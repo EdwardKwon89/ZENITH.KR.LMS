@@ -2277,3 +2277,38 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `supabase/migrations/`(트리거 도입 시), `tests/integration/task-b367-unmark-cost-settled.test.ts`
 - **예상 공수**: 0.3~0.5 MD
 - **우선순위**: Low~Medium — 금전 정합성 방어선 보강, IMP-198과 함께 처리 가능
+---
+
+## [IMP-201] `exceljs@4.4.0` 유지 저하 대비 — 대체 검토 및 `WorkbookWriter` 미사용 가드 (조건부 수용 후속)
+
+- **발견 경위**: TASK-B-360(Issue #1366) ⒝에서 Team B가 Excel 출력을 위해 `exceljs@4.4.0`을 `dependencies`에 추가(JSJung 결정 2026-11-21, 병합 PR #1411). Aiden이 2026-11-22 의존 경로를 검증하고 Edward 승인으로 **조건부 수용**했다.
+- **현재 상태**: exceljs 마지막 publish는 2024-12(유지 저하). `package-lock.json` 검증 결과 `brace-expansion@1.1.14`가 개발 전용에서 **운영 의존성**으로 바뀌었고 `audit-baseline`이 12→15건(`brace-expansion:high`·`exceljs:moderate`·`uuid:moderate` 추가). 단 Team B 코드는 `new ExcelJS.Workbook()` + `wb.xlsx.writeBuffer()`(jszip 경로)만 사용하며, archiver·glob·brace-expansion이 실행되는 `WorkbookWriter`(스트리밍) 경로는 쓰지 않는다(exceljs 패키지 소스 확인: archiver는 `lib/stream/xlsx/workbook-writer.js`에서만 사용, `.glob()`·`.directory()` 호출 없음). `uuid`는 인자 없는 `uuidv4()`만 호출.
+- **영향**: 현재 실질 위험은 낮으나, 향후 코드가 `WorkbookWriter`를 쓰거나 exceljs 전이 의존성에 새 권고가 생기면 도달 가능한 경로로 바뀔 수 있다. 유지 저하로 수정 버전이 나오지 않을 수 있다.
+- **목표 구현**: ① `WorkbookWriter`·`archiver` 직접 사용을 금지하는 가드(회귀 테스트 또는 정적 점검)와 `audit-baseline` 사유 메모 보강 ② 대체 라이브러리 검토(A4·fitToWidth·인쇄 제목행·인쇄 영역 실설정이 가능한 후보 비교) 또는 exceljs 유지 근거 갱신 ③ develop 통합 시 `npm audit --omit=dev`를 baseline과 대조(통합 점검 항목).
+- **관련 파일**: `src/lib/finance/billing/statement-excel.ts`, `scripts/audit-baseline.json`, `package.json`
+- **예상 공수**: 0.3~0.5 MD (가드 0.1 + 대체 검토 0.2~0.4)
+- **우선순위**: Low~Medium — 통합 시 대조(③)는 필수, ①②는 본 사업 착수 후 판단
+
+---
+
+## [IMP-202] `'use server'` 파일의 비async export를 CI에서 탐지하는 점검 신설 (DEF-B-162 재발 방지) — Team B 제안 #1417 채택
+
+- **발견 경위**: TASK-B-360 산출물 `src/app/actions/finance/billing-statements.ts`(`'use server'`)가 동기 함수 `normalizeShipperName`을 export. 클라이언트 컴포넌트가 이 파일을 import하는 순간 `npm run build`가 `Server Actions must be async functions`로 실패(PR #1412·#1413). Team B가 IMP 제안 #1417로 건의, Aiden 채택(2026-11-22, Edward 승인).
+- **현재 상태**: 수정은 PR #1416(TASK-B-368, 유틸 분리)으로 해소. 그러나 이 결함은 **잠복형**이다 — 클라이언트 import가 생기기 전까지 CI가 전부 통과(PR #1404·#1410·#1411 green)하다가 UI PR에서 처음 터졌다. 현재 점검 수단이 없어 같은 유형이 재발해도 UI PR 단계에서야 발견된다.
+- **임시 조치**: 2026-11-22 Aiden이 TeamB_Dev `src/**` `'use server'` 파일을 1회 수동 전수 점검(비async export 0건 확인). 상시 장치 없음.
+- **목표 구현**: ① 정적 점검 스크립트(예: `scripts/check-use-server-exports.mjs`, `npm run check:use-server`) — `'use server'` 파일의 top-level export 중 async 함수·type·interface 외(일반 function·const·let·class·enum, `export default`, 재export 포함)를 탐지해 목록 출력. ② CI `pr-checks.yml`에 **advisory(비차단)** 체크로 추가(기존 `check:ds11`·`check:doc-links`와 같은 방식, baseline 래칫 검토). ③ 이미 잡힌 유형 1건을 단언하는 단위 테스트(소스 문자열 단독 검사가 아닌 AST 또는 파싱 기반 여부는 설계 시 결정).
+- **관련 파일**: `scripts/`(신규, Team A 소유 영역), `.github/workflows/pr-checks.yml`, `package.json`(scripts 항목), `tests/`
+- **예상 공수**: 0.3~0.5 MD (스크립트 0.2 + CI 연동 0.1 + 테스트 0.1~0.2)
+- **우선순위**: Low~Medium — 빌드 차단형 결함의 조기 탐지 장치. 담당은 미지정(본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단)
+
+---
+
+## [IMP-203] 회귀 테스트 실행 시간 단축 — vitest `projects` 분리(순수 단위 병렬 / 실DB 직렬) (#1427 협의 3번)
+
+- **발견 경위**: TASK-1168(#1406) 검증 중 Riley가 전체 회귀가 로컬에서 10분 도구 한계에 걸린다고 보고(#1427). Aiden이 2026-11-22 develop에서 실측: 전체 365초(269파일·1979테스트), 파일별 테스트 실행 시간 합은 80초뿐이고 나머지는 파일마다 반복되는 environment·import 오버헤드. 41개 파일 부분 실측에서 `--maxWorkers=1` 62.66초 / `=4` 62.14초로 차이가 없음(`fileParallelism: false`가 워커 증설을 무력화). Edward 결정(2026-11-22): 1번(`--maxWorkers` 명시) 불채택, 2번(#1428) 보류 등록, 3번 IMP 등록만.
+- **현재 상태**: `vitest.config.ts` L26 `fileParallelism: false` 하나로 269개 파일 전체를 직렬 실행한다. 설정 주석상 목적은 "통합 테스트가 DB 상태를 공유해 병렬 시 경합". 그러나 DB를 쓰지 않는 순수 단위 테스트까지 같은 제약을 받는다. `tests/unit/` 아래에는 `docker exec` 실DB 테스트(`migrations/`·`db/` 등 29개 파일)가 섞여 있어 디렉터리 기준 분리도 단순하지 않다.
+- **임시 조치**: 회귀를 백그라운드로 실행해 결과를 파일로 저장하면 10분 도구 한계를 피할 수 있다(Aiden 실측 6분 5초). 구체 방법은 각 구현 Agent가 스스로 정한다(Edward 방침). CI는 같은 회귀를 약 4분 20초에 마친다.
+- **목표 구현**: ① 파일별 DB 의존 여부를 분류(`docker exec`·`supabase` 호출 여부로 전수 grep, 분류 근거 기록). ② vitest `projects`로 순수 단위(병렬)와 실DB(`fileParallelism: false` 직렬) 분리. ③ 분리 전후 **전체 테스트 수·통과 수 동일** 및 CI 실행 시간 비교, 병렬 구간의 간헐 실패 여부 반복 실행으로 확인. ④ `test:regression` 동작·`check:lrtm` 영향 점검.
+- **관련 파일**: `vitest.config.ts`, `package.json`, `tests/setup.ts`, `tests/unit/**`, `tests/integration/**`
+- **예상 공수**: 1~1.5 MD (분류 0.5 + 설정 0.2 + 안정성 검증 0.3~0.8)
+- **우선순위**: Low — 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단. 위험: DB 경합 오분류 시 간헐 실패가 생겨 오히려 신뢰도를 떨어뜨릴 수 있으므로 검증 설계 필수. 관련: #1427(Close), #1428(보류, 2번).

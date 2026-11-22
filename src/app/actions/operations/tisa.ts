@@ -40,16 +40,26 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
 
   const isAdmin = checkPermission(profile.role, "/admin");
 
-  // 1. Query existing snapshot
-  const { data: snapshot } = await supabase
-    .from("zen_order_rate_snapshots")
-    .select(`
-      id, rate_card_id, applied_unit_price, applied_currency,
-      applied_rule, snapshot_at, is_manual, override_reason,
-      carrier_cost_amount, platform_fee_amount, metadata
-    `)
-    .eq("order_id", orderId)
-    .maybeSingle();
+  // 1. Query existing snapshot (DEF-157: 비관리자는 원가·수수료 제외 안전 뷰 조회)
+  const { data: snapshot } = isAdmin
+    ? await supabase
+        .from("zen_order_rate_snapshots")
+        .select(`
+          id, rate_card_id, applied_unit_price, applied_currency,
+          applied_rule, snapshot_at, is_manual, override_reason,
+          carrier_cost_amount, platform_fee_amount, metadata
+        `)
+        .eq("order_id", orderId)
+        .maybeSingle()
+    : await supabase
+        .from("zen_order_rate_snapshots_safe")
+        .select(`
+          id, rate_card_id, applied_unit_price, applied_currency,
+          applied_rule, snapshot_at, is_manual, override_reason,
+          metadata
+        `)
+        .eq("order_id", orderId)
+        .maybeSingle();
 
   if (snapshot) {
     // 2. Resolve rate card metadata (version_no, priority, valid_from, valid_to)
@@ -73,30 +83,32 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
     const totalWeight = await getTotalWeight(supabase, orderId);
 
     const result: TisaSnapshotResult = {
-      id: snapshot.id,
+      id: snapshot.id || "",
       orderId,
       rateCardId: snapshot.rate_card_id || "N/A",
       versionNo: 1,
       status: snapshot.is_manual ? "MANUAL" : "AUTO",
       priority: 10,
-      baseAmount: Number(snapshot.applied_unit_price),
+      baseAmount: Number(snapshot.applied_unit_price ?? 0),
       currency: snapshot.applied_currency || "USD",
       appliedReason: snapshot.override_reason || undefined,
       validFrom: rateCard?.valid_from || order?.created_at || new Date().toISOString(),
       validTo: rateCard?.valid_until || "9999-12-31T23:59:59Z",
       totalWeight,
       totalFreight: totalWeight * Number(snapshot.applied_unit_price || 0),
-      metadata: snapshot.metadata ?? undefined,
+      metadata: (snapshot.metadata as Record<string, unknown> | null) ?? undefined,
     };
 
     // 4. Role-based shape: only add admin fields for admin/manager users
     if (isAdmin) {
-      result.carrierCostAmount = snapshot.carrier_cost_amount
-        ? Number(snapshot.carrier_cost_amount)
-        : undefined;
-      result.platformFeeAmount = snapshot.platform_fee_amount
-        ? Number(snapshot.platform_fee_amount)
-        : undefined;
+      result.carrierCostAmount =
+        "carrier_cost_amount" in snapshot && snapshot.carrier_cost_amount
+          ? Number(snapshot.carrier_cost_amount)
+          : undefined;
+      result.platformFeeAmount =
+        "platform_fee_amount" in snapshot && snapshot.platform_fee_amount
+          ? Number(snapshot.platform_fee_amount)
+          : undefined;
     }
 
     return result;

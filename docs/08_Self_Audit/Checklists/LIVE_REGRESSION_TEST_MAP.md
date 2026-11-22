@@ -11,9 +11,9 @@
 ## 📊 실측 Vitest 회귀 스위트 현황 (자동 집계)
 
 - **스캔 범위**: `tests/**/*.{test,spec}.{ts,tsx}` (`tests/e2e/**`, `tests/poc-*/**` 제외 — `vitest.config.ts` 기준)
-- **실측 테스트 파일 수**: **287개**
-- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **2,162건**
-- **신규 구조 등재 Task 수**: **14건**
+- **실측 테스트 파일 수**: **292개**
+- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **2,191건**
+- **신규 구조 등재 Task 수**: **17건**
 
 ---
 
@@ -33,6 +33,7 @@
 <!-- LRTM_ITEMS_START -->
 | Task | Issue | 팀 | 작성일 | 케이스 수 | 테스트 파일 | 차원(231) | 상세 |
 |:---|:---:|:---:|:---:|---:|:---|:---:|:---:|
+| **TASK-B-369** | #1425 | Team B | 2026-11-22 | 19건 | `tests/unit/components/order-settlement/order-settlement-list.test.tsx`, `tests/unit/components/order-settlement/order-settlement-detail.test.tsx`, `tests/unit/components/order-settlement/navi-sidebar.test.tsx`, `tests/unit/components/statements/statement-create.test.tsx`, `tests/e2e/e2e-27-order-settlement-ui.spec.ts` | D1, D3, D9 | [상세](./regression-items/TASK-B-369_Issue1425_order-settlement-ui.md) |
 | **TASK-B-368** | - | - | - | 5건 | `tests/unit/finance/task-b368-normalize-shipper-name.test.ts`, `tests/integration/task-b360-billing-statements.test.ts` | D1, D8 | [상세](./regression-items/TASK-B-368_Issue1415_normalize-shipper-name_유틸분리.md) |
 | **TASK-B-367** | #1377 | Team B | 2026-11-20 | 19건 | `tests/unit/finance/task-b367-unmark-cost-settled.test.ts`, `tests/unit/orders/task-b367-settled-cargo-guard.test.ts`, `tests/integration/task-b367-unmark-cost-settled.test.ts`, `tests/unit/i18n/errors-key-sync.test.ts` | D1, D5 | [상세](./regression-items/TASK-B-367_Issue1377_unmark-cost-settled.md) |
 | **TASK-B-366** | #1376 | - | - | 19건 | `tests/unit/finance/task-b366-cost-settlement.test.ts`, `tests/integration/task-b366-cost-settlement.test.ts` | - | [상세](./regression-items/TASK-B-366_Issue1376_cost-settlement-actions.md) |
@@ -42,6 +43,8 @@
 | **TASK-B-360** | #1366 | Team B | 2026-11-21 | 45건 | `tests/integration/task-b360-billing-statements.test.ts`, `tests/unit/finance/task-b360-billable-limits.test.ts`, `tests/integration/task-b360-excel-export.test.ts`, `tests/unit/finance/task-b360-excel-data.test.ts` | D1, D5, D6, D8 | [상세](./regression-items/TASK-B-360_Issue1366_billing-statement-actions.md) |
 | **TASK-B-359** | #1365 | - | - | 8건 | `tests/unit/migrations/taskb359-billing-statement-db.test.ts` | - | [상세](./regression-items/TASK-B-359_Issue1365_billing-statement-db.md) |
 | **TASK-B-357** | #1351 | - | - | 5건 | `tests/unit/shxk/task-b357-shxk-lib-logging.test.ts` | - | [상세](./regression-items/TASK-B-357_Issue1351_shxk-lib-logging.md) |
+| **TASK-1169** | #1407 | Team A | 2026-11-21 | 5건 | `tests/integration/task-1169-create-order-atomic-v7-payload.test.ts` | D2, D5 | [상세](./regression-items/TASK-1169_Issue1407_create-order-atomic-v7-payload.md) |
+| **TASK-1168** | - | - | - | 0건 | `tests/unit/migrations/task1168-def157-order-rate-snapshots-safe-view.test.ts`, `tests/unit/operations/tisa.test.ts` | - | [상세](./regression-items/TASK-1168_Issue1406_order-rate-snapshots-safe-view.md) |
 | **TASK-1167** | #1389 | Team A | 2026-11-19 | 4건 | `tests/integration/task-1167-calculate-order-costs-security.test.ts` | D1, D3 | [상세](./regression-items/TASK-1167_Issue1389_calculate-order-costs-security.md) |
 | **TASK-1166** | #1386 | Team A | 2026-11-18 | 19건 | `tests/unit/migrations/task1166-def153-rate-cards-rls.test.ts` | D3, D5 | [상세](./regression-items/TASK-1166_Issue1386_rate-cards-rls.md) |
 | **TASK-1161** | #1347 | Team A | 2026-11-18 | 7건 | `tests/integration/p6-transport-policy.test.ts`, `tests/integration/tracking-business-qa.test.ts`, `tests/integration/helpers/db.test.ts` | D1, D5, D6 | [상세](./regression-items/TASK-1161_Issue1347_db-fixture-helper.md) |
