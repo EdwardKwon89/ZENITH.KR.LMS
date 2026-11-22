@@ -2218,3 +2218,15 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/[locale]/(auth)/login/actions.ts`, `src/app/actions/admin/auth.ts`, `messages/{ko,en,zh,ja}.json`
 - **예상 공수**: 0.3 MD (코드 매핑 + 문구 + 테스트)
 - **우선순위**: Low — 보안 정보 비노출은 유지하면서 안내 품질만 개선
+
+---
+
+## [IMP-196] `exceljs@4.4.0` 유지 저하 대비 — 대체 검토 및 `WorkbookWriter` 미사용 가드 (조건부 수용 후속)
+
+- **발견 경위**: TASK-B-360(Issue #1366) ⒝에서 Team B가 Excel 출력을 위해 `exceljs@4.4.0`을 `dependencies`에 추가(JSJung 결정 2026-11-21, 병합 PR #1411). Aiden이 2026-11-22 의존 경로를 검증하고 Edward 승인으로 **조건부 수용**했다.
+- **현재 상태**: exceljs 마지막 publish는 2024-12(유지 저하). `package-lock.json` 검증 결과 `brace-expansion@1.1.14`가 개발 전용에서 **운영 의존성**으로 바뀌었고 `audit-baseline`이 12→15건(`brace-expansion:high`·`exceljs:moderate`·`uuid:moderate` 추가). 단 Team B 코드는 `new ExcelJS.Workbook()` + `wb.xlsx.writeBuffer()`(jszip 경로)만 사용하며, archiver·glob·brace-expansion이 실행되는 `WorkbookWriter`(스트리밍) 경로는 쓰지 않는다(exceljs 패키지 소스 확인: archiver는 `lib/stream/xlsx/workbook-writer.js`에서만 사용, `.glob()`·`.directory()` 호출 없음). `uuid`는 인자 없는 `uuidv4()`만 호출.
+- **영향**: 현재 실질 위험은 낮으나, 향후 코드가 `WorkbookWriter`를 쓰거나 exceljs 전이 의존성에 새 권고가 생기면 도달 가능한 경로로 바뀔 수 있다. 유지 저하로 수정 버전이 나오지 않을 수 있다.
+- **목표 구현**: ① `WorkbookWriter`·`archiver` 직접 사용을 금지하는 가드(회귀 테스트 또는 정적 점검)와 `audit-baseline` 사유 메모 보강 ② 대체 라이브러리 검토(A4·fitToWidth·인쇄 제목행·인쇄 영역 실설정이 가능한 후보 비교) 또는 exceljs 유지 근거 갱신 ③ develop 통합 시 `npm audit --omit=dev`를 baseline과 대조(통합 점검 항목).
+- **관련 파일**: `src/lib/finance/billing/statement-excel.ts`, `scripts/audit-baseline.json`, `package.json`
+- **예상 공수**: 0.3~0.5 MD (가드 0.1 + 대체 검토 0.2~0.4)
+- **우선순위**: Low~Medium — 통합 시 대조(③)는 필수, ①②는 본 사업 착수 후 판단
