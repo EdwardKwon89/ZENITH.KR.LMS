@@ -2230,3 +2230,15 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/lib/finance/billing/statement-excel.ts`, `scripts/audit-baseline.json`, `package.json`
 - **예상 공수**: 0.3~0.5 MD (가드 0.1 + 대체 검토 0.2~0.4)
 - **우선순위**: Low~Medium — 통합 시 대조(③)는 필수, ①②는 본 사업 착수 후 판단
+
+---
+
+## [IMP-202] `'use server'` 파일의 비async export를 CI에서 탐지하는 점검 신설 (DEF-B-162 재발 방지) — Team B 제안 #1417 채택
+
+- **발견 경위**: TASK-B-360 산출물 `src/app/actions/finance/billing-statements.ts`(`'use server'`)가 동기 함수 `normalizeShipperName`을 export. 클라이언트 컴포넌트가 이 파일을 import하는 순간 `npm run build`가 `Server Actions must be async functions`로 실패(PR #1412·#1413). Team B가 IMP 제안 #1417로 건의, Aiden 채택(2026-11-22, Edward 승인).
+- **현재 상태**: 수정은 PR #1416(TASK-B-368, 유틸 분리)으로 해소. 그러나 이 결함은 **잠복형**이다 — 클라이언트 import가 생기기 전까지 CI가 전부 통과(PR #1404·#1410·#1411 green)하다가 UI PR에서 처음 터졌다. 현재 점검 수단이 없어 같은 유형이 재발해도 UI PR 단계에서야 발견된다.
+- **임시 조치**: 2026-11-22 Aiden이 TeamB_Dev `src/**` `'use server'` 파일을 1회 수동 전수 점검(비async export 0건 확인). 상시 장치 없음.
+- **목표 구현**: ① 정적 점검 스크립트(예: `scripts/check-use-server-exports.mjs`, `npm run check:use-server`) — `'use server'` 파일의 top-level export 중 async 함수·type·interface 외(일반 function·const·let·class·enum, `export default`, 재export 포함)를 탐지해 목록 출력. ② CI `pr-checks.yml`에 **advisory(비차단)** 체크로 추가(기존 `check:ds11`·`check:doc-links`와 같은 방식, baseline 래칫 검토). ③ 이미 잡힌 유형 1건을 단언하는 단위 테스트(소스 문자열 단독 검사가 아닌 AST 또는 파싱 기반 여부는 설계 시 결정).
+- **관련 파일**: `scripts/`(신규, Team A 소유 영역), `.github/workflows/pr-checks.yml`, `package.json`(scripts 항목), `tests/`
+- **예상 공수**: 0.3~0.5 MD (스크립트 0.2 + CI 연동 0.1 + 테스트 0.1~0.2)
+- **우선순위**: Low~Medium — 빌드 차단형 결함의 조기 탐지 장치. 담당은 미지정(본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단)
