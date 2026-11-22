@@ -8,7 +8,7 @@
 | **최종 승인** | JSJung |
 | **생성일** | 2026-11-22 |
 | **우선순위** | P2 (`team:b`, `priority:p2`, `type:feat`) |
-| **상태** | 🔔 ⒜ PR #1412 검토 대기 (`status:review`), ⒝ 후속 예정. ⒜는 DEF-B-162 해소(#1416) 반영 위해 `origin/TeamB_Dev` @ `c89a5d2d9`로 rebase 완료 |
+| **상태** | 🔁 Jaison 검토 수정요청 2건 반영 완료 — 재커밋 후 CI 재확인 예정 (`status:review` 유지). ⒝ 후속 예정. ⒜는 DEF-B-162 해소(#1416) 반영 위해 `origin/TeamB_Dev` @ `c89a5d2d9`로 rebase 완료 |
 | **브랜치** | `feature/teamb-task-b361-iss1367-billing-statement-ui` (rebase onto `origin/TeamB_Dev` @ `c89a5d2d9`, 구 base `19403fdec`) |
 | **선행 조건** | ✅ #1366 ⒜(PR #1404, 2026-11-20 병합) / ✅ PR #1405(2026-11-21 병합) / ✅ Excel Route Handler PR #1411(2026-11-21 병합) / ✅ DB 마이그레이션 최신(pending 0) |
 | **범위** | WBS 5.1~5.7 — **⒜ PR `Refs #1367`**: S3 목록·S4 생성(수기 화주 포함)·S5 상세·3경로 공용 컴포넌트 / **⒝ PR `Closes #1367`**: 메뉴·경로 허용·i18n 정리·증적 |
@@ -70,10 +70,13 @@ $ gh issue list --state all --search "TASK-B-361 in:title"
 - S4 대상 목록: Admin = `getOrganizations(1,500)`에서 `type ∈ {AGENCY,SHIPPER}` / 대리점 = `getAgencyShippers(profile.org_id)` 중 `is_active !== false`(서버 링크 검증과 일치).
 - 실패 시 `/dashboard` redirect. 조회 전용 경로도 `getBillingStatementDetail`의 RLS가 최종 방어.
 
-### 2-4. "오더정산으로 이동" 링크 경로 실측
+### 2-4. "오더정산으로 이동" 링크 경로 실측 (Jaison 리뷰 반영)
 
 - 설계 §6-5c는 `/finance/order-settlement`을 명시하나 **현행 코드에 해당 라우트 없음**(`src/app`에 `settlement`·`agency/settlements`만 존재).
-- `NaviSidebar.tsx`의 `settlement` 항목은 `/settlement`을 사용 → `excludedUnsettled` 안내 링크를 `/${locale}/settlement`로 구현(⒝ 메뉴 경로와 동일).
+- `/${locale}/settlement`은 **정산 관리(인보이스 개요 `InvoiceTable`) 화면**이며 원가 정산(`SETTLED`) 화면이 아님. 최초 대체 링크는 잘못된 목적지였음(Jaison 지적).
+- `markOrderCostSettled`는 `src/app/actions/finance/ups-actual-cost.ts`에 정의되고 `finance/index.ts`에서 re-export되지만, **이를 호출하는 페이지/컴포넌트는 저장소에 없음**(전수 grep 결과 테스트·문서에만 등장). `BillingConfirmModal`은 `recordActualCostAndFinalize`를 호출하는 별개 흐름.
+- → Jaison 지시 (c)에 따라 **링크를 제거**하고 역할별 문구만 렌더: Admin=`excludedUnsettledAdmin`(화면 미구현), 대리점=`excludedUnsettledAgency`(관리자에게 요청). 구분은 서버가 `STATEMENT_ROUTES[*].canSettleOrders`로 계산해 prop 전달.
+- **S1·S2 화면 미구현 사실은 이슈 #1367에 질문으로 게시** — 설계 정정/후속 Task 여부는 Jaison 판단.
 
 ### 2-5. DTO에 없어 표시하지 않은 설계 요소 (임의 값 생성 금지)
 
@@ -96,7 +99,7 @@ $ gh issue list --state all --search "TASK-B-361 in:title"
 | 심볼 | grep 참조처 | ⒜ 변경 | 비고 |
 |:--|:--|:--|:--|
 | 서버 액션 8종 | B-360 테스트, `api/finance/statements/[id]/export/route.ts`, 신규 8페이지·6컴포넌트 | **소비자만 추가**, 액션 본체 미수정 | 액션의 `revalidatePath('/finance/statements')`·`('/agency/statements')`가 신규 라우트와 정합 |
-| `Statements` i18n | 신규 컴포넌트 6종 + 3 테스트 | 신규 네임스페이스 77키 × 4로케일 | 기존 키 참조 0, `Errors` 키 변경 0 |
+| `Statements` i18n | 신규 컴포넌트 6종 + 3 테스트 | 신규 네임스페이스 78키 × 4로케일 | 기존 키 참조 0, `Errors` 키 변경 0 |
 | `NaviSidebar.tsx` | `(dashboard)/layout.tsx` | 없음 (⒝ 범위) | "정산/재무" children·"대리점 관리" children·화주 메뉴 삽입 예정 |
 | `rbac.ts` `ALL_RESOURCE_PATHS` | 권한 관리 화면 | 없음 (⒝ 범위) | `/finance`·`/agency`·`/shipper` 상위 경로는 이미 등록 — 세부 경로 추가 여부 ⒝에서 결정 |
 | `proxy.ts` 비플랫폼 허용 목록 | 미들웨어 라우팅 | 없음 (⒝ 범위) | `/agency`·`/shipper`는 이미 `startsWith` 허용. `/finance/statements`는 Admin(PLATFORM) 전용이라 제약 없음 |
@@ -105,7 +108,7 @@ $ gh issue list --state all --search "TASK-B-361 in:title"
 
 ### 2-8. i18n 실측
 
-`Statements` 네임스페이스 **77키 × ko/en/zh/ja 동일 키셋**(key set 비교 PASS). 신규 `Errors` 키 없음 — `errors-key-sync` 기대 110키 유지.
+`Statements` 네임스페이스 **78키 × ko/en/zh/ja 동일 키셋**(key set 비교 PASS). 신규 `Errors` 키 없음 — `errors-key-sync` 기대 110키 유지.
 
 ## 3. [발견 이슈]
 
@@ -113,12 +116,15 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 
 | DEF# | 제목 | 긴급도 | 상세 |
 |:--|:--|:--|:--|
-| DEF-B-156(기존) | `npm run check:i18n` 감사 FAIL — ja 로케일이 en 대비 519키 누락(기존 523 → 신규 키 일부 반영으로 감소) | Low | `.agent/defects/DEF-B-156_i18n_ja로케일_523키누락_감사FAIL.md`. 본 Task의 `Statements` 77키는 4로케일 모두 존재(실패 목록에 `Statements.*` 없음). stash 비교 없이도 base `ja.json`이 25 top-level key뿐임을 확인 → 기존 결함. 범위 밖이라 미수정. |
+| DEF-B-156(기존) | `npm run check:i18n` 감사 FAIL — ja 로케일이 en 대비 519키 누락(기존 523 → 신규 키 일부 반영으로 감소) | Low | `.agent/defects/DEF-B-156_i18n_ja로케일_523키누락_감사FAIL.md`. 본 Task의 `Statements` 78키는 4로케일 모두 존재(실패 목록에 `Statements.*` 없음). stash 비교 없이도 base `ja.json`이 25 top-level key뿐임을 확인 → 기존 결함. 범위 밖이라 미수정. |
 | DEF-B-162 | `'use server'` 액션 파일의 비동기 아닌 export `normalizeShipperName`로 `npm run build` 전역 실패 | High → **해소됨** | `.agent/defects/DEF-B-162_청구서액션_비동기아닌_export_빌드실패.md`. B-360 ⒜(PR #1404) 산출물. **Mike/TASK-B-368(PR #1416, 2026-11-22 병합)**이 순수 유틸 `src/lib/finance/billing/normalize-shipper-name.ts`로 분리해 해소. 본 ⒜는 rebase 후 `StatementCreate.tsx`의 로컬 `normalize()`를 해당 공용 유틸 import로 교체(Jaison 2026-11-22 지시) — 규칙 단일 출처. |
 
 | 구분 | 내용 | 조치 |
 |:--|:--|:--|
-| 설계-코드 불일치 | 설계 §6-5c의 오더정산 경로 `/finance/order-settlement` 미존재 | 현행 `/settlement` 사용. ⒝ 메뉴에서도 동일 경로 사용 예정 |
+| 설계-코드 불일치 | 설계 §6-5c의 오더정산 경로 `/finance/order-settlement` 미존재 + `markOrderCostSettled` 호출 화면 없음 | 링크 제거, 역할별 안내 문구로 대체. 이슈 #1367에 S1·S2 구현 여부 질문 게시 |
+| Jaison 리뷰(비차단) | `formatKrw` 원 단위 반올림 → 소수 `numeric(14,2)` 값이 Excel(2자리)과 1원 차이 가능 | 설계 §3-1b "반올림은 현행 `Math.round` 유지"에 따라 의도적. 2자리 표시/정책 변경은 IMP 제안으로 이관 |
+| Jaison 리뷰(비차단) | 연/월 입력과 `dateFrom`/`dateTo`가 독립 | 서버 액션은 4값을 그대로 RPC에 전달, RPC는 연/월 범위만 검증하고 기간과의 일관성 검증 없음(메타 기록). 현 동작 유지·기재 |
+| Jaison 리뷰(비차단) | Admin 대상 목록 `getOrganizations(1,500)` 500건에서 조용히 잘림 | IMP 제안(검색/초과 경고)으로 이관. 본 PR 범위 밖 |
 | DTO 간극 | §2-5 표 — S3 오더수, S5 입금일/확인자/발행일, 항목별 기준일·화주명, S4 출고확정일 별도 열 | 값을 임의 생성하지 않고 생략. 필요 시 별도 Task 제안(R-15) |
 | ADHOC 복수 표기 | 서버가 정규화된 단일 이름만 수용 → "함께 조회"를 복수 동시 조회로 구현 불가 | 칩 선택 재조회로 해석(§2-6), 사람이 오더별 화주명 열로 최종 확인 |
 | 환경 | 워크트리 `node_modules`가 stale하여 병합된 `exceljs@4.4.0` 미설치 → `task-b360-excel-export.test.ts` 로드 실패 | `npm install exceljs@4.4.0 --no-save --no-package-lock`로 해소(추적 파일 변경 없음), 전체 회귀 재실행 |
@@ -126,14 +132,14 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 
 ## 4. [작업 결과]
 
-- 코드 커밋: `d9c8003132c95cc2a0ed7407e3d1eab926dda3e6`(rebase 후 `85ade9850`) + 공용 유틸 전환 `d08b83c5bd92af1099bbe316a33d592a009b277f`
+- 코드 커밋: `d9c8003132c95cc2a0ed7407e3d1eab926dda3e6`(rebase 후 `85ade9850`) + 공용 유틸 전환 `d08b83c5bd92af1099bbe316a33d592a009b277f` + **Jaison 리뷰 수정 `aaeb5f7f04d2eecdea6a075678a9eb2f274c6c9d`**
 
 ### ⒜ PR (WBS 5.1~5.4, `Refs #1367`)
 - **공용 컴포넌트** `src/components/finance/statements/` 8파일 — `types.ts`(DTO·`formatKrw`·`isIssuerScope`), `Badges.tsx`(상태 3색/범위 배지), `StatementModals.tsx`(발행 경고·입금 전액 사전검증), `StatementsList.tsx`(S3 필터 5종+range 버튼 매트릭스), `StatementCreate.tsx`(S4 2단계·ADHOC·truncated/미정산 안내), `StatementDetail.tsx`(S5 상태별 작업영역), `index.ts`, `page-helpers.ts`(서버 가드).
 - **3경로 8페이지** — finance/agency: 목록·생성·상세, shipper: 목록·상세(조회 전용, `/new` 없음).
-- **i18n** — `Statements` 77키 × 4로케일 추가. `Errors` 키 변경 0.
-- **회귀** — `tests/unit/components/statements/` 3파일 21케이스(모두 렌더 결과 단언). R-09 항목 1건 신규 + `build:lrtm`/`check:lrtm` PASS.
-- **되돌리기 검증** — 아래 6건 모두 실제로 되돌려 FAIL 확인 후 복구(복구 후 21/21 재PASS, 잔존 마커 0). 6건째는 rebase 후 공용 유틸 전환(`normalizeShipperName`)에 따른 값 단언 추가(Jaison 2026-11-22 지시):
+- **i18n** — `Statements` 78키 × 4로케일 추가(리뷰 반영으로 `excludedUnsettled`·`goOrderSettlement` 2키 제거, `conditionsChanged`·`excludedUnsettledAdmin`·`excludedUnsettledAgency` 3키 추가). `Errors` 키 변경 0.
+- **회귀** — `tests/unit/components/statements/` 3파일 24케이스(모두 렌더 결과 단언). TC-361-09/26(역할별 링크 유무), TC-361-27/28(조회 조건 변경 무효화) 추가. R-09 항목 1건 신규 + `build:lrtm`/`check:lrtm` PASS.
+- **되돌리기 검증** — 아래 8건 모두 실제로 되돌려 FAIL 확인 후 복구(복구 후 24/24 재PASS, 잔존 마커 0). 7·8건째는 Jaison 리뷰 수정분:
 
 | 되돌린 구현 | 실패 테스트 | 실측 결과 |
 |:--|:--|:--|
@@ -143,9 +149,21 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 | 발행 모달 `issueWarning` 제거 | TC-361-18 | 1 failed / 7 passed |
 | 입금 전액 사전검증 → `false &&` | TC-361-19 | 1 failed / 7 passed |
 | `normalizeShipperName(shipperName)` → `shipperName` (공용 유틸 미적용) | TC-361-11 값 단언 (`'  ABC   주식회사  '` → 칩 1건) | 1 failed / 5 passed |
+| `isStale` → `false` (조건 변경 무효화 제거) | TC-361-27·28 | **FAIL** — 2 failed / 7 passed (27·28) |
+| 잘못된 `/${locale}/settlement` 링크 재삽입 | TC-361-09·26 | **FAIL** — 2 failed / 7 passed (09·26) |
 
 - **vacuous 패턴 0건** — 신규 테스트·컴포넌트 `grep -rnE 'test\.skip|readFileSync|toContain\(.*source|typeof .* === .function'` 결과 0.
-- **전체 회귀** — `npm run test:regression` 286파일/2186케이스 전부 PASS(709.34초). stale `exceljs@4.4.0`을 `--no-save --no-package-lock`으로 재설치해 `task-b360-excel-export.test.ts`(19/19)까지 통과, 추적 파일 변경 없음.
+- **전체 회귀** — rebase 기준 `npm run test:regression` **287파일/2194케이스 전부 PASS(537초)**. stale `exceljs@4.4.0`을 `--no-save --no-package-lock`으로 재설치해 `task-b360-excel-export.test.ts`(19/19)까지 통과, 추적 파일 변경 없음. 리뷰 수정 후 동일 스위트 재실행 예정.
+
+### Jaison 리뷰 수정 (2026-11-22, 🔴 2건 + 🟡 권고 접수)
+| # | 지적 | 조치 |
+|:--|:--|:--|
+| 🔴1 | 조회 후 대상·기간 변경 시 이전 후보/선택이 남아 저장됨 | 조회 조건 10종 스냅샷(`LookupConditions`) 비교로 `isStale` 산출 → 후보 표·미정산/상한 안내 숨김 + 저장 버튼 미렌더, `save()`도 방어. TC-361-27·28 + 되돌리기 7건째 |
+| 🔴2 | `/${locale}/settlement`은 인보이스 개요이며 `markOrderCostSettled` 호출 화면 부재 | 링크 제거, `canSettleOrders`(서버 역할 유래)로 Admin/대리점 문구 분기(4로케일). TC-361-09·26 + 되돌리기 8건째. S1·S2 미구현은 이슈에 질문 게시 |
+| 🟡 | 초안 취소 확인 없음 | ⒝ PR 이관(확인 단계 + 취소 클릭 시 서버 호출 0 단언) |
+| 🟡 | 금액 반올림 | 설계 §3-1b 근거 기재(의도적 `Math.round`), 변경 시 IMP |
+| 🟡 | `getOrganizations(1,500)` 잘림 | IMP 제안 이관 |
+| 🟡 | 연/월 vs 기간 독립 | 실측 기재(서버는 4값 그대로 전달, RPC는 연/월 범위만 검증) |
 
 ### ⒝ PR (WBS 5.5~5.7) — 별도 커밋/PR 예정
 - 미구현(⒝ 예정): `NaviSidebar.tsx` 메뉴 3종, `rbac.ts`·`proxy.ts` 경로 허용 검토, nav i18n, Excel 링크(`/api/finance/statements/[id]/export`), R-10 역할별 스크린샷. 이 PR에서는 만들지 않음(Jaison 지시 — Excel 버튼 선제 생성 시 404).
@@ -158,19 +176,21 @@ _담당 Task 범위 밖 이슈 / 설계·DTO 간극_
 - [x] 조회 전용 모드 작업 영역 미렌더(TC-361-03·04·16·17). 서버 액션 자체 거부는 B-360 병합 테스트가 이미 검증
 - [x] `truncated === true` 경고(TC-361-08) + `excludedUnsettled` 안내·`/settlement` 링크(TC-361-09)
 - [x] 수기 화주: 자동완성·유사명 칩(TC-361-11)·오더별 화주명 열(TC-361-10)·`allowAdhoc=false` 옵션 미렌더(TC-361-12). `/shipper/statements`는 조회 전용 라우트만 존재
-- [x] 4로케일 `Statements` 77키 동일, `Errors` 키 110개 유지. (`npm run check:i18n` 전역 FAIL은 기존 DEF-B-156 — 본 Task 신규 키 누락 0)
+- [x] 4로케일 `Statements` 78키 동일, `Errors` 키 110개 유지. (`npm run check:i18n` 전역 FAIL은 기존 DEF-B-156 — 본 Task 신규 키 누락 0)
 - [x] 영향도 분석 §2-7 기재(GitNexus 미연결 → grep 전수 명시), 변경 심볼 기대 범위 안
-- [x] 되돌리면 테스트 FAIL — §4 조건별 표(5건 실측)
+- [x] 되돌리면 테스트 FAIL — §4 조건별 표(8건 실측)
 - [x] 컴포넌트 테스트 렌더 결과 단언, vacuous 패턴 0건
 - [x] Ds-11: 신규 액션/RPC 없음 → 갱신 불필요. `npm run check:ds11` PASS(미반영 125개 모두 허용 목록)
 - [x] R-09 v3.10: `regression-items/TASK-B-361_*.md` 신규, `npm run build:lrtm` + `npm run check:lrtm` PASS(유령 0·허용목록 밖 미등재 0)
-- [x] `npm run test:regression` 전체 PASS(286파일/2186케이스, 709초, stale `exceljs` 재설치 후). `npm run build`는 **rebase 후 PASS** — DEF-B-162는 Mike/TASK-B-368(PR #1416)이 순수 유틸로 분리해 해소, 본 ⒜는 `StatementCreate.tsx`의 로컬 `normalize()`를 공용 유틸 import로 교체해 규칙 단일 출처 확보(Jaison 지시). CI Regression Tests 재확인 필요.
+- [x] `npm run test:regression` 전체 PASS(**287파일/2194케이스, 537초**, stale `exceljs` 재설치 후). `npm run build`는 **rebase 후 PASS** — DEF-B-162는 Mike/TASK-B-368(PR #1416)이 순수 유틸로 분리해 해소, 본 ⒜는 `StatementCreate.tsx`의 로컬 `normalize()`를 공용 유틸 import로 교체해 규칙 단일 출처 확보(Jaison 지시). 리뷰 수정 후 최종 CI 재확인 예정.
 - [x] Jaison 지시(2026-11-22) 반영 — `origin/TeamB_Dev` @ `c89a5d2d9` rebase, 공용 유틸 import 전환, `normalize()` 값 단언 유지 + 되돌리기 표 반영(총 6건). 로컬 `npm run build` PASS.
+- [x] Jaison 검토 수정요청 2건(조건 변경 무효화·오더정산 링크 제거) 반영 + 되돌리기 8건 실측. `npx eslint` 0 error, statements 관련 `tsc` 에러 0, 스위트 24/24 PASS. 최종 CI 재확인 필요.
 - [x] 에러 로그 확인 — 無(로컬 Supabase `zen_error_logs` severity=ERROR 0건, 전체 0행). 라이브 최종 확인은 병합 후 JSJung
 - [x] 스타일/타입: 신규 파일 `npx eslint` 0 warning, `npx tsc --noEmit`에서 statements 관련 에러 0(기존 `exceljs`·E2E·`.next` 에러는 범위 밖)
 - [x] `check-R17-DoD` 자가 검증 통과 — 코드 커밋 → 해시 자동삽입 → 🔄→🔔 실제 diff 확인 → 문서 커밋 → PR 순서. (opentemplate 명령이므로 수동 동치 점검)
 
 ### ⒝ PR 이관 항목 (5.5~5.7 — 본 ⒜ PR에서는 의도적으로 미포함)
+- [ ] 초안 취소 확인 단계(`StatementsList.doCancel`·`StatementDetail.issueCancel`) + 취소 클릭 시 `cancelBillingStatement` 호출 0 단언 (Jaison 🟡 권고)
 - [ ] `NaviSidebar.tsx` 메뉴 3종(Admin 정산/재무·대리점 관리·화주) + nav i18n 4로케일
 - [ ] `rbac.ts`·`proxy.ts` 경로 허용 검토(§2-7 실측 결과 반영)
 - [ ] Excel 링크 → `/api/finance/statements/[id]/export`(S3 행·S5 상세, 조회 전용 포함)

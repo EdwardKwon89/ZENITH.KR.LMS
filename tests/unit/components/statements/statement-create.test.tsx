@@ -94,7 +94,7 @@ describe('S4 청구서 생성 (TASK-B-361)', () => {
     expect(screen.queryByRole('link', { name: /오더정산/ })).toBeNull();
   });
 
-  it('TC-361-09b: 대리점은 관리자 요청 문구를 보고 오더정산 링크가 없다', async () => {
+  it('TC-361-26: 대리점은 관리자 요청 문구를 보고 오더정산 링크가 없다', async () => {
     m.listOrders.mockResolvedValue({ success: true, orders: [order], total: 1, totalAmount: 54000, excludedUnsettled: 2, truncated: false });
     render(<StatementCreate {...base} basePath="/agency/statements" allowAdhoc canSettleOrders={false} />);
     fireEvent.change(screen.getByLabelText('청구 대상'), { target: { value: 'org1' } });
@@ -165,7 +165,7 @@ describe('S4 청구서 생성 (TASK-B-361)', () => {
     expect(m.push).toHaveBeenCalledWith('/ko/finance/statements/st-1');
   });
 
-  it('TC-361-20: 조회 후 청구 대상을 바꾸면 이전 후보·안내·저장 버튼이 사라진다 (Jaison 리뷰)', async () => {
+  it('TC-361-27: 조회 후 청구 대상을 바꾸면 이전 후보·안내·저장 버튼이 사라진다 (Jaison 리뷰)', async () => {
     m.listOrders.mockResolvedValue({ success: true, orders: [order], total: 1, totalAmount: 54000, excludedUnsettled: 2, truncated: true });
     render(<StatementCreate {...base} />);
     fireEvent.change(screen.getByLabelText('청구 대상'), { target: { value: 'org1' } });
@@ -184,7 +184,7 @@ describe('S4 청구서 생성 (TASK-B-361)', () => {
     expect(m.create).not.toHaveBeenCalled();
   });
 
-  it('TC-361-21: 조회 후 기간을 바꾸면 이전 선택 오더로 저장할 수 없다', async () => {
+  it('TC-361-28: 조회 후 기간을 바꾸면 이전 선택 오더로 저장할 수 없다', async () => {
     m.listOrders.mockResolvedValue({ success: true, orders: [order], total: 1, totalAmount: 54000, excludedUnsettled: 0, truncated: false });
     m.create.mockResolvedValue({ success: true, statementId: 'st-1', statementNo: 'ST-202610-01-1', roundNo: 1 });
     render(<StatementCreate {...base} />);
