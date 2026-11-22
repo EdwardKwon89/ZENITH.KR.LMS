@@ -7,6 +7,7 @@ import { getExchangeRate } from '@/lib/finance/exchange-rate';
 import { estimateUpsFreight } from '@/app/actions/ups/freight';
 import { trError } from '@/lib/i18n/action-error';
 import { computeUpsActualCostKrw, type UpsActualCostAmounts } from '@/lib/ups/actual-cost';
+import { getOrderReleasedDate } from '@/lib/orders/order-released-date';
 
 export interface UpsActualCostInput {
   upsInvoiceNo?: string;
@@ -111,22 +112,6 @@ async function assertAdmin(profile: { role: string } | null): Promise<string | n
 function toNum(v: unknown): number {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
-}
-
-/** 오더 출고확정(RELEASED) 일자 조회 — order_status_history에서 to_status=RELEASED 최신 시각 */
-export async function getOrderReleasedDate(supabase: any, orderId: string, fallbackCreatedAt?: string): Promise<string> {
-  const { data } = await supabase
-    .from('order_status_history')
-    .select('created_at')
-    .eq('order_id', orderId)
-    .eq('next_status', 'RELEASED')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const ts = data?.created_at || fallbackCreatedAt;
-  if (!ts) return new Date().toISOString().slice(0, 10);
-  return String(ts).slice(0, 10);
 }
 
 /** 기존 실제 원가 확정 기록 조회 */

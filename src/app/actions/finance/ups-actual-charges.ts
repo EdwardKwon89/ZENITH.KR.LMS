@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 import { logger } from '@/lib/logger';
 import { trError } from '@/lib/i18n/action-error';
+import { createAdminClient } from '@/utils/supabase/server';
 
 export interface UpsActualChargeInput {
   chargeType: string;
@@ -15,6 +16,30 @@ export interface UpsActualChargeInput {
 }
 
 const ADMIN_ROLES = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'] as const;
+
+/**
+ * TASK-B-372 (Issue #1356 / DEF-150 §1.1): AGENCY 스코프 화주 목록.
+ * `settlement.ts`의 `resolveAgencyShipperIds()` 패턴과 동일하게
+ * 소속 화주(active) + 대리점 자가화주(`agencyOrgId`)를 포함한다(DEF-B-141).
+ */
+async function resolveAgencyScopeShipperIds(
+  supabase: any,
+  agencyOrgId: string | null | undefined,
+): Promise<string[]> {
+  if (!agencyOrgId) return [];
+  const { data, error } = await supabase
+    .from('zen_agency_shippers')
+    .select('shipper_org_id')
+    .eq('agency_org_id', agencyOrgId)
+    .eq('is_active', true);
+  if (error) {
+    // 조회 실패 시 자가화주만 허용(안전한 축소) — 전체 허용으로 열지 않는다.
+    logger.error('resolveAgencyScopeShipperIds: zen_agency_shippers lookup failed', error);
+    return [agencyOrgId];
+  }
+  const downstream = (data || []).map((row: any) => row.shipper_org_id).filter(Boolean) as string[];
+  return [...new Set([...downstream, agencyOrgId])];
+}
 
 /** TASK-B-352: 권한 실패는 throw 대신 로케일 문장을 반환한다(사용자 도달 경로). */
 async function assertAdminOrAgency(profile: { role: string; org_id?: string }): Promise<string | null> {
@@ -50,15 +75,10 @@ export async function recordUpsActualCharges(
       return { success: false, error: await trError('not_ups_order') };
     }
 
-    // AGENCY: 본인 소속 화주 오더만 허용
+    // AGENCY: 소속 화주 + 대리점 자가화주 오더만 허용 (DEF-150 §1.1 / DEF-B-141)
     if (profile.role === 'AGENCY') {
-      const { data: links } = await supabase
-        .from('zen_agency_shippers')
-        .select('shipper_org_id')
-        .eq('agency_org_id', profile.org_id)
-        .eq('is_active', true);
-      const shipperIds = (links || []).map((l: any) => l.shipper_org_id);
-      if (!shipperIds.includes(order.shipper_id)) {
+      const shipperIds = await resolveAgencyScopeShipperIds(supabase, profile.org_id);
+      if (!order.shipper_id || !shipperIds.includes(order.shipper_id)) {
         logger.warn(`recordUpsActualCharges: shipper out of agency scope (${orderId})`);
         return { success: false, error: await trError('shipper_scope_denied') };
       }
@@ -69,13 +89,18 @@ export async function recordUpsActualCharges(
       return { success: false, error: await trError('ups_actual_charge_status_invalid') };
     }
 
-    const { data: existingInvoices } = await supabase
+    // TASK-B-372 (#1356): AGENCY는 소속/자가화주 검증을 통과한 뒤에만 service_role로
+    // 쓰기를 수행한다(zen_ups_actual_charges·zen_order_costs·zen_invoices 모두 AGENCY
+    // INSERT/UPDATE 정책이 없어 사용자 세션으로는 실비등록이 불가능 — DEF-150 §1.1).
+    const writeDb = profile.role === 'AGENCY' ? await createAdminClient() : supabase;
+
+    const { data: existingInvoices } = await writeDb
       .from('zen_invoices')
       .select('id, is_finalized, invoice_tier, billed_org_id, metadata')
       .filter('metadata->>source_order_id', 'eq', orderId)
       .neq('status', 'CANCELED');
 
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await writeDb
       .from('zen_ups_actual_charges')
       .delete()
       .eq('order_id', orderId);
@@ -101,7 +126,7 @@ export async function recordUpsActualCharges(
     });
 
     if (actualChargesToInsert.length > 0) {
-      const { error: insertError } = await supabase
+      const { error: insertError } = await writeDb
         .from('zen_ups_actual_charges')
         .insert(actualChargesToInsert);
 
@@ -111,7 +136,7 @@ export async function recordUpsActualCharges(
       }
     }
 
-    const { data: estimatedCosts, error: estError } = await supabase
+    const { data: estimatedCosts, error: estError } = await writeDb
       .from('zen_order_costs')
       .select('cost_type, unit_price, quantity')
       .eq('order_id', orderId)
@@ -148,7 +173,7 @@ export async function recordUpsActualCharges(
 
     // zen_order_costs에 UPS_ACTUAL_ADJUSTMENT upsert
     if (adjustmentAmount === 0) {
-      const { error: deleteCostError } = await supabase
+      const { error: deleteCostError } = await writeDb
         .from('zen_order_costs')
         .delete()
         .eq('order_id', orderId)
@@ -159,7 +184,7 @@ export async function recordUpsActualCharges(
         return { success: false, error: await trError('generic', { code: 'ADJUSTMENT_DELETE' }) };
       }
     } else {
-      const { data: existingAdjustId, error: checkCostError } = await supabase
+      const { data: existingAdjustId, error: checkCostError } = await writeDb
         .from('zen_order_costs')
         .select('id')
         .eq('order_id', orderId)
@@ -174,7 +199,7 @@ export async function recordUpsActualCharges(
       const defaultCurrency = charges[0]?.currency || 'USD';
 
       if (existingAdjustId) {
-        const { error: updateCostError } = await supabase
+        const { error: updateCostError } = await writeDb
           .from('zen_order_costs')
           .update({ unit_price: adjustmentAmount, currency: defaultCurrency })
           .eq('id', existingAdjustId.id);
@@ -184,7 +209,7 @@ export async function recordUpsActualCharges(
           return { success: false, error: await trError('generic', { code: 'ADJUSTMENT_UPDATE' }) };
         }
       } else {
-        const { error: insertCostError } = await supabase
+        const { error: insertCostError } = await writeDb
           .from('zen_order_costs')
           .insert({
             order_id: orderId,
@@ -214,7 +239,7 @@ export async function recordUpsActualCharges(
           + Number(breakdown.otherCharges || 0);
         const newTotal = platformTotal + additionalSum;
 
-        const { error: updateInvError } = await supabase
+        const { error: updateInvError } = await writeDb
           .from('zen_invoices')
           .update({ total_amount: newTotal })
           .eq('id', inv.id);
@@ -226,7 +251,7 @@ export async function recordUpsActualCharges(
       } else {
         // AGENCY_TO_SHIPPER / ADMIN_TO_SHIPPER: 기존 로직 (zen_order_costs 기반)
         if (adjustmentAmount !== 0) {
-          const { error: linkError } = await supabase
+          const { error: linkError } = await writeDb
             .from('zen_order_costs')
             .update({ invoice_id: inv.id })
             .eq('order_id', orderId)
@@ -239,7 +264,7 @@ export async function recordUpsActualCharges(
           }
         }
 
-        const { data: linkedCosts, error: costsError } = await supabase
+        const { data: linkedCosts, error: costsError } = await writeDb
           .from('zen_order_costs')
           .select('unit_price, quantity')
           .eq('invoice_id', inv.id);
@@ -253,7 +278,7 @@ export async function recordUpsActualCharges(
           return sum + (Number(c.unit_price) * Number(c.quantity || 1));
         }, 0);
 
-        const { error: updateInvError } = await supabase
+        const { error: updateInvError } = await writeDb
           .from('zen_invoices')
           .update({ total_amount: newTotal })
           .eq('id', inv.id);
@@ -393,16 +418,14 @@ export async function searchDeliveredUpsOrders(query: string) {
     throw new Error(await trError('generic', { code: 'ORDER_SEARCH' }));
   }
 
-  // AGENCY: 본인 소속 화주 오더만 필터링
+  // AGENCY: 소속 화주 + 대리점 자가화주 오더만 필터링 (DEF-150 §1.1 / DEF-B-141)
+  // 1단계(order_no)와 2단계(tracking_no) 모두 같은 스코프를 적용한다.
+  const agencyScope = profile.role === 'AGENCY'
+    ? new Set(await resolveAgencyScopeShipperIds(supabase, profile.org_id))
+    : null;
   let resultList = orders || [];
-  if (profile.role === 'AGENCY') {
-    const { data: links } = await supabase
-      .from('zen_agency_shippers')
-      .select('shipper_org_id')
-      .eq('agency_org_id', profile.org_id)
-      .eq('is_active', true);
-    const shipperIds = new Set((links || []).map((l: any) => l.shipper_org_id));
-    resultList = resultList.filter((o) => shipperIds.has(o.shipper_id));
+  if (agencyScope) {
+    resultList = resultList.filter((o) => o.shipper_id != null && agencyScope.has(o.shipper_id));
   }
 
   const orderIds = new Set<string>(resultList.map((o) => o.id));
@@ -441,6 +464,8 @@ export async function searchDeliveredUpsOrders(query: string) {
 
       if (moreOrders) {
         moreOrders.forEach((o) => {
+          // 2단계 결과에도 AGENCY 스코프를 적용한다(누락 시 타 화주 오더 노출).
+          if (agencyScope && (o.shipper_id == null || !agencyScope.has(o.shipper_id))) return;
           if (!orderIds.has(o.id)) {
             resultList.push(o);
             orderIds.add(o.id);

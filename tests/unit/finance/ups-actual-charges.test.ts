@@ -25,6 +25,11 @@ vi.mock('@/lib/auth/guards', () => ({
   validateUserAction: vi.fn(),
 }));
 
+// TASK-B-372 (#1356): AGENCY 쓰기는 소유 검증 후 admin client를 사용한다.
+vi.mock('@/utils/supabase/server', () => ({
+  createAdminClient: vi.fn(async () => mockSupabase),
+}));
+
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
 import { recordUpsActualCharges, getUpsActualCharges, getUpsChargeReconciliation, searchDeliveredUpsOrders } from '@/app/actions/finance/ups-actual-charges';
 

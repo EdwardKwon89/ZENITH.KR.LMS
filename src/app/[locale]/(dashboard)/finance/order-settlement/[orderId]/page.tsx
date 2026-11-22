@@ -1,7 +1,8 @@
 // TASK-B-369 (Issue #1425) — S2 오더정산 상세 /finance/order-settlement/[orderId] (Admin).
 import { notFound, redirect } from 'next/navigation';
 import { requireAuth } from '@/lib/auth/guards';
-import { getOrderReleasedDate, getUpsActualCost } from '@/app/actions/finance/ups-actual-cost';
+import { getUpsActualCost } from '@/app/actions/finance/ups-actual-cost';
+import { getOrderReleasedDate } from '@/lib/orders/order-released-date';
 import { getExchangeRate } from '@/lib/finance/exchange-rate';
 import { logger } from '@/lib/logger';
 import { OrderSettlementDetail } from '@/components/finance/order-settlement';

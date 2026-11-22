@@ -46,9 +46,9 @@ import {
   recordUpsActualCost,
   previewUpsActualCost,
   getUpsActualCost,
-  getOrderReleasedDate,
   recordActualCostAndFinalize,
 } from '@/app/actions/finance/ups-actual-cost';
+import { getOrderReleasedDate } from '@/lib/orders/order-released-date';
 
 describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
   beforeEach(() => {
