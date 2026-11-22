@@ -145,5 +145,43 @@ describe('TC-TISA: getOrderRateSnapshot', () => {
     await getOrderRateSnapshot('order-004');
     const selectArg = qSnap.select.mock.calls[0][0];
     expect(selectArg).toContain('metadata');
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
+  });
+
+  it('TC-TISA-05: 비관리자(화주/대리점) 조회 시 zen_order_rate_snapshots_safe 안전 뷰를 조회하고 원가 컬럼을 선택하지 않는다', async () => {
+    (checkPermission as any).mockReturnValue(false);
+    const metadata = { platform: { totalSellingPrice: 150000 } };
+    const qSnap = makeQuery();
+    qSnap.maybeSingle.mockResolvedValueOnce({
+      data: {
+        id: 'snap-005', rate_card_id: 'rc-005', applied_unit_price: 150000,
+        applied_currency: 'KRW', applied_rule: 'UPS_3TIER', snapshot_at: '2026-11-22T00:00:00Z',
+        is_manual: false, override_reason: null, metadata,
+      },
+      error: null,
+    });
+    const qRate = makeQuery();
+    qRate.maybeSingle.mockResolvedValueOnce({
+      data: { valid_from: '2026-01-01T00:00:00Z', valid_until: null },
+      error: null,
+    });
+    const qWeight = makeQuery();
+    qWeight.eq.mockReturnValueOnce(Promise.resolve({
+      data: [{ gross_weight: 2 }], error: null,
+    }));
+
+    mockSupabase.from
+      .mockReturnValueOnce(qSnap)
+      .mockReturnValueOnce(qRate)
+      .mockReturnValueOnce(qWeight);
+
+    const result = await getOrderRateSnapshot('order-005');
+    expect(mockSupabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots_safe');
+    const selectArg = qSnap.select.mock.calls[0][0] as string;
+    expect(selectArg).not.toContain('carrier_cost_amount');
+    expect(selectArg).not.toContain('platform_fee_amount');
+    expect(result).not.toBeNull();
+    expect(result!.carrierCostAmount).toBeUndefined();
+    expect(result!.platformFeeAmount).toBeUndefined();
   });
 });
