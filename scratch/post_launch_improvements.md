@@ -2277,3 +2277,25 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `supabase/migrations/`(트리거 도입 시), `tests/integration/task-b367-unmark-cost-settled.test.ts`
 - **예상 공수**: 0.3~0.5 MD
 - **우선순위**: Low~Medium — 금전 정합성 방어선 보강, IMP-198과 함께 처리 가능
+
+---
+
+## [IMP-201] 오더정산 S2 — 기타부가운임 다중행 입력 + 항목별 KRW breakdown (서버 액션 확장 필요)
+
+- **발견 경위**: TASK-B-369(Issue #1425) S2 상세 구현 중. 설계 `An_17` §6-3은 기타부가운임 `[+행추가]`와 원가 항목별(기본/유류/급증/기타) KRW 분해를 요구하지만, 현 `recordUpsActualCost` 입력은 단일 `otherChargesHkd`만 받고 `previewUpsActualCost` 응답은 `totalCostKrw`·`recalc`만 반환한다.
+- **현재 상태**: 이번 Task는 서버 액션 변경 금지 범위라 단일 기타부가운임 입력 + 총액/매출 재계산만 표시. 다중행·항목별 분해는 미구현.
+- **목표 구현**: `recordUpsActualCost`에 `otherCharges?: {name, amount, currency}[]`를 추가(A 경로 `buildCostAmounts` 재사용)하고, `previewUpsActualCost` 응답에 `baseKrw/fuelKrw/surgeKrw/otherKrw` 분해를 추가. S2 입력 UI를 행 추가/삭제로 확장.
+- **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `src/lib/ups/actual-cost.ts`, `src/components/finance/order-settlement/OrderSettlementDetail.tsx`, `messages/{ko,en,zh,ja}.json`
+- **예상 공수**: 0.5 MD (액션 계약 확장 + UI + 테스트)
+- **우선순위**: Medium — 설계 R2(비교 후 수정)의 입력 편의/투명성
+
+---
+
+## [IMP-202] 오더정산 S2 "시스템 등록값" — 요율 스냅샷 없는 기존 오더의 대체 소스
+
+- **발견 경위**: TASK-B-369(Issue #1425) S2 구현 중. 시스템 청구/부피중량은 `zen_order_rate_snapshots.metadata.platform`에서만 읽는다. 스냅샷이 없는 과거 오더(또는 스냅샷 생성이 생략된 오더)는 시스템 값이 전부 `—`로 표시된다.
+- **현재 상태**: 값이 없어도 화면은 정상 동작하지만, "시스템 등록값 vs UPS 청구서값" 대비라는 R2 목적이 약해진다.
+- **목표 구현**: 스냅샷 우선, 없으면 `zen_order_packages`(중량·치수)와 `zen_ups_products.volumetric_divisor`로 청구/부피중량을 계산하는 서버측 fallback(신규 조회 액션 또는 Ds-11 등재 헬퍼) 추가.
+- **관련 파일**: 오더정산 상세 페이지, `src/lib/ups/pricing-engine.ts`(계산 규칙 단일 출처), `src/app/actions/finance/ups-actual-cost.ts`
+- **예상 공수**: 0.3~0.5 MD
+- **우선순위**: Low — 표시 보조 정보
