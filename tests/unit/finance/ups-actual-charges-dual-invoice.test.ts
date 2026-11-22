@@ -20,6 +20,10 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
+vi.mock('@/utils/supabase/server', () => ({
+  createAdminClient: vi.fn(async () => mockSupabase),
+}));
+
 vi.mock('@/app/actions/finance/settlement', () => ({
   createPostFinalizationAdjustment: vi.fn().mockResolvedValue({ success: true, adjustmentAmount: 10 }),
 }));

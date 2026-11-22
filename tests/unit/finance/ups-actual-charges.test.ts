@@ -90,7 +90,7 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     expect(result.success).toBe(false);
   });
 
-  it('TC-B204-04: AGENCY 권한 허용 → 본인 화주 오더 등록 성공', async () => {
+  it('TC-B204-04: AGENCY 권한 거부 → 실비 등록 불가 (JSJung 확정 규칙)', async () => {
     mockValidateUser(USER_ROLES.AGENCY, 'agency-org');
     mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
     // AGENCY → shipper-1 연결되어 있다고 가정
@@ -109,11 +109,12 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     const result = await recordUpsActualCharges('order-1', [
       { chargeType: 'BASE', amount: 100, currency: 'USD' },
     ]);
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('권한이 없습니다.');
   });
 
   it('TC-B204-04b: NaN/Infinity 금액은 거부하고 쓰기를 수행하지 않는다', async () => {
-    mockValidateUser(USER_ROLES.AGENCY, 'agency-org');
+    mockValidateUser(USER_ROLES.ADMIN);
     mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
     mockSupabase.from.mockImplementation((table: string) => {
       if (table === 'zen_orders') return createChainableMock({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
@@ -152,7 +153,7 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
 
     const result = await recordUpsActualCharges('order-1', []);
     expect(result.success).toBe(false);
-    expect(result.error).toBe('본인 소속 화주의 오더만 처리할 수 있습니다.');
+    expect(result.error).toBe('권한이 없습니다.');
     const { createAdminClient } = await import('@/utils/supabase/server');
     expect(createAdminClient).not.toHaveBeenCalled();
   });

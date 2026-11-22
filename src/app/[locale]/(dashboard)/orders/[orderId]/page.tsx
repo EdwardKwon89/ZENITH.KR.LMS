@@ -563,7 +563,8 @@ export default async function OrderDetailPage({
             <OrderClaimTrigger orderId={orderId} orderNo={order.order_no} />
           </div>
 
-          {isUpsOrder && (
+          {/* TASK-B-372: UPS 실비는 SUPER_ADMIN·ADMIN·MANAGER 전용 — 비관리자에게 폼을 렌더하지 않는다. */}
+          {isUpsOrder && (isAdmin || profile?.role === 'MANAGER') && (
             <UpsActualAdjustmentForm
               orderId={orderId}
               orderStatus={order.status || ''}
