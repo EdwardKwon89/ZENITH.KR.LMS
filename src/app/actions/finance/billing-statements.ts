@@ -13,6 +13,8 @@ import { USER_ROLES } from '@/lib/auth/rbac';
 import { logger } from '@/lib/logger';
 import { trError, type ErrorKey } from '@/lib/i18n/action-error';
 import { getKstToday, kstDateString, kstRangeBounds } from '@/lib/utils/date-kst';
+// 'use server' 파일은 async 함수만 export 가능 → 순수 함수는 별도 모듈로 분리 (DEF-B-162)
+import { normalizeShipperName } from '@/lib/finance/billing/normalize-shipper-name';
 
 // ───────────────────────────────────────────── types
 
@@ -130,11 +132,6 @@ const DB_ERROR_KEYS: Array<[RegExp, ErrorKey]> = [
   [/header_not_found/, 'statement_not_found'],
   [/unsupported_cost_currency/, 'unsupported_cost_currency'],
 ];
-
-/** 수기 화주명 정규화 — RPC `billed_key`의 ADHOC 규칙과 동일 (공백 압축·양끝 제거·소문자) */
-export function normalizeShipperName(name: string): string {
-  return name.replace(/\s+/g, ' ').trim().toLowerCase();
-}
 
 async function userError(raw: string, where: string): Promise<string> {
   for (const [re, key] of DB_ERROR_KEYS) {
