@@ -17,6 +17,8 @@ import {
 } from '@/app/actions/finance/billing-statements';
 import type { AdhocShipperName, BillableOrderRow, StatementTarget } from './types';
 import { formatKrw } from './types';
+// TASK-B-368 / DEF-B-162 (Issue #1415) — 서버·RPC와 규칙 단일 출처 (로컬 normalize() 제거)
+import { normalizeShipperName } from '@/lib/finance/billing/normalize-shipper-name';
 
 export interface StatementCreateProps {
   basePath: string;
@@ -25,11 +27,6 @@ export interface StatementCreateProps {
   allowAdhoc: boolean;
   defaultYear: number;
   defaultMonth: number;
-}
-
-/** 서버 normalizeShipperName과 동일한 규칙(공백 압축·양끝 제거·소문자). 표기 비교용. */
-function normalize(name: string): string {
-  return name.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -69,7 +66,7 @@ export default function StatementCreate({ basePath, locale, targets, allowAdhoc,
   }, [mode, allowAdhoc, shipperName]);
 
   const similar = useMemo(
-    () => suggestions.filter((s) => s.normalized !== normalize(shipperName)),
+    () => suggestions.filter((s) => s.normalized !== normalizeShipperName(shipperName)),
     [suggestions, shipperName],
   );
 

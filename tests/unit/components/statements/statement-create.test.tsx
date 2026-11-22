@@ -116,6 +116,11 @@ describe('S4 청구서 생성 (TASK-B-361)', () => {
     await waitFor(() => expect(screen.getByText('유사 화주명 2건 — 함께 조회')).toBeTruthy());
     fireEvent.click(screen.getByRole('button', { name: /ABC 주식회사/ }));
     expect((screen.getByLabelText('화주명') as HTMLInputElement).value).toBe('ABC 주식회사');
+
+    // 값 단언(Jaison 2026-11-22 지시): 공백 압축·양끝 제거·소문자 규칙이 공용 유틸에서 적용되어
+    // '  ABC   주식회사  ' → 'abc 주식회사'로 정규화되어 해당 제안이 칩에서 제외된다.
+    fireEvent.change(screen.getByLabelText('화주명'), { target: { value: '  ABC   주식회사  ' } });
+    await waitFor(() => expect(screen.getByText('유사 화주명 1건 — 함께 조회')).toBeTruthy());
   });
 
   it('TC-361-12: 읽기 전용 경로(allowAdhoc=false)에는 수기 화주 옵션이 없다', () => {
