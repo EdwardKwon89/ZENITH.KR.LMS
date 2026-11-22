@@ -6,12 +6,10 @@
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 import { FileText, Plus, Download } from 'lucide-react';
 import { ZenCard, ZenButton, ZenSelect } from '@/components/ui/ZenUI';
-import { cancelBillingStatement } from '@/app/actions/finance/billing-statements';
 import { StatementStatusBadge, StatementScopeBadge } from './Badges';
-import { PaymentConfirmModal } from './StatementModals';
+import { CancelConfirmModal, PaymentConfirmModal } from './StatementModals';
 import type { StatementListRow, StatementScope } from './types';
 import { formatKrw, formatPeriod } from './types';
 
@@ -34,7 +32,7 @@ export default function StatementsList({ statements, basePath, canCreate, locale
   const [year, setYear] = useState<string>('ALL');
   const [month, setMonth] = useState<string>('ALL');
   const [status, setStatus] = useState<string>('ALL');
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [cancelRow, setCancelRow] = useState<StatementListRow | null>(null);
   const [paymentRow, setPaymentRow] = useState<StatementListRow | null>(null);
 
   const years = useMemo(() => Array.from(new Set(rows.map((r) => r.periodYear))).sort((a, b) => b - a), [rows]);
@@ -53,17 +51,6 @@ export default function StatementsList({ statements, basePath, canCreate, locale
     if (status !== 'ALL' && r.status !== status) return false;
     return true;
   }), [rows, scope, target, year, month, status]);
-
-  const doCancel = async (id: string) => {
-    setBusyId(id);
-    const res = await cancelBillingStatement(id);
-    setBusyId(null);
-    if (!res.success) {
-      toast.error(res.error ?? t('actionFailed'));
-      return;
-    }
-    setRows((prev) => prev.filter((r) => r.id !== id));
-  };
 
   const detailHref = (id: string) => `/${locale}${basePath}/${id}`;
 
@@ -175,7 +162,7 @@ export default function StatementsList({ statements, basePath, canCreate, locale
                       </a>
                       {/* 읽기 전용 경로(RECEIVED/SUPERVISED)에서는 변형 버튼을 렌더하지 않는다 */}
                       {mine && row.status === 'DRAFT' && (
-                        <button type="button" className="text-rose-600 hover:underline" disabled={busyId === row.id} onClick={() => doCancel(row.id)}>
+                        <button type="button" className="text-rose-600 hover:underline" onClick={() => setCancelRow(row)}>
                           {t('cancel')}
                         </button>
                       )}
@@ -192,6 +179,18 @@ export default function StatementsList({ statements, basePath, canCreate, locale
           </tbody>
         </table>
       </ZenCard>
+
+      {cancelRow && (
+        <CancelConfirmModal
+          statementId={cancelRow.id}
+          open
+          onClose={() => setCancelRow(null)}
+          onSuccess={() => {
+            setRows((prev) => prev.filter((r) => r.id !== cancelRow.id));
+            setCancelRow(null);
+          }}
+        />
+      )}
 
       {paymentRow && (
         <PaymentConfirmModal

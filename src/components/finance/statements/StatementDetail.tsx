@@ -7,12 +7,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 import { FileWarning, Download } from 'lucide-react';
 import { ZenCard, ZenButton, ZenBadge } from '@/components/ui/ZenUI';
-import { cancelBillingStatement } from '@/app/actions/finance/billing-statements';
 import { StatementStatusBadge, StatementScopeBadge } from './Badges';
-import { IssueConfirmModal, PaymentConfirmModal } from './StatementModals';
+import { CancelConfirmModal, IssueConfirmModal, PaymentConfirmModal } from './StatementModals';
 import type { StatementDetail as StatementDetailType } from './types';
 import { formatKrw, formatPeriod, isIssuerScope } from './types';
 
@@ -29,7 +27,7 @@ export default function StatementDetail({ detail, error, basePath, locale }: Sta
   const [current, setCurrent] = useState<StatementDetailType | null>(detail);
   const [issueOpen, setIssueOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const listHref = `/${locale}${basePath}`;
 
@@ -49,17 +47,6 @@ export default function StatementDetail({ detail, error, basePath, locale }: Sta
   const mine = isIssuerScope(current.scope);
   const isDraft = current.status === 'DRAFT';
   const isIssued = current.status === 'ISSUED';
-
-  const doCancel = async () => {
-    setCancelLoading(true);
-    const res = await cancelBillingStatement(current.id);
-    setCancelLoading(false);
-    if (!res.success) {
-      toast.error(res.error ?? t('actionFailed'));
-      return;
-    }
-    router.push(listHref);
-  };
 
   return (
     <div className="flex-1 flex flex-col gap-6 p-4 md:p-8 max-w-5xl mx-auto w-full">
@@ -137,7 +124,7 @@ export default function StatementDetail({ detail, error, basePath, locale }: Sta
           {isDraft && (
             <>
               <ZenButton onClick={() => setIssueOpen(true)}>{t('issue')}</ZenButton>
-              <ZenButton variant="ghost" onClick={doCancel} loading={cancelLoading}>{t('issueCancel')}</ZenButton>
+              <ZenButton variant="ghost" onClick={() => setCancelOpen(true)}>{t('issueCancel')}</ZenButton>
             </>
           )}
           {isIssued && (
@@ -146,6 +133,14 @@ export default function StatementDetail({ detail, error, basePath, locale }: Sta
         </ZenCard>
       )}
 
+      {mine && cancelOpen && (
+        <CancelConfirmModal
+          statementId={current.id}
+          open
+          onClose={() => setCancelOpen(false)}
+          onSuccess={() => { setCancelOpen(false); router.push(listHref); }}
+        />
+      )}
       {mine && issueOpen && (
         <IssueConfirmModal
           statementId={current.id}

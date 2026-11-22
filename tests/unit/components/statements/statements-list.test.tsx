@@ -9,8 +9,8 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@/app/actions/finance/billing-statements', () => ({
-  cancelBillingStatement: (...a: any[]) => m.cancel(...a),
-  confirmStatementPayment: (...a: any[]) => m.payment(...a),
+  cancelBillingStatement: (...a: unknown[]) => m.cancel(...a),
+  confirmStatementPayment: (...a: unknown[]) => m.payment(...a),
   listBillableOrders: vi.fn(),
   listAdhocShipperNames: vi.fn(),
   createBillingStatement: vi.fn(),
@@ -23,6 +23,8 @@ vi.mock('next-intl', () => {
     scopeAll: '전체', scopeMine: '내 청구', scopeReceived: '나에게 청구된', scopeSupervised: '감독 조회',
     statusDraft: '초안', statusIssued: '발행', statusClosed: '마감',
     view: '보기', cancel: '취소', confirmPayment: '입금확인', excel: 'Excel 저장',
+    cancelConfirmTitle: '초안 취소', cancelWarning: '초안을 취소하면 삭제되며 복구할 수 없습니다.',
+    cancelConfirm: '취소 확정', close: '닫기', actionFailed: '요청을 처리하지 못했습니다.',
     colAction: '작업', onlyMineNote: '※본인 생성분만 표시',
   };
   return {
@@ -104,23 +106,38 @@ describe('S3 청구서 목록 — scope/status별 버튼 노출 (TASK-B-361)', (
     expect(screen.queryByText('+ 청구서 생성')).toBeNull();
   });
 
-  it('TC-361-07: 취소 클릭은 서버 액션을 호출하고 해당 행을 목록에서 제거한다', async () => {
+  it('TC-361-07: 취소 클릭은 확인 모달을 열고, 확정 시 서버 호출 후 해당 행을 제거한다 (Jaison 리뷰)', async () => {
     m.cancel.mockResolvedValue({ success: true });
     render(<StatementsList {...base} statements={[row('a', 'MINE', 'DRAFT'), row('b', 'MINE', 'DRAFT')]} />);
     fireEvent.click(tbl().getAllByRole('button', { name: '취소' })[0]);
+    // 클릭 직후에는 서버 호출 없이 모달만 열린다.
+    expect(m.cancel).not.toHaveBeenCalled();
+    const dialog = within(screen.getByRole('dialog'));
+    expect(dialog.getByText(/초안을 취소하면 삭제되며/)).toBeTruthy();
+    fireEvent.click(dialog.getByRole('button', { name: '취소 확정' }));
     await waitFor(() => expect(m.cancel).toHaveBeenCalledWith('a'));
     await waitFor(() => expect(tbl().queryByText('ST-a')).toBeNull());
     expect(tbl().getByText('ST-b')).toBeTruthy();
   });
 
-  it('TC-361-26: 내 청구 행은 Excel 저장 링크를 렌더한다', () => {
+  it('TC-361-32: 확인 모달에서 닫기를 누르면 서버 호출 없이 행이 유지된다', async () => {
+    render(<StatementsList {...base} statements={[row('a', 'MINE', 'DRAFT')]} />);
+    fireEvent.click(tbl().getByRole('button', { name: '취소' }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.click(dialog.getByRole('button', { name: '닫기' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(m.cancel).not.toHaveBeenCalled();
+    expect(tbl().getByText('ST-a')).toBeTruthy();
+  });
+
+  it('TC-361-29: 내 청구 행은 Excel 저장 링크를 렌더한다', () => {
     render(<StatementsList {...base} statements={[row('x', 'MINE', 'DRAFT')]} />);
     const link = tbl().getByRole('link', { name: 'Excel 저장' });
     expect(link.getAttribute('href')).toBe('/api/finance/statements/x/export');
     expect(link.hasAttribute('download')).toBe(true);
   });
 
-  it('TC-361-27: 읽기 전용(나에게 청구된) 행에서도 Excel 저장 링크를 렌더한다', () => {
+  it('TC-361-30: 읽기 전용(나에게 청구된) 행에서도 Excel 저장 링크를 렌더한다', () => {
     render(<StatementsList {...base} basePath="/shipper/statements" canCreate={false} statements={[row('r', 'RECEIVED', 'ISSUED')]} />);
     expect(tbl().queryByRole('button', { name: '취소' })).toBeNull();
     expect(tbl().getByRole('link', { name: 'Excel 저장' }).getAttribute('href')).toBe('/api/finance/statements/r/export');
