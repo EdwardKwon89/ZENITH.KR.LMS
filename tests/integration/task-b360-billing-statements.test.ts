@@ -25,8 +25,8 @@ import {
   confirmStatementPayment,
   getBillingStatements,
   getBillingStatementDetail,
-  normalizeShipperName,
 } from '@/app/actions/finance/billing-statements';
+import { normalizeShipperName } from '@/lib/finance/billing/normalize-shipper-name';
 
 type Identity = Awaited<ReturnType<typeof createTestOrg>>;
 
