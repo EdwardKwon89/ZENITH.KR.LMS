@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ZenButton, ZenInput } from '@/components/ui/ZenUI';
-import { issueBillingStatement, confirmStatementPayment } from '@/app/actions/finance/billing-statements';
+import { issueBillingStatement, confirmStatementPayment, cancelBillingStatement } from '@/app/actions/finance/billing-statements';
 import { getKstToday } from '@/lib/utils/date-kst';
 import { formatKrw } from './types';
 
@@ -47,6 +47,42 @@ export function IssueConfirmModal({ statementId, open, onClose, onSuccess }: Mod
         <div className="flex justify-end gap-2">
           <ZenButton variant="ghost" onClick={onClose} disabled={loading}>{t('close')}</ZenButton>
           <ZenButton onClick={confirm} loading={loading}>{t('issueConfirm')}</ZenButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Jaison 리뷰(비차단) 반영 — 초안 취소는 확인 단계를 거쳐야 한다.
+// 취소 버튼 클릭은 이 모달을 열기만 하고, 서버 액션은 '취소 확정' 클릭 시에만 호출된다.
+export function CancelConfirmModal({ statementId, open, onClose, onSuccess }: ModalProps) {
+  const t = useTranslations('Statements');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!open) return null;
+
+  const confirm = async () => {
+    setLoading(true);
+    setError(null);
+    const res = await cancelBillingStatement(statementId);
+    setLoading(false);
+    if (!res.success) {
+      setError(res.error ?? t('actionFailed'));
+      return;
+    }
+    onSuccess();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" role="dialog" aria-modal="true">
+      <div className="zen-glass rounded-2xl p-6 w-full max-w-md space-y-4">
+        <h3 className="text-lg font-semibold">{t('cancelConfirmTitle')}</h3>
+        <p className="text-sm text-stone-700">{t('cancelWarning')}</p>
+        {error && <p className="text-sm text-rose-600" role="alert">{error}</p>}
+        <div className="flex justify-end gap-2">
+          <ZenButton variant="ghost" onClick={onClose} disabled={loading}>{t('close')}</ZenButton>
+          <ZenButton onClick={confirm} loading={loading}>{t('cancelConfirm')}</ZenButton>
         </div>
       </div>
     </div>

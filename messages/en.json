@@ -65,6 +65,9 @@
     "targetRequired": "Please select a billing target.",
     "actionFailed": "Failed to process the request.",
     "issueWarning": "Once issued, it cannot be cancelled or deleted.",
+    "cancelConfirmTitle": "Cancel draft",
+    "cancelWarning": "Canceling the draft deletes it permanently. Continue?",
+    "cancelConfirm": "Confirm cancel",
     "issueConfirm": "Confirm Issue",
     "paymentTitle": "Confirm Payment",
     "paymentPaidAt": "Payment Date",
@@ -77,7 +80,8 @@
     "notFound": "Billing statement not found.",
     "readOnly": "Read only",
     "billedBizNoLabel": "Business No.",
-    "noCandidates": "No candidate orders found."
+    "noCandidates": "No candidate orders found.",
+    "excel": "Save Excel"
   },
   "Errors": {
     "withdraw_confirm_input": "Type 'Withdraw' exactly to confirm.",
@@ -298,7 +302,9 @@
     "agency_settlements_nav": "Settlements",
     "agency_ups_rates_nav": "UPS Rate Inquiry",
     "shipper_ups_rates_nav": "UPS Freight Inquiry",
-    "shipper_invoices_nav": "Invoices"
+    "shipper_invoices_nav": "Invoices (Legacy)",
+    "statements_nav": "Billing Statements",
+    "shipper_statements_nav": "Statements (Monthly)"
   },
   "VOC": {
     "title": "VOC Management",

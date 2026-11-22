@@ -11,9 +11,9 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@/app/actions/finance/billing-statements', () => ({
-  issueBillingStatement: (...a: any[]) => m.issue(...a),
-  confirmStatementPayment: (...a: any[]) => m.payment(...a),
-  cancelBillingStatement: (...a: any[]) => m.cancel(...a),
+  issueBillingStatement: (...a: unknown[]) => m.issue(...a),
+  confirmStatementPayment: (...a: unknown[]) => m.payment(...a),
+  cancelBillingStatement: (...a: unknown[]) => m.cancel(...a),
   listBillableOrders: vi.fn(),
   listAdhocShipperNames: vi.fn(),
   createBillingStatement: vi.fn(),
@@ -32,6 +32,8 @@ vi.mock('next-intl', () => {
     scopeMine: '내 청구', scopeReceived: '나에게 청구된', scopeSupervised: '감독 조회',
     issue: '발행', issueCancel: '취소(삭제)', issueConfirm: '발행 확정',
     issueWarning: '발행하면 취소·삭제할 수 없습니다.', confirmPayment: '입금확인',
+    cancelConfirmTitle: '초안 취소', cancelWarning: '초안을 취소하면 삭제되며 복구할 수 없습니다.',
+    cancelConfirm: '취소 확정',
     paymentTitle: '입금확인', paymentPaidAt: '입금일', paymentAmount: '입금액',
     paymentConfirm: '입금확인 완료', paymentMismatch: '입금액이 청구액과 다릅니다. 전액 일치만 가능합니다.',
     close: '닫기', readOnly: '조회 전용', notFound: '청구서를 찾을 수 없습니다.',
@@ -39,7 +41,7 @@ vi.mock('next-intl', () => {
     colFuelSurcharge: '유류할증료', colSurgeFee: '급증수수료', colOtherCharges: '기타',
     colSubtotal: '소계', colBilledTarget: '청구대상', colPeriodRound: '기간/차수',
     totalLabel: '합계 {amount}원', itemCount: '오더 {count}건', billedBizNoLabel: '사업자번호',
-    view: '보기', actionFailed: '요청을 처리하지 못했습니다.',
+    view: '보기', actionFailed: '요청을 처리하지 못했습니다.', excel: 'Excel 저장',
   };
   return {
     useTranslations: () => (key: string, params?: Record<string, unknown>) => {
@@ -141,5 +143,35 @@ describe('S5 청구서 상세 — 권한별 작업 영역 (TASK-B-361)', () => {
     render(<StatementDetail {...base} detail={null} error="요청한 청구서가 존재하지 않습니다." />);
     expect(screen.getByText('청구서를 찾을 수 없습니다.')).toBeTruthy();
     expect(screen.getByText('요청한 청구서가 존재하지 않습니다.')).toBeTruthy();
+  });
+
+  it('TC-361-31: 읽기 전용 상세에서도 Excel 저장 링크를 렌더한다', () => {
+    render(<StatementDetail {...base} basePath="/shipper/statements" detail={detail({ status: 'ISSUED', scope: 'RECEIVED' })} />);
+    const link = screen.getByRole('link', { name: 'Excel 저장' });
+    expect(link.getAttribute('href')).toBe('/api/finance/statements/st-1/export');
+    expect(link.hasAttribute('download')).toBe(true);
+    expect(screen.queryByRole('button', { name: '발행' })).toBeNull();
+  });
+
+  it('TC-361-33: 상세 취소(삭제) 클릭은 서버 호출 없이 확인 모달만 연다 (Jaison 리뷰)', async () => {
+    render(<StatementDetail {...base} detail={detail()} />);
+    fireEvent.click(screen.getByRole('button', { name: '취소(삭제)' }));
+    expect(m.cancel).not.toHaveBeenCalled();
+    const dialog = within(screen.getByRole('dialog'));
+    expect(dialog.getByText(/초안을 취소하면 삭제되며/)).toBeTruthy();
+    fireEvent.click(dialog.getByRole('button', { name: '닫기' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(m.cancel).not.toHaveBeenCalled();
+    expect(m.push).not.toHaveBeenCalled();
+  });
+
+  it('TC-361-34: 상세 취소 확정 시 서버 호출 후 목록으로 이동한다', async () => {
+    m.cancel.mockResolvedValue({ success: true });
+    render(<StatementDetail {...base} detail={detail()} />);
+    fireEvent.click(screen.getByRole('button', { name: '취소(삭제)' }));
+    const dialog = within(screen.getByRole('dialog'));
+    fireEvent.click(dialog.getByRole('button', { name: '취소 확정' }));
+    await waitFor(() => expect(m.cancel).toHaveBeenCalledWith('st-1'));
+    await waitFor(() => expect(m.push).toHaveBeenCalledWith('/ko/finance/statements'));
   });
 });
