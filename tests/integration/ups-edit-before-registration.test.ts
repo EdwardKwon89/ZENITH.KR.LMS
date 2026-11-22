@@ -225,13 +225,17 @@ function snapshotRows(): string {
 
 describe('TASK-B-339: UPS 등록 전 수정 (Issue #1254, 실 DB)', () => {
   let supabase: SupabaseClient;
+  let adminSession: SupabaseClient;
 
   beforeEach(async () => {
     if (!SERVICE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required in env');
     supabase = createClient(URL, SERVICE_KEY);
+    // TASK-B-370: 안전 뷰는 auth.uid() 기반 WHERE를 가지므로 service_role(uid=null)로는 0행이다.
+    // 서버 액션 경로는 실제 Admin 세션 클라이언트로 실행한다.
+    adminSession = makeSessionClient(ADMIN_USER, '339-admin@test.kr');
     setupFixture();
     mockValidateUserAction.mockResolvedValue({
-      supabase,
+      supabase: adminSession,
       user: { id: ADMIN_USER },
       profile: { id: ADMIN_USER, role: 'ADMIN', org_id: ADMIN_ORG },
     });

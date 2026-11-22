@@ -1,11 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('@/utils/supabase/server', () => ({ createAdminClient: vi.fn() }));
+
 import { refreshUpsRateSnapshot } from '@/lib/orders/rate-snapshot-refresh';
+import { createAdminClient } from '@/utils/supabase/server';
 
 // TASK-B-339 (Issue #1254 / 결함 ③): UPS 오더 수정 후 운임 스냅샷 갱신.
 //   zen_order_rate_snapshots에는 unique_order_snapshot(order_id) 유일 인덱스가 있어
 //   insert만 하면 실패하므로 update-or-insert가 필수다.
 
 const ORDER_ID = '33900000-0000-4000-8000-000000000020';
+const ADMIN = { id: 'user-admin', role: 'ADMIN', org_id: null };
 
 const FULL_ORDER = {
   id: ORDER_ID,
@@ -62,10 +67,9 @@ function createSupabaseMock(tables: Record<string, any>) {
     return builder;
   }
 
-  return {
-    writes,
-    supabase: { from: (table: string) => builderFor(table) },
-  };
+  const supabase = { from: (table: string) => builderFor(table) };
+  vi.mocked(createAdminClient).mockResolvedValue(supabase as any);
+  return { writes, supabase };
 }
 
 const ESTIMATE = {
@@ -86,10 +90,10 @@ describe('TASK-B-339: refreshUpsRateSnapshot (Issue #1254)', () => {
       zen_orders: FULL_ORDER,
       zen_order_packages: [{ length: 30, width: 20, height: 10, gross_weight: 12.5 }],
       zen_ups_products: { id: 'product-1' },
-      zen_order_rate_snapshots: { id: 'snap-1', is_manual: false },
+      zen_order_rate_snapshots_safe: { id: 'snap-1', is_manual: false },
     });
 
-    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, estimateFn });
+    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, profile: ADMIN, estimateFn });
 
     const snapshotWrites = writes.filter((w) => w.table === 'zen_order_rate_snapshots');
     expect(snapshotWrites).toHaveLength(1);
@@ -104,10 +108,10 @@ describe('TASK-B-339: refreshUpsRateSnapshot (Issue #1254)', () => {
       zen_orders: FULL_ORDER,
       zen_order_packages: [{ length: 30, width: 20, height: 10, gross_weight: 12.5 }],
       zen_ups_products: { id: 'product-1' },
-      zen_order_rate_snapshots: null,
+      zen_order_rate_snapshots_safe: null,
     });
 
-    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, estimateFn });
+    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, profile: ADMIN, estimateFn });
 
     const snapshotWrites = writes.filter((w) => w.table === 'zen_order_rate_snapshots');
     expect(snapshotWrites).toHaveLength(1);
@@ -121,10 +125,10 @@ describe('TASK-B-339: refreshUpsRateSnapshot (Issue #1254)', () => {
       zen_orders: FULL_ORDER,
       zen_order_packages: [{ length: 30, width: 20, height: 10, gross_weight: 12.5 }],
       zen_ups_products: { id: 'product-1' },
-      zen_order_rate_snapshots: { id: 'snap-manual', is_manual: true },
+      zen_order_rate_snapshots_safe: { id: 'snap-manual', is_manual: true },
     });
 
-    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, estimateFn });
+    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, profile: ADMIN, estimateFn });
 
     expect(writes.filter((w) => w.table === 'zen_order_rate_snapshots')).toHaveLength(0);
     expect(warnSpy).toHaveBeenCalled();
@@ -153,11 +157,11 @@ describe('TASK-B-339: refreshUpsRateSnapshot (Issue #1254)', () => {
       zen_orders: FULL_ORDER,
       zen_order_packages: [{ length: 30, width: 20, height: 10, gross_weight: 12.5 }],
       zen_ups_products: { id: 'product-1' },
-      zen_order_rate_snapshots: null,
+      zen_order_rate_snapshots_safe: null,
       ...tables,
     });
 
-    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, estimateFn });
+    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, profile: ADMIN, estimateFn });
 
     expect(writes.filter((w) => w.table === 'zen_order_rate_snapshots')).toHaveLength(0);
     expect(estimateFn).not.toHaveBeenCalled();
@@ -170,12 +174,12 @@ describe('TASK-B-339: refreshUpsRateSnapshot (Issue #1254)', () => {
       zen_orders: FULL_ORDER,
       zen_order_packages: [{ length: 30, width: 20, height: 10, gross_weight: 12.5 }],
       zen_ups_products: { id: 'product-1' },
-      zen_order_rate_snapshots: { id: 'snap-1', is_manual: false },
+      zen_order_rate_snapshots_safe: { id: 'snap-1', is_manual: false },
     });
     estimateFn.mockRejectedValue(new Error('zone not found'));
 
     await expect(
-      refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, estimateFn })
+      refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, profile: ADMIN, estimateFn })
     ).rejects.toThrow('zone not found');
 
     expect(writes.filter((w) => w.table === 'zen_order_rate_snapshots')).toHaveLength(0);
@@ -189,10 +193,10 @@ describe('TASK-B-339: refreshUpsRateSnapshot (Issue #1254)', () => {
         { length: 40, width: 30, height: 20, gross_weight: '7.5' },
       ],
       zen_ups_products: { id: 'product-1' },
-      zen_order_rate_snapshots: null,
+      zen_order_rate_snapshots_safe: null,
     });
 
-    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, estimateFn });
+    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, profile: ADMIN, estimateFn });
 
     expect(estimateFn).toHaveBeenCalledWith({
       productId: 'product-1',
@@ -208,16 +212,38 @@ describe('TASK-B-339: refreshUpsRateSnapshot (Issue #1254)', () => {
     });
   });
 
+  it('TC-SNAP-08: 소유하지 않은 화주 세션은 쓰기 0회 + 추정 함수 미호출 (TASK-B-370)', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { supabase, writes } = createSupabaseMock({
+      zen_orders: FULL_ORDER,
+      zen_order_packages: [{ length: 30, width: 20, height: 10, gross_weight: 12.5 }],
+      zen_ups_products: { id: 'product-1' },
+      zen_order_rate_snapshots_safe: { id: 'snap-1', is_manual: false },
+    });
+
+    await refreshUpsRateSnapshot({
+      supabase,
+      orderId: ORDER_ID,
+      profile: { id: 'user-other', role: 'SHIPPER', org_id: 'org-other' },
+      estimateFn,
+    });
+
+    expect(writes.filter((w) => w.table === 'zen_order_rate_snapshots')).toHaveLength(0);
+    expect(estimateFn).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
   it('TC-SNAP-07: recipient_country_code가 없으면 dest_port의 country_code로 대체한다', async () => {
     const { supabase } = createSupabaseMock({
       zen_orders: { ...FULL_ORDER, recipient_country_code: null, dest_port_id: 'port-1' },
       zen_order_packages: [{ length: 30, width: 20, height: 10, gross_weight: 12.5 }],
       zen_ups_products: { id: 'product-1' },
       zen_ports: { country_code: 'JP' },
-      zen_order_rate_snapshots: null,
+      zen_order_rate_snapshots_safe: null,
     });
 
-    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, estimateFn });
+    await refreshUpsRateSnapshot({ supabase, orderId: ORDER_ID, profile: ADMIN, estimateFn });
 
     expect(estimateFn.mock.calls[0][0].destCountryCode).toBe('JP');
   });
