@@ -10,7 +10,8 @@ dotenv.config({ path: '.env.local' });
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
-const PASSWORD = 'password1234';
+// CI Supabase 정책: 소문자·대문자·숫자·기호 각 1자 이상
+const PASSWORD = 'Password1234!';
 
 vi.mock('@/app/actions/ups/freight', () => ({
   estimateUpsFreight: vi.fn(),
