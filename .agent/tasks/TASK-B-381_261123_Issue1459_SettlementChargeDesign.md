@@ -28,7 +28,7 @@
 - **실DB**: 로컬 Supabase(`supabase_db_*`) + `TeamB_Dev` 마이그레이션 상태(로컬 reset 완료).
 - **호출 경로**: 실제 서버 액션(`recordUpsActualCost`, `recordActualCostAndFinalize`, `recordUpsActualCharges`)을 vitest에서 직접 호출. `validateUserAction`만 ADMIN 프로필로 stub하고 **DB 클라이언트는 service-role 실연결**을 주입했다. 따라서 측정된 것은 "RLS를 통과한 뒤의 청구·인보이스 쓰기 동작"이다. **RLS(역할별 허용/거부)는 이 실측 범위가 아니다.**
 - **`estimateUpsFreight`는 고정 stub**으로 대체했다(청구중량 변경 경로의 청구 행·합계 변화만 분리 관찰하기 위함). 따라서 아래 수치는 "stub가 반환한 매출"과 실제 청구 행의 관계를 보여주며, 실제 UPS 요율 계산값이 아니다.
-- **픽스처**: UPS `DELIVERED` 오더 + `ADMIN_TO_AGENCY` 인보이스(80) + `AGENCY_TO_SHIPPER` 인보이스(80), 각 인보이스에 `BASE_FREIGHT:80` 1행 연결. `ADMIN`은 `auth.users`에도 insert(마감 시 `finalized_by` FK).
+- **픽스처**: UPS `DELIVERED` 오더 + `ADMIN_TO_AGENCY` 인보이스(80) + `AGENCY_TO_SHIPPER` 인보이스(80), 각 인보이스에 `BASE_FREIGHT:80` 1행 연결. `ADMIN`은 `auth.users`에도 insert(마감 시 `finalized_by` FK). **주의**: 실제 인보이스 생성기는 `ADMIN_TO_AGENCY`에 비용 행을 연결하지 않는다(§1-5). 픽스처는 두 tier의 쓰기 동작을 같은 조건에서 비교하기 위해 대칭으로 연결한 것이며, 이 차이는 §2의 설계 결론(tier별 처리 분리)에 반영했다.
 - **정리**: 측정 후 `session_replication_role=replica`로 픽스처 전부 삭제.
 - 실측에 쓴 임시 테스트 파일은 측정 후 삭제했다(커밋하지 않음).
 
@@ -40,13 +40,13 @@
 |:--|:--|
 | `zen_ups_actual_cost.other_charges_hkd` | 50 (원가 측에는 저장) |
 | `zen_ups_actual_other_charges` | **0행** — B 경로는 항목명을 저장하지 않는다 |
-| `zen_order_costs` | `UPS_ACTUAL_COST_ADJ:140` 1행 추가(쉬퍼 인보이스 연결). 기존 BASE 2행 유지 |
+| `zen_order_costs` | `UPS_ACTUAL_COST_ADJ:140` 1행 추가(쉬퍼 인보이스 연결). 기존 BASE 행(인보이스별 1행) 유지 |
 | `ADMIN_TO_AGENCY` | **180** = stub `newAgencyTotal`(180), `metadata.platform_breakdown.otherCharges`=**5**(stub 값) |
 | `AGENCY_TO_SHIPPER` | **220** = BASE 80 + ADJ 140 = stub `newShipperTotal`(220) |
 | 규칙 2 | 청구중량 변경 시 기본·유류·급증 재계산은 동작(총액 기준 충족) |
 | 규칙 3·4 | **미충족** — 입력한 기타 50 HKD는 어떤 청구 행에도 들어가지 않는다 |
 
-**원인(코드 확인)**: `recomputeRevenue`가 `estimateUpsFreight`를 호출할 때 `otherCharges`를 **전달하지 않는다**(`src/app/actions/finance/ups-actual-cost.ts:167~180`). 입력 부가운임은 원가 합계(`total_cost_krw`)에만 반영된다. 또한 B 경로는 `zen_ups_actual_other_charges`에 쓰지 않으므로(`ups-actual-cost.ts:255~300` 구간) **항목명 자체가 소실**된다.
+**원인(코드 확인)**: `recomputeRevenue`가 `estimateUpsFreight`를 호출할 때 `otherCharges`를 **전달하지 않는다**(`src/app/actions/finance/ups-actual-cost.ts:167~180`). 입력 부가운임은 원가 합계(`total_cost_krw`)에만 반영된다. 또한 B 경로(`ups-actual-cost.ts:199~455`)에는 `zen_ups_actual_other_charges` insert/delete가 **아예 없다**(코드 검색 확인) → **항목명 자체가 소실**된다.
 
 ### 1-3. 경로 A — `recordActualCostAndFinalize` (중량 변경 X, 마감)
 
@@ -62,7 +62,7 @@
 
 즉 A 경로는 "원가 측 항목은 저장하지만 청구 행을 만들지 않고, 기존 비용 행 합계로 마감"한다. 마감 후에는 이 금액을 추가하려면 마감 후 조정 경로가 필요하다.
 
-> 참고: 중량 변경이 없는 A 경로는 `recomputeRevenue`를 호출하지 않으므로 규칙 2(재계산)가 적용되지 않는다. 이는 확정 규칙 2가 "정산마감 시" 전반을 의미하는지, "청구중량이 바뀐 경우"만 의미하는지에 대한 **JSJung 확인 항목**이다(§3-1).
+> 참고: 중량 변경이 없는 A 경로는 `recomputeRevenue`를 호출하지 않으므로 규칙 2(재계산)가 적용되지 않는다. 이는 확정 규칙 2가 "정산마감 시" 전반을 의미하는지, "청구중량이 바뀐 경우"만 의미하는지에 대한 **JSJung 확인 항목**이다(§3 #1).
 
 ### 1-4. 경로 C — `recordUpsActualCharges` (현행 별도 실비 등록)
 
@@ -151,8 +151,8 @@
 
 #### (6) 권한 경계 (JSJung 확인 필요)
 
-- 실DB 정책 확인: `zen_order_costs` SELECT = SHIPPER(자기 오더)·AGENCY(자기 대리점 오더)·ADMIN·ZENITH_SUPER_ADMIN. **MANAGER는 SELECT/ALL 정책이 없다**(`Admins can manage order costs`도 ADMIN·SUPER_ADMIN만).
-- 규칙 1은 MANAGER 마감을 허용하지만, 현 정책으로는 MANAGER 세션에서 청구 행 생성·인보이스 갱신이 **RLS에서 막힌다**. DEF-B-166의 MANAGER 실패 경로와 동일 계열.
+- 실DB 정책 **정의** 확인: `zen_order_costs` SELECT = SHIPPER(자기 오더)·AGENCY(자기 대리점 오더)·ADMIN·ZENITH_SUPER_ADMIN. **MANAGER는 SELECT/ALL 정책이 없다**(`Admins can manage order costs`도 ADMIN·SUPER_ADMIN만). `zen_invoices`의 `Admins can manage all invoices`도 ADMIN·ZENITH_SUPER_ADMIN만이다.
+- 규칙 1은 MANAGER 마감을 허용하지만, 위 정책 정의상 MANAGER 세션에서는 청구 행 생성·인보이스 갱신이 **RLS에서 막힌다**. DEF-B-166의 MANAGER 실패 경로와 동일 계열. (이번 실측은 ADMIN 세션만 수행 — **MANAGER 세션 실행은 미실시**, 구현 착수 시 실측 필요)
 - 이 Task에서 정책을 넓히지 않는다(권한 확대는 별도 결정). → **MANAGER 처리 방침을 JSJung이 결정**해야 구현 착수가 가능하다.
 - 원가 컬럼(`zen_ups_actual_cost`) 접근 차단은 TASK-B-377/#1451 설계 범위다. 이 Task는 `zen_order_costs`에 원가 컬럼을 추가하지 않는다.
 
