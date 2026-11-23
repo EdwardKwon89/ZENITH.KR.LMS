@@ -309,4 +309,4 @@
 - **7차 변경**: JSJung ③ B안·core 분리·DTO·DEF-B-172 반영.
 - **DEF-B-172** 신규: `getOrderRevenueCost(List)` 화주 원가 노출 — 별도 Task, PR-2 미수정.
 - PR: #1476 (draft, `Refs #1362`).
-- **커밋 해시**: `<CONTENT_COMMIT>` (7차 내용 커밋; 해시 갱신 커밋 별도)
+- **커밋 해시**: `17f73c590` (7차 내용 커밋). 해시 갱신 커밋 별도.
