@@ -88,13 +88,42 @@
 
 - 컷오버 전 `UPS_ACTUAL_ADJUSTMENT` 행은 legacy 인보이스에만 연결되고, **컷오버 전 오더는 statement 대상 제외(#1369)** 이므로 충돌하지 않는다.
 
-### 2-2. 컷오버일 설정·경계
+### 2-2. 컷오버 설정·경계 (Jaison 5차 보완 반영)
 
-- 저장: `zen_system_settings.setting_key = 'ups_settlement_cutover_date'`(YYYY-MM-DD). 기존 설정 패턴을 따르며, **변경 이력은 `updated_at` + 변경 시 `logger.info`(설정자·이전/이후 값)** 로 남긴다. 별도 audit 테이블이 필요하면 JSJung 확인.
-- **값이 없거나 파싱 실패 → 신규 분기 비활성**(legacy 라우팅).
-- 판정: **출고확정일 ≥ 컷오버일**이면 신규 경로(제안). 최종 경계는 #1369 함수가 결정하며 이 Task는 호출만.
-- 경계 테스트: 컷오버 당일·전일, 출고확정 취소·변경, 컷오버 직전 정산 시작(in-flight), 설정값 없음/잘못된 값.
-- 배포 순서의 **마지막 단계에서 설정값을 기록**한다(그 전에는 신규 분기 비활성).
+#### (1) 저장·쓰기 권한·감사 비교
+
+| 안 | 저장/권한 | 감사 | 동결 |
+|:--|:--|:--|:--|
+| **(a) 전용 테이블 + DEFINER RPC (권장)** | `zen_ups_settlement_config`(단일 행, `cutover_at timestamptz`). SELECT=ADMIN·MANAGER·SUPER(경로 판정용), **쓰기=RPC만**. `REVOKE ALL` 후 `authenticated`에 SELECT만 | `zen_param_audit_log`(param_key·old/new·changed_by·changed_at) | RPC 검사 + config 테이블 `BEFORE UPDATE` 트리거 |
+| (b) `zen_system_settings` + restrictive RLS | 공유 테이블, 키별 RESTRICTIVE 정책 | `logger.info`만/별도 audit | 앱 검사 |
+| (c) 앱 액션 role check만 | 공유 테이블 | 앱 | 앱 |
+
+- **권장: (a)**. `zen_system_settings`는 현재 ADMIN·MANAGER·SUPER 모두 ALL이라 **MANAGER가 컷오버일을 바꿀 수 있다**. 컷오버일은 오더의 청구 경로를 가르는 값이므로 MANAGER 쓰기를 막는다.
+```
+zen_ups_settlement_config
+  key text primary key check (key = 'ups_settlement_cutover'),
+  cutover_at timestamptz null,
+  updated_by uuid, updated_at timestamptz
+```
+
+- `set_ups_settlement_cutover_at(p_cutover_at timestamptz, p_reason text)`:
+  - `SECURITY DEFINER`, `auth.uid()`로 **ADMIN·ZENITH_SUPER_ADMIN만** 허용(MANAGER 거부).
+  - **동결**: `zen_ups_settlement_runs` 1건 이상 **또는** 신규 경로 `zen_billing_statement_items` 1건 이상이면 `cutover_locked` 거부. 값 변경 금지.
+  - config UPDATE + `zen_param_audit_log` INSERT를 **한 트랜잭션**으로.
+  - config 테이블에는 `BEFORE UPDATE` 트리거를 두어 run 존재 시 직접 변경도 차단(service_role 방어).
+- **변경 이력**: `zen_param_audit_log`(기존 테이블) 사용. 별도 audit 테이블은 만들지 않는다. 감사 항목(설정자·이전/이후·시각·사유)은 JSJung 확인.
+
+#### (2) 경계 판정 — 인보이스 우선 + timestamptz
+
+- **문제**: 인보이스는 출고확정(RELEASED) 시 자동 생성된다. 컷오버일이 날짜이고 배포 전 같은 날 출고확정된 오더가 있으면, `출고확정일 ≥ 컷오버일`로 신규 경로에 분류되어 `unexpected_legacy_invoice`에 걸려 **어느 경로로도 정산 불가**가 된다.
+- **판정 규칙(제안)**:
+  1. 비취소 레거시 인보이스(`metadata.source_order_id`)가 있으면 **출고확정일과 무관하게 legacy** (#1369 "기존 인보이스는 그대로").
+  2. 인보이스가 없고 **출고확정 시각 ≥ 컷오버 시각(timestamptz)** 이면 신규.
+  3. 그 외 legacy.
+- **설정값은 날짜가 아니라 `timestamptz`** 로 둔다(같은 날 배포 전후 모호성 제거). 값이 없으면 신규 분기 비활성.
+- **#1369 전달**: 위 규칙을 #1369 판정 함수 요구사항으로 코멘트한다(이 Task는 호출만).
+- 경계 테스트: 당일 배포 전 출고확정+인보이스(→legacy), 인보이스 없음+컷오버 이후(→신규), 인보이스 있음+컷오버 이후(→legacy), 인보이스 없음+컷오버 이전(→legacy), 출고확정 취소·변경, in-flight, 설정값 없음/오류.
+- 배포 순서의 **마지막 단계에서 RPC로 설정값을 기록**한다(그 전에는 신규 분기 비활성).
 
 ### 2-3. 컷오버 후 통합 정산마감 `finalizeUpsSettlement` (신규 전용)
 
@@ -171,6 +200,17 @@ zen_ups_settlement_run_charges
 - `billing_items_amounts`는 **SECURITY INVOKER 유지**. 대리점이 소속 화주 statement를 만들 때 `SHIPPER` 행을 읽고, 화주는 agency 행을 읽지 못한다.
 - **세션 매트릭스 테스트**: SHIPPER가 `ADMIN_TO_AGENCY` 0건(양성 대조: 자기 SHIPPER 행 1건), AGENCY가 두 tier, ADMIN 전체, anon 0. 결과표만 문서화(재현 절차 없음).
 
+#### run 테이블 불변성·권한 (Jaison 5차 보완)
+
+| 안 | 내용 | 장점 | 단점 |
+|:--|:--|:--|:--|
+| **(a) 권한 최소화 + RLS + 트리거 (권장)** | `REVOKE ALL` 후 `authenticated`에 **SELECT만**, INSERT/UPDATE/DELETE 정책 없음. run/amounts/charges에 `BEFORE UPDATE OR DELETE` 트리거 | service_role 실수에도 append-only 유지 | 테스트 정리는 replica 필요 |
+| (b) 권한만 | DML grant 회수 | 단순 | service_role은 우회 |
+| (c) RLS만 | DML 정책 미생성 | 앱 레벨 방어 | service_role은 우회 |
+
+- **권장: (a)**. 쓰기는 `finalize_ups_settlement_run`(DEFINER)만 수행한다.
+- 트리거는 `UPDATE`·`DELETE` 시 예외를 발생시켜 append-only를 강제한다. run 교체가 필요하면 **새 version INSERT**만 한다.
+
 ### 2-7. `billing_items_amounts` + 청구서 항목
 
 - 최신 run이 있으면 run 금액 반환(KRW, `charge_weight_kg`=run 값). 반환 컬럼 추가: `freight_adjustment numeric`, `charge_details jsonb`.
@@ -246,6 +286,7 @@ zen_ups_settlement_run_charges
 - `SETTLED` 이미면 거부, UPS·DELIVERED·컷오버 후·설정값 확인.
 - run+amounts+charges+주문 `SETTLED`를 **한 트랜잭션** → 부분 실패 없음.
 - 컷오버 전/설정값 없음이면 `legacy_order`(방어), 인보이스 존재 시 `unexpected_legacy_invoice`.
+- **컷오버 설정 RPC**: `set_ups_settlement_cutover_at` — **ADMIN·ZENITH_SUPER_ADMIN만**(MANAGER 제외), run 존재 시 `cutover_locked`, `zen_param_audit_log` 기록. run RPC와 분리한다.
 - **MANAGER 의존성**:
 
 | 단계 | 클라이언트 | RLS 의존 |
@@ -294,13 +335,14 @@ zen_ups_settlement_run_charges
 | M1 | run 3테이블 + RLS(tier 분리) | 앱 배포 전 | DROP TABLE |
 | M2 | `billing_items_amounts` run 분기 + `create_billing_statement_with_items` 통화 가드 우회 + `zen_billing_statement_items`(`freight_adjustment`·`charge_details`) | **#1453 조율 후**, 앱 배포 전 | 함수/컬럼 원복 |
 | M3 | RPC `finalize_ups_settlement_run`(보안 GRANT 포함) | 앱 배포 전 | DROP FUNCTION |
+| M4 | 컷오버 config 테이블 + RLS + 동결 트리거 + `set_ups_settlement_cutover_at` RPC + `zen_param_audit_log` | 앱 배포 전 | DROP TABLE/FUNCTION/TRIGGER |
 
 **배포 순서**
 1. Ds-11 확정.
 2. **#1369(판정 함수·인보이스 생성 중단) 선행** — 이 Task는 의존.
 3. M1·M2·M3 배포(추가형, 기존 앱 무영향).
 4. 앱: 신규 화면·액션 추가(컷오버 설정값이 없어 **비활성**).
-5. 배포 후 **마지막에 `ups_settlement_cutover_date` 설정** → 신규 분기 활성.
+5. 배포 후 **마지막에 `set_ups_settlement_cutover_at` RPC로 설정값 기록** → 신규 분기 활성.
 6. B-377 표시 갱신.
 
 - 컷오버 전 오더는 `billing_items_amounts` legacy 폴백으로 현행 동작 유지(회귀 필수). 컷오버 후 오더만 run 경로.
@@ -313,7 +355,8 @@ zen_ups_settlement_run_charges
 | # | 항목 | 상태 |
 |:-:|:--|:--|
 | 1 | **반영 시점**(임시저장 vs 정산 완료) | **JSJung 확인**. 권장=정산 완료 시점 |
-| 2 | **컷오버일 값·경계 포함 여부(`>=`)** | **JSJung/#1369**. 값은 배포 마지막에 설정 |
+| 2 | **컷오버 경계 판정** | **#1369 전달**. 제안=인보이스 우선 + `timestamptz`(출고확정 시각 ≥ 컷오버 시각). 날짜 `>=` 방식은 당일 배포 전 오더를 정산 불가로 만든다 |
+| 2a | 컷오버 설정 쓰기 권한·감사 | **권장=전용 테이블+RPC(ADMIN·SUPER만)+`zen_param_audit_log`**. MANAGER 쓰기 금지, run 존재 시 동결. audit 항목은 JSJung 확인 |
 | 3 | `billing_items_amounts` 변경 순서 | **#1453(Baker) 회신 대기** — 2026-11-23 코멘트 |
 | 4 | B-377 표시 설계 갱신 일정 | B-381 확정 후 B-377이 run 소스로 갱신(#1451 코멘트) |
 | 5 | statement 발행 후 금액 변경 | **불가**(unique). 후속 Task |
