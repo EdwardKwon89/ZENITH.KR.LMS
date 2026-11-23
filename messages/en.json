@@ -277,7 +277,8 @@
     "statement_empty": "A statement with no orders cannot be issued.",
     "statement_not_found": "Statement not found.",
     "target_not_allowed": "The billing target is not in your scope or is invalid.",
-    "unsupported_cost_currency": "This statement cannot be created because some revenue items are not in KRW. (check the currency in cost management)"
+    "unsupported_cost_currency": "This statement cannot be created because some revenue items are not in KRW. (check the currency in cost management)",
+    "own_agency_only": "Only your own agency can be processed."
   },
   "Common": {
     "phoneHelp": "Numbers only (no hyphens, max {max} digits)",
