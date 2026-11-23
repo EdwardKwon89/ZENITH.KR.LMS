@@ -4,7 +4,7 @@
 |:-----|:-----|
 | 이슈 | #1455 (Jaison 배정 Mike · p3) · DEF-B-163 |
 | 담당 | Mike (Worker) / Auditor: Jaison |
-| 변경 | `src/app/[locale]/(dashboard)/dashboard/page.tsx` — "Carrier" 컬럼에 `id: "carrier"` 지정(표시 중립, `accessorKey: "shipper_name"` 유지) + `tests/e2e/e2e-33-b380-dashboard-dup-key.spec.ts` 신규 |
+| 변경 | `src/app/[locale]/(dashboard)/dashboard/page.tsx` — "Carrier" 컬럼에 `id: "carrier"` 지정(표시 중립, `accessorKey: "shipper_name"` 유지) + `tests/e2e/e2e-33-b380-dashboard-dup-key.spec.ts` 신규 (CI 미실행/수동 — Playwright) |
 | 검증 차원 (231 D1~D9) | `D1(정합성)`, `D7(관측성/콘솔)` |
 
 ## 회귀 항목
