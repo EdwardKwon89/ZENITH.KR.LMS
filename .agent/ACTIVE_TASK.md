@@ -53,7 +53,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | in-progress | 미배정 | 2026-11-23 |
 | [#1458](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1458) | [Team A] TASK-1172: TeamB_Dev 통합 사전 검토 ③ — 서버 액션·lib·API 라우트 (D_Kai) | a | p2 | open | 미배정 | 2026-11-23 |
 | [#1457](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1457) | [Team A] TASK-1171: TeamB_Dev 통합 사전 검토 ② — 테스트 38개·회귀 등재 (B_Kai) | a | p2 | open | 미배정 | 2026-11-23 |
-| [#1456](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1456) | [Team A] TASK-1170: TeamB_Dev 통합 사전 검토 ① — UI·페이지·i18n (Riley) | a | p2 | open | 미배정 | 2026-11-23 |
+| [#1456](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1456) | [Team A] TASK-1170: TeamB_Dev 통합 사전 검토 ① — UI·페이지·i18n (Riley) | a | p2 | in-progress | 미배정 | 2026-11-23 |
 | [#1455](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1455) | [Team B] TASK-B-380: 대시보드 React 중복 key 경고 해소 (DEF-B-163) | b | p3 | open | 미배정 | 2026-11-23 |
 | [#1453](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1453) | [Team B] TASK-B-379: 청구 금액 함수 base 테이블 의존 제거 + 입고 실측 스냅샷 갱신 주체 정리 (#1449 C, 설계 의견부터) | b | p2 | open | 미배정 | 2026-11-23 |
 | [#1452](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1452) | [Team B] TASK-B-378: 청구서 번호 채번 함수 실행 권한·역할 검사 정렬 (#1449 B) | b | p2 | open | 미배정 | 2026-11-23 |
