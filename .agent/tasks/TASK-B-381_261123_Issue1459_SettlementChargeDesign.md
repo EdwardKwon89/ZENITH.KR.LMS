@@ -214,4 +214,4 @@
 - **설계 의견 전용**: 코드·마이그레이션 변경 없음. 실측은 임시 vitest 파일로 수행 후 삭제(커밋 없음).
 - 실측 근거: §1-2~1-5 표(실DB, ADMIN, `estimateUpsFreight` stub).
 - 연계: TASK-B-377(#1451, PR #1454)의 표시 설계가 이 Task의 청구 행 결과를 소스로 사용한다.
-- PR: #1460 (draft, `Refs #1459`, `Refs #1451`) — JSJung 확정 후 구현.
+- PR: #1462 (draft, `Refs #1459`, `Refs #1451`) — JSJung 확정 후 구현.
