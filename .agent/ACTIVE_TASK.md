@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1463](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1463) | [Team B] TASK-B-382: MANAGER의 UPS 정산마감 관련 테이블 RLS 정책 정렬 (규칙 1 이행, 설계 의견부터) | b | p2 | open | 미배정 | 2026-11-23 |
 | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | draft | 미배정 | 2026-11-23 |
 | [#1458](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1458) | [Team A] TASK-1172: TeamB_Dev 통합 사전 검토 ③ — 서버 액션·lib·API 라우트 (D_Kai) | a | p2 | open | 미배정 | 2026-11-23 |
 | [#1457](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1457) | [Team A] TASK-1171: TeamB_Dev 통합 사전 검토 ② — 테스트 38개·회귀 등재 (B_Kai) | a | p2 | open | 미배정 | 2026-11-23 |
