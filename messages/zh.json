@@ -89,7 +89,8 @@
     "auth_signup_failed": "注册失败，请检查输入信息。",
     "auth_signup_profile_failed": "创建用户资料失败，请稍后重试。",
     "inventory_not_found": "找不到库存项目。",
-    "inventory_below_zero": "库存数量不能小于 0。"
+    "inventory_below_zero": "库存数量不能小于 0。",
+    "own_agency_only": "只能处理您所属代理商的资源。"
   },
   "Common": {
     "phoneHelp": "仅限数字（不含连字符，最多 {max} 位）",
