@@ -90,7 +90,7 @@
 
 ### 2-2. 컷오버일 설정·경계
 
-- 저장: `zen_system_settings.setting_key = 'ups_settlement_cutover_date'`(YYYY-MM-DD), 값·`updated_at`으로 이력. (기존 설정 패턴)
+- 저장: `zen_system_settings.setting_key = 'ups_settlement_cutover_date'`(YYYY-MM-DD). 기존 설정 패턴을 따르며, **변경 이력은 `updated_at` + 변경 시 `logger.info`(설정자·이전/이후 값)** 로 남긴다. 별도 audit 테이블이 필요하면 JSJung 확인.
 - **값이 없거나 파싱 실패 → 신규 분기 비활성**(legacy 라우팅).
 - 판정: **출고확정일 ≥ 컷오버일**이면 신규 경로(제안). 최종 경계는 #1369 함수가 결정하며 이 Task는 호출만.
 - 경계 테스트: 컷오버 당일·전일, 출고확정 취소·변경, 컷오버 직전 정산 시작(in-flight), 설정값 없음/잘못된 값.
