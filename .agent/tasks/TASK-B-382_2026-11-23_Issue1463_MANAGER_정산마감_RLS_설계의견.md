@@ -6,16 +6,17 @@
 | **담당(Worker)** | Baker (Team B) |
 | **검증(Auditor)** | Jaison |
 | **설계 확정** | **JSJung** → **Aiden** (본 문서는 확정 요청용 의견 — 구현 없음) |
-| **상태** | 📝 설계 의견 **수정본 v5** (`status:draft`) — Jaison 5차 보완(컷오버 폐기·UPS 제거 후 정책 집합 재산정) + JSJung 영향 공지(16:08) + #1462 7차 반영. 재검토·최종 확정(①~④, ②는 신규 A/B 결정) 전까지 정책·함수·코드 변경 금지 |
+| **상태** | 📝 설계 의견 **수정본 v5.1** (`status:draft`) — Jaison 5차 재검토 승인 + 보완 4건(recomputeRevenue 위치·인보이스 존재 검사 fail-open 단서·표기 정리·결정 #2 종결) 반영. **JSJung 최종 확정(①~④, ②는 신규 A/B 결정) → Aiden 설계 확정 요청 상태** — 확정 전까지 정책·함수·코드 변경 금지 |
 | **브랜치** | `feature/teamb-task-b382-iss1463-manager-rls-design` (base `origin/TeamB_Dev` @ `83bb486f1`) |
 | **연관** | DEF-B-166(b), DEF-B-168, **DEF-B-171**(확정: (b) / 후속 #1475), TASK-B-381(#1459 / **PR #1462 7차**), TASK-B-377(#1451 / PR #1454), TASK-B-379(#1453), **#1475(TASK-B-383, Mike)** |
 | **공개 저장소 주의** | 아래 표는 **허용/거부 결과만** 기록합니다. 노출 경위·재현 절차 세부는 기재하지 않습니다. |
-| **개정 이력** | `54ddba60a` 최초 → `6f400bf0d` 1차 → `e6b10c6e9` 2차 → `6d857341f` 3차 → `1f6f2c614` 4차 → **v5(본 개정)** |
+| **개정 이력** | `54ddba60a` 최초 → `6f400bf0d` 1차 → `e6b10c6e9` 2차 → `6d857341f` 3차 → `1f6f2c614` 4차 → `32d01d742` v5 → `60bedef3c` v5 해시 기재 → **v5.1(본 개정)** |
 
 | 버전 | 일자 | 반영 내용 |
 |:--|:--|:--|
 | v4 | 2026-11-23 | Jaison 4차 DELETE 근거 정정, JSJung #1475 확정 (커밋 `1f6f2c614`) |
-| **v5** | 2026-11-24 | Jaison 5차 보완 6건 + JSJung 16:08 영향 공지 + #1462 7차 반영 — **컷오버 폐기·UPS 인보이스 경로 제거·정책 집합을 "UPS 제거 후" 기준으로 재산정** (커밋 `32d01d742`, 해시 기재 `2차 커밋`) |
+| v5 | 2026-11-24 | Jaison 5차 보완 6건 + JSJung 16:08 영향 공지 + #1462 7차 반영 — **컷오버 폐기·UPS 인보이스 경로 제거·정책 집합을 "UPS 제거 후" 기준으로 재산정** (커밋 `32d01d742` / 해시 기재 `60bedef3c`) |
+| **v5.1** | 2026-11-24 | Jaison 5차 재검토 승인, 보완 4건 반영 — recomputeRevenue 위치 정정, `ups_invoice_exists` fail-open 단서·테스트, 표기 정리, 결정 #2 종결 (커밋: 1차 커밋 후 §10에 기재) |
 
 ---
 
@@ -57,14 +58,15 @@
 | **Jaison 5차 보완 4** | 스냅샷 의존을 "B-381 7차 기준, 단계 4"로 표현 | §6 |
 | **Jaison 5차 보완 5** | §9 ① 경로 수 재산정, ③ 순서 갱신, ④ SUB_ADMIN 한 줄 종결 | §9-2 |
 | **Jaison 5차 보완 6** | 공개 저장소 규칙(결과표만) 유지 | 전문 |
+| **Jaison 5차 재검토 — 승인 + 보완 4** | ① `recomputeRevenue`는 앱 액션 단계(§6) ② `ups_invoice_exists` fail-open 단서·테스트(§0-2·§5·§6) ③ 개정 이력 해시·서식 오타(상단·§0-2) ④ 결정 #2 종결(§3-1·§7-3·§9-1 #2) | §0-2·§3-1·§5·§6·§7-3·§9-1·§9-2·상단 개정 이력 |
 
 ### 0-2. v5 범위 · 가정 (JSJung 16:08 공지 / #1462 7차)
 
 - **컷오버 폐기**: 컷오버일·레거시 병행·"컷오버 전/후" 분류는 모두 삭제합니다. UPS 오더는 **신규 경로 하나**(`finalize_ups_settlement_run`)로 동작합니다.
-- **UPS 인보이스 경로 제거**: UPS 정산마감은 `SECURITY DEFINER` RPC(역할 검사 ADMIN·MANAGER·ZENITH_SUPER_ADMIN)가 처리하므로 **MANAGER의 UPS 정산마감은 `zen_invoices`·`zen_order_costs` RLS에 의존하지 않습니다.**
+- **UPS 인보이스 경로 제거**: UPS 정산마감은 `SECURITY DEFINER` RPC(역할 검사 ADMIN·MANAGER·ZENITH_SUPER_ADMIN)가 처리하므로 **MANAGER의 UPS 정산마감은 `zen_invoices`·`zen_order_costs` RLS에 의존하지 않습니다.** **단, 인보이스 존재 검사(`ups_invoice_exists`)를 DEFINER RPC 안에서 수행하는 한** 성립합니다. 앱 세션 클라이언트에서 수행하면 MANAGER는 `zen_invoices`가 0행이라 "존재하지 않음"으로 읽어 **통과(fail-open)** 하므로, #1462 §2-9의 RPC 내부 검사가 전제입니다(Jaison 5차 재검토 지적 — B-381에도 동일 점검 통보).
 - **비UPS 무변경**: 비UPS 오더·인보이스 경로는 이번 개편 범위 밖이며 변경하지 않습니다(B-381 7차, JSJung 확정 2026-11-24). 남는 RLS 불일치는 이 비UPS 경로에만 있습니다.
 - 기존 데이터는 보존하되, 호환·이중 처리를 위한 레거시 분기는 두지 않습니다.
--최종 정책 수는 위 A/B 결정과 B-381 7차 설계 확정 후 확정합니다.
+- **최종 정책 수**는 위 A/B 결정과 B-381 7차 설계 확정 후 확정합니다.
 
 ---
 
@@ -149,7 +151,7 @@
 | **MANAGER** | **false** | **예외** |
 | SUB_ADMIN / OPERATOR / AGENCY / SHIPPER | false | 예외 |
 
-`zen_role_permissions`에 MANAGER의 `/admin` 행 없음(`/admin/ups-actual-charges`만 있음). `createPostFinalizationAdjustment`는 `validateAdminAction()` 사용(563행) → 결정 #2로 이 함수에만 로컬 역할 목록 적용(전역 변경 금지). 단, 이 함수 자체가 **UPS 인보이스 경로 제거로 소멸**하므로(§1), 결정 #2의 실효 범위는 B-381 ① 경로(§9-1 #2)로 한정됩니다.
+`zen_role_permissions`에 MANAGER의 `/admin` 행 없음(`/admin/ups-actual-charges`만 있음). `createPostFinalizationAdjustment`는 `validateAdminAction()` 사용(563행) → 결정 #2로 이 함수에만 로컬 역할 목록 적용(전역 변경 금지). 단, 이 함수 자체가 **UPS 인보이스 경로 제거로 소멸**하므로(§1) **결정 #2는 종결(해당 없음)** 입니다. 전역 `validateAdminAction()` 변경은 금지.
 
 ---
 
@@ -250,6 +252,7 @@
 - **되돌리기 실측**: A안 신설 4건 DROP 후 MANAGER `X` 복귀 확인(프로브 `afterAll` 원복). B안은 해당 없음.
 - **서버 액션 연결**: 잔여 9개 경로 중 정산 인접 경로 우선 확인. 제거 경로(7·10번)는 호출부 소멸로 미적용 확인.
 - **UPS 경로 무의존 확인**: MANAGER가 `finalize_ups_settlement_run`을 **정책 0개 상태(B안)에서도** 호출 가능함을 확인(SECURITY DEFINER 역할 검사).
+- **인보이스 존재 검사 fail-open 방지(Jaison 5차 재검토 추가)**: **MANAGER로 비취소 UPS 인보이스가 남아 있는 오더를 정산 시도 → `ups_invoice_exists`로 거부**됨을 검증. `zen_invoices`가 0행인 MANAGER 세션에서 앱 단계 검사를 수행하면 통과하는 fail-open 위험이 있으므로, 검사가 **DEFINER RPC 안(#1462 §2-9)** 에서 수행되어 거부되는지 확인. A안(정책 개방)에서도 RPC 내부 검사로 거부되는지 함께 대조.
 - **청구서 존재 확인 함수 테스트**: §7-1 5번 항목의 양성/음성 대조 + 되돌리기 실측. **#1475 적용 전/후 양쪽 상태 모두**에서 "MANAGER가 플랫폼 발행·대리점 발행 양쪽 포함 오더의 정산 해제를 거부"하는지 검증(§6 의존).
 - **M5 기준 대조**: B-381 7차 M5 일괄 초기화의 "청구서 항목 포함 오더 제외"와 §7-1 함수의 "DRAFT 포함 상태 무관 존재 확인"이 **같은 포함 기준(상태 무관)**인지 한 줄 확인(§7-1 1번).
 - **DEF-B-168 확인**: `rejectInvoice` 원가 연결 해제 실패가 수정 Task에서 해결됐는지 확인(본 Task에서는 수정 금지).
@@ -260,6 +263,7 @@
 | MANAGER / `zen_invoices` SELECT·INSERT·UPDATE | X | SELECT·UPDATE **O** / INSERT **X**(근거 소멸) | **X 전부** |
 | MANAGER / `zen_order_costs` SELECT·INSERT·UPDATE·DELETE | X | SELECT·INSERT **O** / UPDATE·DELETE **X**(근거 소멸) | **X 전부** |
 | MANAGER / UPS 정산마감(RPC) | (현재 UPS 구 경로) | **O** — SECURITY DEFINER, 양 안 동일 | **O** — 양 안 동일 |
+| MANAGER / 비취소 UPS 인보이스 잔존 오더 정산 | (현재 UPS 구 경로) | **`ups_invoice_exists` 거부** — DEFINER RPC 내부 검사(양 안 동일) | **`ups_invoice_exists` 거부** — 동일 |
 | MANAGER / 청구서 항목 직접 SELECT | 플랫폼 발행 O / 대리점 발행 X | **동일(정책 추가 없음)** | **동일** |
 | MANAGER / 존재 확인 함수 호출 | (함수 없음) | 포함 오더 `true`, 미포함 `false` | 동일(함수는 양 안 공통) |
 | AGENCY·SHIPPER·OPERATOR 전체 | §2·§3·§2-1 그대로 | 동일(예측) | 동일(예측) |
@@ -269,8 +273,8 @@
 
 ## 6. TASK-B-379(#1453)와의 경계 · 순서 (v5 갱신)
 
-- **UPS 경로 무의존**: UPS 정산마감은 `finalize_ups_settlement_run`(`SECURITY DEFINER`, 역할 검사 ADMIN·MANAGER·ZENITH_SUPER_ADMIN)이 처리하므로 `zen_invoices`·`zen_order_costs` RLS 정책 수(A 4 / B 0)와 무관합니다.
-- **스냅샷 의존 — B-381 7차 기준, 단계 4**: `finalize_ups_settlement_run`의 **단계 4 `recomputeRevenue`**는 `order.snapshot`을 읽어 run에 저장할 화주·대리점 target을 계산합니다. MANAGER는 스냅샷이 `null`이라 0 폴백으로 결과가 달라질 수 있으므로, **#1453(B-379)의 MANAGER 스냅샷 SELECT 결정이 여전히 선행 조건**입니다. 본 Task는 스냅샷 정책을 변경하지 않습니다.
+- **UPS 경로 무의존(단서 포함)**: UPS 정산마감은 `finalize_ups_settlement_run`(`SECURITY DEFINER`, 역할 검사 ADMIN·MANAGER·ZENITH_SUPER_ADMIN)이 처리하므로 `zen_invoices`·`zen_order_costs` RLS 정책 수(A 4 / B 0)와 무관합니다. **단, 인보이스 존재 검사(`ups_invoice_exists`)를 DEFINER RPC 안에서 수행하는 한** 성립합니다(#1462 §2-9). 앱 세션 클라이언트에서 검사하면 MANAGER는 인보이스 0행을 "없음"으로 읽어 fail-open 되므로, RPC 내부 검사가 전제입니다(§0-2·§5 검증 추가).
+- **스냅샷 의존 — B-381 7차 기준, 앱 액션 4단계**: `recomputeRevenue`는 **RPC가 아니라 앱 액션 `finalizeUpsSettlement`의 4단계(세션 클라이언트, #1462 §2-1)** 로, `order.snapshot`을 읽어 run에 저장할 화주·대리점 target을 계산합니다. MANAGER는 스냅샷이 `null`이라 0 폴백으로 결과가 달라질 수 있으므로(앱 단계에서 발생), **#1453(B-379)의 MANAGER 스냅샷 SELECT 결정이 여전히 선행 조건**입니다. 본 Task는 스냅샷 정책을 변경하지 않습니다.
 - 존재 확인 함수(M2)·`unmarkOrderCostSettled`는 UPS 경로 제거와 무관하게 **유지**됩니다. M5 일괄 초기화는 이 함수를 거치지 않으므로 "청구서 포함 오더 제외" 조건을 스크립트에 명시해야 합니다(§7-1 1번).
 - **#1475(TASK-B-383) 의존(JSJung 확정)**: B-382의 존재 확인 전용 함수를 `unmarkOrderCostSettled`에 적용한 **뒤에** #1475를 병합합니다. #1475 적용 시 MANAGER에게 플랫폼 발행 청구서 항목이 0행으로 보여, 함수가 없으면 정산 해제가 허용될 수 있습니다. 테스트는 **#1475 적용 전/후 양쪽 상태**를 모두 검증합니다(§5·§7-1 5번).
 
@@ -280,7 +284,7 @@
 |:--|:--|:--|
 | **설계 확정** | **B-381 7차(먼저) → B-382 v5 → JSJung → Aiden** | B-381 7차가 UPS 경로 제거·단일 신규 경로·M5를 확정(Jaison 승인 완료, PR #1462가 먼저 확정 요청 단계). B-382는 그 결과에 의존 |
 | **구현** | **B-382 선행 → B-381 → B-377(#1454)** | JSJung 확정 B-382 선행(마이그레이션 객체·timestamp 충돌 회피). B-381은 UPS 경로 제거 전제 |
-| **별도 선행 조건** | **#1453(B-379) 스냅샷 결정** | B-381 7차 단계 4 `recomputeRevenue`가 `order.snapshot` 사용 |
+| **별도 선행 조건** | **#1453(B-379) 스냅샷 결정** | B-381 7차 **앱 액션 `finalizeUpsSettlement` 4단계** `recomputeRevenue`가 `order.snapshot` 사용 |
 | **#1475** | B-382 함수 적용 후 병합 | 무결성 보호의 전제 |
 
 → 설계 확정 축과 구현 축은 별개입니다. 임의로 순서를 바꾸지 않습니다.
@@ -323,8 +327,8 @@
 | 항목 | 확정 |
 |:--|:--|
 | SUB_ADMIN | **제외 확정·비차단** — 정책 추가·삭제 없음. 원가 테이블 SUB_ADMIN 접근 정렬은 #1451(A) 별도. 계정 존재·사용 여부는 업무 확인(§9-2 ④ — 답이 늦어도 진행 가능) |
-| `createPostFinalizationAdjustment` 가드 | UPS 인보이스 경로 제거로 **함수 소멸** → 결정 #2의 실효 범위는 B-381 ① 경로로 한정. 전역 `validateAdminAction()` 변경은 금지 |
-| 스냅샷 | **#1453 소관, B-381 7차 기준 단계 4가 선행 조건**(§6) |
+| `createPostFinalizationAdjustment` 가드 | UPS 인보이스 경로 제거로 **함수 소멸 → 결정 #2 종결(해당 없음)**. 전역 `validateAdminAction()` 변경은 금지 |
+| 스냅샷 | **#1453 소관, B-381 7차 앱 액션 4단계가 선행 조건**(§6) |
 
 ---
 
@@ -393,7 +397,7 @@ NOTIFY pgrst, 'reload schema';
 | # | 확정 내용 | 반영 |
 |:-:|:--|:--|
 | 1 | 방식 B: MANAGER 전용 정책 신설. 기존 ADMIN·SUPER_ADMIN 정책 미수정 | §4-2 |
-| 2 | `createPostFinalizationAdjustment` MANAGER 허용 — 전역 가드 변경 금지, 이 함수에만 로컬 역할 목록 (단, UPS 경로 제거로 함수 소멸 → 실효는 B-381 ① 경로) | §3-1·§7-3 |
+| 2 | `createPostFinalizationAdjustment` MANAGER 허용 — **UPS 경로 제거로 함수 소멸 → 결정 #2 종결(해당 없음)**. 전역 가드 변경 금지 | §3-1·§7-3 |
 | 3 | SUB_ADMIN 이번 범위 제외(추가·삭제 없음) | §7-3 |
 | 4 | ~~청구서 항목 MANAGER SELECT 정책(#8)~~ → **후속 결정 B로 대체** | §7-1 |
 | 5 | 스냅샷 정책은 #1453 소관, B-382 선행(마이그레이션 번호 순서) | §6 |
@@ -409,18 +413,19 @@ NOTIFY pgrst, 'reload schema';
 
 | # | 확인 요청 | 근거/현재 의견 |
 |:-:|:--|:--|
-| ① | 잔여 **9개 경로**(현재 11개 → UPS 제거 후 9개)에 "MANAGER=admin" 동등 전권을 적용하는가. 단 `getRevenueReport`·`getCostReport`는 정책과 무관하게 거부 유지, `createPostFinalizationAdjustment`·`recordUpsActualCharges`는 제거로 제외 | **Jaison 4·5차 검토: 승인(경로 수 갱신 반영)** / §4-3 — JSJung·Aiden 최종 확정 대기 |
-| ② | **신규 결정: MANAGER의 비UPS 오더 인보이스·원가 처리를 RLS까지 열 것인가** — **A**: 필요한 정책만 열어 앱 가드와 일치(인보이스 SELECT·UPDATE + 원가 SELECT·INSERT = **4개**) / **B**: 열지 않음(**0개**, 비UPS 앱 가드 정리는 별도 Task). 구 "7개 vs 6개(DELETE 제외)"는 UPS 제거 재산정에 흡수되어 **삭제**. 가정: 비UPS 무변경(B-381 7차 JSJung 확정) | Jaison 5차 보완 1·2 / §4-1·§4-1-2 — **JSJung 최종 결정 대기** |
-| ③ | 순서 — **설계 확정: B-381 7차 → B-382 v5 → JSJung → Aiden / 구현: B-382 선행 → B-381 → B-377(#1454)**. 별도 선행 조건 #1453(B-379, B-381 7차 단계 4) | **Jaison 4·5차 검토: 승인(최신 순서 갱신)** / §6 — JSJung 최종 확정 대기 |
+| ① | 잔여 **9개 경로**(현재 11개 → UPS 제거 후 9개)에 "MANAGER=admin" 동등 전권을 적용하는가. 단 `getRevenueReport`·`getCostReport`는 정책과 무관하게 거부 유지, `createPostFinalizationAdjustment`·`recordUpsActualCharges`는 제거로 제외 | **Jaison 5차 재검토 의견: ②가 B안이면 사실상 무의미(정책 신설 없음), A안일 때만 승인** / §4-3 — JSJung·Aiden 최종 확정 대기 |
+| ② | **신규 결정: MANAGER의 비UPS 오더 인보이스·원가 처리를 RLS까지 열 것인가** — **A**: 필요한 정책만 열어 앱 가드와 일치(인보이스 SELECT·UPDATE + 원가 SELECT·INSERT = **4개**) / **B**: 열지 않음(**0개**, 비UPS 앱 가드 정리는 별도 Task). 구 "7개 vs 6개(DELETE 제외)"는 UPS 제거 재산정에 흡수되어 **삭제**. 가정: 비UPS 무변경(B-381 7차 JSJung 확정) | **Jaison 5차 재검토: B안 권장** — ⓐ UPS 정산마감 MANAGER 허용은 DEFINER RPC로 충족, ⓑ A안은 `rejectInvoice`를 "취소는 되고 원가 연결 해제는 조용히 실패"하는 반쪽 동작으로 열고 DEF-B-168 영향 확대, ⓒ JSJung 결정 A(정산마감 관련 한정)에 부합, ⓓ 롤백 용이. 단 비UPS 청구서 업무가 필요하면 A안. **업무 판단은 JSJung** / §4-1·§4-1-2 — 결정 대기 |
+| ③ | 순서 — **설계 확정: B-381 7차 → B-382 v5.1 → JSJung → Aiden / 구현: B-382 선행 → B-381 → B-377(#1454)**. 별도 선행 조건 #1453(B-379, B-381 7차 앱 액션 4단계) | **Jaison 5차 재검토: 승인** / §6 — JSJung 최종 확정 대기 |
 | ④ | SUB_ADMIN 계정의 실제 존재·사용 여부(업무 사실 확인). **이번 범위 제외 확정, 비차단 — 답이 늦어도 진행** | §7-3 |
 | ⑤ | ~~청구서 조회 범위 의도 확인~~ → **JSJung 확정: (b) 의도하지 않은 노출, 후속 #1475(TASK-B-383, Mike)**. B-382는 청구서 조회 정책을 바꾸지 않고, 함수 적용 후 #1475 병합 | §9-1 #11·§6·DEF-B-171 |
 | (종결) | ~~"MANAGER=admin"을 청구서관리에 적용하는가~~ → **JSJung 결정: 포함하지 않음** | §7-2·§9-1 #6 |
 
 ### 9-3. 다음 절차
 
-1. **Jaison 5차 재검토(v5 반영 확인)** → 2. **B-381 7차 설계 확정(PR #1462, 선행)** → 3. **JSJung 최종 확정(①②③, ④는 비차단·⑤ 완료)** → 4. **Aiden 설계 확정** → 5. 구현 착수.
+1. **Jaison 5차 재검토 완료 — 방향 승인, 보완 4건 반영(v5.1; 별도 재검토 없이 diff 확인)** → 2. **B-381 7차 설계 확정(PR #1462, 선행)** → 3. **JSJung 최종 확정(①②③, ④는 비차단·⑤ 완료)** → 4. **Aiden 설계 확정** → 5. 구현 착수.
 2. 이슈 `status:draft`, PR draft 유지. 확정 전까지 정책·함수·코드 변경 없음.
 3. 구현 시 순서(§6)와 **#1475는 B-382 함수 적용 후 병합** 의존을 준수.
+4. **JSJung 결정 시 Jaison 권장안은 B안(정책 0개)** — 단 비UPS 청구서 업무상 MANAGER 처리가 필요하면 A안(4개). §9-2 ② 참조.
 
 ---
 
@@ -442,6 +447,8 @@ NOTIFY pgrst, 'reload schema';
 - 코드/정책/함수 변경 **없음**. 마이그레이션·서버 액션·테스트 파일 미추가(DEF 보고서만 추가). `Closes` 미사용(`Refs #1463`).
 - 실측 근거: 최초 로그인 세션 SELECT + JWT 주입 롤백 DML, **청구서 픽스처 실측(잔여 0건)**, **ADMIN 트리거 실측(ROLLBACK)**, `pg_policies` 카탈로그, `checkPermission` 직접 실행. v3: 호출 클라이언트 유형 열거(세션 vs admin client). v4: `zen_order_costs` DELETE 경로 코드 대조(`ups-actual-cost.ts` L408 `invoice_id: inv.id`). **v5: UPS 제거 대상 호출 그래프 대조**(`createPostFinalizationAdjustment` → `createAdjustmentInvoice`/`linkAdjustmentCosts`, `InvoiceGenerator`의 admin client 우회, `finalize_ups_settlement_run`의 SECURITY DEFINER 역할 검사).
 - 미확인 항목: 브라우저 클릭 미실행, 빈 테이블 판정 불가, SUPER_ADMIN 세션 미측정, 변경 후 매트릭스는 예측 — §0·§2 명시.
-- 검토 반영: Jaison 1차 5 + 2차 5 + 3차 4 + 4차 1 + **5차 6** / JSJung 1차 5 + 후속 3 + 컷오버 전 현행 유지·DEF 분담 2 + #1475 결정 2 + **16:08 영향 공지** / #1462 7차 / Aiden 4건 — §0-1 대조표 참조.
-- 라벨 `status:draft` 유지. 검증: Jaison / 최종 확정: JSJung → Aiden.
-- **v5 커밋 해시: `32d01d742`** (본 해시 기재는 2차 커밋 — 정책·코드 변경 없음)
+- 검토 반영: Jaison 1차 5 + 2차 5 + 3차 4 + 4차 1 + 5차 6 + **5차 재검토 승인·보완 4건** / JSJung 1차 5 + 후속 3 + 컷오버 전 현행 유지·DEF 분담 2 + #1475 결정 2 + **16:08 영향 공지** / #1462 7차 / Aiden 4건 — §0-1 대조표 참조.
+- **v5.1 추가 대조**: #1462 §2-1(앱 액션 `finalizeUpsSettlement` 4단계 = `recomputeRevenue`)·§2-9(DEFINER RPC 내부 `ups_invoice_exists`) 코드 대조로 위치 정정 및 fail-open 단서·테스트 반영.
+- 라벨 `status:draft` 유지. 검증: Jaison (5차 재검토 승인) / 최종 확정: JSJung → Aiden.
+- **v5 커밋 해시: `32d01d742`**, 해시 기재 `60bedef3c`.
+- **v5.1 커밋 해시: (1차 커밋 후 2차 커밋에서 기재)**
