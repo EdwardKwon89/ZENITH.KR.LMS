@@ -16,7 +16,7 @@
 |:--|:--|:--|
 | v4 | 2026-11-23 | Jaison 4차 DELETE 근거 정정, JSJung #1475 확정 (커밋 `1f6f2c614`) |
 | v5 | 2026-11-24 | Jaison 5차 보완 6건 + JSJung 16:08 영향 공지 + #1462 7차 반영 — **컷오버 폐기·UPS 인보이스 경로 제거·정책 집합을 "UPS 제거 후" 기준으로 재산정** (커밋 `32d01d742` / 해시 기재 `60bedef3c`) |
-| **v5.1** | 2026-11-24 | Jaison 5차 재검토 승인, 보완 4건 반영 — recomputeRevenue 위치 정정, `ups_invoice_exists` fail-open 단서·테스트, 표기 정리, 결정 #2 종결 (커밋: 1차 커밋 후 §10에 기재) |
+| **v5.1** | 2026-11-24 | Jaison 5차 재검토 승인, 보완 4건 반영 — recomputeRevenue 위치 정정, `ups_invoice_exists` fail-open 단서·테스트, 표기 정리, 결정 #2 종결 (커밋 `20e78c7a5`; 해시 기재는 후속 커밋) |
 
 ---
 
@@ -451,4 +451,4 @@ NOTIFY pgrst, 'reload schema';
 - **v5.1 추가 대조**: #1462 §2-1(앱 액션 `finalizeUpsSettlement` 4단계 = `recomputeRevenue`)·§2-9(DEFINER RPC 내부 `ups_invoice_exists`) 코드 대조로 위치 정정 및 fail-open 단서·테스트 반영.
 - 라벨 `status:draft` 유지. 검증: Jaison (5차 재검토 승인) / 최종 확정: JSJung → Aiden.
 - **v5 커밋 해시: `32d01d742`**, 해시 기재 `60bedef3c`.
-- **v5.1 커밋 해시: (1차 커밋 후 2차 커밋에서 기재)**
+- **v5.1 커밋 해시: `20e78c7a5`** (본 해시 기재는 후속 커밋 — 정책·코드 변경 없음)
