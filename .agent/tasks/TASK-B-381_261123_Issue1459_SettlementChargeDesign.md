@@ -1,20 +1,20 @@
-# TASK-B-381 — Issue #1459: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (설계 의견, 6차)
+# TASK-B-381 — Issue #1459: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (설계 의견, 7차)
 
 | 항목 | 내용 |
 |:-----|:------|
 | **Issue** | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) (TASK-B-377 / #1449 A 연장) |
 | **담당(Worker)** | Dave (Team B) |
 | **검증(Auditor)** | Jaison / **설계 확정: JSJung·Aiden** |
-| **상태** | 📝 설계 의견 6차 (`status:draft`) — **구현 금지** |
+| **상태** | 📝 설계 의견 7차 — **JSJung 결정 반영, 설계 확정 요청** (`status:draft`) — 구현 금지 |
 | **브랜치** | `feature/teamb-task-b381-iss1459-settlement-charge-design` (base `origin/TeamB_Dev` 83bb486f1) |
 | **공개 저장소 주의** | 노출 경위·재현 절차는 쓰지 않고 "도달 가능/불가 + 코드 위치"만 기재 |
-| **6차 반영** | JSJung: **컷오버 폐기** — 청구서관리는 신규 기능으로만 적용, 기존 데이터 보존·호환 의무 없음. Jaison 5차 보완 중 컷오버 항목은 영구 폐기 |
+| **7차 반영** | JSJung(2026-11-24): PAID 없음·비UPS 무변경·M5·DROP 별도·run-only 확정. Jaison 6차 보완 3건 + 7차 지시 반영 |
 
 ## 0. 범위 — UPS 오더 전체 단일 신규 경로
 
 - **컷오버일·레거시 병행·"기존 인보이스는 그대로"는 폐기**한다.
 - UPS 오더의 정산마감·청구는 **신규 경로 하나**로 동작한다.
-- 비UPS 오더는 이번 개편 범위 밖이며 변경하지 않는다(JSJung 확인 대기).
+- 비UPS 오더는 이번 개편 범위 밖이며 **변경하지 않는다(확정)**.
 - 기존 데이터는 보존하되 **호환·이중 청구를 위한 레거시 분기는 두지 않는다**.
 
 ### 확정·유지되는 결정
@@ -68,7 +68,7 @@
 | 1 | 가드 | admin 3역할(세션), UPS·`DELIVERED`·미정산 |
 | 2 | 인보이스 정리 방어 | UPS 오더에 **비취소 인보이스가 남아 있으면 `ups_invoice_exists` 거부** — 일괄 취소 스크립트(§2-4) 전에는 정산 불가 |
 | 3 | 원가 저장 | `zen_ups_actual_cost` upsert + 원가 측 부가항목 저장 |
-| 4 | 매출 재계산 | 입력 중량·치수로 `recomputeRevenue` — A·B 구분 없이 수행 |
+| 4 | 매출 재계산 | 입력 중량·치수로 `recomputeRevenue` — **run에 저장할 화주·대리점 target 계산용**. `zen_order_costs`를 갱신하지 않으며, 새 경로는 `UPS_ACTUAL_COST_ADJ` 델타를 생성하지 않는다(기존 행은 보존) |
 | 5 | 환산·반올림 | 부가운임 항목별 KRW 환산(출고확정일), 항목별 2자리 반올림 |
 | 6 | RPC 1회 | `finalize_ups_settlement_run`: run+amounts+charges 저장 + 주문 `SETTLED` **한 트랜잭션** |
 | 7 | 후속 | 알림(best-effort), revalidate |
@@ -127,11 +127,11 @@ zen_ups_settlement_run_charges
 
 | 안 | 내용 | 장점 | 단점·위험 |
 |:--|:--|:--|:--|
-| **(a) 일괄 취소 (권장)** | UPS 오더의 비취소 인보이스를 1회 스크립트/마이그레이션으로 `CANCELED` 처리(연결 원가 행은 불변 트리거로 건드리지 않음). 이전 상태 백업 + 롤백 SQL | 신규 경로와 충돌 제거, `legacy_invoiced_order` 가드 자연 통과 | PAID 인보이스 처리·회계 영향 확인 필요 |
+| **(a) 일괄 취소 (권장)** | UPS 오더의 비취소 인보이스를 1회 스크립트/마이그레이션으로 `CANCELED` 처리(연결 원가 행은 불변 트리거로 건드리지 않음). 이전 상태 백업 + 롤백 SQL | 신규 경로와 충돌 제거, `legacy_invoiced_order` 가드 자연 통과 | PAID 발견 시 스크립트 중단(방어) |
 | (b) `legacy_invoiced_order` 가드 제거 | 정산 가드만 제거 | 변경 작음 | 남은 인보이스와 이중 청구 위험 |
 | (c) 가드 유지 + 제외 표시 | 기존 상태 유지 | 데이터 무변경 | 해당 오더 정산 불가, 단일 경로 원칙 위배 |
 
-- **권장: (a)**. `PAID` 인보이스는 일괄 취소에서 **제외**하고, 해당 오더는 `paid_invoice_exists`로 신규 정산을 막아 **이중 청구를 방지**한다(처리 방침은 JSJung 확인).
+- **권장: (a)**. 운영 UPS 인보이스에 **PAID는 없음(JSJung 확정)**. `paid_invoice_exists`는 **방어용 가드로만** 유지하고, 일괄 취소 스크립트는 **PAID가 1건이라도 발견되면 중단·보고**한다. 별도 정책 분기·표는 두지 않는다.
 - 스크립트는 `zen_invoices` 상태만 변경하고 `zen_invoice_history`에 사유를 남긴다. 연결 `zen_order_costs`는 그대로 둔다.
 - 원격 DB 변경은 **R-14 승인 후**에만 수행한다.
 
@@ -144,6 +144,7 @@ zen_ups_settlement_run_charges
 | (c) 최소 run 백필 | 기존 원장/스냅샷으로 run 1회 생성 | 청구 가능 | 레거시 금액 품질 문제 재도입 |
 
 - **권장: (a)**, 보존 의무가 없고 단일 경로 원칙에 맞다. 초기화 대상·시점은 배포 절차에 포함한다.
+- **M5 초기화 대상 제외**: `zen_billing_statement_items`에 이미 포함된 오더는 초기화하지 않는다(포함 시 중단·보고). 일괄 SQL은 `unmarkOrderCostSettled`의 청구서 포함 검사를 거치지 않으므로 이 조건을 스크립트에 명시한다.
 - (c)는 ADJ·통화·tier 문제를 다시 들여오므로 사용하지 않는다.
 
 ### 2-7. 옛 UPS 기능 정리표 (비UPS 불변)
@@ -181,7 +182,7 @@ zen_ups_settlement_run_charges
 
 - `finalize_ups_settlement_run`: `SECURITY DEFINER`, `search_path` 고정, `REVOKE PUBLIC/anon` → `GRANT authenticated`, `auth.uid()` 역할 검사 **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**, actor 파라미터 없음, 세션 클라이언트 호출.
 - run+amounts+charges+`SETTLED` 한 트랜잭션. 부분 실패 없음.
-- 이미 `SETTLED`면 거부, 비취소 UPS 인보이스가 있으면 `ups_invoice_exists`, PAID 인보이스가 있으면 `paid_invoice_exists`.
+- 이미 `SETTLED`면 거부, 비취소 UPS 인보이스가 있으면 `ups_invoice_exists`, PAID가 있으면 `paid_invoice_exists`(방어용).
 - 테스트: SHIPPER·AGENCY·anon 거부, ADMIN·MANAGER 양성 대조.
 
 ### 2-10. R-11·Ds-11
@@ -198,8 +199,8 @@ zen_ups_settlement_run_charges
 4. run RLS 매트릭스(SHIPPER agency 0건, AGENCY 2 tier, ADMIN 전체, anon 0).
 5. RPC 보안·원자성(부분 실패 롤백), MANAGER 양성.
 6. UPS 출고확정 → 인보이스 미생성, 비UPS → 생성(회귀).
-7. 기존 UPS 인보이스 일괄 취소(연결 원가 불변) + `ups_invoice_exists` 해제, PAID 예외 차단.
-8. 기존 SETTLED·run 없음 초기화 → 재정산 성공(`settlement_run_missing` 해소).
+7. 기존 UPS 인보이스 일괄 취소(연결 원가 불변) + `ups_invoice_exists` 해제. **PAID 발견 시 스크립트 중단·보고**.
+8. 기존 SETTLED·run 없음 초기화 → 재정산 성공(`settlement_run_missing` 해소). **청구서 포함 오더는 초기화 제외(중단·보고)**.
 9. 옛 UPS 화면·액션 제거 후 비UPS 화면 무회귀.
 10. R-10: 새 정산마감·청구서 화면(화주·대리점) 스크린샷, `/admin/error-logs` 신규 ERROR 0.
 11. `npm run test:regression` PASS, `npm run build`.
@@ -211,8 +212,8 @@ zen_ups_settlement_run_charges
 | M1 | run 3테이블 + RLS(tier) + 불변 트리거 | 앱 배포 전 | DROP TABLE |
 | M2 | `billing_items_amounts` run 전용 + `zen_billing_statement_items`(`freight_adjustment`·`charge_details`) + 통화 가드 제거 | 앱 배포 전 | 함수/컬럼 원복 |
 | M3 | RPC `finalize_ups_settlement_run`(보안 GRANT 포함) | 앱 배포 전 | DROP FUNCTION |
-| M4 | UPS 인보이스 일괄 취소(비PAID) + 상태 백업 + `zen_invoice_history` | 앱 배포 후 **R-14 승인 후** | 백업에서 상태 복원 |
-| M5 | 기존 SETTLED·run 없음 UPS 오더 `NOT_SETTLED` 초기화(백업·롤백) | M4 후 | 백업에서 복원 |
+| M4 | UPS 인보이스 일괄 취소 + 상태 백업 + `zen_invoice_history`. **PAID 발견 시 중단·보고** | 앱 배포 후 **R-14 승인 후** | 백업에서 상태 복원 |
+| M5 | 기존 SETTLED·run 없음 UPS 오더 `NOT_SETTLED` 초기화(백업·롤백). **청구서 항목 포함 오더 제외** | M4 후 | 백업에서 복원 |
 
 **배포 순서**
 1. Ds-11 확정.
@@ -237,15 +238,20 @@ zen_ups_settlement_run_charges
 
 ## 3. 남은 확인 항목
 
+### 확정 (JSJung, 2026-11-24)
+
+| # | 항목 | 확정 | 근거·비고 |
+|:-:|:--|:--|:--|
+| 1 | 비UPS 오더 무변경 | **확정** | 청구서 생성이 UPS 전용이라 충돌 없음 |
+| 2 | PAID UPS 인보이스 | **없음(JSJung)** | `paid_invoice_exists`는 방어용 가드만, 스크립트는 PAID 발견 시 중단·보고 |
+| 3 | 기존 SETTLED·run 없음 | **재정산 초기화(M5)** | **청구서 항목 포함 오더는 제외**(중복 청구 방지) |
+| 4 | `zen_ups_actual_charges` DROP | **코드 제거 후 별도 결정** | 비가역 |
+| 5 | `billing_items_amounts` 폴백 | **run-only(폴백 제거)** | 청구서는 UPS·DELIVERED·SETTLED 전용, 신규 정산은 항상 run 생성 |
+
 | # | 항목 | 상태 |
 |:-:|:--|:--|
-| 1 | 비UPS 오더 무변경 | **JSJung 확인 대기** (이 범위 밖 가정) |
-| 2 | PAID UPS 인보이스 처리 | **JSJung 확인** — 일괄 취소 제외 + 신규 정산 차단(`paid_invoice_exists`) 권장 |
-| 3 | 기존 SETTLED·run 없음 UPS 오더 | **JSJung 확인** — 재정산 초기화(M5) 권장 |
-| 4 | `zen_ups_actual_charges` DROP | **JSJung 결정**(코드 제거 후, 비가역) |
-| 5 | `billing_items_amounts` 폴백 제거 | **(a) run-only 권장** — Jaison/Aiden 확인 |
-| 6 | #1453 조율 | 회신 대기 |
-| 7 | R-10 증적 대상 | 새 정산마감·청구서 화면(화주·대리점) |
+| 6 | #1453 오율 함수 조율 | **회신 대기** |
+| 7 | R-10 증적 대상 | 새 정산마감·청구서 화면(화주·대리점) — 계획 |
 
 ## 4. 관련 DEF (수정 금지)
 
@@ -253,8 +259,9 @@ zen_ups_settlement_run_charges
 
 ## 5. [작업 결과]
 
-- **설계 의견 6차**: 컷오버 폐기·단일 신규 경로로 재작성. 5차 승인(run·RLS·RPC·청구서 금액 원천) 유지.
-- 삭제: 컷오버 설정/RPC/동결/감사/경계/시험 환경, `isBeforeCutover`, LEGACY 분기.
-- 추가: 자동 인보이스 중단, 기존 인보이스 처리, SETTLED 초기화, 옛 기능 정리표, DEF 영향표.
-- 코드·마이그레이션 변경 없음.
+- **설계 의견 7차**: JSJung 결정(2026-11-24) 반영 — PAID 없음·비UPS 무변경·M5·DROP 별도·run-only 확정.
+- Jaison 6차 보완 3건: M5 청구서 포함 제외, `recomputeRevenue` 목적 명시, §3 확정/근거 정리.
+- 7차 지시: PAID는 방어 가드로만, M5 제외 조건·테스트, 상태 표기·§5 갱신.
+- 코드·마이그레이션 변경 없음. PR은 draft 유지(`status:draft`).
+- **커밋 해시**: `<CONTENT_COMMIT>` (7차 내용 커밋; 해시 갱신 커밋은 별도)
 - PR: #1462 (draft, `Refs #1459`, `Refs #1451`, `Refs #1453`, `Refs #1463`, `Refs #1369`).
