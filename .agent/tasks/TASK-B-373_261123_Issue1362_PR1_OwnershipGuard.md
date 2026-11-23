@@ -65,7 +65,7 @@
 
 - 코드 커밋: `ed706a82d` (`[Dave] fix: TASK-B-373 PR-1 …`), 단위 테스트 보정 커밋은 아래 PR 참조.
 - 구현·테스트·Ds-11·회귀 항목 완료. **DB 마이그레이션 없음**, `shippers.ts` 무변경, 새 키 없음.
-- PR: (작성 후 갱신) — `Refs #1362`, base `TeamB_Dev`.
-- `git diff --stat origin/TeamB_Dev...HEAD`: (최종 커밋 후 기재)
+- PR: #1478 — `Refs #1362`, base `TeamB_Dev`.
+- `git diff --stat`은 PR 코멘트 참조(마지막 커밋 후 산출).
 - **발견 이슈**: 없음.
 - **주의**: PR-1은 `TeamB_Dev` 기준 최소 diff이며, Aiden이 211 런북 §7(main 기반 선반영)로 이식 검토.
