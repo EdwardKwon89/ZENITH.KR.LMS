@@ -11,9 +11,9 @@
 ## 📊 실측 Vitest 회귀 스위트 현황 (자동 집계)
 
 - **스캔 범위**: `tests/**/*.{test,spec}.{ts,tsx}` (`tests/e2e/**`, `tests/poc-*/**` 제외 — `vitest.config.ts` 기준)
-- **실측 테스트 파일 수**: **297개**
-- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **2,217건**
-- **신규 구조 등재 Task 수**: **24건**
+- **실측 테스트 파일 수**: **292개**
+- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **2,191건**
+- **신규 구조 등재 Task 수**: **17건**
 
 ---
 
@@ -33,13 +33,6 @@
 <!-- LRTM_ITEMS_START -->
 | Task | Issue | 팀 | 작성일 | 케이스 수 | 테스트 파일 | 차원(231) | 상세 |
 |:---|:---:|:---:|:---:|---:|:---|:---:|:---:|
-| **TASK-B-378** | - | - | - | 6건 | `tests/unit/migrations/taskb359-billing-statement-db.test.ts`, `tests/e2e/e2e-31-billing-flow-verification.spec.ts` | D1, D5 | [상세](./regression-items/TASK-B-378_Issue1452_billing_seq_role_check.md) |
-| **TASK-B-375** | #1356 | Team B | 2026-11-23 | 6건 | `tests/integration/task-b375-rls-shipper-agency-select.test.ts` | D1, D3, D5 | [상세](./regression-items/TASK-B-375_Issue1356_rls-shipper-agency-select.md) |
-| **TASK-B-374** | - | - | - | 8건 | `tests/integration/task-b374-shipper-ownership.test.ts`, `tests/unit/i18n/errors-key-sync.test.ts`, `tests/e2e/e2e-32-b374-shipper-ownership-ui.spec.ts` | D1, D5 | [상세](./regression-items/TASK-B-374_Issue1349_shipper-ownership.md) |
-| **TASK-B-373** | #1362 | Team B | 2026-11-23 | 9건 | `tests/integration/task-b373-other-charges-ownership.test.ts` | D1, D5 | [상세](./regression-items/TASK-B-373_Issue1362_other-charges-ownership.md) |
-| **TASK-B-372** | #1356 | Team B | 2026-11-23 | 6건 | `tests/integration/task-b372-admin-only.test.ts`, `tests/unit/finance/ups-actual-charges.test.ts`, `tests/unit/finance/ups-actual-cost.test.ts` | D1, D3, D5 | [상세](./regression-items/TASK-B-372_Issue1356_def150-pr1.md) |
-| **TASK-B-371** | - | - | - | 12건 | `tests/e2e/e2e-31-billing-flow-verification.spec.ts` | D1, D5, D6, D8 | [상세](./regression-items/TASK-B-371_Issue1439_billing-e2e-verification.md) |
-| **TASK-B-370** | #1420 | Team B | 2026-11-23 | 13건 | `tests/integration/task-b370-snapshot-safe-view.test.ts`, `tests/integration/ups-edit-before-registration.test.ts`, `tests/unit/orders/rate-snapshot-refresh.test.ts`, `tests/unit/orders/direct-shipper-ups-snapshot.test.ts` | D1, D3, D8 | [상세](./regression-items/TASK-B-370_Issue1420_snapshot-safe-view.md) |
 | **TASK-B-369** | #1425 | Team B | 2026-11-22 | 19건 | `tests/unit/components/order-settlement/order-settlement-list.test.tsx`, `tests/unit/components/order-settlement/order-settlement-detail.test.tsx`, `tests/unit/components/order-settlement/navi-sidebar.test.tsx`, `tests/unit/components/statements/statement-create.test.tsx`, `tests/e2e/e2e-27-order-settlement-ui.spec.ts` | D1, D3, D9 | [상세](./regression-items/TASK-B-369_Issue1425_order-settlement-ui.md) |
 | **TASK-B-368** | - | - | - | 5건 | `tests/unit/finance/task-b368-normalize-shipper-name.test.ts`, `tests/integration/task-b360-billing-statements.test.ts` | D1, D8 | [상세](./regression-items/TASK-B-368_Issue1415_normalize-shipper-name_유틸분리.md) |
 | **TASK-B-367** | #1377 | Team B | 2026-11-20 | 19건 | `tests/unit/finance/task-b367-unmark-cost-settled.test.ts`, `tests/unit/orders/task-b367-settled-cargo-guard.test.ts`, `tests/integration/task-b367-unmark-cost-settled.test.ts`, `tests/unit/i18n/errors-key-sync.test.ts` | D1, D5 | [상세](./regression-items/TASK-B-367_Issue1377_unmark-cost-settled.md) |

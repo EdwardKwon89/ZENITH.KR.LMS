@@ -31,4 +31,5 @@
 
 **회귀 검증**: `npm run test:regression` → **297파일 / 2,271케이스 전부 PASS** (exit 0). `npm run build` → **성공**. 신규 통합 3건 + 기존 단위 3건 PASS.
 **Ds-11**: `docs/02_Analysis/ds11/Ds_11_11A_UPS_Rates.md` 11.3에 3개 액션 권한·소유권 검증 추가. `npm run check:ds11` → **OK** (허용 목록 밖 신규 미반영 0건).
+**R-10 UI 증적**: `docs/02_Analysis/evidence/task-b373/r10-{list,after-edit,after-deactivate}.png` — 대리점 실제 로그인으로 목록·수정 저장·비활성화 확인, 변경 후 `zen_error_logs` ERROR 0.
 **발견 이슈**: 없음.
