@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | open | 미배정 | 2026-11-23 |
+| [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | in-progress | 미배정 | 2026-11-23 |
 | [#1458](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1458) | [Team A] TASK-1172: TeamB_Dev 통합 사전 검토 ③ — 서버 액션·lib·API 라우트 (D_Kai) | a | p2 | open | 미배정 | 2026-11-23 |
 | [#1457](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1457) | [Team A] TASK-1171: TeamB_Dev 통합 사전 검토 ② — 테스트 38개·회귀 등재 (B_Kai) | a | p2 | open | 미배정 | 2026-11-23 |
 | [#1456](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1456) | [Team A] TASK-1170: TeamB_Dev 통합 사전 검토 ① — UI·페이지·i18n (Riley) | a | p2 | open | 미배정 | 2026-11-23 |
