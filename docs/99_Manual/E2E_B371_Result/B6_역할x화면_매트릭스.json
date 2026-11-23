@@ -45,7 +45,7 @@
     "발행버튼": false,
     "입금확인버튼": false,
     "취소삭제버튼": false,
-    "Excel링크": true,
+    "Excel링크": false,
     "heading": "청구서 관리",
     "pageErrors": [],
     "consoleErrors": []
@@ -155,7 +155,7 @@
   {
     "role": "Admin",
     "screen": "S5_타인상세(대리점B문서)",
-    "url": "/ko/agency/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c",
+    "url": "/ko/agency/statements/6de5c0c8-fe71-492a-bff5-812139d4a124",
     "status": 200,
     "finalPath": "/ko/dashboard",
     "없음안내": false,
@@ -206,7 +206,7 @@
   {
     "role": "Admin",
     "screen": "Excel_타인문서",
-    "url": "/api/finance/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c/export",
+    "url": "/api/finance/statements/6de5c0c8-fe71-492a-bff5-812139d4a124/export",
     "status": 200,
     "finalPath": "(api)",
     "ct": "application/vnd.openxmlformats-officedocument.spreadsheetml.",
@@ -295,7 +295,7 @@
     "발행버튼": false,
     "입금확인버튼": false,
     "취소삭제버튼": false,
-    "Excel링크": false,
+    "Excel링크": true,
     "heading": "청구서 관리",
     "pageErrors": [],
     "consoleErrors": []
@@ -320,9 +320,9 @@
   {
     "role": "대리점A",
     "screen": "S5_타인상세(대리점B문서)",
-    "url": "/ko/agency/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c",
+    "url": "/ko/agency/statements/6de5c0c8-fe71-492a-bff5-812139d4a124",
     "status": 200,
-    "finalPath": "/ko/agency/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c",
+    "finalPath": "/ko/agency/statements/6de5c0c8-fe71-492a-bff5-812139d4a124",
     "없음안내": true,
     "조회전용배지": false,
     "생성버튼": false,
@@ -337,7 +337,7 @@
   {
     "role": "대리점A",
     "screen": "Excel_타인문서",
-    "url": "/api/finance/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c/export",
+    "url": "/api/finance/statements/6de5c0c8-fe71-492a-bff5-812139d4a124/export",
     "status": 404,
     "finalPath": "(api)",
     "ct": "text/plain;charset=UTF-8",
@@ -449,9 +449,9 @@
   {
     "role": "대리점B",
     "screen": "S5_타인상세(대리점B문서)",
-    "url": "/ko/agency/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c",
+    "url": "/ko/agency/statements/6de5c0c8-fe71-492a-bff5-812139d4a124",
     "status": 200,
-    "finalPath": "/ko/agency/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c",
+    "finalPath": "/ko/agency/statements/6de5c0c8-fe71-492a-bff5-812139d4a124",
     "없음안내": false,
     "조회전용배지": false,
     "생성버튼": false,
@@ -466,7 +466,7 @@
   {
     "role": "대리점B",
     "screen": "Excel_타인문서",
-    "url": "/api/finance/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c/export",
+    "url": "/api/finance/statements/6de5c0c8-fe71-492a-bff5-812139d4a124/export",
     "status": 200,
     "finalPath": "(api)",
     "ct": "application/vnd.openxmlformats-officedocument.spreadsheetml.",
@@ -570,7 +570,7 @@
     "발행버튼": false,
     "입금확인버튼": false,
     "취소삭제버튼": false,
-    "Excel링크": false,
+    "Excel링크": true,
     "heading": "청구서 관리",
     "pageErrors": [],
     "consoleErrors": []
@@ -578,7 +578,7 @@
   {
     "role": "화주A",
     "screen": "S5_타인상세(대리점B문서)",
-    "url": "/ko/agency/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c",
+    "url": "/ko/agency/statements/6de5c0c8-fe71-492a-bff5-812139d4a124",
     "status": 200,
     "finalPath": "/ko/orders",
     "없음안내": false,
@@ -595,7 +595,7 @@
   {
     "role": "화주A",
     "screen": "Excel_타인문서",
-    "url": "/api/finance/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c/export",
+    "url": "/api/finance/statements/6de5c0c8-fe71-492a-bff5-812139d4a124/export",
     "status": 404,
     "finalPath": "(api)",
     "ct": "text/plain;charset=UTF-8",
@@ -707,7 +707,7 @@
   {
     "role": "화주B",
     "screen": "S5_타인상세(대리점B문서)",
-    "url": "/ko/agency/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c",
+    "url": "/ko/agency/statements/6de5c0c8-fe71-492a-bff5-812139d4a124",
     "status": 200,
     "finalPath": "/ko/orders",
     "없음안내": false,
@@ -724,7 +724,7 @@
   {
     "role": "화주B",
     "screen": "Excel_타인문서",
-    "url": "/api/finance/statements/460e211f-0e47-4768-9cac-a92cf64a9e5c/export",
+    "url": "/api/finance/statements/6de5c0c8-fe71-492a-bff5-812139d4a124/export",
     "status": 404,
     "finalPath": "(api)",
     "ct": "text/plain;charset=UTF-8",
