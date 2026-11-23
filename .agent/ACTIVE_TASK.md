@@ -51,7 +51,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#1442](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1442) | [Team B] TASK-B-376: UPS 실비(원가) 화주·대리점 노출 차단 — zen_order_costs UPS_ACTUAL_ADJUSTMENT (DEF-150 후속, 설계 의견부터) | b | p1 | review | 미배정 | 2026-11-23 |
-| [#1439](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1439) | [Team B] TASK-B-371: 청구서관리 ⑦ 통합 검증 — 전 구간 E2E·권한 교차·Excel 실제 다운로드 (WBS 8.1~8.3, Mike) | b | p2 | in-progress | 미배정 | 2026-11-22 |
+| [#1439](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1439) | [Team B] TASK-B-371: 청구서관리 ⑦ 통합 검증 — 전 구간 E2E·권한 교차·Excel 실제 다운로드 (WBS 8.1~8.3, Mike) | b | p2 | review | 미배정 | 2026-11-23 |
 | [#1434](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1434) | [IMP 제안] 오더정산 S2 — UPS 청구서 PDF 첨부 (WBS 2.6 선택 범위) | - | - | - | 미배정 | 2026-11-22 |
 | [#1433](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1433) | [IMP 제안] 오더정산 관리자 역할 상수(ADMIN_ROLES) 공용 모듈 분리 | - | - | - | 미배정 | 2026-11-22 |
 | [#1432](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1432) | [IMP 제안] 오더정산 S2 — 요율 스냅샷 없는 기존 오더의 시스템 등록값 대체 소스 | - | - | - | 미배정 | 2026-11-22 |
@@ -61,7 +61,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1371](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1371) | [Team B → Aiden] Gale(Gemini 4 Argon) 페르소나 등록 요청 — agent-worktree-init.sh 등 | a | p3 | open | 미배정 | 2026-11-18 |
 | [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | blocked | 미배정 | 2026-11-20 |
 | [#1368](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1368) | [Team B] TASK-B-362: 청구서관리 ⑤ 청구서 PDF 생성·다운로드 및 발행 이메일 | b | p2 | blocked | 미배정 | 2026-11-17 |
-| [#1364](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1364) | [Team B] EPIC: 청구서관리 — 오더정산·청구서 생성/관리 (추적용) | b | p2 | in-progress | 미배정 | 2026-11-22 |
+| [#1364](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1364) | [Team B] EPIC: 청구서관리 — 오더정산·청구서 생성/관리 (추적용) | b | p2 | in-progress | 미배정 | 2026-11-23 |
 | [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) | [Aiden → Team B] DEF-151 UPS 요율 조회 액션 원가 포함 반환·가드 공백, /agency/other-charges 원가 노출 수정 요청 | b | p1 | open | 미배정 | 2026-11-22 |
 | [#1356](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1356) | [Aiden → Team B] DEF-150 finance/UPS 실비·정산 액션 대리점 필터 누락·가드 공백 수정 요청 | b | p1 | in-progress | 미배정 | 2026-11-22 |
 | [#1349](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1349) | [Aiden] DEF-149 §1.1 — agency/shippers.ts 대리점 소유권 검증 누락(교차 테넌트 IDOR) 수정 요청 (Team B 소유) | b | p1 | open | 미배정 | 2026-11-22 |
