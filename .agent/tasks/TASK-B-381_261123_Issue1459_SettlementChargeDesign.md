@@ -1,163 +1,95 @@
-# TASK-B-381 — Issue #1459: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (설계 의견, 5차)
+# TASK-B-381 — Issue #1459: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (설계 의견, 6차)
 
 | 항목 | 내용 |
 |:-----|:------|
 | **Issue** | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) (TASK-B-377 / #1449 A 연장) |
 | **담당(Worker)** | Dave (Team B) |
 | **검증(Auditor)** | Jaison / **설계 확정: JSJung·Aiden** |
-| **상태** | 📝 설계 의견 5차 (`status:draft`) — **구현 금지** |
+| **상태** | 📝 설계 의견 6차 (`status:draft`) — **구현 금지** |
 | **브랜치** | `feature/teamb-task-b381-iss1459-settlement-charge-design` (base `origin/TeamB_Dev` 83bb486f1) |
 | **공개 저장소 주의** | 노출 경위·재현 절차는 쓰지 않고 "도달 가능/불가 + 코드 위치"만 기재 |
-| **5차 반영** | JSJung: 컷오버 전 오더 **현행 유지**, 실비 화면 컷오버 전 유지, 컷오버일=설정값. Jaison 4차 보완 6건 + Aiden 6건 |
+| **6차 반영** | JSJung: **컷오버 폐기** — 청구서관리는 신규 기능으로만 적용, 기존 데이터 보존·호환 의무 없음. Jaison 5차 보완 중 컷오버 항목은 영구 폐기 |
 
-## 0. 범위·확정 결정
+## 0. 범위 — UPS 오더 전체 단일 신규 경로
 
-### 범위
-- **컷오버일 이후 출고확정된 UPS 오더만** 이번 개편 대상이다.
-- 컷오버 전 오더(기존 인보이스 보유)는 **현행 그대로** — 기존 액션·화면·인보이스·실비 등록을 변경하지 않는다.
-- 컷오버 판정은 **#1369(TASK-B-363) 판정 함수를 재사용**하고, 이 Task는 호출만 한다. 인보이스 생성 중단도 #1369 범위다.
+- **컷오버일·레거시 병행·"기존 인보이스는 그대로"는 폐기**한다.
+- UPS 오더의 정산마감·청구는 **신규 경로 하나**로 동작한다.
+- 비UPS 오더는 이번 개편 범위 밖이며 변경하지 않는다(JSJung 확인 대기).
+- 기존 데이터는 보존하되 **호환·이중 청구를 위한 레거시 분기는 두지 않는다**.
 
-### JSJung 확정 (2026-11-23)
+### 확정·유지되는 결정
 | # | 내용 |
 |:-:|:--|
-| 1 | **컷오버일 = 신규 기능 개발 완료·배포일**(미정). 코드 상수가 아닌 **설정값**으로 두고, 값이 없으면 신규 분기 비활성 |
-| 2 | 컷오버 전 오더의 정산마감은 **현행 유지**. LEGACY 개편(cost_name·인보이스 RPC·legacy L·조정 인보이스 개선)은 **이 Task 범위 제외** |
-| 3 | 컷오버 전 오더의 `UpsActualAdjustmentForm`·`recordUpsActualCharges`(실비 등록)는 **현행 유지**. 컷오버 후 오더에서만 거부/미노출 |
-| 4 | 실비는 컷오버 후 오더에서 **정산마감을 통해서만** 등록 |
-| 5 | MANAGER는 RPC에서 **ADMIN·MANAGER·ZENITH_SUPER_ADMIN** 허용(#1463 정책과 무관하게 DEFINER) |
-| 6 | append-only·RPC 원자성·음수 행(admin)·항목별 반올림·출고확정일 환율·A도 재계산은 유지 |
-| 7 | 새 DEF 번호는 **DEF-B-169부터**(Baker는 168 사용) |
+| 1 | UPS 정산마감은 admin(ZENITH_SUPER_ADMIN·ADMIN·MANAGER)만. RPC 역할에 **MANAGER 포함** |
+| 2 | 정산마감 시 수정된 청구중량으로 화주·대리점 운임 재계산(규칙 2) |
+| 3 | 부가운임은 항목명·금액으로 화주·대리점 청구에 반영(규칙 3·4·6) |
+| 4 | 임시저장=원가만 / **정산 완료=run 생성 + `SETTLED`** |
+| 5 | run 저장소·RPC 보안·원자성·tier 단위 RLS·불변성(5차 승인) 유지 |
+| 6 | 부가운임은 **KRW**(청구서 기준 통화), 출고확정일 환율, 항목별 반올림 |
+| 7 | 실비 등록은 **전 오더에서 폐기** — 정산마감을 통해서만 |
+| 8 | B-377 표시 소스는 **run** 기준으로 갱신 |
 
 ---
 
-## 1. 실측 (실DB, 2026-11-23)
+## 1. 현황 실측 (설계 근거)
 
-### 1-1. 방법과 한계
-
-- 로컬 Supabase + `TeamB_Dev` 마이그레이션. 서버 액션은 `validateUserAction`만 ADMIN stub + **service-role 실연결**, `estimateUpsFreight`는 stub.
-- statement 측정은 실제 SQL 함수(`billing_items_amounts`·`create_billing_statement_with_items`)를 실DB에서 호출(ADMIN JWT).
-- **RLS 역할별 허용/거부는 미측정**(정책은 `pg_policies` 정의만 확인). 픽스처는 측정 후 삭제.
-
-### 1-2. 청구서(statement) 금액 — 이번 설계의 핵심
-
-픽스처: UPS `DELIVERED`·`SETTLED`, 스냅샷(platform 250/30/10/10, agency 200/20/5/5, `agencyCostPrice=180`, `billingWeightKg=10`, USD), 원장(250/30/10/10 + ADJ 40 + SETTLEMENT 30).
-
-| 측정 | 결과 |
-|:--|:--|
-| `billing_items_amounts(..., 'AGENCY_TO_SHIPPER')` | 250 / 30 / 10 / **80** / **370**, `charge_weight_kg=10` |
-| `billing_items_amounts(..., 'ADMIN_TO_AGENCY')` | 200 / 20 / 5 / **5** / **230**, `charge_weight_kg=10` |
-| 화주 `other_charges` | **ADJ 40 + OTHER 10 + SETTLEMENT 30 = 80** → **ADJ가 "기타 부가운임"에 혼입** |
-| 대리점 tier | 스냅샷만 읽음 → **ADJ·부가운임 미반영** |
-| 청구중량 | 스냅샷 `billingWeightKg=10` 우선 → `actual_weight_kg=12`도 **10 유지** |
-| 통화 | USD 원장 → **`unsupported_cost_currency`** 실패, KRW → 생성 성공 |
-| 인보이스 대조 | 대리점 인보이스 `agencyCostPrice`(180) vs statement 230 → **50 차이**, 화주는 **USD vs KRW 단위 불일치** |
-
-### 1-3. 컷오버 전(레거시) 현행 — 수정하지 않고 DEF로 기록
+### 1-1. 기존 경로는 부가운임을 청구에 반영하지 못한다
 
 | 경로 | 실측 결과 | DEF |
 |:--|:--|:--|
-| A `recordActualCostAndFinalize` | 중량 10 저장, **재계산 없음**, 총액 80으로 마감 | **DEF-B-169** |
-| B `recordUpsActualCost` | 기타 50 HKD 청구 미반영, `zen_ups_actual_other_charges` 0행(항목명 소실) | **DEF-B-170** |
-| C `recordUpsActualCharges` | 2회차 `ADJUSTMENT_UPDATE` 실패 | **DEF-B-167** 링크 |
-| `rejectInvoice` | 연결 해제 UPDATE가 불변 트리거에 차단(오류 미확인) 가능성 | **DEF-B-168** 링크(Baker 브랜치) |
+| A `recordActualCostAndFinalize` | 중량 입력·저장은 하지만 **재계산 없음**, 부가운임 청구 행 없음, 총액 80으로 마감 | DEF-B-169 |
+| B `recordUpsActualCost` | 입력 부가운임 청구 미반영, 항목명 테이블 0행 | DEF-B-170 |
+| C `recordUpsActualCharges` | `UPS_ACTUAL_ADJUSTMENT`만 생성, 항목명 없음, 2회차 `ADJUSTMENT_UPDATE` 실패 | DEF-B-167 |
 
-- 연결 행 불변 트리거(`trg_prevent_cost_change_after_invoice`)는 운영에서도 활성(Aiden 읽기 전용 조회).
+### 1-2. 청구서 금액 원천의 한계 (run 저장소가 필요한 이유)
+
+| 측정 | 결과 |
+|:--|:--|
+| `billing_items_amounts` 화주 | ADJ·부가운임이 `other_charges`에 혼입 |
+| `billing_items_amounts` 대리점 | 요율 스냅샷만 읽어 **정산 결과 미반영** |
+| 청구중량 | 스냅샷 `billingWeightKg` 우선 → 실측 재계산 미반영 |
+| 통화 | 비KRW 원장은 `unsupported_cost_currency`로 차단 |
+
+→ **정산 결과를 청구서가 읽는 단일 run 저장소(run-only)** 가 필요하다.
+
+### 1-3. run 테이블 불변성
+
+- `zen_order_costs` 연결 행은 UPDATE/DELETE 차단 트리거가 운영에서도 활성(Aiden 읽기 전용 조회).
+- run 테이블도 같은 원칙(append-only)으로 설계한다(§2-3).
 
 ---
 
 ## 2. [설계 의견]
 
-### 2-1. 컷오버 분기 구조 — legacy 무변경
-
-| 안 | 내용 | 장점 | 단점 |
-|:--|:--|:--|:--|
-| **(A) 화면/라우트 분기 (권장·채택)** | 컷오버 판정으로 **컷오버 전=기존 화면·기존 액션 그대로**, 컷오버 후=신규 `finalizeUpsSettlement`·신규 화면 | legacy 회귀 0, 책임 분리 | 컴포넌트 2개 |
-| (B) 단일 액션 내 분기 | 신규 액션이 legacy 액션을 내부 호출 | 진입점 1개 | 중첩 호출·부분 상태, 결국 legacy UI도 필요 |
-
-- **LEGACY 개편 범위 비교(JSJung 결정으로 (A) 채택)**
-
-| 항목 | LEGACY 무변경 (채택) | LEGACY에도 규칙 적용 (미채택) |
-|:--|:--|:--|
-| `cost_name` 컬럼 | **없음** | 필요 |
-| 인보이스 RPC·마감 | **없음** | 필요 |
-| legacy `L` 총액식 | **없음** | 필요 |
-| 통화 다른 두 인보이스 환산 | **없음** | 필요 |
-| 마감 후 조정 인보이스 개선 | **없음** | 필요 |
-| #1369 "기존 인보이스 그대로" | 일치 | 충돌 |
-| 결함 | DEF-B-169·170으로 기록 | 이 Task에서 수정 |
-
-- 컷오버 전 `UPS_ACTUAL_ADJUSTMENT` 행은 legacy 인보이스에만 연결되고, **컷오버 전 오더는 statement 대상 제외(#1369)** 이므로 충돌하지 않는다.
-
-### 2-2. 컷오버 설정·경계 (Jaison 5차 보완 반영)
-
-#### (1) 저장·쓰기 권한·감사 비교
-
-| 안 | 저장/권한 | 감사 | 동결 |
-|:--|:--|:--|:--|
-| **(a) 전용 테이블 + DEFINER RPC (권장)** | `zen_ups_settlement_config`(단일 행, `cutover_at timestamptz`). SELECT=ADMIN·MANAGER·SUPER(경로 판정용), **쓰기=RPC만**. `REVOKE ALL` 후 `authenticated`에 SELECT만 | `zen_param_audit_log`(param_key·old/new·changed_by·changed_at) | RPC 검사 + config 테이블 `BEFORE UPDATE` 트리거 |
-| (b) `zen_system_settings` + restrictive RLS | 공유 테이블, 키별 RESTRICTIVE 정책 | `logger.info`만/별도 audit | 앱 검사 |
-| (c) 앱 액션 role check만 | 공유 테이블 | 앱 | 앱 |
-
-- **권장: (a)**. `zen_system_settings`는 현재 ADMIN·MANAGER·SUPER 모두 ALL이라 **MANAGER가 컷오버일을 바꿀 수 있다**. 컷오버일은 오더의 청구 경로를 가르는 값이므로 MANAGER 쓰기를 막는다.
-```
-zen_ups_settlement_config
-  key text primary key check (key = 'ups_settlement_cutover'),
-  cutover_at timestamptz null,
-  updated_by uuid, updated_at timestamptz
-```
-
-- `set_ups_settlement_cutover_at(p_cutover_at timestamptz, p_reason text)`:
-  - `SECURITY DEFINER`, `auth.uid()`로 **ADMIN·ZENITH_SUPER_ADMIN만** 허용(MANAGER 거부).
-  - **동결**: `zen_ups_settlement_runs` 1건 이상 **또는** 신규 경로 `zen_billing_statement_items` 1건 이상이면 `cutover_locked` 거부. 값 변경 금지.
-  - config UPDATE + `zen_param_audit_log` INSERT를 **한 트랜잭션**으로.
-  - config 테이블에는 `BEFORE UPDATE` 트리거를 두어 run 존재 시 직접 변경도 차단(service_role 방어).
-- **변경 이력**: `zen_param_audit_log`(기존 테이블) 사용. 별도 audit 테이블은 만들지 않는다. 감사 항목(설정자·이전/이후·시각·사유)은 JSJung 확인.
-
-#### (2) 경계 판정 — 인보이스 우선 + timestamptz
-
-- **문제**: 인보이스는 출고확정(RELEASED) 시 자동 생성된다. 컷오버일이 날짜이고 배포 전 같은 날 출고확정된 오더가 있으면, `출고확정일 ≥ 컷오버일`로 신규 경로에 분류되어 `unexpected_legacy_invoice`에 걸려 **어느 경로로도 정산 불가**가 된다.
-- **판정 규칙(제안)**:
-  1. 비취소 레거시 인보이스(`metadata.source_order_id`)가 있으면 **출고확정일과 무관하게 legacy** (#1369 "기존 인보이스는 그대로").
-  2. 인보이스가 없고 **출고확정 시각 ≥ 컷오버 시각(timestamptz)** 이면 신규.
-  3. 그 외 legacy.
-- **설정값은 날짜가 아니라 `timestamptz`** 로 둔다(같은 날 배포 전후 모호성 제거). 값이 없으면 신규 분기 비활성.
-- **#1369 전달**: 위 규칙을 #1369 판정 함수 요구사항으로 코멘트한다(이 Task는 호출만).
-- 경계 테스트: 당일 배포 전 출고확정+인보이스(→legacy), 인보이스 없음+컷오버 이후(→신규), 인보이스 있음+컷오버 이후(→legacy), 인보이스 없음+컷오버 이전(→legacy), 출고확정 취소·변경, in-flight, 설정값 없음/오류.
-- 배포 순서의 **마지막 단계에서 RPC로 설정값을 기록**한다(그 전에는 신규 분기 비활성).
-
-### 2-3. 컷오버 후 통합 정산마감 `finalizeUpsSettlement` (신규 전용)
+### 2-1. 단일 정산마감 `finalizeUpsSettlement`
 
 | # | 단계 | 내용 |
 |:-:|:--|:--|
-| 1 | 가드 | admin 3역할(세션), UPS·`DELIVERED`·미정산, **컷오버 후·설정값 존재** 확인. 컷오버 전이면 `legacy_order` 반환(신규 액션 비활성) |
-| 2 | 인보이스 방어 | 컷오버 후 오더에 인보이스가 있으면 `unexpected_legacy_invoice` 거부 |
-| 3 | 원가 저장 | `zen_ups_actual_cost` upsert(현행 계산·환율 로직 재사용) |
-| 4 | 매출 재계산 | 입력 중량·치수로 `recomputeRevenue` — **A·B 구분 없이** 수행(규칙 2) |
-| 5 | 환산·반올림 | 부가운임 항목별 **KRW** 환산(출고확정일), 항목별 2자리 반올림 |
-| 6 | RPC 1회 | `finalize_ups_settlement_run`: run(version)+amounts+charges 저장 + 주문 `SETTLED` **한 트랜잭션** |
+| 1 | 가드 | admin 3역할(세션), UPS·`DELIVERED`·미정산 |
+| 2 | 인보이스 정리 방어 | UPS 오더에 **비취소 인보이스가 남아 있으면 `ups_invoice_exists` 거부** — 일괄 취소 스크립트(§2-4) 전에는 정산 불가 |
+| 3 | 원가 저장 | `zen_ups_actual_cost` upsert + 원가 측 부가항목 저장 |
+| 4 | 매출 재계산 | 입력 중량·치수로 `recomputeRevenue` — A·B 구분 없이 수행 |
+| 5 | 환산·반올림 | 부가운임 항목별 KRW 환산(출고확정일), 항목별 2자리 반올림 |
+| 6 | RPC 1회 | `finalize_ups_settlement_run`: run+amounts+charges 저장 + 주문 `SETTLED` **한 트랜잭션** |
 | 7 | 후속 | 알림(best-effort), revalidate |
 
-**반영 시점 (명시)**
+- **반영 시점**: 임시저장은 원가만, 청구 반영은 정산 완료 시점(기존 방침). 초안 금액은 청구서에 노출되지 않는다.
+- 원가 저장(3)은 RPC 밖이다. RPC 실패 시 원가만 남지만 청구·상태는 변하지 않아 **재사용 가능한 임시저장**이다(DEF-B-166(b)의 거짓 마감 이력과 다름).
+- **표시·청구 단일 소스**: run. 보조로 `zen_ups_actual_cost`(원가, admin)만 유지한다.
 
-| 단계 | 원가 | run/청구 | 청구서 | 화주 노출 |
-|:--|:--|:--|:--|:--|
-| 임시저장(`saveUpsSettlementDraft`) | O | **X** | X | 기존 금액만 |
-| 정산 완료(`finalizeUpsSettlement`) | O(재사용) | **O** | statement 생성 시 반영 | 청구서 생성 후 |
+### 2-2. `billing_items_amounts` — run 전용 (레거시 폴백 제거)
 
-- 대안(임시저장 시점 반영)은 초안 금액 노출·불변 트리거 때문에 음수 행에 의존한다. **정산 완료 시점 반영 권장** → §3 #1(JSJung 확인).
-- 원가 저장(3)은 RPC 밖이다. RPC 실패 시 원가만 남지만 **청구·상태가 변하지 않아 재사용 가능한 임시저장**이다(DEF-B-166(b)의 "마감 이력 거짓 기록"과 다름).
-
-### 2-4. 청구서 금액 원천 — 해결안 비교
-
-| 안 | 내용 | 장점 | 단점·위험 |
+| 안 | 내용 | 장점 | 단점 |
 |:--|:--|:--|:--|
-| (a) 스냅샷 반영 | 정산 결과를 `zen_order_rate_snapshots.metadata`에 기록 | 함수 변경 최소 | 감사 스냅샷 변조, tier·항목명 부적합, ADJ 분류 불가 |
-| (b) 기존 원장 읽기 변경 | `billing_items_amounts`가 `zen_order_costs`·`actual_weight_kg`·tier 태깅을 읽게 | 새 저장소 없음 | tier 컬럼 필요, 대리점 금액 부재, legacy 이중 계산 위험 |
-| **(c) 정산 결과 단일 저장소 (권장)** | `zen_ups_settlement_runs(+amounts,+charges)`에 tier별·항목별·KRW 스냅샷. `billing_items_amounts`가 최신 run 우선 | 규칙 2·3·4·6 한 곳, legacy 무변경 | 신규 테이블·함수 변경, #1453 조율 |
+| **(a) run-only (권장)** | 최신 run 금액만 반환. run이 없으면 **청구서 생성 RPC에서 `settlement_run_missing` 오류** | 단일 소스, ADJ·통화·tier 문제 동시 해결, #1453 base 의존 제거 | 기존 SETTLED·run 없는 오더는 청구 불가 → §2-4/2-5에서 처리 |
+| (b) 최소 폴백 유지 | run 없으면 현행 `zen_order_costs`/스냅샷 | 기존 오더 청구 가능 | ADJ 혼입·대리점 스냅샷·통화 문제 잔존, 이중 소스 |
 
-**권장: (c)**. **#1453(Baker) 조율**: 같은 `billing_items_amounts`를 변경하므로 B-379 접근 경로 변경을 먼저/하나의 마이그레이션으로 반영하고, B-381은 "run 우선 + legacy 폴백" 분기를 그 위에 얹는 순서. `#1453`에 조율 코멘트 게시(2026-11-23), **회신 대기**.
+- **권장: (a)**. 청구서 생성은 `SETTLED` UPS 오더만 가능하고, 신규 정산은 항상 run을 만든다. run이 없는 `SETTLED` UPS 오더는 §2-5에서 재정산 또는 제외로 정리한다.
+- `billing_items_amounts`는 `charge_weight_kg`·tier 금액·`freight_adjustment`·`charge_details`를 run에서 반환한다.
+- `create_billing_statement_with_items`의 **비KRW 원장 통화 가드는 제거**한다(run은 KRW 고정, 원장을 읽지 않음).
+- #1453(Baker)는 이 함수의 base 의존 제거를 다루므로, **run-only 전환으로 요구가 단순화**된다. 조율 코멘트 유지.
 
-### 2-5. 정산 run 저장소
+### 2-3. run 저장소·RLS·불변성 (5차 승인 유지)
 
 ```
 zen_ups_settlement_runs
@@ -178,175 +110,128 @@ zen_ups_settlement_run_charges
   index (run_id, tier, line_no)   -- 같은 이름 중복 허용
 ```
 
-- **tier 매핑**: `ADMIN_TO_AGENCY`(대리점 청구), `SHIPPER`(화주 청구). `billing_items_amounts`는 요청 tier가 `ADMIN_TO_AGENCY`면 agency, `AGENCY_TO_SHIPPER`·`ADMIN_TO_SHIPPER`면 shipper 행을 읽는다. **한 SHIPPER 행이 두 발행자 tier를 처리**한다.
-  - 근거: `src/lib/ups/shipper-pricing.ts:1~5` — "Admin 판매가에서 Zone별 할인율로 직접 계산(Agency 원가 경유 안 함)", `finalFreight = discountedBase + fuel + other + surge`. 대리점 마진은 `agencyCostPrice`와 플랫폼가의 차이로, 화주 금액에 가산되지 않는다.
-- **append-only 버전**: 재정산은 새 version 추가(기존 run 불변). **같은 입력 2회**: 최신 run과 계산 결과(정렬된 name+amount 목록 포함)가 동일하면 **새 version 미생성**.
-- **금액 분해**: `freight_adjustment = target - (base+fuel+surge+other)`(음수 가능). ADJ를 "기타 부가운임"에 섞지 않는다. breakdown이 없으면 `base=target`, 나머지 0, 차액은 adjustment.
-- `settlement_charges_total` = charges 합(항목별 반올림 후). charge amount **음수 허용(admin)**. `line_total = base+fuel+surge+other+freight_adjustment+charges`.
-- **통화**: run 금액은 **KRW**. 입력 통화는 출고확정일 환율로 환산, 항목별 반올림.
+- **tier**: `ADMIN_TO_AGENCY`(대리점 청구), `SHIPPER`(화주 청구). 한 SHIPPER 행이 `AGENCY_TO_SHIPPER`·`ADMIN_TO_SHIPPER`를 모두 처리한다(근거: `shipper-pricing.ts` — Agency 원가 경유 안 함).
+- **append-only**: 재정산은 새 version. 같은 입력 2회는 새 version 미생성(정렬된 name+amount 비교).
+- **금액**: `freight_adjustment = target - (base+fuel+surge+other)`(음수 가능), `settlement_charges_total` = 항목별 반올림 합, `line_total = base+fuel+surge+other+freight_adjustment+charges`.
+- **RLS tier 분리**: ADMIN/SUPER/MANAGER 전체, AGENCY 자기 `ADMIN_TO_AGENCY`+소속 화주 `SHIPPER`, SHIPPER 자기 `SHIPPER`만(대리점 매입가 0건), anon 0.
+- **불변성**: RLS는 SELECT 정책만, `REVOKE ALL` 후 `authenticated`에 SELECT만, run·amounts·charges에 `BEFORE UPDATE/DELETE` 트리거. 쓰기는 DEFINER RPC만.
+- **표시**: run 금액·항목명이 화주·대리점 화면/청구서의 단일 소스. `freight_adjustment`는 "운임 조정", `SETTLEMENT_CHARGE`는 "부가운임"으로 분리.
 
-### 2-6. run RLS — tier 단위 분리 (필수·보안)
+### 2-4. UPS 인보이스 자동 생성 중단
 
-`run_amounts`·`run_charges` SELECT 정책:
+- `operations/orders.ts`의 `nextStatus === RELEASED` 분기에서 **UPS 오더는 `generateInvoicesForOrder`를 호출하지 않는다**(비UPS만 호출).
+- 비UPS 오더의 인보이스 생성·마감은 **변경하지 않는다**(JSJung 확인 대기 — 이 범위 밖).
+- `generateInvoicesForOrder`를 직접 호출하는 관리자 액션(`generateInvoiceAction`)도 UPS 오더에는 사용하지 않도록 UI/가드를 정리한다.
 
-| 역할 | 허용 행 |
-|:--|:--|
-| ADMIN·ZENITH_SUPER_ADMIN·MANAGER | 전체 |
-| AGENCY | 자기 오더(`order.agency_org_id = 내 org`)의 **`ADMIN_TO_AGENCY`**(자기 매입가) + **`SHIPPER`** 행 |
-| SHIPPER | 자기 오더(`order.shipper_id = 내 org`)의 **`SHIPPER` 행만** — `ADMIN_TO_AGENCY` **0건** |
-| anon | 0건 |
+### 2-5. 이미 생긴 UPS 인보이스 처리 — 비교
 
-- `runs` 헤더도 같은 오더 소유 조건으로 제한(금액 없음).
-- `billing_items_amounts`는 **SECURITY INVOKER 유지**. 대리점이 소속 화주 statement를 만들 때 `SHIPPER` 행을 읽고, 화주는 agency 행을 읽지 못한다.
-- **세션 매트릭스 테스트**: SHIPPER가 `ADMIN_TO_AGENCY` 0건(양성 대조: 자기 SHIPPER 행 1건), AGENCY가 두 tier, ADMIN 전체, anon 0. 결과표만 문서화(재현 절차 없음).
+| 안 | 내용 | 장점 | 단점·위험 |
+|:--|:--|:--|:--|
+| **(a) 일괄 취소 (권장)** | UPS 오더의 비취소 인보이스를 1회 스크립트/마이그레이션으로 `CANCELED` 처리(연결 원가 행은 불변 트리거로 건드리지 않음). 이전 상태 백업 + 롤백 SQL | 신규 경로와 충돌 제거, `legacy_invoiced_order` 가드 자연 통과 | PAID 인보이스 처리·회계 영향 확인 필요 |
+| (b) `legacy_invoiced_order` 가드 제거 | 정산 가드만 제거 | 변경 작음 | 남은 인보이스와 이중 청구 위험 |
+| (c) 가드 유지 + 제외 표시 | 기존 상태 유지 | 데이터 무변경 | 해당 오더 정산 불가, 단일 경로 원칙 위배 |
 
-#### run 테이블 불변성·권한 (Jaison 5차 보완)
+- **권장: (a)**. `PAID` 인보이스는 일괄 취소에서 **제외**하고, 해당 오더는 `paid_invoice_exists`로 신규 정산을 막아 **이중 청구를 방지**한다(처리 방침은 JSJung 확인).
+- 스크립트는 `zen_invoices` 상태만 변경하고 `zen_invoice_history`에 사유를 남긴다. 연결 `zen_order_costs`는 그대로 둔다.
+- 원격 DB 변경은 **R-14 승인 후**에만 수행한다.
+
+### 2-6. 기존 SETTLED·run 없는 UPS 오더 처리
 
 | 안 | 내용 | 장점 | 단점 |
 |:--|:--|:--|:--|
-| **(a) 권한 최소화 + RLS + 트리거 (권장)** | `REVOKE ALL` 후 `authenticated`에 **SELECT만**, INSERT/UPDATE/DELETE 정책 없음. run/amounts/charges에 `BEFORE UPDATE OR DELETE` 트리거 | service_role 실수에도 append-only 유지 | 테스트 정리는 replica 필요 |
-| (b) 권한만 | DML grant 회수 | 단순 | service_role은 우회 |
-| (c) RLS만 | DML 정책 미생성 | 앱 레벨 방어 | service_role은 우회 |
+| **(a) 재정산 대상으로 초기화 (권장)** | `SETTLED`이면서 run이 없는 UPS 오더를 `NOT_SETTLED`로 1회 초기화(백업·롤백 SQL) | 단일 경로로 재정산·청구 가능 | 상태 이력 변경 |
+| (b) 청구서 대상에서 제외 | run 없으면 `settlement_run_missing`으로 차단 | 데이터 무변경 | 해당 오더 영구 미청구 |
+| (c) 최소 run 백필 | 기존 원장/스냅샷으로 run 1회 생성 | 청구 가능 | 레거시 금액 품질 문제 재도입 |
 
-- **권장: (a)**. 쓰기는 `finalize_ups_settlement_run`(DEFINER)만 수행한다.
-- 트리거는 `UPDATE`·`DELETE` 시 예외를 발생시켜 append-only를 강제한다. run 교체가 필요하면 **새 version INSERT**만 한다.
+- **권장: (a)**, 보존 의무가 없고 단일 경로 원칙에 맞다. 초기화 대상·시점은 배포 절차에 포함한다.
+- (c)는 ADJ·통화·tier 문제를 다시 들여오므로 사용하지 않는다.
 
-### 2-7. `billing_items_amounts` + 청구서 항목
+### 2-7. 옛 UPS 기능 정리표 (비UPS 불변)
 
-- 최신 run이 있으면 run 금액 반환(KRW, `charge_weight_kg`=run 값). 반환 컬럼 추가: `freight_adjustment numeric`, `charge_details jsonb`.
-  - `other_charges` = run `other_charges` + `settlement_charges_total`, `line_total` = base+fuel+surge+other+freight_adjustment+charges.
-- run이 없으면 **현행 로직 폴백**(legacy: `zen_order_costs`/스냅샷, `unsupported_cost_currency` 유지, `freight_adjustment=0`, `charge_details=null`). **legacy 값 동일성 회귀 테스트 필수**.
-- **run 경로에서는 비KRW 원장 통화 가드를 우회**한다(함수가 원장을 읽지 않으므로). `create_billing_statement_with_items`의 통화 가드도 **run 존재 시 우회**하도록 함께 변경(현재는 원장을 직접 검사).
-- `zen_billing_statement_items` 컬럼 추가: `freight_adjustment numeric not null default 0`, `charge_details jsonb null`.
-- 표시: `other_charges`는 기타+부가운임 합, `charge_details`로 항목명, `freight_adjustment`는 "운임 조정" 별도 라인. `line_total` 불변식 유지.
-
-### 2-8. 항목명·중복·ADJ·라벨
-
-- **같은 이름 중복 허용**: `run_charges`는 `id` PK + `line_no`, 이름 unique 없음. 같은 이름 2건은 2행으로 저장하고 합계를 낸다(항목별 반올림 불변식 유지). 표시는 이름별 그룹(선택).
-- **ADJ 분류**: run 경로의 ADJ는 `freight_adjustment`(운임 조정)로 분리. legacy 폴백은 현행 유지.
-- **라벨**:
-
-| cost_type | 라벨(화주·대리점) |
-|:--|:--|
-| `SETTLEMENT_CHARGE` | **부가운임** |
-| `OTHER_CHARGE` | 기타 부가운임 |
-| `UPS_ACTUAL_COST_ADJ` | **운임 조정** |
-| `UPS_ACTUAL_ADJUSTMENT`(legacy) | 부가운임(정산) |
-
-- #1451(B-377) 라벨 표에 `UPS_ACTUAL_COST_ADJ`가 없다 → **두 task file 동시 갱신 필요**(이 Task 제안: "운임 조정").
-- **표시 소스**: 컷오버 후 오더는 run(amounts+charges), 컷오버 전은 기존 `zen_order_costs`. B-377 표시 설계는 두 소스를 지원해야 한다(§2-13).
-
-### 2-9. 실비 등록 경로 (컷오버 전 유지·후 거부)
-
-| 대상 | 컷오버 전 오더 | 컷오버 후 오더 |
-|:--|:--|:--|
-| `recordUpsActualCharges` | **현행 유지**(쓰기 허용, 폐기 오류 없음) | **거부**(`use_settlement_path`) |
-| `UpsActualAdjustmentForm` | **현행 유지**(admin 가드) | **미노출** |
-| `zen_ups_actual_charges` | 유지·이력 | 읽기 전용(과거) |
-| `UPS_ACTUAL_ADJUSTMENT` | legacy 인보이스 연결 유지 | 신규 생성 없음 |
-
-- 판정은 #1369 함수(설정값) 재사용. #1440 admin 가드·#1441 정책 제거는 유지(권한 확대 금지).
-- **테이블 DROP((b)안)은 범위 제외** — 컷오버 전 오더가 계속 사용.
-
-### 2-10. 레거시 기능 정리표
-
-| 기능 | 컷오버 전 | 컷오버 후 | 비고 |
+| 기능 | UPS 오더 | 비UPS 오더 | 권장 |
 |:--|:--|:--|:--|
-| `BillingConfirmModal`·`finalizeDailyShipperInvoices` | 유지 | 미사용 | legacy 인보이스 |
-| `OrderSettlementDetail`(기존 동작) | 유지 | 신규 화면으로 라우팅 | (A)안 |
-| `recordUpsActualCost`·`recordActualCostAndFinalize`·`markOrderCostSettled` | 유지 | 미사용 | legacy 결함은 DEF |
-| `recordUpsActualCharges`·`UpsActualAdjustmentForm` | 유지 | 거부/미노출 | §2-9 |
-| `finalizeUpsSettlement`(신규) | 비활성 | 사용 | post-cutover 전용 |
-| `/finance/statements` | **컷오버 전 오더 제외**(#1369 정책) | 사용 | legacy 폴백 회귀 테스트 |
-| `/finance/daily-billing` | 유지 | 미사용 | legacy |
+| 출고확정 시 `generateInvoicesForOrder` | **중단** | 유지 | 조건 분기(§2-4) |
+| `BillingConfirmModal` | **제거/숨김** | 해당 없음 | UPS 진입점 제거 |
+| `finalizeDailyShipperInvoices` | **UPS 항목 제외** | 유지 | 필터/가드 |
+| `recordUpsActualCost` | **제거**(신규 경로 대체) | — | 코드 제거 |
+| `recordActualCostAndFinalize` | **제거** | — | 코드 제거 |
+| `recordUpsActualCharges` | **전 오더 폐기** | — | 오류/숨김 → 제거 |
+| `UpsActualAdjustmentForm` | **제거** | — | UI 제거 |
+| `markOrderCostSettled` | 신규 RPC로 흡수 | — | 제거/내부화 |
+| `unmarkOrderCostSettled` | 유지(statement 포함 차단) | — | 유지 |
+| `/finance/daily-billing` UPS 항목 | **숨김/제외** | 유지 | UI |
+| `/finance/statements` | 신규 경로 | — | 사용 |
+| `zen_ups_actual_charges` | 데이터 이력 | — | 코드 제거 후 **DROP은 별도 결정**(비가역) |
 
-- **호출처 grep(2026-11-23)**: `recordActualCostAndFinalize`→`BillingConfirmModal.tsx:6,118`; `recordUpsActualCost`→`OrderSettlementDetail.tsx:15,192`·`UpsActualAdjustmentForm.tsx:5,143`; `previewUpsActualCost`→3개 컴포넌트; `recordUpsActualCharges`→`UpsActualAdjustmentForm.tsx:4,243`; `markOrderCostSettled`→`OrderSettlementDetail.tsx:16,213`·`finance/index.ts:36`; `BillingConfirmModal`→`ShipperDailyBillingClient.tsx:28,693`; `UpsActualAdjustmentForm`→admin client·orders page; `OrderSettlementDetail`→`finance/order-settlement/[orderId]/page.tsx:8,159`.
+- 실비 등록은 **전 오더에서 폐기**(정산마감 경유만). `zen_ups_actual_charges` 테이블 DROP은 코드 제거와 분리해 비교하고 JSJung이 결정한다.
+- `zen_ups_actual_other_charges`는 원가 측 감사용으로 유지(화면 비노출), 청구는 run을 쓴다.
 
-### 2-11. 청구서 발행 후·정산 해제
+### 2-8. DEF 영향표 (수정 금지, 보고만)
 
-| 시점 | 청구서 상태 | 정산 해제 | 부가운임 변경 |
-|:--|:--|:--|:--|
-| 정산 완료 전 | — | — | 임시저장만 |
-| 정산 완료 후·statement 생성 전 | 없음 | 허용(상태만, run 이력 유지) | 재정산 시 새 run version |
-| statement 생성 후 | `zen_billing_statement_items` 포함 | **차단**(`statement_includes_order`) | **불가**(unique(order_id,tier)) |
-| statement 발행 후 | `issued` 등 | 차단 | 불가 → 새 차수/조정은 후속 Task |
-
-- 청구서는 발행 시점 스냅샷이며 같은 오더·tier는 1회만 포함 → **정산이 청구서 생성보다 먼저 확정**되어야 한다.
-
-### 2-12. RPC — `finalize_ups_settlement_run`
-
-**보안**
-- `SECURITY DEFINER`, `SET search_path = public`.
-- `REVOKE ALL ... FROM PUBLIC, anon` → `GRANT EXECUTE ... TO authenticated`.
-- 내부에서 `auth.uid()`로 `zen_profiles.role` 검사: **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**. actor 파라미터 없음.
-- 앱은 **세션 클라이언트**로 호출(admin client 금지).
-- 테스트: SHIPPER·AGENCY·anon 직접 호출 거부, ADMIN·MANAGER 양성 대조.
-
-**상태·원자성**
-- `SETTLED` 이미면 거부, UPS·DELIVERED·컷오버 후·설정값 확인.
-- run+amounts+charges+주문 `SETTLED`를 **한 트랜잭션** → 부분 실패 없음.
-- 컷오버 전/설정값 없음이면 `legacy_order`(방어), 인보이스 존재 시 `unexpected_legacy_invoice`.
-- **컷오버 설정 RPC**: `set_ups_settlement_cutover_at` — **ADMIN·ZENITH_SUPER_ADMIN만**(MANAGER 제외), run 존재 시 `cutover_locked`, `zen_param_audit_log` 기록. run RPC와 분리한다.
-- **MANAGER 의존성**:
-
-| 단계 | 클라이언트 | RLS 의존 |
+| DEF | UPS 경로 제거 후 | 비UPS 인보이스 |
 |:--|:--|:--|
-| 원가 저장(`zen_ups_actual_cost`·`zen_ups_actual_other_charges`) | 세션 | 두 테이블 `admin_manager_all`에 MANAGER 포함(정책 정의 확인) |
-| run RPC | 세션 | DEFINER + `auth.uid()` → RLS 무관, MANAGER 동작 |
-| statement 생성(별도 흐름) | 세션 | 기존 정책(#1463과 무관) |
+| DEF-B-165 | UPS 포함·AGENCY 허용 부분 **소멸** | 남음 |
+| DEF-B-166 | UPS 인보이스 마감 경로 **소멸** | 남음 |
+| DEF-B-167 | C 경로 **소멸** | 트리거 자체는 잔존(기존 행) |
+| DEF-B-169 | A 경로 **소멸** | 해당 없음 |
+| DEF-B-170 | B 경로 **소멸** | 해당 없음 |
+| DEF-B-168 | UPS 인보이스 취소는 별도 스크립트 | 비UPS `rejectInvoice` 경로 **남음** |
 
-### 2-13. B-377(#1451)·B-382(#1463) 정합
+### 2-9. RPC·보안·원자성 (유지)
 
-- **B-377**: 컷오버 후 표시 소스가 `zen_order_costs`가 아니라 run이므로 B-377의 `cost_name`·가드 함수 가정을 **다시 써야 한다**.
-  - 일정: B-381 설계 확정 → B-377이 run 소스로 표시 설계 갱신(PR #1454) → 구현은 B-381 run API 확정 후. 두 task file을 함께 갱신. #1451에 일정 코멘트.
-- **B-382**: 이 Task는 정책을 바꾸지 않는다. DEFINER RPC·`zen_order_costs` INSERT 전용으로 B-382의 UPDATE/DELETE 근거가 줄어 재산정 필요(Jaison이 #1463에 전달). DEF-B-168은 Baker 브랜치 사용.
+- `finalize_ups_settlement_run`: `SECURITY DEFINER`, `search_path` 고정, `REVOKE PUBLIC/anon` → `GRANT authenticated`, `auth.uid()` 역할 검사 **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**, actor 파라미터 없음, 세션 클라이언트 호출.
+- run+amounts+charges+`SETTLED` 한 트랜잭션. 부분 실패 없음.
+- 이미 `SETTLED`면 거부, 비취소 UPS 인보이스가 있으면 `ups_invoice_exists`, PAID 인보이스가 있으면 `paid_invoice_exists`.
+- 테스트: SHIPPER·AGENCY·anon 거부, ADMIN·MANAGER 양성 대조.
 
-### 2-14. R-11·Ds-11
+### 2-10. R-11·Ds-11
 
-- 신규/변경: `finalizeUpsSettlement`, `saveUpsSettlementDraft`, `previewUpsSettlement`, RPC `finalize_ups_settlement_run`, `billing_items_amounts`(컬럼 추가).
-- 입력: UPS 인보이스 정보·중량/치수·원가 항목·부가운임 항목(음수 허용)·사유.
-- 출력: `{success, settled, runVersion, statementPreview:{tier,base,fuel,surge,other,freightAdjustment,charges,total,weightKg}[], recalculated, error}`.
-- 오류: `permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`·`legacy_order`·`unexpected_legacy_invoice`·`currency_conversion_failed`·`rpc_failed`.
-- Ds-11: `Ds_11_11B_UPS_Agency_Actuals.md`, `Ds_11_04_Finance_Settlement.md`, 인덱스. 구현 PR에서 갱신(R-12).
+- 신규/변경: `finalizeUpsSettlement`, `saveUpsSettlementDraft`, `previewUpsSettlement`, RPC `finalize_ups_settlement_run`, `billing_items_amounts`(run 전용·컬럼 추가), `zen_billing_statement_items`(`freight_adjustment`·`charge_details`).
+- 오류: `permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`·`ups_invoice_exists`·`paid_invoice_exists`·`settlement_run_missing`·`currency_conversion_failed`·`rpc_failed`.
+- Ds-11: `Ds_11_11B_UPS_Agency_Actuals.md`, `Ds_11_04_Finance_Settlement.md`, 인덱스. 구현 PR에서 갱신.
 
-### 2-15. 테스트 계획
+### 2-11. 테스트 계획 (단일 경로)
 
-**신규(path)**
-1. 컷오버 후 정산 완료 → run 양 tier 값, `charge_weight_kg`=재계산 중량, `billing_items_amounts` 일치.
-2. ADJ `freight_adjustment` 분리, `other_charges`에 미혼입.
-3. `charge_details` 항목명·금액(항목별 반올림 합=총액), **같은 이름 2건** 2행·합계.
-4. 비KRW 원장이어도 run 경로 statement 생성 성공, legacy 폴백은 현행 차단 유지.
-5. 같은 입력 2회 → 새 version 미생성·금액 불변.
-6. run RLS 매트릭스(SHIPPER agency 0건, AGENCY 2 tier, ADMIN 전체, anon 0).
-7. RPC 보안·원자성(부분 실패 롤백).
-8. 컷오버 경계: 당일·전일, 설정값 없음/오류, 출고확정 취소·변경, in-flight.
-9. 컷오버 전 오더: 신규 액션 `legacy_order`, 기존 화면·액션 무변경(스모크).
-10. legacy 폴백 `billing_items_amounts` 값이 변경 전과 동일(회귀).
+1. 정산 완료 → run 양 tier, `charge_weight_kg`·`billing_items_amounts` 일치.
+2. ADJ `freight_adjustment` 분리, `other_charges` 미혼입, 항목명·항목별 반올림 합=총액(같은 이름 2건 포함).
+3. 같은 입력 2회 → 새 version 미생성·금액 불변.
+4. run RLS 매트릭스(SHIPPER agency 0건, AGENCY 2 tier, ADMIN 전체, anon 0).
+5. RPC 보안·원자성(부분 실패 롤백), MANAGER 양성.
+6. UPS 출고확정 → 인보이스 미생성, 비UPS → 생성(회귀).
+7. 기존 UPS 인보이스 일괄 취소(연결 원가 불변) + `ups_invoice_exists` 해제, PAID 예외 차단.
+8. 기존 SETTLED·run 없음 초기화 → 재정산 성공(`settlement_run_missing` 해소).
+9. 옛 UPS 화면·액션 제거 후 비UPS 화면 무회귀.
+10. R-10: 새 정산마감·청구서 화면(화주·대리점) 스크린샷, `/admin/error-logs` 신규 ERROR 0.
+11. `npm run test:regression` PASS, `npm run build`.
 
-**표시·연계**
-11. B-377 표시(컷오버 후 run 소스, 항목명·운임 조정 라벨).
-12. before/after 스크린샷, 기존 화면 무회귀.
-13. `npm run test:regression` PASS.
-
-### 2-16. 마이그레이션·배포 순서
+### 2-12. 마이그레이션·배포 순서
 
 | # | 내용 | 시점 | 롤백 |
 |:-:|:--|:--|:--|
-| M1 | run 3테이블 + RLS(tier 분리) | 앱 배포 전 | DROP TABLE |
-| M2 | `billing_items_amounts` run 분기 + `create_billing_statement_with_items` 통화 가드 우회 + `zen_billing_statement_items`(`freight_adjustment`·`charge_details`) | **#1453 조율 후**, 앱 배포 전 | 함수/컬럼 원복 |
+| M1 | run 3테이블 + RLS(tier) + 불변 트리거 | 앱 배포 전 | DROP TABLE |
+| M2 | `billing_items_amounts` run 전용 + `zen_billing_statement_items`(`freight_adjustment`·`charge_details`) + 통화 가드 제거 | 앱 배포 전 | 함수/컬럼 원복 |
 | M3 | RPC `finalize_ups_settlement_run`(보안 GRANT 포함) | 앱 배포 전 | DROP FUNCTION |
-| M4 | 컷오버 config 테이블 + RLS + 동결 트리거 + `set_ups_settlement_cutover_at` RPC + `zen_param_audit_log` | 앱 배포 전 | DROP TABLE/FUNCTION/TRIGGER |
+| M4 | UPS 인보이스 일괄 취소(비PAID) + 상태 백업 + `zen_invoice_history` | 앱 배포 후 **R-14 승인 후** | 백업에서 상태 복원 |
+| M5 | 기존 SETTLED·run 없음 UPS 오더 `NOT_SETTLED` 초기화(백업·롤백) | M4 후 | 백업에서 복원 |
 
 **배포 순서**
 1. Ds-11 확정.
-2. **#1369(판정 함수·인보이스 생성 중단) 선행** — 이 Task는 의존.
-3. M1·M2·M3 배포(추가형, 기존 앱 무영향).
-4. 앱: 신규 화면·액션 추가(컷오버 설정값이 없어 **비활성**).
-5. 배포 후 **마지막에 `set_ups_settlement_cutover_at` RPC로 설정값 기록** → 신규 분기 활성.
-6. B-377 표시 갱신.
+2. M1·M2·M3 배포(추가형).
+3. 앱 배포: UPS 자동 인보이스 중단 + 신규 정산 화면/액션(비취소 UPS 인보이스가 있으면 `ups_invoice_exists`로 차단).
+4. M4 실행 → 비취소 UPS 인보이스 0건 확인.
+5. M5 실행(필요 시) → 기존 SETTLED UPS 오더 재정산 가능.
+6. R-10: 신규 경로로 정산·청구서 생성 확인.
 
-- 컷오버 전 오더는 `billing_items_amounts` legacy 폴백으로 현행 동작 유지(회귀 필수). 컷오버 후 오더만 run 경로.
-- 진행 중 legacy draft/인보이스는 무변경.
+- 컷오버 설정·`isBeforeCutover`·레거시 분기는 **없다**.
+- 비UPS 오더·인보이스는 무변경.
+
+### 2-13. 연계 정합
+
+- **#1369(TASK-B-363)**: 컷오버 구현이 아니라 **옛 UPS 기능 정리·자동 인보이스 중단** 범위로 변경. B-381은 조건·요구만 명시하고 구현 중복을 피한다. (이전 컷오버 요구 코멘트는 철회)
+- **B-377(#1451)**: 표시 소스는 **run 단일**. pre/post 분기 삭제. 설계 갱신 일정은 B-381 확정 후 PR #1454에서.
+- **B-382(#1463)**: RPC DEFINER·`zen_order_costs` DML 미사용으로 MANAGER 정책 근거 재산정. 이 Task는 정책 미변경.
+- **#1453(Baker)**: `billing_items_amounts` run 전용으로 base 의존이 사라짐 — 조율 코멘트 유지.
+- **`zen_ups_actual_charges` DROP**: 코드 제거 후 별도 결정(비가역, JSJung).
 
 ---
 
@@ -354,31 +239,22 @@ zen_ups_settlement_run_charges
 
 | # | 항목 | 상태 |
 |:-:|:--|:--|
-| 1 | **반영 시점**(임시저장 vs 정산 완료) | **JSJung 확인**. 권장=정산 완료 시점 |
-| 2 | **컷오버 경계 판정** | **#1369 전달**. 제안=인보이스 우선 + `timestamptz`(출고확정 시각 ≥ 컷오버 시각). 날짜 `>=` 방식은 당일 배포 전 오더를 정산 불가로 만든다 |
-| 2a | 컷오버 설정 쓰기 권한·감사 | **권장=전용 테이블+RPC(ADMIN·SUPER만)+`zen_param_audit_log`**. MANAGER 쓰기 금지, run 존재 시 동결. audit 항목은 JSJung 확인 |
-| 3 | `billing_items_amounts` 변경 순서 | **#1453(Baker) 회신 대기** — 2026-11-23 코멘트 |
-| 4 | B-377 표시 설계 갱신 일정 | B-381 확정 후 B-377이 run 소스로 갱신(#1451 코멘트) |
-| 5 | statement 발행 후 금액 변경 | **불가**(unique). 후속 Task |
-| 6 | run 항목명 표시 그룹화(같은 이름) | UI 결정(합계/개별) |
-| 7 | 운영 데이터 | Aiden 읽기 전용 조회(0건·연결 18·트리거 활성), Jaison 미검증 |
+| 1 | 비UPS 오더 무변경 | **JSJung 확인 대기** (이 범위 밖 가정) |
+| 2 | PAID UPS 인보이스 처리 | **JSJung 확인** — 일괄 취소 제외 + 신규 정산 차단(`paid_invoice_exists`) 권장 |
+| 3 | 기존 SETTLED·run 없음 UPS 오더 | **JSJung 확인** — 재정산 초기화(M5) 권장 |
+| 4 | `zen_ups_actual_charges` DROP | **JSJung 결정**(코드 제거 후, 비가역) |
+| 5 | `billing_items_amounts` 폴백 제거 | **(a) run-only 권장** — Jaison/Aiden 확인 |
+| 6 | #1453 조율 | 회신 대기 |
+| 7 | R-10 증적 대상 | 새 정산마감·청구서 화면(화주·대리점) |
 
----
+## 4. 관련 DEF (수정 금지)
 
-## 4. 관련 DEF (R-18, 수정 금지·보고만)
-
-| DEF | 내용 | 상태 |
-|:--|:--|:--|
-| **DEF-B-169** | A 경로 중량 변경 시 재계산 없음 | **이 브랜치 신규** |
-| **DEF-B-170** | B 경로 부가운임 청구 미반영·항목명 소실 | **이 브랜치 신규** |
-| **DEF-B-167** | 연결 비용 행 불변 트리거 + 재정산 오류 미확인(C 재등록 실패 포함) | 이 브랜치(링크) |
-| **DEF-B-168** | `rejectInvoice` 원가 연결 해제 조용한 실패 | Baker 브랜치(PR #1465) — 링크 |
-| **DEF-B-165·166** | 일괄 마감·`markInvoiceFinalized` 결함 | TASK-B-377 브랜치(PR #1454) — 링크 |
+- DEF-B-165·166·167·169·170, DEF-B-168 링크. 영향표는 §2-8. DEF 번호 신규 등록 없음(설계 단계).
 
 ## 5. [작업 결과]
 
-- **설계 의견 5차**: 컷오버 후 전용으로 범위 축소(컷오버 전 현행 유지). Jaison 4차 보완 6건 + Aiden 6건 + JSJung 결정 반영.
-- 신규 DEF-B-169·170 등록, 167·168·165·166 링크.
-- run RLS tier 분리·중복 항목 허용·컷오버 설정값·#1369 선행·B-377 정합 일정 반영.
+- **설계 의견 6차**: 컷오버 폐기·단일 신규 경로로 재작성. 5차 승인(run·RLS·RPC·청구서 금액 원천) 유지.
+- 삭제: 컷오버 설정/RPC/동결/감사/경계/시험 환경, `isBeforeCutover`, LEGACY 분기.
+- 추가: 자동 인보이스 중단, 기존 인보이스 처리, SETTLED 초기화, 옛 기능 정리표, DEF 영향표.
 - 코드·마이그레이션 변경 없음.
-- PR: #1462 (draft, `Refs #1459`, `Refs #1451`, `Refs #1453`, `Refs #1463`).
+- PR: #1462 (draft, `Refs #1459`, `Refs #1451`, `Refs #1453`, `Refs #1463`, `Refs #1369`).
