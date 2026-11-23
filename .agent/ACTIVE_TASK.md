@@ -50,7 +50,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1470](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1470) | [Team A] TASK-1174: zen_invoice_history 접근 제어 정렬 (DEF-161) | a | p1 | in-progress | 미배정 | 2026-11-23 |
 | [#1467](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1467) | [IMP 제안] 대리점 화주 등급·할인율 수정(updateAgencyShipperGrade)의 역마진(정책 할인율) 가드 검토 — DEF-149 §1.1 후속 | b | p3 | open | 미배정 | 2026-11-23 |
 | [#1463](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1463) | [Team B] TASK-B-382: MANAGER의 UPS 정산마감 관련 테이블 RLS 정책 정렬 (규칙 1 이행, 설계 의견부터) | b | p2 | draft | 미배정 | 2026-11-23 |
 | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | draft | 미배정 | 2026-11-23 |
@@ -69,7 +68,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | blocked | 미배정 | 2026-11-20 |
 | [#1368](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1368) | [Team B] TASK-B-362: 청구서관리 ⑤ 청구서 PDF 생성·다운로드 및 발행 이메일 | b | p2 | blocked | 미배정 | 2026-11-17 |
 | [#1364](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1364) | [Team B] EPIC: 청구서관리 — 오더정산·청구서 생성/관리 (추적용) | b | p2 | in-progress | 미배정 | 2026-11-23 |
-| [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) | [Aiden → Team B] DEF-151 UPS 요율 조회 액션 원가 포함 반환·가드 공백, /agency/other-charges 원가 노출 수정 요청 | b | p1 | open | 미배정 | 2026-11-22 |
+| [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) | [Aiden → Team B] DEF-151 UPS 요율 조회 액션 원가 포함 반환·가드 공백, /agency/other-charges 원가 노출 수정 요청 | b | p1 | open | 미배정 | 2026-11-23 |
 | [#1356](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1356) | [Aiden → Team B] DEF-150 finance/UPS 실비·정산 액션 대리점 필터 누락·가드 공백 수정 요청 | b | p1 | in-progress | 미배정 | 2026-11-22 |
 | [#1346](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1346) | [Team A] TASK-1160: 231 PoC 단계 2 — 모듈 ①② 위험 3군 재현·실DB 편입 측정 (§10 #4·#6·#13·#16 확정 반영) | a | p3 | blocked | 미배정 | 2026-11-18 |
 | [#1336](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1336) | [Team A] TASK-1154: DEF-146 P2 — 간접 의존 high 4건 해소 (browserslist·dompurify·source-map-js·ws) | a | p2 | open | 미배정 | 2026-11-22 |
