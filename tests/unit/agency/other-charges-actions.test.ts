@@ -26,12 +26,18 @@ describe('TC-AG-OC: Agency Other Charges CRUD', () => {
     filter.eq = vi.fn(() => filter);
     filter.order = vi.fn(() => filter);
     filter.then = vi.fn((r: any) => r({ data: [], error: null }));
+    filter.maybeSingle = vi.fn(() => Promise.resolve({ data: { id: 'charge-001', agency_org_id: 'agency-001' }, error: null }));
 
     mockSupabase = {
       from: vi.fn(() => ({
         select: vi.fn(() => filter),
         upsert: vi.fn(() => Promise.resolve({ error: null })),
-        update: vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) })),
+        update: vi.fn(() => {
+          const chain: any = {};
+          chain.eq = vi.fn(() => chain);
+          chain.select = vi.fn(() => Promise.resolve({ data: [{ id: 'charge-001' }], error: null }));
+          return chain;
+        }),
         eq: vi.fn(() => filter),
         order: vi.fn(() => filter),
       })),
