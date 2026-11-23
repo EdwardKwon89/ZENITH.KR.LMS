@@ -18,6 +18,8 @@ const U_OTHER = randomUUID();    // AGENCY @ ORG_OTHER
 const U_SHIPPER = randomUUID();  // INDIVIDUAL @ ORG_SHIPPER
 const U_ADMIN = randomUUID();    // ADMIN @ ORG_STRANGER (발행자 org 아님 → 감독 경로 ③만으로 조회 격리)
 const U_MANAGER = randomUUID();  // MANAGER @ ORG_STRANGER (감독 제외 대상)
+const U_OPERATOR = randomUUID(); // OPERATOR @ ORG_STRANGER (TASK-B-378: seq 비허용 음성 대조)
+const U_SUPER = randomUUID();    // ZENITH_SUPER_ADMIN @ ORG_STRANGER (TASK-B-378: seq 허용 양성 대조)
 
 const KEY = randomUUID().substring(0, 8);
 const madeOrders: string[] = [];
@@ -52,7 +54,9 @@ function claims(profileId: string): string {
   const role =
     profileId === U_ISSUER || profileId === U_OTHER ? 'AGENCY' :
     profileId === U_SHIPPER ? 'INDIVIDUAL' :
-    profileId === U_ADMIN ? 'ADMIN' : 'MANAGER';
+    profileId === U_ADMIN ? 'ADMIN' :
+    profileId === U_SUPER ? 'ZENITH_SUPER_ADMIN' :
+    profileId === U_OPERATOR ? 'OPERATOR' : 'MANAGER';
   return `{"sub": "${profileId}", "role": "authenticated", "app_metadata": {"role": "${role}", "org_id": "${profileOrg(profileId)}"}}`;
 }
 
@@ -139,7 +143,9 @@ function setupFixture() {
     ('${U_OTHER}',  '${ORG_OTHER}',  'b359-other-${KEY}@test.com',  'AGENCY', NOW()),
     ('${U_SHIPPER}','${ORG_SHIPPER}','b359-shipper-${KEY}@test.com','INDIVIDUAL', NOW()),
     ('${U_ADMIN}',  '${ORG_STRANGER}','b359-admin-${KEY}@test.com', 'ADMIN', NOW()),
-    ('${U_MANAGER}','${ORG_STRANGER}','b359-manager-${KEY}@test.com','MANAGER', NOW())`);
+    ('${U_MANAGER}','${ORG_STRANGER}','b359-manager-${KEY}@test.com','MANAGER', NOW()),
+    ('${U_OPERATOR}','${ORG_STRANGER}','b359-operator-${KEY}@test.com','OPERATOR', NOW()),
+    ('${U_SUPER}',  '${ORG_STRANGER}','b359-super-${KEY}@test.com',  'ZENITH_SUPER_ADMIN', NOW())`);
   psql(`INSERT INTO public.zen_agency_shippers (id, agency_org_id, shipper_org_id, shipper_type, is_active, created_at)
     VALUES ('${randomUUID()}', '${ORG_ISSUER}', '${ORG_SHIPPER}', 'INDIVIDUAL', TRUE, NOW())`);
 }
@@ -231,7 +237,12 @@ describe('TASK-B-359 (Issue #1365): 청구서 DB — 헤더·항목·채번 RPC�
         ORDER BY proname`).split('\n');
       expect(secdef).toEqual(['create_billing_statement=false', 'next_billing_statement_seq=true']);
       expect(psql(`SELECT has_function_privilege('anon','public.create_billing_statement(text,integer,integer,uuid,text,text,date,date)','EXECUTE')`)).toBe('f');
+      // TASK-B-378 (#1452): seq GRANT를 청구서 생성 RPC 2종과 동일하게 정렬 —
+      // authenticated·service_role 허용 / PUBLIC·anon·dashboard_user 거부 (b359 REVOKE에 dashboard_user 방어적 명시)
       expect(psql(`SELECT has_function_privilege('authenticated','public.next_billing_statement_seq(integer,integer)','EXECUTE')`)).toBe('t');
+      expect(psql(`SELECT has_function_privilege('service_role','public.next_billing_statement_seq(integer,integer)','EXECUTE')`)).toBe('t');
+      expect(psql(`SELECT has_function_privilege('anon','public.next_billing_statement_seq(integer,integer)','EXECUTE')`)).toBe('f');
+      expect(psql(`SELECT has_function_privilege('dashboard_user','public.next_billing_statement_seq(integer,integer)','EXECUTE')`)).toBe('f');
       expect(psql(`SELECT has_function_privilege('authenticated','public.create_billing_statement(text,integer,integer,uuid,text,text,date,date)','EXECUTE')`)).toBe('t');
     });
   });
@@ -325,12 +336,64 @@ describe('TASK-B-359 (Issue #1365): 청구서 DB — 헤더·항목·채번 RPC�
       expect(psqlAs(U_ISSUER, `SELECT count(*) FROM public.zen_billing_statement_seq`)).toBe('0');
     });
 
-    it('TC-359-Q1b: authenticated의 next_billing_statement_seq 호출은 허용(원자 증분 1→2)', () => {
-      const a = psqlAs(U_ISSUER, `SELECT public.next_billing_statement_seq(2026, 12)`);
-      const b = psqlAs(U_ISSUER, `SELECT public.next_billing_statement_seq(2026, 12)`);
+    it('TC-359-Q1b: seq 역할 검사 — 허용(AGENCY·ADMIN·ZENITH_SUPER_ADMIN) 양성 + 비허용(INDIVIDUAL·MANAGER·OPERATOR) 거부 (TASK-B-378)', () => {
+      // ── 양성 대조: 허용 역할은 원자 증분이 계속된다
+      const a = psqlAs(U_ISSUER, `SELECT public.next_billing_statement_seq(2026, 12)`);   // AGENCY
+      const b = psqlAs(U_ISSUER, `SELECT public.next_billing_statement_seq(2026, 12)`);   // AGENCY (증분 확인)
       expect(Number(a)).toBeGreaterThan(0);
       expect(Number(b)).toBe(Number(a) + 1);
+      const c = psqlAs(U_ADMIN, `SELECT public.next_billing_statement_seq(2026, 12)`);    // ADMIN
+      expect(Number(c)).toBe(Number(b) + 1);
+      const d = psqlAs(U_SUPER, `SELECT public.next_billing_statement_seq(2026, 12)`);    // ZENITH_SUPER_ADMIN
+      expect(Number(d)).toBe(Number(c) + 1);
+
+      // ── 음성 대조: 비허용 역할은 create_not_allowed (두 RPC와 동일 오류 코드)
+      expect(psqlAsErr(U_SHIPPER, `SELECT public.next_billing_statement_seq(2026, 12)`))
+        .toContain('create_not_allowed: role=INDIVIDUAL');
+      // MANAGER: 이슈 본문은 "허용 역할"에 적혀 있으나 두 RPC(b359/b360) 모두 거부 → 코드 정합 우선(불일치는 task file·PR에 보고)
+      expect(psqlAsErr(U_MANAGER, `SELECT public.next_billing_statement_seq(2026, 12)`))
+        .toContain('create_not_allowed: role=MANAGER');
+      expect(psqlAsErr(U_OPERATOR, `SELECT public.next_billing_statement_seq(2026, 12)`))
+        .toContain('create_not_allowed: role=OPERATOR');
+
+      // ── 거부가 증분을 만들지 않음 (카운터는 마지막 허용 호출 d에서 정지)
+      expect(psql(`SELECT last_seq FROM public.zen_billing_statement_seq WHERE period_year=2026 AND period_month=12`)).toBe(String(d));
+
+      // ── auth.uid() 없는 직접 호출(슈퍼유저)도 차단 (SECURITY DEFINER 방어)
+      let superErr = '';
+      try { psql(`SELECT public.next_billing_statement_seq(2026, 12)`); } catch (err) { superErr = String(err); }
+      expect(superErr).toContain('profile_not_found');
+
       psql(`DELETE FROM public.zen_billing_statement_seq WHERE period_year=2026 AND period_month=12`);
+    });
+
+    it('TC-359-Q1c: 월 seq 4자리 상한 소진 — 10000 도달 시 lpad 절단 → statement_no UNIQUE 충돌로 생성 실패 (TASK-B-378)', () => {
+      // ① 절단 실측: 4자리 lpad는 10000을 '1000'으로 잘라낸다 (Postgres lpad)
+      expect(psql(`SELECT lpad('10000',4,'0')`)).toBe('1000');
+
+      const M = 6;
+      psql(`DELETE FROM public.zen_billing_statement_seq WHERE period_year=2026 AND period_month=${M}`);
+      psql(`INSERT INTO public.zen_billing_statement_seq (period_year, period_month, last_seq) VALUES (2026, ${M}, 999)`);
+
+      // ② seq 1000에서 정상 생성 → ST-202606-01-1000
+      const first = createStatement(U_ISSUER, { orgId: ORG_SHIPPER, month: M });
+      expect(first.split('|')[0]).toBe('ST-202606-01-1000');
+
+      // ③ 카운터 소진(9999) 후 다른 발행자(Admin, round 1)로 생성 시도 → seq 10000이 같은 번호로 절단 → UNIQUE 충돌
+      psql(`UPDATE public.zen_billing_statement_seq SET last_seq=9999 WHERE period_year=2026 AND period_month=${M}`);
+      const err = psqlAsErr(U_ADMIN, `SELECT stmt_no FROM public.create_billing_statement('ADMIN_TO_AGENCY', 2026, ${M}, '${ORG_SHIPPER}', NULL, NULL, DATE '2026-06-01', DATE '2026-06-30')`);
+      expect(err).toContain('zen_billing_statements_statement_no_key');
+
+      // ④ 실패는 트랜잭션 롤백 → 카운터도 9999로 복귀 (재시도도 동일하게 실패)
+      expect(psql(`SELECT last_seq FROM public.zen_billing_statement_seq WHERE period_year=2026 AND period_month=${M}`)).toBe('9999');
+
+      // 정리: 생성 헤더 + 카운터 제거 (이후 블록의 월 6 생성·전체 카운터 검증에 영향 없도록)
+      psql(`ALTER TABLE public.zen_billing_statements DISABLE TRIGGER trg_billing_statement_before_delete;
+            ALTER TABLE public.zen_billing_statement_items DISABLE TRIGGER trg_billing_statement_items_guard;`);
+      psql(`DELETE FROM public.zen_billing_statements WHERE statement_no='ST-202606-01-1000'`);
+      psql(`ALTER TABLE public.zen_billing_statements ENABLE TRIGGER trg_billing_statement_before_delete;
+            ALTER TABLE public.zen_billing_statement_items ENABLE TRIGGER trg_billing_statement_items_guard;`);
+      psql(`DELETE FROM public.zen_billing_statement_seq WHERE period_year=2026 AND period_month=${M}`);
     });
   });
 
