@@ -3,7 +3,7 @@
 #### getAgencyOrgIdByShipper(shipperOrgId)
 - **Path**: `src/app/actions/agency/shipper-link.ts:6-17`
 - **설명**: 화주 조직 ID(`shipperOrgId`)로 연결된 활성 대리점 조직 ID(`zen_agency_shippers.agency_org_id`, `is_active = true`)를 단건 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/agency/shipper-link.ts:7`, 로그인 세션 검증만 수행하며 액션 내 별도 역할·소유권 가드 없음 — 일반 세션 클라이언트를 통해 `zen_agency_shippers` RLS 정책 적용, `DEF-149` 참조)
+- **권한**: `validateUserAction()` (로그인 세션 검증 + 액션 내 소유권 가드 없음 — **단, 일반 세션 클라이언트라 `zen_agency_shippers` RLS 정책이 적용됨을 실DB로 확인**: 대리점/화주 각각 자기 연결은 반환, 타 대상은 `null` → **수정 불필요**, TASK-B-374 점검 결과 TC-374-06)
 - **Input**: `shipperOrgId: string` (화주 조직 UUID)
 - **Output**: `Promise<string | null>` (연결된 `agency_org_id` 또는 `null`)
 - **오류**: 미인증/프로필 부재 시 `Error("Login required")` / `Error("Profile not found")` throw (`validateUserAction`); DB 조회 실패 시 `Error("대리점 조회 실패: ${error.message}")` throw (`shipper-link.ts:15`)
@@ -11,44 +11,44 @@
 #### getAgencyShippers(agencyOrgId)
 - **Path**: `src/app/actions/agency/shippers.ts:118-157`
 - **설명**: 특정 대리점(`agencyOrgId`) 소속 화주 연결 목록(`zen_agency_shippers`)과 화주 조직 상세(`shipper:shipper_org_id` 조인)를 생성일 내림차순으로 조회합니다.
-- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (`src/app/actions/agency/shippers.ts:119-122`, 허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY` — 단, `createAdminClient()`로 RLS를 우회하면서 `agencyOrgId === profile.org_id` 소속 일치 검증이 누락됨, `DEF-149` 참조)
+- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY`) + **대리점 소유권 검증** — `agencyOrgId === profile.org_id`를 확인하지 않으면 거부 (`ownAgencyError()`, TASK-B-374 / **DEF-149 §1.1 수정 반영**). `ZENITH_SUPER_ADMIN`은 `checkPermission` 전역 바이패스와 정합하여 예외
 - **Input**: `agencyOrgId: string` (대리점 조직 UUID)
 - **Output**: `Promise<{ shippers: AgencyShipperRow[] }>` (`src/types/agency.ts:14-25`)
-- **오류**: 미인증(`"Login required"` / `"Profile not found"`), 역할 불충족 시 `Error("Unauthorized access")` throw (`shippers.ts:121`); DB 조회 실패 시 `logger.error` 기록 후 `Error("Failed to fetch agency shippers: ${error.message}")` throw (`shippers.ts:151-154`)
+- **오류**: 미인증(`"Login required"` / `"Profile not found"`), 역할 불충족 시 `trError('permission_denied')` throw, **타 대리점 소유 시 `logger.warn` 후 `trError('own_agency_only')` throw** (`ownAgencyError()`); DB 조회 실패 시 `logger.error` 기록 후 `Error("Failed to fetch agency shippers: ...")` throw
 
 #### createAgencyShipper(agencyOrgId, shipperData)
 - **Path**: `src/app/actions/agency/shippers.ts:163-273`
 - **설명**: 대리점 소속 신규 화주 계정(Supabase Auth 사용자 + `zen_organizations` + `zen_profiles` + `zen_agency_shippers` 연결)을 생성하고 임시 비밀번호 환영 이메일을 발송합니다.
-- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (`src/app/actions/agency/shippers.ts:167-170`, 허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY` — `createAdminClient()` 사용 시 `agencyOrgId === profile.org_id` 검증 누락은 `DEF-149` 참조)
+- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY`) + **대리점 소유권 검증** — `agencyOrgId !== profile.org_id`이면 **생성 부수효과(Auth·조직·연결) 전에** 거부 (`ownAgencyError()`, **DEF-149 §1.1 수정 반영**)
 - **Input**: `agencyOrgId: string`, `shipperData: CreateAgencyShipperInput` (`CreateAgencyShipperSchema` Zod 검증: `name`, `shipper_type: 'INDIVIDUAL'|'CORPORATE'`, `discount_rate: 0~0.9999`, `login_email`, 법인 시 `biz_no` 필수 등, `src/lib/validations/agency.ts:3-34`)
 - **Output**: `Promise<CreateAgencyShipperResult>` (`{ success: true; shipperId: string; inviteEmailSent: boolean } | { success: false; fieldErrors: Record<string, string> }`, `shippers.ts:159-161`)
-- **오류**: 역할 불충족 시 `{ success: false, fieldErrors: { _form: '접근 권한이 없습니다.' } }` (`shippers.ts:169`); Zod 검증 실패 시 필드별 오류 맵 반환 (`shippers.ts:173-180`); Auth 생성 실패 시 `{ success: false, fieldErrors: { login_email: authError.message } }` (`shippers.ts:194-196`); 조직/프로필/연결 생성 실패 시 `_rollbackShipper()` 수행 후 `{ success: false, fieldErrors: { _form: '화주 조직/프로필/연결 생성에 실패했습니다.' } }` 반환 (`shippers.ts:235-259`)
+- **오류**: 역할 불충족 시 `{ success: false, fieldErrors: { _form: '접근 권한이 없습니다.' } }` (`shippers.ts:169`); **타 대리점 소유 시 `logger.warn` 후 `{ _form: trError('own_agency_only') }` 반환** (`ownAgencyError()`, **DEF-149 §1.1 수정 반영**); Zod 검증 실패 시 필드별 오류 맵 반환 (`shippers.ts:173-180`); Auth 생성 실패 시 `{ success: false, fieldErrors: { login_email: authError.message } }` (`shippers.ts:194-196`); 조직/프로필/연결 생성 실패 시 `_rollbackShipper()` 수행 후 `{ success: false, fieldErrors: { _form: '화주 조직/프로필/연결 생성에 실패했습니다.' } }` 반환 (`shippers.ts:235-259`)
 - **부수효과**: `supabase.auth.admin.createUser` 호출(`shippers.ts:189`), `sendShipperWelcomeEmail` 발송(실패 시 `logger.warn` 기록 후 비차단 진행, `shippers.ts:201-211`), `syncAuthMetadata`(`role: 'AGENCY_SHIPPER'`, `org_type: 'SHIPPER'`, `shippers.ts:264-269`), `revalidatePath('/agency/shippers')` (`shippers.ts:271`)
 
 #### updateAgencyShipperGrade(id, grade, discountRate)
 - **Path**: `src/app/actions/agency/shippers.ts:275-308`
 - **설명**: 대리점-화주 연결 행(`zen_agency_shippers.id`)의 등급(`grade`)과 할인율(`discount_rate`)을 수정합니다.
-- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (`src/app/actions/agency/shippers.ts:280-283`, 허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY` — `createAdminClient()` 사용 시 대상 행의 `agency_org_id === profile.org_id` 검증 및 역마진 가드 미적용은 `DEF-149` 참조)
+- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY`) + **대리점 소유권 검증** — UPDATE 전에 대상 행의 `agency_org_id`를 조회해 `profile.org_id`와 비교하고, 다르면 거부 (`ownAgencyError()`, **DEF-149 §1.1 수정 반영**). **역마진 가드는 미적용 유지** — `validateAgencyReverseMargin()`은 `zone_id` 인자 기반(zone 요율 전용)이라 `grade`/`discount_rate` 수정에는 대응 컨텍스트가 없음 → IMP 제안으로 추적
 - **Input**: `id: string` (`zen_agency_shippers.id`), `grade: string` (최대 20자), `discountRate: number` (`0 ~ 0.9999`, `UpdateAgencyShipperGradeSchema`, `src/lib/validations/agency.ts:36-39`)
 - **Output**: `Promise<{ success: true }>` (`shippers.ts:307`)
-- **오류**: 역할 불충족 시 `Error("Unauthorized access")` throw (`shippers.ts:282`); Zod 검증 실패 시 `Error("Validation failed: ${parsed.error.message}")` throw (`shippers.ts:287`); DB 업데이트 실패 시 `logger.error` 기록 후 `Error("Failed to update shipper grade: ${error.message}")` throw (`shippers.ts:300-303`)
+- **오류**: 역할 불충족 시 `trError('permission_denied')` throw; Zod 검증 실패 시 `Error("Validation failed: ...")` throw; 연결 행 미존재 시 `Error('Shipper not found')`; **타 대리점 소유 시 `logger.warn` 후 `trError('own_agency_only')` throw**; 조회/업데이트 실패 시 `logger.error` 후 `Error(...)` throw
 - **부수효과**: `revalidatePath('/agency/shippers')` (`shippers.ts:306`)
 
 #### getAgencyShipperById(shipperId)
 - **Path**: `src/app/actions/agency/shippers.ts:310-350`
 - **설명**: 대리점-화주 연결 ID(`shipperId`)로 단건 연결 정보 및 화주 조직 상세(`org:shipper_org_id` 주소·담당자 포함)를 조회합니다.
-- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (`src/app/actions/agency/shippers.ts:311-314`, 허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY` — `createAdminClient()` 사용 시 `agency_org_id === profile.org_id` 소유권 검증 누락은 `DEF-149` 참조)
+- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY`) + **대리점 소유권 검증** — 조회 성공 후 행의 `agency_org_id !== profile.org_id`이면 거부 (`ownAgencyError()`, **DEF-149 §1.1 수정 반영**)
 - **Input**: `shipperId: string` (`zen_agency_shippers.id`)
 - **Output**: `Promise<{ shipper: Record<string, unknown> }>` (`zen_agency_shippers` 단건 + `org` 조인 객체, `shippers.ts:349`)
-- **오류**: 역할 불충족 시 `Error("Unauthorized access")` throw (`shippers.ts:313`); DB 조회 실패 시 `logger.error` 기록 후 `Error("Failed to fetch shipper: ${error.message}")` throw (`shippers.ts:344-347`)
+- **오류**: 역할 불충족 시 `trError('permission_denied')` throw; **타 대리점 소유 시 `logger.warn` 후 `trError('own_agency_only')` throw**; DB 조회 실패 시 `logger.error` 기록 후 `Error("Failed to fetch shipper: ...")` throw
 
 #### updateAgencyShipper(shipperId, data)
 - **Path**: `src/app/actions/agency/shippers.ts:356-427`
 - **설명**: 대리점 소속 화주의 조직 정보(`zen_organizations`)와 연결 설정(`zen_agency_shippers`: `shipper_type`, `discount_rate`, `grade`, `is_active`)을 수정합니다 (`INDIVIDUAL` 유형은 `discount_rate = 0` 강제).
-- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (`src/app/actions/agency/shippers.ts:360-363`, 허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY` — `createAdminClient()` 사용 시 `agency_org_id === profile.org_id` 소유권 검증 누락은 `DEF-149` 참조)
+- **권한**: `validateUserAction()` + `checkPermission(profile.role, '/agency')` (허용 역할: `ZENITH_SUPER_ADMIN`, `AGENCY`) + **대리점 소유권 검증** — 연결 행을 `shipper_org_id, agency_org_id`로 조회해 `profile.org_id`와 비교하고, 다르면 **조직 UPDATE 전에** 거부 (`ownAgencyError()`, **DEF-149 §1.1 수정 반영**)
 - **Input**: `shipperId: string` (`zen_agency_shippers.id`), `data: UpdateAgencyShipperInput` (`UpdateAgencyShipperSchema` Zod 검증, `src/lib/validations/agency.ts:41-70`)
 - **Output**: `Promise<UpdateAgencyShipperResult>` (`{ success: true } | { success: false; fieldErrors: Record<string, string> }`, `shippers.ts:352-354, 426`)
-- **오류**: 역할 불충족 시 `{ success: false, fieldErrors: { _form: '접근 권한이 없습니다.' } }` 반환 (`shippers.ts:362`); Zod 검증 실패 시 `{ success: false, fieldErrors }` 반환 (`shippers.ts:366-373`); 연결 행 미존재 시 `Error("Shipper not found")` throw (`shippers.ts:386`); 조직/화주 업데이트 실패 시 `Error("Failed to update org/shipper: ...")` throw (`shippers.ts:407, 422`)
+- **오류**: 역할 불충족 시 `{ success: false, fieldErrors: { _form: '접근 권한이 없습니다.' } }` 반환; **타 대리점 소유 시 `logger.warn` 후 `{ _form: trError('own_agency_only') }` 반환** (`ownAgencyError()`); Zod 검증 실패 시 `{ success: false, fieldErrors }` 반환 (`shippers.ts:366-373`); 연결 행 미존재 시 `Error("Shipper not found")` throw (`shippers.ts:386`); 조직/화주 업데이트 실패 시 `Error("Failed to update org/shipper: ...")` throw (`shippers.ts:407, 422`)
 - **부수효과**: `revalidatePath('/agency/shippers')` (`shippers.ts:425`)
 
 #### getShipperZoneDiscounts(shipperOrgId)
