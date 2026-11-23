@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1467](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1467) | [IMP 제안] 대리점 화주 등급·할인율 수정(updateAgencyShipperGrade)의 역마진(정책 할인율) 가드 검토 — DEF-149 §1.1 후속 | b | p3 | open | 미배정 | 2026-11-23 |
 | [#1466](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1466) | [Team A] TASK-1173: DEF-157 마무리 — 안전 뷰 breakdown 화이트리스트화 (DEF-160) | a | p1 | in-progress | 미배정 | 2026-11-23 |
 | [#1463](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1463) | [Team B] TASK-B-382: MANAGER의 UPS 정산마감 관련 테이블 RLS 정책 정렬 (규칙 1 이행, 설계 의견부터) | b | p2 | draft | 미배정 | 2026-11-23 |
 | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | draft | 미배정 | 2026-11-23 |
