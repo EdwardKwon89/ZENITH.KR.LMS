@@ -59,7 +59,7 @@
 | `zen_ups_freight_minimums` | agency/shipper select | 노출 |
 
 - **RLS는 행(row)만 제한하고 컬럼은 제한하지 않는다.** 그래서 액션 `select('*')`가 원가를 그대로 반환한다.
-- DB 권한 수준의 잔여 위험은 이 Task에서 다루지 않는다(§2-6, 별도 p1 Task·상세 비공개).
+- DB 권한 수준의 잔여 위험은 이 Task에서 다루지 않는다(§2-6, 별도 p2 Task·상세 비공개).
 
 ### 1-4. 대리점 부가요금 소유권 공백 (측정)
 
@@ -135,6 +135,7 @@
 5. **Low**
    - `getAgencyPricingPolicies`(호출처 0): `requireAdminManagerOrSubAdmin` 추가(방어). RLS(`admin_all`/`sub_admin_scoped`/`agency_select`)는 유지.
    - `getPublicWeightTierRates`: `valid_from <= refDate` + `valid_until is null or >= refDate` 필터 추가(기본요율과 동일).
+6. **PR-2 추가 점검(Aiden 요청)**: `estimateUpsFreight` 응답에서 **비관리자에게 전달되는 필드 범위**를 점검하는 항목을 PR-2 설계에 포함할 수 있는지 검토한다. 상세 기준은 Aiden이 별도 전달하며, 이번 설계에서는 **점검 항목 등록**까지 한다.
 
 ### 2-4. 구현 설계 (B: 대리점 소유권 가드, PR-1 권장)
 
@@ -176,10 +177,10 @@
 
 - 구현 단계: `npm run test:regression`, `npm run build`, Ds-11 `check:ds11`.
 
-### 2-6. 잔여 위험 — 액션·화면 외 경로 (별도 p1 Task)
+### 2-6. 잔여 위험 — 액션·화면 외 경로 (별도 p2 Task)
 
 - 이번 설계는 **서버 액션/RSC·화면 경로**를 닫는다.
-- 액션·화면 외 경로(DB 권한·정책 수준)의 잔여 위험은 **이 Task에서 다루지 않는다.** Aiden이 **p1 별도 Task**로 안내하며, 상세·재현 정보는 공개 문서에 적지 않고 비공개로 전달한다.
+- 액션·화면 외 경로(DB 권한·정책 수준)의 잔여 위험은 **이 Task에서 다루지 않는다.** Aiden이 **p2 별도 Task**로 안내하며, **이번 PR-1·PR-2 범위에는 포함하지 않는다.** 정책 교체는 견적 엔진·공개 조회 함수의 읽기 방식 변경이 선행되어야 하며, 상세·재현 정보는 공개 문서에 적지 않고 비공개로 전달한다.
 - PR-2의 공개 조회 함수(`rates-public.ts`)는 이후 **안전 뷰로 소스 테이블을 교체하기 쉬운 구조**(조회 함수 한 곳에서 소스 변경)를 유지한다.
 - R-09의 "대리점·화주 세션이 원가 컬럼을 받지 못한다"는 **액션/화면 경로 기준**으로 검증하고, 그 외 경로는 별도 Task 결과로 다룬다.
 
@@ -192,7 +193,7 @@
 
 ### 2-8. 마이그레이션·배포
 
-- **DB 마이그레이션 없음**(액션 가드·화면·Low). 액션·화면 외 잔여 위험은 별도 p1 Task.
+- **DB 마이그레이션 없음**(액션 가드·화면·Low). 액션·화면 외 잔여 위험은 **p2 별도 Task**(이번 범위 제외).
 - PR 순서: **PR-1(소유권, 착수 승인됨)** → **PR-2(DEF-151, 설계 확정 후)**. 각 PR은 `Refs #1362`, Close는 Jaison 수동. PR-1은 `TeamB_Dev` 대상·`other-charges.ts`/테스트/Ds-11 최소 diff로 만들고 Aiden이 main 이식을 검토한다.
 - PR-2는 `agency/other-charges/page.tsx`(Team A 1파일) 외 Team A 파일을 건드리지 않는다(`git diff --stat` 확인).
 
@@ -204,14 +205,15 @@
 |:-:|:--|
 | 1 | 가드 **C안** 승인(기본요율만 SUB_ADMIN, 나머지 5종 ADMIN/MANAGER/ZENITH_SUPER_ADMIN). 공유 가드 추출 승인 |
 | 2 | **PR-1(소유권) → PR-2(DEF-151)** 분리 승인. PR-1 먼저 |
-| 3 | 액션·화면 외 잔여 위험은 **p1 별도 Task**(Aiden 안내) |
+| 3 | 액션·화면 외 잔여 위험은 **p2 별도 Task**(Aiden 안내, 이번 PR-1·PR-2 범위 제외) |
 | 4 | Low 2건은 **PR-2 포함** |
 | 5 | PR-1: `shippers.ts` 미수정·새 파일/키 금지·`own_agency_only` 재사용·쓰기 전 검증·DB 불변 테스트 |
 | 6 | PR-2: 대리점 자기 `agency_other_charges` 매입가 편집 유지 R-10 화면 증적 필요 |
+| 7 | PR-2: `estimateUpsFreight` 비관리자 응답 필드 범위 점검 항목 포함 검토(Aiden 상세 별도 전달) |
 
 ## 4. [작업 결과]
 
 - 설계 의견 + 실측(6종×5역할, 소유권 허용/거부, RLS 정의, 호출처 전수). 공개 문서에는 허용/거부 결과만 기재.
 - Aiden·Jaison 조건부 승인(2026-11-23). **PR-1(소유권) 착수 승인**, PR-2는 설계 확정 후.
-- **PR-1 구현/테스트 결과는 별도 PR에서 이 파일에 추가**한다.
+- **PR-1 구현 제출**: PR #1478 (base `TeamB_Dev`, CI 7/7). Jaison 재확인 대기.
 - PR: #1476 (draft, `Refs #1362`).
