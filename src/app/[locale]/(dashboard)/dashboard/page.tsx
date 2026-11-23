@@ -43,6 +43,10 @@ export default function DashboardPage() {
     {
       header: "Carrier",
       accessorKey: "shipper_name",
+      // TASK-B-380 (Issue #1455, DEF-B-163): accessorKey가 "Customer" 컬럼과 중복이라
+      // TanStack의 컬럼 id(=header.id/cell.id)가 겹치고 React 중복 key 경고가 났다.
+      // 표시값(accessorKey)은 그대로 두고 **컬럼 id만 고유하게** 분리 — 화면 표시 변화 없음.
+      id: "carrier",
     },
     {
       header: "Route",
