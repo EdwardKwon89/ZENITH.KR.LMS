@@ -89,7 +89,8 @@
     "auth_signup_failed": "Sign-up failed. Please check the information you entered.",
     "auth_signup_profile_failed": "Failed to create the profile. Please try again shortly.",
     "inventory_not_found": "Inventory item not found.",
-    "inventory_below_zero": "Inventory quantity cannot be negative."
+    "inventory_below_zero": "Inventory quantity cannot be negative.",
+    "own_agency_only": "Only your own agency can be processed."
   },
   "Common": {
     "phoneHelp": "Numbers only (no hyphens, max {max} digits)",
