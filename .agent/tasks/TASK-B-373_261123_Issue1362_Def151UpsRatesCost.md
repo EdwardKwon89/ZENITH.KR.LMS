@@ -18,7 +18,7 @@
 | **C. Low (Issue §2.3)** | `getAgencyPricingPolicies` 가드, `getPublicWeightTierRates` 유효기간 필터 |
 | **제외** | RLS 정책·테이블 GRANT 변경(§2-6 잔여 위험), 요율 계산 로직 변경 |
 
-- A는 **설계 확정 후 구현**. B는 Aiden이 "설계와 무관하게 먼저 PR로 분리 가능"이라고 명시 → **PR-1(B) → PR-2(A)** 분리 권장.
+- A는 **설계 확정 후 구현**. B는 Aiden·Jaison이 **PR-1로 먼저 분리 승인** → **PR-1(B) → PR-2(A)**.
 - 설계 의견 단계에서는 `src/` 변경 0.
 
 ---
@@ -59,20 +59,21 @@
 | `zen_ups_freight_minimums` | agency/shipper select | 노출 |
 
 - **RLS는 행(row)만 제한하고 컬럼은 제한하지 않는다.** 그래서 액션 `select('*')`가 원가를 그대로 반환한다.
-- 추가 발견: `anon`·`authenticated`에 6개 테이블 **INSERT/UPDATE/DELETE/TRUNCATE GRANT**가 부여되어 있다(RLS 정책이 없어 실제 쓰기는 차단되지만, GRANT 과다). 컬럼 GRANT도 `authenticated`에 원가 컬럼 포함. → §2-6 잔여 위험.
+- DB 권한 수준의 잔여 위험은 이 Task에서 다루지 않는다(§2-6, 별도 p1 Task·상세 비공개).
 
 ### 1-4. 대리점 부가요금 소유권 공백 (측정)
 
 `src/app/actions/agency/other-charges.ts` 3개 액션은 `checkPermission('/agency')`만 확인하고 `createAdminClient()`(service_role)로 쿼리한다 → **RLS 우회**.
 
-| 호출(AGENCY A 세션) | 결과 |
+| 호출(AGENCY A 세션) | 현재 결과(허용/거부만) |
 |:--|:--|
-| `getAgencyOtherCharges(B)` | **B 대리점 행 조회 성공**(selling 20 / cost 18) |
-| `upsertAgencyOtherCharge(B, {...})` | **B 행 변경 성공**(99 / 88) |
-| `deactivateAgencyOtherCharge(B_row)` | **B 행 비활성화 성공**(`is_active=false`) |
+| `getAgencyOtherCharges(B)` | **허용**(거부되어야 함) |
+| `upsertAgencyOtherCharge(B, …)` | **허용**(거부되어야 함) |
+| `deactivateAgencyOtherCharge(B_row)` | **허용**(거부되어야 함) |
 
-- `zen_agency_other_charges`에는 `agency_own` RLS가 있으나 **admin client가 우회**하므로 액션 가드가 없으면 교차 테넌트 IDOR가 성립한다.
+- `zen_agency_other_charges`에는 `agency_own` RLS가 있으나 **admin client가 우회**하므로 액션 가드가 없으면 교차 테넌트 접근이 성립한다.
 - #1469(`agency/shippers.ts`)는 같은 문제를 `ownAgencyError`로 닫았다. 이 파일만 미적용.
+- 구체 값·호출 형태는 공개 문서에 적지 않는다(필요 시 비공개 전달).
 
 ### 1-5. 호출처 전수 (R-20)
 
@@ -141,15 +142,17 @@
 
 | 액션 | 가드 |
 |:--|:--|
-| `getAgencyOtherCharges(agencyOrgId)` | `ownAgencyError(profile, agencyOrgId, ...)` → 불일치 시 `own_agency_only` |
-| `upsertAgencyOtherCharge(agencyOrgId, data)` | 동일 + upsert 후 대상 행의 `agency_org_id`가 호출자 소속인지 재확인 |
-| `deactivateAgencyOtherCharge(id)` | **선조회**로 `agency_org_id` 확인 + `update ... eq('agency_org_id', profile.org_id)`로 이중 방어 |
+| `getAgencyOtherCharges(agencyOrgId)` | **조회 전** `ownAgencyError(profile, agencyOrgId, …)` → 불일치 시 `own_agency_only` |
+| `upsertAgencyOtherCharge(agencyOrgId, data)` | **쓰기 전** `agencyOrgId`를 `profile.org_id`와 비교(SUPER_ADMIN 예외). 사후 재확인 없음 |
+| `deactivateAgencyOtherCharge(id)` | **선조회**로 `agency_org_id` 확인 + `update … eq('id').eq('agency_org_id', row.agency_org_id)` 이중 방어 |
 
+- **PR-1은 `shippers.ts`를 건드리지 않는다.** `ownAgencyError`는 `other-charges.ts` **파일 내부 지역 헬퍼**로 둔다(동일 로직의 소규모 중복 허용). 새 파일·새 오류 키 금지, `own_agency_only`(main 기존 키) 재사용.
 - `ZENITH_SUPER_ADMIN` 예외는 #1469와 동일(전역 바이패스 정합).
-- 공유 헬퍼: `src/lib/auth/agency-ownership.ts`로 `ownAgencyError` 추출 후 `shippers.ts`도 교체(중복 방지). #1469 파일을 건드리므로 PR-1에서 함께 테스트.
 - 거부 시 `logger.warn` + `own_agency_only`(4로케일 기존 키).
-- `createAdminClient`는 가드 통과 후 유지(현행). RLS 우회는 가드로 보완.
-- **PR-1 분리 이유**: Aiden 지시·운영 p1·DEF-151 설계와 독립. PR-1은 코드+테스트, PR-2는 A 확정 후.
+- `createAdminClient`는 가드 통과 후 유지(현행). #1469 패턴과 동일.
+- **diff 범위**: `other-charges.ts` + 통합 테스트 + Ds-11 + 회귀 항목. `git diff --stat`으로 PR에 기재.
+- **장기 방향(IMP 제안)**: 이 테이블에는 `agency_own`/`admin_all` DB 정책이 있으므로 세션 클라이언트로 전환하면 DB가 격리를 강제한다. 이번 PR-1은 Aiden 요청대로 #1469 패턴(admin client + 가드) 유지, 세션 클라이언트 전환은 IMP 제안으로 분리.
+- **PR-1 분리 이유**: Aiden·Jaison 승인, 운영 p1, DEF-151 설계와 독립.
 
 ### 2-5. 테스트 계획 (R-09)
 
@@ -162,10 +165,10 @@
 6. `admin/ups-rates` 관리자 화면 무회귀, `/admin/error-logs` 신규 ERROR 0.
 
 **B. 소유권 (PR-1)**
-7. AGENCY A → B 조회/upsert/deactivate **거부** + DB 불변.
-8. A 자기 소속 성공, ZENITH_SUPER_ADMIN 성공.
-9. 가드 제거 시 IDOR 성공(FAIL) 확인 후 원복.
-10. 실DB 세션·실제 로그인 기준.
+7. AGENCY A → B 조회/upsert/deactivate **거부**. 거부 시 **DB 불변**: 타 대리점 행의 값·`is_active`·행 수 불변, 거부된 upsert가 행을 만들지 않음.
+8. A 자기 소속 조회/upsert/deactivate 성공, ZENITH_SUPER_ADMIN 양성 대조.
+9. **함수별 되돌리기 실측**: 각 가드를 무효화하면 해당 케이스만 FAIL(IDOR 성립)하고 나머지는 PASS — 측정 후 원복.
+10. 실DB·실제 세션 기준(`signInWithPassword`·`getUserClient`), 소스 문자열 검사·skip 금지.
 
 **C. Low**
 11. `getAgencyPricingPolicies` 비관리자 거부.
@@ -173,13 +176,12 @@
 
 - 구현 단계: `npm run test:regression`, `npm run build`, Ds-11 `check:ds11`.
 
-### 2-6. 잔여 위험 — 직접 PostgREST 노출 (별도 판단)
+### 2-6. 잔여 위험 — 액션·화면 외 경로 (별도 p1 Task)
 
-- 액션 가드 + public 화면 전환은 **서버 액션/RSC 경로**를 닫는다.
-- 그러나 `authenticated`에 테이블 SELECT GRANT가 있고 RLS는 행만 제한하므로, **대리점·화주가 자신의 JWT로 PostgREST에 직접 `select=cost_price`를 호출하면 원가 컬럼을 받을 수 있다**(실DB GRANT 확인). `anon`에는 DML GRANT까지 있다(RLS로 차단되지만 과다).
-- 완전 차단은 (a) 원가 컬럼 REVOKE + 안전 뷰/`SECURITY DEFINER` 함수 경유, (b) 공개용 안전 뷰(`zen_ups_*_safe`) + base 테이블 SELECT 회수 중 하나가 필요하며, **요율 마스터 전반의 GRANT/정책 변경**이라 이 이슈 범위를 넘는다.
-- **이번 PR은 액션·화면 경로를 닫고**, 직접 PostgREST 잔여 위험은 별도 DEF/Task로 보고·분리할 것을 제안한다. R-09의 "대리점·화주 세션이 원가 컬럼을 받지 못한다"는 **액션/화면 경로 기준**으로 검증하고, 직접 REST는 별도 항목으로 명시한다.
-- Aiden이 직접 REST까지 요구하면 범위를 (a)/(b)로 확장해야 하므로 **설계 확정 시 확인 필요**.
+- 이번 설계는 **서버 액션/RSC·화면 경로**를 닫는다.
+- 액션·화면 외 경로(DB 권한·정책 수준)의 잔여 위험은 **이 Task에서 다루지 않는다.** Aiden이 **p1 별도 Task**로 안내하며, 상세·재현 정보는 공개 문서에 적지 않고 비공개로 전달한다.
+- PR-2의 공개 조회 함수(`rates-public.ts`)는 이후 **안전 뷰로 소스 테이블을 교체하기 쉬운 구조**(조회 함수 한 곳에서 소스 변경)를 유지한다.
+- R-09의 "대리점·화주 세션이 원가 컬럼을 받지 못한다"는 **액션/화면 경로 기준**으로 검증하고, 그 외 경로는 별도 Task 결과로 다룬다.
 
 ### 2-7. Ds-11·R-12
 
@@ -190,21 +192,26 @@
 
 ### 2-8. 마이그레이션·배포
 
-- **DB 마이그레이션 없음**(액션 가드·화면·Low). 직접 PostgREST 잔여 위험은 별도 Task.
-- PR 순서: **PR-1(소유권)** → Aiden 확인 → **PR-2(DEF-151)**. 각 PR은 `Refs #1362`, Close는 Jaison 수동.
+- **DB 마이그레이션 없음**(액션 가드·화면·Low). 액션·화면 외 잔여 위험은 별도 p1 Task.
+- PR 순서: **PR-1(소유권, 착수 승인됨)** → **PR-2(DEF-151, 설계 확정 후)**. 각 PR은 `Refs #1362`, Close는 Jaison 수동. PR-1은 `TeamB_Dev` 대상·`other-charges.ts`/테스트/Ds-11 최소 diff로 만들고 Aiden이 main 이식을 검토한다.
 - PR-2는 `agency/other-charges/page.tsx`(Team A 1파일) 외 Team A 파일을 건드리지 않는다(`git diff --stat` 확인).
 
 ---
 
-## 3. 확인 요청 (Aiden)
+## 3. 확정된 결정 (Aiden·Jaison, 2026-11-23)
 
-1. **가드 정책 C안**(기본요율만 SUB_ADMIN, 나머지 5종 admin/manager) 승인 여부. B안(SUB_ADMIN 6종)을 원하면 페이지 변경을 줄일 수 있다.
-2. **PR 분리**: PR-1(소유권, 즉시) → PR-2(DEF-151) 순서 승인.
-3. **직접 PostgREST 잔여 위험**: 이번 범위는 액션/화면만 닫고, 컬럼 GRANT/안전 뷰는 별도 Task로 분리하는 안 승인 여부.
-4. Low 2건을 PR-2에 포함할지 후속으로 미룰지.
+| # | 결정 |
+|:-:|:--|
+| 1 | 가드 **C안** 승인(기본요율만 SUB_ADMIN, 나머지 5종 ADMIN/MANAGER/ZENITH_SUPER_ADMIN). 공유 가드 추출 승인 |
+| 2 | **PR-1(소유권) → PR-2(DEF-151)** 분리 승인. PR-1 먼저 |
+| 3 | 액션·화면 외 잔여 위험은 **p1 별도 Task**(Aiden 안내) |
+| 4 | Low 2건은 **PR-2 포함** |
+| 5 | PR-1: `shippers.ts` 미수정·새 파일/키 금지·`own_agency_only` 재사용·쓰기 전 검증·DB 불변 테스트 |
+| 6 | PR-2: 대리점 자기 `agency_other_charges` 매입가 편집 유지 R-10 화면 증적 필요 |
 
 ## 4. [작업 결과]
 
-- 설계 의견 + 실측(6종×5역할, 소유권 IDOR 실측, RLS/GRANT 정의, 호출처 전수).
-- **구현·마이그레이션 없음** (Aiden 확정 전).
+- 설계 의견 + 실측(6종×5역할, 소유권 허용/거부, RLS 정의, 호출처 전수). 공개 문서에는 허용/거부 결과만 기재.
+- Aiden·Jaison 조건부 승인(2026-11-23). **PR-1(소유권) 착수 승인**, PR-2는 설계 확정 후.
+- **PR-1 구현/테스트 결과는 별도 PR에서 이 파일에 추가**한다.
 - PR: #1476 (draft, `Refs #1362`).
