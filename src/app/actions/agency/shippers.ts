@@ -9,6 +9,8 @@ import type { CreateAgencyShipperInput, UpdateAgencyShipperInput, AgencyShipperR
 import { generateTempPassword, sendShipperWelcomeEmail } from '@/lib/notifications/email';
 import { syncAuthMetadata } from '@/lib/auth/sync';
 import { revalidatePath } from 'next/cache';
+import { USER_ROLES } from '@/lib/auth/rbac';
+import { trError } from '@/lib/i18n/action-error';
 
 async function _createShipperOrg(
   supabase: SupabaseClient,
@@ -115,11 +117,38 @@ async function _rollbackShipper(
   }
 }
 
+/**
+ * DEF-149 §1.1 — **대리점 소유권 검증** (교차 테넌트 IDOR 차단).
+ *
+ * 아래 5개 액션은 `createAdminClient()`(service_role)로 쿼리해 RLS를 우회하므로,
+ * 인자/대상 행의 `agency_org_id`가 **호출자 대리점 소속인지**를 쿼리 전에 확인해야 한다.
+ * (대조 기준: `zone-discounts.ts`의 `agencyOrgId !== profile.org_id` 거부)
+ *
+ * - `ZENITH_SUPER_ADMIN`은 `checkPermission()`의 전역 바이패스(`rbac.ts` "모든 권한 허용")와 정합하도록 예외.
+ * - 거부 시 `logger.warn`(관측성) + `Errors.own_agency_only`(4로케일) 반환 — 반환 형태는 호출 함수가 결정.
+ */
+async function ownAgencyError(
+  profile: { role: string | null; org_id: string | null },
+  targetAgencyOrgId: string | null | undefined,
+  where: string,
+): Promise<string | null> {
+  if (profile.role === USER_ROLES.ZENITH_SUPER_ADMIN) return null;
+  if (!profile.org_id || !targetAgencyOrgId || targetAgencyOrgId !== profile.org_id) {
+    logger.warn(
+      `[${where}] ownership denied: caller=${profile.org_id ?? '(none)'} target=${targetAgencyOrgId ?? '(none)'}`,
+    );
+    return await trError('own_agency_only');
+  }
+  return null;
+}
+
 export async function getAgencyShippers(agencyOrgId: string) {
   const { profile } = await validateUserAction();
   if (!checkPermission(profile.role, '/agency')) {
-    throw new Error('Unauthorized access');
+    throw new Error(await trError('permission_denied'));
   }
+  const ownErr = await ownAgencyError(profile, agencyOrgId, 'getAgencyShippers');
+  if (ownErr) throw new Error(ownErr);
 
   const supabase = await createAdminClient();
 
@@ -168,6 +197,9 @@ export async function createAgencyShipper(
   if (!checkPermission(profile.role, '/agency')) {
     return { success: false, fieldErrors: { _form: '접근 권한이 없습니다.' } };
   }
+  // DEF-149 §1.1 — 타 대리점 명의로 화주를 만들지 못하도록 (생성 부수효과 전에 차단)
+  const ownErr = await ownAgencyError(profile, agencyOrgId, 'createAgencyShipper');
+  if (ownErr) return { success: false, fieldErrors: { _form: ownErr } };
 
   const parsed = CreateAgencyShipperSchema.safeParse(shipperData);
   if (!parsed.success) {
@@ -279,7 +311,7 @@ export async function updateAgencyShipperGrade(
 ) {
   const { profile } = await validateUserAction();
   if (!checkPermission(profile.role, '/agency')) {
-    throw new Error('Unauthorized access');
+    throw new Error(await trError('permission_denied'));
   }
 
   const parsed = UpdateAgencyShipperGradeSchema.safeParse({ grade, discount_rate: discountRate });
@@ -288,6 +320,20 @@ export async function updateAgencyShipperGrade(
   }
 
   const supabase = await createAdminClient();
+
+  // DEF-149 §1.1 — 대상 행의 소유 대리점을 확인한 뒤에만 수정 (id만 보고 수정하던 것 보완)
+  const { data: link, error: linkError } = await supabase
+    .from('zen_agency_shippers')
+    .select('agency_org_id')
+    .eq('id', id)
+    .maybeSingle();
+  if (linkError) {
+    logger.error('[updateAgencyShipperGrade] owner lookup failed:', linkError.message);
+    throw new Error(`Failed to fetch shipper: ${linkError.message}`);
+  }
+  if (!link) throw new Error('Shipper not found');
+  const ownErr = await ownAgencyError(profile, link.agency_org_id, 'updateAgencyShipperGrade');
+  if (ownErr) throw new Error(ownErr);
 
   const { error } = await supabase
     .from('zen_agency_shippers')
@@ -310,7 +356,7 @@ export async function updateAgencyShipperGrade(
 export async function getAgencyShipperById(shipperId: string) {
   const { profile } = await validateUserAction();
   if (!checkPermission(profile.role, '/agency')) {
-    throw new Error('Unauthorized access');
+    throw new Error(await trError('permission_denied'));
   }
 
   const supabase = await createAdminClient();
@@ -345,6 +391,13 @@ export async function getAgencyShipperById(shipperId: string) {
     logger.error('[getAgencyShipperById] Failed:', error.message);
     throw new Error(`Failed to fetch shipper: ${error.message}`);
   }
+  // DEF-149 §1.1 — 타 대리점 화주 상세 열람 차단
+  const ownErr = await ownAgencyError(
+    profile,
+    (data as { agency_org_id?: string } | null)?.agency_org_id,
+    'getAgencyShipperById',
+  );
+  if (ownErr) throw new Error(ownErr);
 
   return { shipper: data };
 }
@@ -380,10 +433,13 @@ export async function updateAgencyShipper(
 
   const { data: link, error: linkError } = await supabase
     .from('zen_agency_shippers')
-    .select('shipper_org_id')
+    .select('shipper_org_id, agency_org_id')
     .eq('id', shipperId)
     .single();
   if (linkError || !link) throw new Error('Shipper not found');
+  // DEF-149 §1.1 — 타 대리점 화주 정보·할인율 변조 차단 (조직 UPDATE 전에 검증)
+  const ownErr = await ownAgencyError(profile, link.agency_org_id, 'updateAgencyShipper');
+  if (ownErr) return { success: false, fieldErrors: { _form: ownErr } };
 
   const { error: orgError } = await supabase
     .from('zen_organizations')
