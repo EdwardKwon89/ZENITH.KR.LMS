@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1449](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1449) | [Aiden → Team B] 통합(#1448) 전 필수 조치 3건 — UPS 실비 원가 테이블 권한 정렬·채번 함수 권한·청구 금액 함수 base 의존 제거 | b | p1 | open | jungjs | 2026-11-23 |
 | [#1442](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1442) | [Team B] TASK-B-376: UPS 실비(원가) 화주·대리점 노출 차단 — zen_order_costs UPS_ACTUAL_ADJUSTMENT (DEF-150 후속, 설계 의견부터) | b | p1 | review | 미배정 | 2026-11-23 |
 | [#1439](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1439) | [Team B] TASK-B-371: 청구서관리 ⑦ 통합 검증 — 전 구간 E2E·권한 교차·Excel 실제 다운로드 (WBS 8.1~8.3, Mike) | b | p2 | review | 미배정 | 2026-11-23 |
 | [#1434](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1434) | [IMP 제안] 오더정산 S2 — UPS 청구서 PDF 첨부 (WBS 2.6 선택 범위) | - | - | - | 미배정 | 2026-11-22 |
