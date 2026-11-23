@@ -70,10 +70,13 @@
 - `upsertAgencyRateOverride(agencyOrgId, data)` — 오버라이드 등록/수정. **`cost_price`는 서버 트리거가 자동 계산 → 클라이언트 전송값 무시**
 - `deactivateAgencyRateOverride(id)` — 오버라이드 비활성화
 
-- **Path**: `src/app/actions/agency/other-charges.ts` (신규)
+- **Path**: `src/app/actions/agency/other-charges.ts`
 - `getAgencyOtherCharges(agencyOrgId)` — Agency별 부가요금 목록
+  - **권한**: `validateUserAction` + `checkPermission('/agency')` + **소유권 검증**(`agencyOrgId === profile.org_id`, `ZENITH_SUPER_ADMIN` 예외). 거부 시 `own_agency_only`(4로케일) + `logger.warn`.
 - `upsertAgencyOtherCharge(agencyOrgId, data)` — 부가요금 등록/수정
+  - **권한**: 위와 동일. **쓰기 전에** `agencyOrgId`를 `profile.org_id`와 비교해 타 대리점 명의 변경을 차단.
 - `deactivateAgencyOtherCharge(id)` — 부가요금 비활성화
+  - **권한**: 위와 동일. **선조회**로 대상 행의 `agency_org_id`를 확인한 뒤 `update … eq('id').eq('agency_org_id', row.agency_org_id)` 조건부 UPDATE로 이중 방어.
 
 ### 11.4 DB 함수 (Security Definer)
 

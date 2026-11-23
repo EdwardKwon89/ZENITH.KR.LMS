@@ -11,9 +11,9 @@
 ## 📊 실측 Vitest 회귀 스위트 현황 (자동 집계)
 
 - **스캔 범위**: `tests/**/*.{test,spec}.{ts,tsx}` (`tests/e2e/**`, `tests/poc-*/**` 제외 — `vitest.config.ts` 기준)
-- **실측 테스트 파일 수**: **269개**
-- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **1,934건**
-- **신규 구조 등재 Task 수**: **6건**
+- **실측 테스트 파일 수**: **274개**
+- **실측 테스트 케이스 수 (`it`/`test` 블록)**: **1,976건**
+- **신규 구조 등재 Task 수**: **11건**
 
 ---
 
@@ -33,7 +33,12 @@
 <!-- LRTM_ITEMS_START -->
 | Task | Issue | 팀 | 작성일 | 케이스 수 | 테스트 파일 | 차원(231) | 상세 |
 |:---|:---:|:---:|:---:|---:|:---|:---:|:---:|
+| **TASK-B-374** | - | - | - | 8건 | `tests/integration/task-b374-shipper-ownership.test.ts`, `tests/unit/i18n/errors-key-sync.test.ts`, `tests/e2e/e2e-32-b374-shipper-ownership-ui.spec.ts` | D1, D5 | [상세](./regression-items/TASK-B-374_Issue1349_shipper-ownership.md) |
+| **TASK-B-373** | #1362 | Team B | 2026-11-23 | 9건 | `tests/integration/task-b373-other-charges-ownership.test.ts` | D1, D5 | [상세](./regression-items/TASK-B-373_Issue1362_other-charges-ownership.md) |
+| **TASK-1174** | - | - | - | 0건 | `tests/unit/migrations/task1174-def161-invoice-history-rls.test.ts` | - | [상세](./regression-items/TASK-1174_Issue1470_invoice-history-rls.md) |
+| **TASK-1173** | - | - | - | 0건 | `tests/unit/migrations/task1173-def157-safe-view-breakdown-whitelist.test.ts` | - | [상세](./regression-items/TASK-1173_Issue1466_safe-view-breakdown-whitelist.md) |
 | **TASK-1169** | #1407 | Team A | 2026-11-21 | 5건 | `tests/integration/task-1169-create-order-atomic-v7-payload.test.ts` | D2, D5 | [상세](./regression-items/TASK-1169_Issue1407_create-order-atomic-v7-payload.md) |
+| **TASK-1168** | - | - | - | 0건 | `tests/unit/migrations/task1168-def157-order-rate-snapshots-safe-view.test.ts`, `tests/unit/operations/tisa.test.ts` | - | [상세](./regression-items/TASK-1168_Issue1406_order-rate-snapshots-safe-view.md) |
 | **TASK-1167** | #1389 | Team A | 2026-11-19 | 4건 | `tests/integration/task-1167-calculate-order-costs-security.test.ts` | D1, D3 | [상세](./regression-items/TASK-1167_Issue1389_calculate-order-costs-security.md) |
 | **TASK-1166** | #1386 | Team A | 2026-11-18 | 19건 | `tests/unit/migrations/task1166-def153-rate-cards-rls.test.ts` | D3, D5 | [상세](./regression-items/TASK-1166_Issue1386_rate-cards-rls.md) |
 | **TASK-1161** | #1347 | Team A | 2026-11-18 | 7건 | `tests/integration/p6-transport-policy.test.ts`, `tests/integration/tracking-business-qa.test.ts`, `tests/integration/helpers/db.test.ts` | D1, D5, D6 | [상세](./regression-items/TASK-1161_Issue1347_db-fixture-helper.md) |
