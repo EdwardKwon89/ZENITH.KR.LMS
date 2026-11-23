@@ -89,7 +89,8 @@
     "auth_signup_failed": "登録に失敗しました。入力内容をご確認ください。",
     "auth_signup_profile_failed": "プロフィールの作成に失敗しました。しばらくしてから再試行してください。",
     "inventory_not_found": "在庫品目が見つかりません。",
-    "inventory_below_zero": "在庫数量は 0 未満にできません。"
+    "inventory_below_zero": "在庫数量は 0 未満にできません。",
+    "own_agency_only": "ご所属代理店のリソースのみ処理できます。"
   },
   "Common": {
     "phoneHelp": "数字のみ入力（ハイフンなし、最大 {max} 桁）",
