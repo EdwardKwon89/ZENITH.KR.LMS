@@ -50,7 +50,7 @@ ZENITH_LMS는 복잡한 글로벌 물류 프로세스를 단일 플랫폼에서 
 
 ### 🎨 [03] 시스템 설계 및 API 명세 (Design)
 구현을 위한 기술 설계와 API 규격서입니다.
-- [Ds_11_API_상세_명세서.md](docs/03_Design/Ds_11_API_상세_명세서.md): **전체 모듈 통합 API 규격 (V2)**
+- [Ds_11_API_상세_명세서.md](docs/02_Analysis/Ds_11_API_상세_명세서.md): **전체 모듈 통합 API 규격 (V2)**
 - [Ds_01_화면설계_공통_컴포넌트.md](docs/03_Design/Ds_01_화면설계_공통_컴포넌트.md): UI 디자인 시스템 및 컴포넌트 설계
 - [302_AUTH_GUARD_ARCHITECTURE.md](docs/03_Design/302_AUTH_GUARD_ARCHITECTURE.md): 미들웨어 기반 권한 제어(RBAC) 아키텍처
 

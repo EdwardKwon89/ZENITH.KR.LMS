@@ -22,7 +22,7 @@ tags: ["procedure"]
 - Zod를 사용한 입력 데이터 검증 스키마를 설계합니다.
 
 ### 단계 2: API 명세서(Ds-11) 작성 및 업데이트
-- `docs/03_Design/Ds_11_API_상세_명세서.md`에 해당 API를 등록합니다.
+- `docs/02_Analysis/Ds_11_API_상세_명세서.md`(인덱스)의 목차에서 해당 도메인을 찾아 **`docs/02_Analysis/ds11/Ds_11_*.md` 분할 파일**에 해당 API를 등록합니다(TASK-1163).
 - **필수 포함 항목**:
     - **ID/명칭**: Action 또는 RPC 함수의 이름
     - **방식**: `Action` (Next.js Server Action) 또는 `RPC` (Supabase Postgres Function)

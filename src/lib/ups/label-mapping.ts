@@ -104,10 +104,12 @@ export function resolveConsigneeStreet(
   return localAddr ? `${road} (${localAddr})` : road;
 }
 
-// TASK-B-341 (Issue #1261) → TASK-B-342 (Issue #1263): SHXK createorder의 shipper 블록.
+// TASK-B-341 (Issue #1261) → TASK-B-342 (Issue #1263) → TASK-B-345 (Issue #1277): SHXK createorder의 shipper 블록.
 // shipper_name    = 화면 "화주명"(zen_orders.shipper_name). 폴백: order.shipper_name → shipper_org.name → shipperDefaults.name
-// shipper_company = 회사 기본값 고정 (shipperDefaults.name = 환경변수 SHXK_SHIPPER_NAME)
-//   (JSJung 2026-10-22 결정 — TASK-B-341의 "두 필드 모두 화주명" 결정을 번복)
+// shipper_company = 전송하지 않는다.
+//   (2026-11-12 JSJung 결정 — TASK-B-342의 "회사 기본값 고정" 결정을 번복, TASK-B-345)
+//   SHXK 명세상 선택 필드이므로 키 자체를 payload에서 제거한다(빈 문자열 전송 아님).
+//   shipperDefaults.name은 shipper_name 폴백용으로만 사용한다.
 // 담당자명(order.shipper_contact_name)은 SHXK payload 어디에도 전송하지 않는다.
 function buildShipperPayload(
   order: Record<string, unknown>,
@@ -121,13 +123,39 @@ function buildShipperPayload(
 
   return {
     shipper_name: shipperDisplayName,
-    shipper_company: shipperDefaults.name,
     shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
     shipper_province: sanitizeComma((order.shipper_state_province as string) || ''),
     shipper_city: sanitizeComma((order.shipper_city as string) || ''),
     shipper_street: sanitizeComma(resolveShipperStreet(order, shipperOrg)),
     shipper_postcode: (order.shipper_zipcode as string) || '',
     shipper_telephone: stripNonDigits((order.shipper_contact_phone as string) || ''),
+  };
+}
+
+// TASK-B-346 PR③ (Issue #1278): consignee 리터럴 분리 — buildCreateOrderPayload의
+// 함수 길이 50줄 제한(ZEN_A4 / GOV_COMMON.md:307) 준수 목적. street·회사명은 호출부에서 정규화해 넘긴다.
+function buildConsigneePayload(
+  order: Record<string, unknown>,
+  countryCode: string,
+  fullConsigneeStreet: string,
+  consigneeCompany: string,
+): Record<string, unknown> {
+  return {
+    // TASK-B-346 (Issue #1278): 테스트용 폴백 제거 — 수취인 성명이 비면
+    // validateShxkPayload()의 '수취인 성명 누락' 사전검증이 SHXK 호출 전에 차단한다.
+    consignee_name: (order.recipient_name as string) || '',
+    // TASK-B-346 PR② (Issue #1278): 수하인 회사명 — 입력이 있을 때만 전송(빈 값이면 키 자체를 생략).
+    // TASK-B-343 선례대로 전송 시점에 쉼표를 공백으로 치환한다(라벨 인쇄 시 쉼표 절단 방지).
+    // PR③: 공백만 입력된 경우도 sanitizeComma 후 빈 값이면 키를 생략한다.
+    ...(consigneeCompany ? { consignee_company: consigneeCompany } : {}),
+    consignee_countrycode: (order.recipient_country_code as string) || countryCode,
+    consignee_province: sanitizeComma((order.recipient_state_province as string) || ''),
+    consignee_city: sanitizeComma((order.recipient_city as string) || ''),
+    consignee_street: fullConsigneeStreet,
+    consignee_postcode: (order.recipient_zipcode as string) || '',
+    consignee_telephone: stripNonDigits((order.recipient_phone as string) || ''),
+    consignee_email: (order.recipient_email as string) || '',
+    consignee_tariff: (order.recipient_pccc as string) || '',
   };
 }
 
@@ -150,6 +178,9 @@ export function buildCreateOrderPayload(
   // TASK-B-343: 전송 시점에만 쉼표 치환 (표시/무역서류는 기존 출력 유지)
   const cleanConsigneeStreet = sanitizeComma(resolveRoadAddress(consigneeStreet));
   const fullConsigneeStreet = sanitizeComma(localAddr ? `${cleanConsigneeStreet} (${localAddr})` : cleanConsigneeStreet);
+  // TASK-B-346 PR③ (Issue #1278): 공백만 있는 회사명("  ")은 trim 후 빈 값이 되므로 키 자체를 생략한다
+  // (이전에는 `'  '`가 truthy라 `consignee_company: ''`가 전송됐다 — SHXK에 빈 문자열 전송 방지).
+  const consigneeCompany = order.recipient_company ? sanitizeComma(String(order.recipient_company)) : '';
 
   return {
     reference_no: (order.order_no as string).replace(/-/g, ''),
@@ -163,17 +194,7 @@ export function buildCreateOrderPayload(
     mail_cargo_type: mailCargoType,
     cargovolume,
     shipper: buildShipperPayload(order, shipperDefaults),
-    consignee: {
-      consignee_name: (order.recipient_name as string) || 'E2E Consignee',
-      consignee_countrycode: (order.recipient_country_code as string) || countryCode,
-      consignee_province: sanitizeComma((order.recipient_state_province as string) || ''),
-      consignee_city: sanitizeComma((order.recipient_city as string) || ''),
-      consignee_street: fullConsigneeStreet,
-      consignee_postcode: (order.recipient_zipcode as string) || '',
-      consignee_telephone: stripNonDigits((order.recipient_phone as string) || ''),
-      consignee_email: (order.recipient_email as string) || '',
-      consignee_tariff: (order.recipient_pccc as string) || '',
-    },
+    consignee: buildConsigneePayload(order, countryCode, fullConsigneeStreet, consigneeCompany),
     invoice,
   };
 }

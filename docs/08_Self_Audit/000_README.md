@@ -48,6 +48,11 @@
 | [UAT_1.3_Auth.md](./UAT/UAT_1.3_Auth.md) | 인증 시스템 테스트 시나리오 |
 | [UAT_1.3_Result_Auth.md](./UAT/UAT_1.3_Result_Auth.md) | 인증 시스템 테스트 결과 보고 |
 
+#### 🧬 [TestCoverage_231](./TestCoverage_231) (테스트 커버리지 PoC — 231 §8.1)
+| 파일명 | 개요 |
+|--------|------|
+| [231_PoC_Baseline_Report_D1_20261115.md](./TestCoverage_231/231_PoC_Baseline_Report_D1_20261115.md) | PoC 단계 1 기준선 보고서(부록 D-1) — 모듈 ①② 커버리지·변이 점수·실DB CI 현황 |
+
 ---
 
 [← 상위 목록으로 돌아가기](../00_GUIDE/000_README.md)

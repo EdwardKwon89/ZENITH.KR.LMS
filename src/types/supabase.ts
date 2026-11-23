@@ -2806,6 +2806,7 @@ export type Database = {
           recipient_address: string | null
           recipient_address_local: string | null
           recipient_city: string | null
+          recipient_company: string | null
           recipient_contact: string | null
           recipient_country_code: string | null
           recipient_email: string | null
@@ -2860,6 +2861,7 @@ export type Database = {
           recipient_address?: string | null
           recipient_address_local?: string | null
           recipient_city?: string | null
+          recipient_company?: string | null
           recipient_contact?: string | null
           recipient_country_code?: string | null
           recipient_email?: string | null
@@ -2914,6 +2916,7 @@ export type Database = {
           recipient_address?: string | null
           recipient_address_local?: string | null
           recipient_city?: string | null
+          recipient_company?: string | null
           recipient_contact?: string | null
           recipient_country_code?: string | null
           recipient_email?: string | null
@@ -5623,6 +5626,76 @@ export type Database = {
             columns: ["carrier_id"]
             isOneToOne: false
             referencedRelation: "zen_carriers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_order_rate_snapshots_safe: {
+        Row: {
+          applied_currency: string | null
+          applied_rule: string | null
+          applied_unit_price: number | null
+          id: string | null
+          is_manual: boolean | null
+          metadata: Json | null
+          order_id: string | null
+          override_reason: string | null
+          priority: number | null
+          rate_card_id: string | null
+          snapshot_at: string | null
+          version_no: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_order_rate_snapshots_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "zen_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_order_rate_snapshots_rate_card_id_fkey"
+            columns: ["rate_card_id"]
+            isOneToOne: false
+            referencedRelation: "zen_rate_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zen_rate_cards_safe: {
+        Row: {
+          carrier_id: string | null
+          created_at: string | null
+          currency: string | null
+          dest_port_id: string | null
+          id: string | null
+          is_active: boolean | null
+          origin_port_id: string | null
+          tiers: Json | null
+          transport_mode: string | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zen_rate_cards_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "zen_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_rate_cards_dest_port_id_fkey"
+            columns: ["dest_port_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zen_rate_cards_origin_port_id_fkey"
+            columns: ["origin_port_id"]
+            isOneToOne: false
+            referencedRelation: "zen_ports"
             referencedColumns: ["id"]
           },
         ]

@@ -278,7 +278,8 @@ describe('DEF-B-148 / TASK-B-328: fetchAndIssueUpsLabel(docType 없음) 오류 �
     const result = await fetchAndIssueUpsLabel(ORDER_ID);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe('라벨 발급 실패 (getnewlabel)');
+    // TASK-B-351 (Issue #1299): 로케일 문구(Errors.label_issue_failed)로 전환 — 의도된 갱신
+    expect(result.error).toBe('라벨 발급에 실패했습니다.');
     expect(packageUpdates.length).toBe(0);
   });
 

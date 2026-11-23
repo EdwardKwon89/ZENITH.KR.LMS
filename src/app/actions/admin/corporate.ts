@@ -5,6 +5,7 @@ import { withAction } from '@/lib/actions/wrapper';
 import { revalidatePath } from "next/cache";
 import { validateUserAction } from "@/lib/auth/guards";
 import { USER_ROLES } from "@/lib/auth/rbac";
+import { normalizePhoneDigits } from "@/lib/validation/shxk-limits";
 
 /**
  * TASK-B-267 (Issue #1028): 법인정보/부서 관리 허용 역할 — CORPORATE·ADMIN + AGENCY·SHIPPER.
@@ -84,7 +85,9 @@ export const updateOrganizationInfo = withAction(async function (payload: {
   if (payload.country_code !== undefined) updateData.country_code = payload.country_code;
   if (payload.address_english !== undefined) updateData.address_english = payload.address_english;
   if (payload.address_detail_english !== undefined) updateData.address_detail_english = payload.address_detail_english;
-  if (payload.contact !== undefined) updateData.contact_phone = payload.contact;
+  // TASK-B-347 (Issue #1279): 전화 서버측 정규화 — 비숫자 제거 + 15자리 상한
+  // (거부가 아닌 정규화: 레거시 하이픈/괄호 포함 저장분이 다른 필드와 함께 재저장되는 것을 막지 않기 위함)
+  if (payload.contact !== undefined) updateData.contact_phone = normalizePhoneDigits(payload.contact);
   if (payload.email !== undefined) updateData.contact_email = payload.email;
 
   const { error } = await supabase

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from 'next-intl';
 import { logger } from '@/lib/logger';
 
 import { useState, useEffect, useTransition } from "react";
@@ -31,6 +32,7 @@ export default function RouteOptimizationSection({
   const [appliedSegments, setAppliedSegments] = useState<any[] | null>(initialAppliedSegments || null);
   const [milestones, setMilestones] = useState<any[]>([]);
   const [isPending, startTransition] = useTransition();
+  const errT = useTranslations('Errors');
   const [isLoadingVisual, setIsLoadingVisual] = useState(false);
 
   const handleCalculate = async () => {
@@ -43,7 +45,8 @@ export default function RouteOptimizationSection({
           toast.success("경로 옵션이 계산되었습니다.");
         }
       } catch (error: any) {
-        toast.error(`경로 계산 실패: ${error.message}`);
+        console.error(error);
+        toast.error(errT('generic', { code: 'ROUTE_CALC' }));
       }
     });
   };
@@ -61,7 +64,8 @@ export default function RouteOptimizationSection({
           fetchVisualization();
         }
       } catch (error: any) {
-        toast.error(`경로 선택 실패: ${error.message}`);
+        console.error(error);
+        toast.error(errT('generic', { code: 'ROUTE_SELECT' }));
       }
     });
   };

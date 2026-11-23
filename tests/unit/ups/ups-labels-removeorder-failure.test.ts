@@ -68,8 +68,9 @@ describe('TASK-B-211: removeorder 실패 시 즉시 return', () => {
     const result = await cancelUpsRegistration('order-123');
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('UPS 라벨 회수 실패(SHXK)');
-    expect(result.error).toContain('UPS rejected cancellation');
+    // TASK-B-351: SHXK 원문은 사용자에게 노출하지 않는다
+    expect(result.error).toBe('라벨 회수에 실패했습니다.');
+    expect(result.error).not.toContain('UPS rejected cancellation');
     expect(removeorder).toHaveBeenCalledWith('REF001');
     expect(docsChain.delete).not.toHaveBeenCalled();
     expect(supabase.delete).not.toHaveBeenCalled();
@@ -89,8 +90,9 @@ describe('TASK-B-211: removeorder 실패 시 즉시 return', () => {
     const result = await voidUpsLabel('order-456');
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('UPS 라벨 회수 실패(SHXK)');
-    expect(result.error).toContain('UPS rejected void');
+    // TASK-B-351: SHXK 원문은 사용자에게 노출하지 않는다
+    expect(result.error).toBe('라벨 회수에 실패했습니다.');
+    expect(result.error).not.toContain('UPS rejected void');
     expect(removeorder).toHaveBeenCalledWith('REF002');
     expect(supabase.update).not.toHaveBeenCalled();
     const pkgCalls = supabase.from.mock.calls.filter(

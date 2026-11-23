@@ -88,7 +88,8 @@ describe('Corporate Actions Unit Tests', () => {
       rep_name: '대표자',
       biz_no: '123-45-67890',
       address: '서울시 강남구 테헤란로 123',
-      contact_phone: '010-1234-5678',
+      // TASK-B-347 (Issue #1279): 전화 서버측 정규화 — 하이픈 포함 입력값도 숫자만 저장
+      contact_phone: '01012345678',
       contact_email: 'corp@zenith.kr',
     });
 
@@ -151,7 +152,8 @@ describe('Corporate Actions — AGENCY/SHIPPER 확장 (TASK-B-267 / Issue #1028)
     const result = await updateOrganizationInfo({ representative: 'Agency CEO', contact: '010-0000-1111' });
     expect(result.data).toBe(true);
     expect(result.error).toBeNull();
-    expect(mockSupabase.update).toHaveBeenCalledWith({ rep_name: 'Agency CEO', contact_phone: '010-0000-1111' });
+    // TASK-B-347 (Issue #1279): 하이픈 포함 입력값은 서버에서 숫자만으로 정규화되어 저장
+    expect(mockSupabase.update).toHaveBeenCalledWith({ rep_name: 'Agency CEO', contact_phone: '01000001111' });
     expect(mockSupabase.eq).toHaveBeenCalledWith('id', 'org-456');
   });
 

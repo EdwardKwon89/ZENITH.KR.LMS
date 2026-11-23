@@ -12,6 +12,7 @@ import {
 } from '@/app/actions/corporate';
 import { AddressInput } from '@/components/common/AddressInput';
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { 
   Building2, 
   Users, 
@@ -31,6 +32,7 @@ import { useTranslations } from 'next-intl';
 
 export default function CorporatePage() {
   const t = useTranslations('Dashboard');
+  const errT = useTranslations('Errors');
   const [activeTab, setActiveTab] = useState<'info' | 'dept'>('info');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -48,7 +50,7 @@ export default function CorporatePage() {
         setDepts(deptsData.departments);
       } catch (err) {
         logger.error(err);
-        toast.error('데이터를 불러오는 데 실패했습니다.');
+        toast.error(errT('fetch_failed'));
       } finally {
         setIsLoading(false);
       }
@@ -83,7 +85,8 @@ export default function CorporatePage() {
         toast.success(t('success_save_org'));
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'ORGANIZATION_SAVE' }));
     } finally {
       setIsSaving(false);
     }
@@ -102,7 +105,8 @@ export default function CorporatePage() {
         toast.success(t('success_add_dept'));
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'ORGANIZATION_SAVE' }));
     }
   }
 
@@ -119,7 +123,8 @@ export default function CorporatePage() {
         toast.success(t('success_edit_dept'));
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'ORGANIZATION_SAVE' }));
     }
   }
 
@@ -135,7 +140,8 @@ export default function CorporatePage() {
         toast.success(t('success_delete_dept'));
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'ORGANIZATION_SAVE' }));
     }
   }
 
@@ -229,8 +235,9 @@ export default function CorporatePage() {
                 <div className="space-y-2.5">
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">{t('label_contact')}</label>
                   <div className="relative group">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-brand-500" />
-                    <ZenInput name="contact" defaultValue={org?.contact_phone || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
+                    {/* TASK-B-347 (Issue #1279): PhoneInput 도움말이 입력 아래에 붙어 컨테이너가 길어짐 — 아이콘 중앙선을 입력란 기준(top-6)으로 고정 */}
+                    <Phone className="absolute left-4 top-6 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-brand-500" />
+                    <PhoneInput name="contact" defaultValue={org?.contact_phone || ''} className="pl-11 h-12 border-slate-200 rounded-xl focus:ring-brand-500/20" />
                   </div>
                 </div>
 

@@ -62,6 +62,8 @@ export function ContactFields({ t, loginEmail, defaultValues = {}, fieldErrors =
       <div className="mt-4">
         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('form_contact_phone')}</label>
         <input name="contact_phone" defaultValue={defaultValues.contact_phone} onChange={(e) => { e.target.value = formatPhone(e.target.value); }} maxLength={13} className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+        {/* TASK-B-347 (Issue #1279): 하이픈 필수 형식(validations/agency.ts) —숫자만 아님, 형식 안내 필요 */}
+        <p className="text-[10px] text-slate-400 mt-1">{t('form_contact_phone_help')}</p>
         {fieldErrors.contact_phone && <p className="text-xs text-red-500 mt-1">{fieldErrors.contact_phone}</p>}
       </div>
     </div>

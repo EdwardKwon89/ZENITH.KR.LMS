@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 import { getVocList, answerVoc, updateVocStatus, VocItem, VocDetail, getVocDetail } from '@/app/actions/voc';
 import { ZenCard, ZenButton, ZenBadge, ZenInput } from '@/components/ui/ZenUI';
@@ -17,6 +18,7 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
   const [vocs, setVocs] = useState<VocItem[]>(initialVocs);
   const [selectedVocId, setSelectedVocId] = useState<string | null>(null);
   const [selectedVocDetail, setSelectedVocDetail] = useState<VocDetail | null>(null);
+  const errT = useTranslations('Errors');
   const [answerContent, setAnswerContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
@@ -28,7 +30,7 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
     if (result.success) {
       setSelectedVocDetail(result.data);
     } else {
-      toast.error('상세 정보 로드 실패', { description: result.error });
+      toast.error(errT('generic', { code: 'VOC_DETAIL_LOAD' }), { description: result.error });
     }
     setIsLoadingDetail(false);
   };
@@ -49,7 +51,7 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
       });
       
       if (error) {
-        toast.error('답변 등록 실패', { description: error });
+        toast.error(errT('generic', { code: 'VOC_ANSWER' }), { description: error });
         return;
       }
 
@@ -63,7 +65,8 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
         setVocs(listResult.vocs ?? []);
       }
     } catch (err: any) {
-      toast.error('답변 등록 실패', { description: err.message });
+      console.error(err);
+      toast.error(errT('generic', { code: 'VOC_ANSWER' }));
     } finally {
       setIsSubmitting(false);
     }
@@ -75,7 +78,7 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
     try {
       const { data: success, error } = await updateVocStatus(selectedVocId, 'CLOSED');
       if (error) {
-        toast.error('상태 변경 실패', { description: error });
+        toast.error(errT('generic', { code: 'VOC_STATUS' }), { description: error });
         return;
       }
       
@@ -86,7 +89,8 @@ export default function AdminVocClient({ initialVocs, t }: AdminVocClientProps) 
         setVocs(listResult.vocs ?? []);
       }
     } catch (err: any) {
-      toast.error('상태 변경 실패', { description: err.message });
+      console.error(err);
+      toast.error(errT('generic', { code: 'VOC_STATUS' }));
     }
   };
 

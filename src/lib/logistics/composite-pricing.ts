@@ -51,7 +51,7 @@ export class TISARateMatcher {
   
   async matchRateCard(carrierId: string, mode: TransportMode, originPortId?: string, destPortId?: string) {
     const today = new Date().toISOString().split('T')[0];
-    let query = this.supabase.from('zen_rate_cards').select('tiers, currency');
+    let query = this.supabase.from('zen_rate_cards_safe').select('tiers, currency');
     
     if (typeof query.eq === 'function') query = query.eq('carrier_id', carrierId);
     if (typeof query.eq === 'function') query = query.eq('transport_mode', mode);
@@ -229,7 +229,7 @@ export async function calculateCompositePricing(input: CompositePricingInput): P
   const chargeableWeight = calculateChargeableWeight({ weight, volume, mode: transport_mode });
   const today = new Date().toISOString().split('T')[0];
   
-  let rateCardQuery = supabase.from('zen_rate_cards').select('tiers, currency');
+  let rateCardQuery = supabase.from('zen_rate_cards_safe').select('tiers, currency');
   if (typeof rateCardQuery.eq === 'function') rateCardQuery = rateCardQuery.eq('carrier_id', carrier_id);
   if (typeof rateCardQuery.eq === 'function') rateCardQuery = rateCardQuery.eq('transport_mode', transport_mode);
   if (typeof rateCardQuery.eq === 'function') rateCardQuery = rateCardQuery.eq('is_active', true);

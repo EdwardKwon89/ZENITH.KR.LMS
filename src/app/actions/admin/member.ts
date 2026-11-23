@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from '@/lib/logger';
+import { trError } from '@/lib/i18n/action-error';
 import { withAction } from '@/lib/actions/wrapper';
 import { revalidatePath } from "next/cache";
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
@@ -47,7 +48,7 @@ export async function getMyProfile() {
   const { profile } = await validateUserAction();
 
   if (!profile) {
-    throw new Error("프로필 정보를 불러오는 데 실패했습니다.");
+    throw new Error(await trError('profile_not_found'));
   }
 
   return profile;
@@ -69,8 +70,8 @@ export async function updateMyProfile(payload: {
     revalidatePath("/mypage/profile");
     return { success: true };
   } catch (err: any) {
-    logger.error("[MEMBER_ACTION] updateMyProfile Error:", err.message);
-    return { error: "프로필 수정 중 오류가 발생했습니다." };
+    logger.error("[MEMBER_ACTION] updateMyProfile Error:", err);
+    return { error: await trError('generic', { code: 'PROFILE_SAVE' }) };
   }
 }
 
@@ -109,16 +110,16 @@ export const requestGradePromotion = withAction(async function (payload: {
   } : null;
 
   if (zenProfileError || !profile) {
-    throw new Error("프로필 정보를 확인할 수 없습니다.");
+    throw new Error(await trError('profile_not_found'));
   }
 
   if (profile.role !== USER_ROLES.INDIVIDUAL) {
-    throw new Error("개인 회원만 등급 승급을 신청할 수 있습니다.");
+    throw new Error(await trError('grade_promotion_individual_only'));
   }
 
   const { data: existing } = await adminRepo.findExistingPendingRequest(user.id);
   if (existing) {
-    throw new Error("이미 대기 중인 승급 신청이 있습니다.");
+    throw new Error(await trError('grade_promotion_pending_exists'));
   }
 
   const { data: request, error: requestError } = await adminRepo.insertPromotionRequest({
@@ -131,7 +132,7 @@ export const requestGradePromotion = withAction(async function (payload: {
 
   if (requestError || !request) {
     logger.error("Error requesting grade promotion:", requestError);
-    throw new Error("승급 신청 중 오류가 발생했습니다.");
+    throw new Error(await trError('generic', { code: 'GRADE_PROMOTION_SAVE' }));
   }
 
   const { data: admins } = await adminRepo.findAdminProfiles();
@@ -169,7 +170,7 @@ export async function getGradePromotionRequests(params?: {
       adminRole: profile?.role,
       params,
     });
-    throw new Error("신청 목록을 불러오는 데 실패했습니다.");
+    throw new Error(await trError('fetch_failed'));
   }
 
   const requests: GradePromotionRequest[] = (data || []).map((item: any) => {
@@ -209,11 +210,11 @@ export const reviewGradePromotion = withAction(async function (payload: {
 
   const { data: request, error: fetchError } = await adminRepo.findPromotionRequestById(payload.requestId);
   if (fetchError || !request) {
-    throw new Error("신청 내역을 찾을 수 없습니다.");
+    throw new Error(await trError('not_found'));
   }
 
   if (request.status !== "PENDING") {
-    throw new Error("이미 처리가 완료된 신청입니다.");
+    throw new Error(await trError('grade_promotion_already_processed'));
   }
 
   const { error: updateError } = await adminRepo.updatePromotionRequest(payload.requestId, {
@@ -223,7 +224,7 @@ export const reviewGradePromotion = withAction(async function (payload: {
   });
 
   if (updateError) {
-    throw new Error("심사 결과 저장 중 오류가 발생했습니다.");
+    throw new Error(await trError('generic', { code: 'GRADE_REVIEW_SAVE' }));
   }
 
   if (payload.decision === "APPROVED") {
@@ -263,8 +264,8 @@ export async function withdrawUser() {
 
     return { success: true };
   } catch (err: any) {
-    logger.error("[MEMBER_ACTION] withdrawUser Error:", err.message);
-    return { error: "탈퇴 처리 중 오류가 발생했습니다." };
+    logger.error("[MEMBER_ACTION] withdrawUser Error:", err);
+    return { error: await trError('generic', { code: 'WITHDRAW' }) };
   }
 }
 
@@ -291,7 +292,7 @@ export async function listMembers(params?: {
 
   if (error) {
     logger.error("[MEMBER_ACTION] listMembers Error:", error);
-    throw new Error("회원 목록을 불러오는 데 실패했습니다.");
+    throw new Error(await trError('fetch_failed'));
   }
 
   return { members: data || [], total: count || 0 };
@@ -305,13 +306,13 @@ export async function changeMemberStatus(userId: string, status: string) {
   const repo = new AdminRepository(supabase);
 
   if (status === 'SUSPENDED' && profile?.id === userId) {
-    throw new Error("자기 자신을 정지할 수 없습니다.");
+    throw new Error(await trError('cannot_suspend_self'));
   }
 
   const { error } = await repo.updateProfileStatus(userId, status);
   if (error) {
     logger.error("[MEMBER_ACTION] changeMemberStatus Error:", error);
-    throw new Error("회원 상태 변경 중 오류가 발생했습니다.");
+    throw new Error(await trError('generic', { code: 'MEMBER_STATUS_SAVE' }));
   }
 
   // Sync status to Supabase Auth app_metadata so proxy middleware reads fresh status
@@ -331,7 +332,7 @@ export async function changeMemberGrade(userId: string, gradeCode: string) {
   const { error } = await repo.updateProfileGrade(userId, gradeCode);
   if (error) {
     logger.error("[MEMBER_ACTION] changeMemberGrade Error:", error);
-    throw new Error("회원 등급 변경 중 오류가 발생했습니다.");
+    throw new Error(await trError('generic', { code: 'MEMBER_GRADE_UPDATE' }));
   }
 
   // Sync grade to Supabase Auth app_metadata for consistency

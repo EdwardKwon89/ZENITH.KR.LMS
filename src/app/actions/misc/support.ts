@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from '@/lib/logger';
+import { trError } from '@/lib/i18n/action-error';
 
 import { validateUserAction, validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
@@ -68,7 +69,7 @@ export async function createQna(payload: {
   order_id?: string;
 }) {
   const { supabase, user, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
 
   // 1. 오더 소유권 검증 (있는 경우)
   if (payload.order_id) {
@@ -78,8 +79,8 @@ export async function createQna(payload: {
       .eq("id", payload.order_id)
       .single();
 
-    if (orderError || !order) throw new Error("Order not found");
-    if (order.shipper_id !== profile.org_id) throw new Error("UNAUTHORIZED: Access denied to this order");
+    if (orderError || !order) throw new Error(await trError('order_not_found'));
+    if (order.shipper_id !== profile.org_id) throw new Error(await trError('permission_denied'));
   }
 
   // 2. zen_qna INSERT
@@ -96,7 +97,10 @@ export async function createQna(payload: {
     .select("id, title, content, order_id, org_id, status, created_at, updated_at, created_by")
     .single();
 
-  if (qnaError) throw new Error(`QnA creation failed: ${qnaError.message}`);
+  if (qnaError) {
+    logger.error('createQna: insert failed', qnaError);
+    throw new Error(await trError('generic', { code: 'QNA_CREATE' }));
+  }
 
   // 3. Admin 대상 알림 발송 (VOC 패턴 참조)
   try {
@@ -162,7 +166,10 @@ export async function getQnaList({
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    logger.error('getQnaList: failed', error);
+    throw new Error(await trError('generic', { code: 'QNA_LIST' }));
+  }
 
   const qnas = data.map((item: any) => ({
     ...item,
@@ -188,7 +195,7 @@ export async function getQnaDetail(qnaId: string): Promise<QnaDetail> {
     .eq("id", qnaId)
     .single();
 
-  if (qnaError || !qna) throw new Error("QnA not found");
+  if (qnaError || !qna) throw new Error(await trError('not_found'));
 
   const { data: answers, error: ansError } = await supabase
     .from("zen_qna_answers")
@@ -199,7 +206,10 @@ export async function getQnaDetail(qnaId: string): Promise<QnaDetail> {
     .eq("qna_id", qnaId)
     .order("created_at", { ascending: true });
 
-  if (ansError) throw new Error(ansError.message);
+  if (ansError) {
+    logger.error('getQnaDetail: failed', ansError);
+    throw new Error(await trError('generic', { code: 'QNA_ANSWERS_FETCH' }));
+  }
 
   const order = Array.isArray(qna.order) ? qna.order[0] : qna.order;
   return {
@@ -234,7 +244,10 @@ export async function answerQna(payload: {
     .select("id, qna_id, answered_by, content, created_at")
     .single();
 
-  if (ansError) throw new Error(`Answer failed: ${ansError.message}`);
+  if (ansError) {
+    logger.error('answerQna: failed', ansError);
+    throw new Error(await trError('generic', { code: 'QNA_ANSWER_SAVE' }));
+  }
 
   // 2. 상태 업데이트
   const { data: qna } = await supabase
@@ -307,7 +320,10 @@ export async function upsertFaq(payload: {
   }
 
   const { data, error } = await query.select("id, answer, category, created_at, created_by, is_active, order_no, question, updated_at").single();
-  if (error) throw new Error(`FAQ upsert failed: ${error.message}`);
+  if (error) {
+    logger.error('upsertFaq: failed', error);
+    throw new Error(await trError('generic', { code: 'FAQ_SAVE' }));
+  }
 
   revalidatePath("/support/faq");
   return { success: true, faqId: data.id };
@@ -343,7 +359,10 @@ export async function getFaqList({
   }
 
   const { data, error, count } = await query.order("order_no", { ascending: true }).range(from, to);
-  if (error) throw new Error(error.message);
+  if (error) {
+    logger.error('getFaqList: failed', error);
+    throw new Error(await trError('generic', { code: 'FAQ_LIST' }));
+  }
 
   return { faqs: data as FaqItem[], total: count || 0 };
 }
@@ -360,7 +379,10 @@ export async function deleteFaq(faqId: string) {
     .update({ is_active: false })
     .eq("id", faqId);
 
-  if (error) throw new Error(`Delete failed: ${error.message}`);
+  if (error) {
+    logger.error('deleteFaq: failed', error);
+    throw new Error(await trError('generic', { code: 'FAQ_DELETE' }));
+  }
 
   revalidatePath("/support/faq");
   return { success: true };
@@ -410,7 +432,10 @@ export async function upsertNotice(payload: {
   }
 
   const { data, error } = await query.select("id, content, created_at, created_by, is_important, is_published, published_at, title, updated_at").single();
-  if (error) throw new Error(`Notice upsert failed: ${error.message}`);
+  if (error) {
+    logger.error('upsertNotice: failed', error);
+    throw new Error(await trError('generic', { code: 'NOTICE_SAVE' }));
+  }
 
   revalidatePath("/support/notices");
   return { success: true, noticeId: data.id };
@@ -427,7 +452,10 @@ export async function deleteNotice(noticeId: string) {
     .delete()
     .eq("id", noticeId);
 
-  if (error) throw new Error(`Delete failed: ${error.message}`);
+  if (error) {
+    logger.error('deleteNotice: failed', error);
+    throw new Error(await trError('generic', { code: 'NOTICE_DELETE' }));
+  }
 
   revalidatePath("/support/notices");
   return { success: true };
@@ -457,7 +485,10 @@ export async function getNoticeList({
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    logger.error('getNoticeList: failed', error);
+    throw new Error(await trError('generic', { code: 'NOTICE_LIST' }));
+  }
 
   return { notices: data as NoticeItem[], total: count || 0 };
 }
@@ -490,7 +521,10 @@ export async function getOrderQnaList(orderId: string, page = 1, pageSize = 50):
     .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (error) throw new Error(`Failed to fetch order QnA: ${error.message}`);
+  if (error) {
+    logger.error('getOrderQnaList: failed', error);
+    throw new Error(await trError('generic', { code: 'ORDER_QNA_LIST' }));
+  }
 
   const qnas = data.map((item: any) => ({
     ...item,

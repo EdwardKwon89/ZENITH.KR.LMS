@@ -22,6 +22,7 @@ import { Star, ArrowUpCircle, Info, CheckCircle2, Clock } from "lucide-react";
 
 export default function MyGradePage({ params: { locale } }: { params: { locale: string } }) {
   const t = useTranslations("Support");
+  const errT = useTranslations('Errors');
   
   const [profile, setProfile] = useState<any>(null);
   const [gradeMaster, setGradeMaster] = useState<GradeMasterItem[]>([]);
@@ -63,7 +64,7 @@ export default function MyGradePage({ params: { locale } }: { params: { locale: 
     if (pendingRequest) return;
     
     if (!targetGrade || !requestReason) {
-      toast.error("모든 항목을 입력해주세요.");
+      toast.error(errT('grade_fill_all_required'));
       return;
     }
 
@@ -79,7 +80,8 @@ export default function MyGradePage({ params: { locale } }: { params: { locale: 
         setPendingRequest(newPending);
       }
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'GRADE_PROMOTION' }));
     } finally {
       setSubmitting(false);
     }

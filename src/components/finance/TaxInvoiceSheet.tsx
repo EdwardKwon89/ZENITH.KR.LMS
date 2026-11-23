@@ -9,6 +9,7 @@ import { ZenButton, ZenBadge } from '@/components/ui/ZenUI';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { TaxInvoiceTemplate } from './TaxInvoiceTemplate';
+import { useTranslations } from 'next-intl';
 
 interface TaxInvoiceSheetProps {
   invoiceId: string;
@@ -23,6 +24,7 @@ export const TaxInvoiceSheet: React.FC<TaxInvoiceSheetProps> = ({
   isOpen,
   onClose
 }) => {
+  const te = useTranslations('Errors');
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -65,7 +67,8 @@ export const TaxInvoiceSheet: React.FC<TaxInvoiceSheetProps> = ({
       }
     } catch (err: any) {
       logger.error('[TaxInvoiceSheet] handleIssue error:', err);
-      toast.error(`발행 실패: ${err.message}`);
+      console.error(err);
+      toast.error(te('generic', { code: 'INVOICE_ISSUE' }));
     } finally {
       logger.info('[TaxInvoiceSheet] handleIssue finished, setting actionLoading to false');
       setActionLoading(false);
@@ -81,7 +84,8 @@ export const TaxInvoiceSheet: React.FC<TaxInvoiceSheetProps> = ({
         loadHistory();
       }
     } catch (err: any) {
-      toast.error(`발송 실패: ${err.message}`);
+      console.error(err);
+      toast.error(te('generic', { code: 'INVOICE_SEND' }));
     } finally {
       setActionLoading(false);
     }

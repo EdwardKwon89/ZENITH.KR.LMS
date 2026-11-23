@@ -1450,6 +1450,7 @@
 - **예상 공수**: 0.5 MD (hook 로직 재설계 + 팀 공지)
 - **우선순위**: **High로 상향** — PASS 오기재 방향(PR#309·#313)이 실제로 발생함이 확인되어, 리뷰어가 매번 실제 CI를 직접 조회하지 않으면 회귀 실패가 은폐된 채 병합될 실질적 위험이 입증됨
 - **상태**: 🔄 1단계 적용 완료(2026-07-11) — `.githooks/pre-commit`에서 이 파일 기반 하드 블록(exit 1) 제거, 경고만 출력하도록 완화. 병합 판단은 원격 CI(`gh pr checks`) 전용으로 전환. pre-commit이 실제 테스트를 재실행하는 강화안(3단계)은 로컬 환경 준비 후 별도 검토.
+- **상태 갱신(2026-11-14, 종결)**: 2단계 완료 — 이 파일을 4개월간 `FAIL`로 방치한 채 pre-commit이 매 커밋 경고를 출력하는 문제(Edward 지적)로 근본 조치. 파일 삭제 + `.gitignore` 등록, `.githooks/pre-commit` 검사 제거, `.claude/settings.json` `Stop` 훅 제거(세션 종료마다 최대 120초 회귀 실행 후 파일을 쓰던 동작 — `테스트 | tail && PASS` 구조라 파이프 종료코드 때문에 값이 부정확했음), `GEMINI.md` 표준 절차에서 기록 줄 제거, `104` 가이드에 폐지 주석. 병합 판단은 원격 CI(`gh pr checks`) 단독. 3단계(pre-commit에서 실제 테스트 재실행)는 채택하지 않음 — 로컬 DB 상태 의존(R-08-2)으로 재현성이 낮고 CI가 이미 매번 fresh DB로 판정.
 
 ## [IMP-136] `gh pr merge --squash`가 stale 브랜치의 ACTIVE_TASK.md 행 삭제를 그대로 반영(병합 후 데이터 유실)
 
@@ -1998,3 +1999,258 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `scripts/check-db-freshness.sh`(25·29·41·46행), `scripts/agent-worktree-init.sh`(85행), `GOV_COMMON.md`(R-08-2)
 - **예상 공수**: 0.2~0.3 MD (스크립트 수정 + 동작 케이스 4종 검증)
 - **우선순위**: Low — 기능 장애 아님. 다만 R-08-2의 자동화 가치가 환경에 따라 0이 되는 문제로, DEF-128(로컬 DB stale) 재발 방어선의 사각지대
+
+---
+
+## [IMP-179] 프로덕션 배포(`vercel --prod`)가 로컬 작업 디렉토리를 올리는 구조 — stale 소스 배포를 막는 안전장치 부재
+
+- **발견 경위**: 2026-10-29 09:44 KST, TASK-B-343 릴리즈(PR #1272, `cfe06fdd6`) 배포 중 발견. `main` 병합 직후 공유 체크아웃(`develop` checkout, `origin/develop`보다 21커밋 뒤처진 `bbfb79fc5`)에서 `vercel --prod --yes`를 실행해 **B-343이 없는 오래된 소스(`zenith-140yfnteq`)가 프로덕션에 배포**됨. 배포 후 `grep sanitizeComma`로 누락을 확인하고 09:47 KST에 `origin/main` 격리 worktree에서 재배포(`zenith-8rjsei5da`)해 해소.
+- **현재 상태**: 재배포로 프로덕션은 `cfe06fdd6` 기준 정상. 약 3분간 stale 코드가 서비스됨(데이터 변경·신규 에러 로그 없음, row count 전후 동일 — 오더 49/프로필 16/인보이스 24/에러로그 70). 원인은 Vercel 프로젝트가 GitHub 연동이 없어(SOP 209 §0) CLI가 로컬 디렉토리를 그대로 업로드하는데, 배포 전 "배포 소스 = 방금 병합한 main"을 확인하는 단계가 SOP에 없었던 것.
+- **진행 상태(2026-10-29)**: (A)(B) 구현 완료 — `scripts/deploy-prod.sh`(게이트·격리 worktree·V1~V3 검증·롤백 대상 출력), dry-run·오류 종료코드 검증. **미완: 실배포 경로 첫 검증(다음 배포 시), (C) 장기 검토.**
+- **임시 조치**: 실행 런북 `docs/00_GUIDE/211_PRODUCTION_DEPLOY_RUNBOOK.md` 작성(배포 전·후 게이트, 보고 양식, 롤백, 장애 사례) + SOP 209 v1.2(§4)에 "격리 worktree에서 `origin/main` 기준 배포 + HEAD 해시 확인" 절차를 문서화함(본 항목과 같은 커밋).
+- **목표 구현**: (A) 배포 전 자동 가드 스크립트(`scripts/deploy-prod.sh` 등) — `git fetch` 후 `git rev-parse HEAD`가 `origin/main`과 다르면 exit 1로 중단, 또는 스크립트가 직접 임시 worktree를 만들어 배포·정리까지 수행, (B) 배포 완료 후 `vercel inspect` alias 연결 확인과 배포 소스 해시를 출력, (C) 장기적으로 Vercel–GitHub 연동 또는 GitHub Actions 배포 전환 검토(AWS 이관 Issue #995 일정과 함께 판단).
+- **관련 파일**: `docs/00_GUIDE/209_VERCEL_DEPLOYMENT_SOP.md`(§0·§4), `.vercel/project.json`, `.vercelignore`
+- **예상 공수**: 0.3~0.5 MD (A+B 스크립트), C는 별도 검토
+- **우선순위**: Medium — 이번엔 3분·데이터 영향 없이 해소됐으나, 병합 코드가 통째로 빠진 채 프로덕션에 올라가는 유형이라 Pilot 실데이터 환경에서는 재발 시 기능 회귀·오동작 위험이 큼. 현재 방어선은 SOP 문서뿐(강제력 없음 — R-17 worktree 수기 안내가 재발했던 전례와 동일하므로 스크립트화 권장)
+
+
+---
+
+## [IMP-180] 담당자 미지정 High/p1 이슈가 방치되는 구조 — 세션 시작 점검(R-16)이 `--assignee` 기준이라 걸러내지 못함 (DEF-B-154 사례)
+
+- **발견 경위**: 2026-11-13 09:25 KST, #1283(DEF-B-154, CI Regression 전 PR 실패, p1) 처리 중 발견. 이슈는 2026-11-12 13:58 KST에 Team B가 원인까지 정확히 진단해 올렸고(수정은 Aiden 소유 영역인 CI 설정이라 직접 수정 불가), **assignee 없이 `status:open`·`priority:p1`로 약 19시간 방치**. 그동안 Team B는 PR#1282·#1285·#1286 3건을 CI 없이 로컬 대체 검증(R-08-1)으로 진행.
+- **현재 상태**: 2026-11-13 PR#1287/#1288로 해소(CLI 2.122.1 고정). 그러나 "소유 영역 밖 수정이 필요한 긴급 이슈"가 담당자 없이 올라올 때 누가 언제 집는지 정해진 규칙이 없음.
+- **원인**: R-16 세션 시작 점검이 `gh issue list --assignee <본인>`이라 assignee 미지정 이슈는 조회 대상이 아님. R-18 "긴급도 High → Aiden이 Edward에게 보고 후 TASK 발령"도 이슈가 올라온 사실을 Aiden이 인지해야 시작되는데, 인지 경로(알림/조회)가 없음.
+- **영향**: 팀 전체 CI 적색 상태가 반나절 이상 지속되면 모든 PR이 CI 검증 없이 로컬 증적에만 의존 — 머지 품질 방어선(R-08) 약화. 이번엔 코드 결함은 없었으나 이상적 상황이 아님.
+- **임시 조치**: 없음(이번 건은 수동 처리).
+- **목표 구현**: (A) R-16에 "assignee 미지정 + `priority:p1` 또는 `status:open` 오픈 이슈 조회(`gh issue list --search "no:assignee label:priority:p1"`)"를 세션 시작 점검 항목으로 추가, (B) R-18 보고 이슈 생성 시 Aiden을 자동 assignee로 지정하거나 `needs:aiden` 라벨 부여 규칙화(Team B 이슈 템플릿 반영), (C) 선택: GitHub Action으로 미지정 p1 이슈 6시간 경과 시 알림 코멘트.
+- **관련 파일**: `GOV_COMMON.md`(R-16·R-18), `.github/ISSUE_TEMPLATE/`(존재 시), Team B 지침(`105_MULTITEAM_GOVERNANCE.md`)
+- **예상 공수**: 0.3 MD (A·B 문서 개정), C 포함 시 +0.3 MD
+- **우선순위**: Medium
+
+---
+
+## [IMP-181] CI Supabase CLI 버전 고정(2.122.1) 후속 — `[inbucket]` → `[local_smtp]` 전환 및 고정 해제 계획
+
+- **발견 경위**: 2026-11-13 09:24 KST, DEF-B-154 조치(PR#1287/#1288) 중. `version: latest`가 3.x로 해석되어 `supabase/config.toml`의 `[inbucket]`을 거부하는 것이 원인이었고, 즉시 복구책으로 CLI를 2.122.1로 고정.
+- **현재 상태**: 고정으로 CI 정상화. 단 고정은 임시 방어선 — 2.x가 EOL되거나 `supabase/setup-cli` 액션이 구버전 다운로드를 중단하면 다시 실패. 로컬 개발 CLI(`npx supabase@2.122.1`)도 같은 이유로 고정 중(2026-11-09 메모). 3.0은 config 비호환 외에도 mac 서명 이슈가 있었음.
+- **임시 조치**: `.github/workflows/pr-checks.yml`에 `version: 2.122.1` + 주석으로 사유 기재.
+- **목표 구현**: ①3.x 로컬·CI에서 `supabase start` 실측하며 `config.toml` 전체 비호환 항목 파악(`[inbucket]`→`[local_smtp]` 포함, R-06 Context7로 최신 문서 확인) ②`[local_smtp]` 전환 시 로컬 이메일 테스트 흐름(Inbucket UI 포트 54324 의존 여부) 영향 확인 ③전환 후 CI 고정 버전 상향 또는 `latest` 복귀(복귀 시 마이너 업데이트 영향 모니터링) ④`check-db-freshness.sh`(IMP-178)·docs의 CLI 버전 표기 일괄 갱신.
+- **관련 파일**: `supabase/config.toml`(99행 `[inbucket]`), `.github/workflows/pr-checks.yml`, `scripts/check-db-freshness.sh`, `docs/00_GUIDE/` 로컬 개발 가이드
+- **예상 공수**: 0.5 MD (3.x 비호환 조사 포함)
+- **우선순위**: Low — 고정으로 장애 해소됨. 단 기술 부채이므로 Pilot 이후 정기 점검 시점에 처리 권장
+
+
+---
+
+## [IMP-182] 검토 산출물(제출 보고서) 파일이 무고지로 0바이트 훼손 — 보호·무결성 확인 장치 부재 (`riley_review.md` 사고)
+
+- **발견 경위**: 2026-11-13 12:16 KST, 문서 231 v0.2 2차 교차 검증(Riley·B_Kai·D_Kai) 결과에서 3인이 모두 "`docs/08_Self_Audit/Reviews/231/riley_review.md`가 0바이트"라고 지적. Aiden이 `stat`으로 확인 — **size=0, mtime=11:24:38**. 제출 시점(10:52)에는 32,273바이트·188줄이었음(Aiden이 10:5x에 전문 Read).
+- **현재 상태**: Riley 세션 기록(`~/.gemini/antigravity/brain/43b932d2-…/.system_generated/logs/transcript_full.jsonl`의 step 50 `write_file` + step 55 `edit_file`)에서 프로그램으로 재구성해 복원(32,273바이트·188줄, SHA-256 앞 12자리 `166e234170c7`). **훼손 원인은 미특정** — 확인된 사실: ①해당 시각(11:23:50~11:25:30) 저장소·worktree에서 변경된 파일은 이 1개뿐 ②오케스트레이션 첫 실행(11:51:58)보다 약 27분 앞섬 ③오케스트레이션 raw 로그(`orchestration/logs/runs/*.ndjson`)에 해당 파일에 대한 쓰기성 명령 0건 ④Riley 세션 기록은 10:54에 종료. Antigravity IDE 프로세스가 실행 중이었으나 관련성은 **확인 못 함**.
+- **영향**: 2차 검증이 0바이트 자료로 수행되어 **(R) 의견 14건의 반영표 대조가 실질적으로 이루어지지 않음**(231 부록 E #1).
+- **임시 조치**: 복원, 제출 보고서 2종(`riley_review.md`·`bkai_review.md`) 쓰기 금지(`chmod a-w`), 체크섬 기록.
+- **목표 구현**: (A) 제출·확정된 검토 보고서는 커밋하거나 읽기 전용+체크섬 파일로 고정하고, 검토 시작 시 크기·체크섬 검증을 `debate.py`에 추가(자료 파일이 0바이트·체크섬 불일치면 실행 중단) (B) 검토 기간 중 제출 파일은 미추적 상태로 두지 말고 즉시 커밋 (C) 원인 조사: Antigravity IDE 에디터 버퍼 동기화·Riley 별도 세션 가능성 확인.
+- **관련 파일**: `docs/08_Self_Audit/Reviews/231/riley_review.md`, `orchestration/script/debate.py`(Edward 로컬 도구 — 저장소 미포함)
+- **예상 공수**: 0.2 MD (A·B), C는 조사
+- **우선순위**: Medium — 검토 근거 자료가 소리 없이 사라질 수 있다는 점에서 재발 시 의사결정 품질에 직접 영향
+
+---
+
+## [IMP-183] Ds-11(API 상세 명세서) 참조 경로 불일치 4곳 + 2026-07-15 이후 미갱신(R-12 준수 미확인)
+
+- **발견 경위**: 2026-11-13, 문서 231 검토 중 D_Kai·Riley가 "Ds-11 문서 부재"라 지적했고 Aiden이 `docs/03_Design/`만 확인해 동의(**오류**). 이후 Edward 지시로 아카이브 의도를 조사하던 중 B_Kai의 GH#206 #13 재조사 기록에서 **현행본이 `docs/02_Analysis/Ds_11_API_상세_명세서.md`에 있음**을 확인(554줄, v2.1 Sync, 마지막 수정 2026-07-15 TASK-184 §11.11).
+- **아카이브 경위(확인됨)**: 2026-07-06 커밋 `e4456c485`(GH#206 #13)로 구 INDEX+DETAIL 등 17파일이 `docs/03_Design/_archive/ds_11/`로 이동. B_Kai 재조사("02_Analysis본이 단독 Truth, 나머지는 DEPRECATED/Draft/구 구조")를 Aiden이 승인, Edward가 PR#221 병합 — **의도된 정리**. 이슈 본문의 "3파일"은 B_Kai 1차 조사 오류(디렉토리 누락)였고 재조사에서 17개로 정정됨.
+- **현재 상태**: ① 구 경로(`docs/03_Design/Ds_11_API_상세_명세서.md`)를 가리키는 문서 4곳 — `MASTER_INDEX.md:42`, `README.md:53`, `docs/00_GUIDE/303_API_FIRST_DEVELOPMENT_GUIDE.md:25`, `docs/03_Design/Ds_10_API_INVENTORY.md:21`(링크 깨짐). `GOV_COMMON.md` R-11(116행)·R-12(119행)는 파일명만 적어 경로 문제 없음 ② 2026-07-15 이후 `src/app/actions` 변경 커밋 153건, 신규 액션 파일 7개(`admin/exchange-rates`, `finance/{daily-billing,order-revenue-cost,shipper-invoices,ups-actual-charges,ups-actual-cost}`, `operations/bulk-orders`) — Ds-11 수정 0건. **함수명 기준 대조(2026-11-13)**: `use server` 액션 함수 298개(54파일) 중 Ds-11에 이름이 나오는 것 92개(30%), Ds-10 인벤토리 37개(12%), 둘 중 하나라도 96개(32%); 7/16 이후 추가 20개 함수는 Ds-11 언급 0개. 한계: ①이름 언급 여부일 뿐 언급된 92개의 시그니처·응답 정확성은 미검증 ②파일 이동(경로 재편)으로 git '최초 추가일'이 신뢰되지 않아 **4/27 동기화 시점 대비 얼마나 벌어졌는지는 분리 불가** → R-12(선제 갱신 의무) 준수가 확인되지 않음.
+- **조치 이력**: **(A) 참조 경로 4곳 정정 완료(2026-11-13, Edward 승인)** — 구 경로 잔존 0건. 불일치 기록: **DEF-145**(`.agent/defects/DEF-145_*.md`) + 함수 단위 전체 목록 `docs/08_Self_Audit/Ds11_Gap/Ds11_Gap_Report_20261113.md`. **(B)의 집행 장치는 2026-11-13 Edward 승인으로 구현**: 자동 점검+래칫(`scripts/check-ds11-sync.mjs`, baseline 206), 링크 점검(`scripts/check-doc-links.mjs`, baseline 84), CI advisory job(`pr-checks.yml`), R-11·R-12 개정(GOV_COMMON v3.7). 남은 것은 206개 백로그 해소·2단계(내용 정확성)·필수 승격 시점·R-11 샘플 점검(DEF-145 §8).
+- **임시 조치**: 문서 231은 명세 근거를 Ds-11 현행본(미갱신분은 코드·Issue로 보완)·105·코드 상수 주석으로 서술.
+- **목표 구현**: (A) 참조 경로 4곳을 `docs/02_Analysis/Ds_11_API_상세_명세서.md`로 정정 (B) 신규 액션 7개 및 변경분을 Ds-11과 내용 대조해 갱신 범위 확정, R-12 운영 방식 결정(전수 갱신 vs 변경 큰 모듈·외부 계약 중심) — Edward 결정.
+- **관련 파일**: `docs/02_Analysis/Ds_11_API_상세_명세서.md`, `MASTER_INDEX.md`, `README.md`, 303 가이드, `Ds_10_API_INVENTORY.md`, `GOV_COMMON.md`(R-12)
+- **예상 공수**: (A) 0.1 MD, (B) 1~2 MD (내용 대조 범위에 따라)
+- **우선순위**: Medium (R-12 준수 가시화 — 현재는 위반 여부조차 확인되지 않는 상태)
+
+## [IMP-184] SHXK 사전검증 메시지(`validate-payload.ts`)가 한글 고정 — 비한국어 사용자에게 한글 혼입
+
+- **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299 / 부모 #1280)에서 `ups-labels.ts`의 사용자 반환 오류를 로케일 문장으로 전환하는 과정. `placeShxkOrder()`의 사전검증 실패는 `Errors.shxk_validation_failed`("SHXK 사전검증에 실패했습니다: {fields}")로 감쌌지만, `{fields}`에 들어가는 값은 `src/lib/shxk/validate-payload.ts`가 반환하는 **한글 고정 문자열**(예: `발송인 성명 누락`, `수취인 우편번호 누락`)이다.
+- **현재 상태**: 결과적으로 ko 사용자에게는 자연스럽지만, en/zh/ja 사용자에게는 "SHXK pre-validation failed: 발송인 성명 누락"처럼 **한국어 필드 오류가 섞여 표시**된다. 지시(#1299)에 따라 이번 Task에서는 `validate-payload.ts`를 수정하지 않고 한계만 기록한다.
+- **영향**: 비한국어 로케일에서 SHXK 등록 실패 시 세부 원인 파악이 어렵다(다만 일반문구+필드 목록은 표시되므로 "완전 미번역"은 아님). `ups-labels.ts` 단독 전환으로는 해소 불가.
+- **임시 조치**: 없음(문구 래퍼만 적용).
+- **목표 구현**: (A) `validate-payload.ts`가 `{code, params}` 형태(예: `{ code: 'shipper_name_missing' }`)를 반환하도록 바꾸고 호출부에서 `Errors.shxk_fields.*` 키로 로케일 변환, 또는 (B) 검증 함수에 `t` 함수를 주입해 사전검증 단계에서 로케일 문장 생성. 두 방안 모두 `validate-payload.ts`의 기존 한글 문자열 단언 테스트(`tests/unit/ups/shxk-payload-validation.test.ts` 등)를 코드 기반으로 갱신해야 한다.
+- **관련 파일**: `src/lib/shxk/validate-payload.ts`, `src/app/actions/operations/ups-labels.ts`(`placeShxkOrder`), `messages/{ko,en,zh,ja}.json`(`Errors.shxk_validation_failed`), `tests/unit/ups/shxk-payload-validation.test.ts`
+- **예상 공수**: 0.3~0.5 MD (검증 코드 12종 키화 + 4개 로케일 문구 + 기존 테스트 갱신)
+- **우선순위**: Low~Medium — 기능 장애는 아니나, 로케일 정합(#1280) 목표의 마지막 잔여 구간
+
+---
+
+## [IMP-185] `Errors` 네임스페이스 zh/ja 신규 문구 초안 검수 (TASK-B-351 산출물)
+
+- **발견 경위**: 2026-11-13, TASK-B-351(Issue #1299)에서 `messages/{zh,ja}.json`의 `Errors` 네임스페이스에 신규 키 6개(`profile_not_found`, `destination_country_not_found`, `label_not_found`, `document_save_failed`, `document_save_failed_after_shipping`, `shxk_validation_failed`)와 SHXK 오류 사전 2건(`未找到订单信息`, `Invalid ShipFrom AddressLine3`)의 zh/ja 문구를 Dave가 초안 작성했다.
+  - **TASK-B-356(Issue #1334) 추가분(10키)**: `auth_invalid_credentials`·`auth_email_not_confirmed`·`auth_account_exists`·`auth_password_invalid`·`auth_rate_limited`·`auth_unexpected`·`auth_signup_failed`·`auth_signup_profile_failed`·`inventory_not_found`·`inventory_below_zero` — zh/ja 초안 검수 동일 대상.
+  - **TASK-B-354(Issue #1330) 추가분(18키)**: `invoice_not_found`·`invoice_already_finalized`·`invoice_already_canceled`·`invoice_finalize_reason_required`·`settlement_order_already_finalized`·`settlement_recalc_locked`·`settlement_items_locked`·`invoice_create_failed`·`cost_name_required`·`cost_amount_invalid`·`cost_currency_required`·`order_edit_status_invalid`·`master_order_bound`·`route_required_for_scheduled`·`measurements_stale`·`inbound_no_measurement_changes`·`ups_edit_registered_locked`·`ups_edit_status_locked` — zh/ja 초안 검수 동일 대상.
+  - **TASK-B-352(Issue #1325) 추가분(9키)**: `not_ups_order`, `ups_actual_cost_status_invalid`, `ups_actual_charge_status_invalid`, `billing_finalize_status_invalid`, `shipper_scope_denied`, `manual_reason_required`, `already_delivered`, `agency_org_missing`, `status_change_denied` — zh/ja 초안 검수 동일 대상.
+- **현재 상태**: 키 세트·ICU 플레이스홀더 일치(`errors-key-sync.test.ts`)는 자동 검증되지만, **문구의 자연스러움/용어 일관성은 사람 검수 대상**이다. Jaison 리뷰에서도 "머지 후 JSJung 검수 대상으로 IMP에 남겨 달라"고 요청.
+- **영향**: 문구 품질 문제로 그치며 기능 오류는 아니다. 다만 고객 노출 문구이므로 검수 전까지 잠정 문구로 운영된다.
+- **목표 구현**: zh/ja 원어민(또는 담당자) 검수 → 필요 시 `messages/{zh,ja}.json` `Errors.*` 및 `SHXK_TRANSLATION_DICT` 문구 수정. 이후 `errors-key-sync` + `translate.test.ts` 기대값 동기 갱신.
+- **관련 파일**: `messages/zh.json`, `messages/ja.json`, `src/lib/shxk/translate.ts`, `tests/unit/i18n/errors-key-sync.test.ts`, `tests/unit/shxk/translate.test.ts`
+- **예상 공수**: 0.1~0.2 MD (검수·문구 수정·테스트 기대값 갱신)
+- **우선순위**: Low — 기능 무관, 표시 문구 품질
+- **TASK-B-355(2026-11-17) 신규 키 목록 추가**: `Errors` **22종** — 보안 문구 원문1:1 8종(`find_member_not_found`, `find_corp_not_found`, `find_corp_admin_not_found`, `internal_error`, `password_reset_failed`, `password_change_failed`, `email_not_available`, `current_password_incorrect`) + 도메인 4종(`grade_promotion_individual_only`, `grade_promotion_pending_exists`, `grade_promotion_already_processed`, `cannot_suspend_self`, `voc_closed_not_revertable` = 5종) + 검증 힌트 9종(`withdraw_confirm_input`, `grade_fill_all_required`, `rate_carrier_from_required`, `rate_slabs_required`, `surcharge_required`, `exchange_amount_date_required`, `zone_date_required`, `qty_required`, `qty_reason_required`) — zh/ja 동일 잠정 초안(사람 검수 대상). **참고**: `qty_required`·`qty_reason_required`는 원문이 영어라 ko/en 동일값(원문 유지) — 한글화 여부는 검수 시 판단. `Errors` 총계 58→**80키**.
+- **TASK-B-353(2026-11-16) 신규 키 목록 추가**: `Errors` 10종(`fetch_failed`, `status_outbound_confirm`, `status_cancel_inbound`, `status_ups_register`, `status_ups_undo`, `status_departure_confirm`, `status_departure_cancel`, `status_departure_undo`, `own_shipper_outbound`, `own_shipper_only`) + `WarehouseOutbound.confirm_outbound_partial_failed` + `WarehouseInbound.{cargo_found, no_measurements, measurements_saved}` — zh/ja 문구는 동일하게 **잠정 초안**(위 사람 검수 대상에 포함). 참고: `zh`·`ja`에는 `WarehouseInbound`·`WarehousePickup` 네임스페이스 자체가 없어(기존 결함, DEF-B-156 계열) 이번에 `WarehouseInbound` 블록을 신규 생성해 신규 3키만 추가했다(기존 키 미생성).
+
+---
+
+## [IMP-186] 단일 파일 꼬리 추가형 번호(회귀맵 §번호·IMP ID) 병렬 작업 충돌 — 채번 방식 개선
+
+- **발견 경위**: 2026-11-14, TeamB_Dev→develop 통합 사전 검토 중 `LIVE_REGRESSION_TEST_MAP.md`(§번호)와 `scratch/post_launch_improvements.md`(IMP ID) 두 파일에서 양 브랜치가 같은 번호를 꼬리에 추가한 충돌이 발생(PR #1303에서 해소). 동일 원인이 TASK-B-350/B-351 재작업, Issue #1291(회귀맵 분할 결정, DEF-B-157)로 이미 관측되었고, TASK·DEF 번호는 `next-task-number.sh`·`next-def-number.sh`로 대응했으나 **회귀맵 §번호와 IMP ID에는 채번 도구가 없다**.
+- **현재 상태**: 병렬 작업(Team A/B)이 같은 시점에 각자 "다음 번호"를 꼬리에 붙이면 병합 시 번호가 겹친다. 이번 충돌 해소 결과 — 회귀맵 Team B §76~83을 §77~84로 재부여, Team B IMP-171→184·IMP-172→185로 재부여(관련 task file 참조 정정). 해소 비용과 참조 오류 위험이 수작업에 있다.
+- **임시 조치**: 같은 날 통합 주기 개정(105, 2026-11-14 — 당일 KST 23:00까지 완료분은 당일 반영)으로 브랜치 간 간격을 줄여 충돌 빈도를 낮춤. 충돌 시 develop 번호를 유지하고 후행 브랜치를 재부여.
+- **목표 구현**: (A) IMP ID — `next-imp-number.sh [A|B]`로 채번하거나 항목을 `scratch/imp/IMP-NNN.md` 개별 파일로 분리(꼬리 추가 충돌 제거) (B) 회귀맵 — §번호 의존 제거(도메인별 파일 분할 또는 번호 없는 앵커)와 `next-section-number.sh`; **Issue #1291(분할 결정)과 함께 Edward 판단**. 어느 쪽이든 기존 참조(task file 등)의 번호 이전 계획 필요.
+- **관련 파일**: `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`, `scratch/post_launch_improvements.md`, `scripts/next-task-number.sh`·`scripts/next-def-number.sh`(참고 패턴), Issue #1291, `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`
+- **예상 공수**: (A) 0.3~0.5 MD, (B) 1 MD 내외(분할 범위에 따라)
+- **우선순위**: Medium — 기능 무관이나 병렬 작업이 늘수록 병합마다 재발
+
+---
+
+## [IMP-187] develop→TeamB_Dev 동기화 사전 점검 도구 (`check-branch-drift.sh`)
+
+- **발견 경위**: 2026-11-14, 105 개정(동기화를 Team B 리더가 착수 전·통합 PR 제출 전에 수행) 논의 중 — 동기화 판단에 필요한 정보(뒤처진 커밋 수, 예상 충돌 파일, 진행 중 브랜치와의 겹침)를 얻는 표준 도구가 없다.
+- **현재 상태**: 수동으로 `git rev-list --count TeamB_Dev..develop`, `git merge --no-commit --no-ff develop`(시험 병합), `git merge-tree`를 사용해야 한다. 담당자별로 절차가 달라질 수 있고, 2026-10-01~11-14 198커밋 뒤처짐은 확인 수단·점검 습관이 없어 방치된 결과.
+- **임시 조치**: 105 §"develop → TeamB_Dev 동기화"에 수동 명령을 명시. 충돌 파일·해소 방식은 PR 본문에 기록.
+- **목표 구현**: `scripts/check-branch-drift.sh [팀브랜치]` — ① 뒤처진 커밋 수 ② 시험 병합(격리 워크트리, 결과 폐기) 충돌 파일 목록 ③ develop 쪽 변경 공유 파일(회귀맵·IMP·Ds-11·`package.json`·락파일·마이그레이션 등) ④ 선택: 진행 중(`status:in-progress`) 브랜치와 변경 파일 겹침. `agent-worktree-init.sh`·`check-db-freshness.sh`와 같은 방식으로 착수 시 자동 호출 검토. advisory로 시작(차단하지 않음).
+- **관련 파일**: `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`, `scripts/agent-worktree-init.sh`·`scripts/check-db-freshness.sh`(참고 패턴), IMP-186
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 동기화 누락이 번호·파일 충돌과 통합 지연으로 이어짐(IMP-186과 한 쌍)
+
+---
+
+## [IMP-188] `next-task-number.sh`가 Issue만 있는 Task 번호를 감지하지 못해 채번 충돌 발생
+
+- **발견 경위**: 2026-11-15, DEF-146 영향 분석 Task 발령 중 `./scripts/next-task-number.sh A`가 `TASK-1150`을 반환했으나 이미 같은 번호의 Issue(#1309, 회귀맵 이전 Task)가 발령되어 있었다. 발령 직후 이슈 제목을 TASK-1151로 정정해 실제 충돌은 피했다.
+- **현재 상태**: 스크립트는 `.agent/tasks/TASK-*` 파일명만 기준으로 다음 번호를 계산한다. R-17에서 Task는 Issue로 먼저 발령되고 상세 파일은 담당 Agent가 착수 시 생성하므로, **발령~착수 사이의 Task 번호가 감지되지 않는다**(blocked 상태로 오래 대기하는 Task일수록 위험).
+- **임시 조치**: 발령 전 `gh issue list --state all --search "TASK-NNNN"`로 번호를 수동 확인.
+- **목표 구현**: `next-task-number.sh`·`next-def-number.sh`가 task file뿐 아니라 `gh issue list --state all`의 제목(`TASK-N`·`DEF-N`)도 조회해 최댓값+1을 반환(gh 미인증 시 경고와 함께 파일 기준 폴백). IMP-186·IMP-187과 함께 채번 일원화 검토.
+- **관련 파일**: `scripts/next-task-number.sh`, `scripts/next-def-number.sh`, R-19(번호 채번 규칙)
+- **예상 공수**: 0.2 MD
+- **우선순위**: Medium — 번호 중복은 Issue #358에서 이미 반복 확인된 사고 유형
+
+---
+
+## [IMP-189] `admin` 서버 액션 15모듈의 역할 판정이 인라인 중복 — RBAC 권한표(`checkPermission`) 미사용
+
+- **발견 경위**: 2026-11-15, TASK-1151(Issue #1314 / DEF-146) 취약점 도달 가능성 분석 중 "미들웨어를 우회하면 남는 2차 방어선"을 추적하다 발견(DEF-147 참조).
+- **현재 상태**: `src/app/actions/admin/*.ts` 15모듈 중 `checkPermission()` 사용 **0건**. 역할 판정은 ① `validateAdminAction()` 6모듈 ② `profile.role !== USER_ROLES.X` 인라인 비교 6모듈 ③ 역할 검사 없음 1모듈(`auth.ts`, 본인 계정 작업)로 **분산**되어 있다. 모듈마다 허용 역할 집합이 조금씩 달라(`ADMIN`만 / `ADMIN+MANAGER` / `ADMIN+MANAGER+CUSTOMS_BROKER` 등) 권한표를 코드로 파악할 수 없고, 페이지 레벨 게이트도 22건 중 11건이 없다(DEF-147).
+- **임시 조치**: 현행 유지. TASK-1151 보고서 §3.1과 DEF-147에 실태 표를 남겨 판단 근거 확보.
+- **목표 구현**: IMP-001(RBAC DB 기반 전환)과 함께 — `admin` 액션의 역할 판정을 `checkPermissionDB`/`checkPermission` 단일 경로로 통일하고, 허용 역할 집합은 `rbac.ts` 권한표로 이동. 아울러 `admin/layout.tsx` 서버측 역할 게이트 신설(DEF-147 권장 조치 1)로 페이지·액션 이중 방어 구조 확립.
+- **관련 파일**: `src/app/actions/admin/*.ts`, `src/lib/auth/rbac.ts`, `src/lib/auth/guards.ts`, `src/app/[locale]/(dashboard)/admin/layout.tsx`(신설), `src/lib/auth/proxy.ts`, `.agent/defects/DEF-147_admin페이지_역할게이트_미들웨어단독.md`
+- **예상 공수**: 0.5~1 MD (역할 정책 확정 + 액션 15모듈 정리 + 페이지 게이트 + 회귀)
+- **우선순위**: Medium — 현재 직접 유출은 미확인(액션 가드·RLS가 2차 방어)이나 미들웨어 우회 취약점과 결합 시 노출. IMP-001과 동일 방향이라 통합 진행이 효율적
+
+---
+
+## [IMP-190] `tests/**` 기존 타입 오류 212건 — Next 16.3+ `tsc` CLI 타입 검사에서 빌드 실패 요인
+
+- **발견 경위**: 2026-11-16, TASK-1153(Issue #1320 / DEF-146 P0) `next` 16.4.6 상향 중 D_Kai가 발견. Next 16.3+는 `experimental.useTypeScriptCli` 기본값이 tsc CLI라 `tests/**`의 기존 타입 오류가 표면화되어 `npm run build`가 실패했다.
+- **현재 상태**: `next.config.ts`에 `experimental: { useTypeScriptCli: false }`(+ `TODO(IMP-190)`)를 두어 16.2.4와 동일한 동작(JS 컴파일러 API)을 유지 중. CI 타입 검사는 advisory(IMP-134)이며 오류 212건은 그대로다.
+- **임시 조치**: 위 옵션으로 빌드 통과 유지. 이 옵션은 실험적(`experimental`)이라 이후 Next 버전에서 제거·변경될 수 있다 — Next 상향 때마다 `npm run build` 결과를 확인한다.
+- **목표 구현**: `tests/**` 타입 오류를 정리하거나 `tsconfig`에서 tests를 빌드 대상에서 분리(별도 `tsconfig.test.json`)한 뒤 `useTypeScriptCli: false` 제거. 오류 212건의 분류(구 mock 타입·`any` 누락 등)를 먼저 측정.
+- **관련 파일**: `next.config.ts`(57행 TODO), `tsconfig.json`, `tests/**`
+- **예상 공수**: 1~2 MD (분류 후 확정)
+- **우선순위**: Low~Medium — 현재 빌드·운영 영향 없음, 단 `experimental` 옵션 의존이라 Next 상향 시 재발 위험(PoC 도구 설정도 `.mjs`로 우회 중, 문서 231 v1.7)
+
+---
+
+## [IMP-191] SHXK createorder `consignee.*` 미전송 8개 필드 — 신규 컬럼·UI 필요 (결정 요청)
+
+- **발견 경위**: 2026-11-16, TASK-B-346 PR③(Issue #1278)에서 SHXK createorder `consignee.*` 18개 필드를 감사한 결과, 명세(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행)에 있으나 현재 payload에 전송되지 않는 8개 필드를 확인했다.
+- **미전송 필드**: `consignee_district`(구/군, 300)·`consignee_doorplate`(문패번호, 300)·`consignee_areacode`(지역코드, 10)·`consignee_mobile`(휴대폰, 100)·`consignee_fax`(팩스, 100)·`consignee_certificatetype`(증명서유형: ID/PP)·`consignee_certificatecode`(증명서번호, 50)·`consignee_credentials_period`(증명서 유효기간, 50).
+- **현재 상태**: 위 8개는 `zen_orders`에 대응 컬럼이 없고 입력 UI도 없어 payload 매핑 자체가 불가능하다. 필수(Y)는 아니나 `district`·`areacode`·`mobile`은 일부 국가(아시아·중남미 등)의 수취인 통관·배송 정확도에 영향을 줄 수 있고, `certificatetype`/`certificatecode`/`credentials_period`는 특정 국가의 신분증 기반 통관에 요구될 수 있다.
+- **목표 구현(택1 또는 단계적)**: ① 컬럼·UI 신설 후 매핑(district·doorplate·areacode·mobile·fax) ② 증명서 3종은 별도 정책 결정 후 진행 ③ 불필요 확정 시 Ds-11 감사 표에 "미전송 확정"으로 종결.
+- **관련 파일**: `supabase/migrations/`(신규), `src/lib/ups/label-mapping.ts`, `src/lib/validation/order.ts`, `src/lib/validation/shxk-limits.ts`, `src/components/orders/OrderRegistrationForm.tsx`, `docs/02_Analysis/Ds_11_API_상세_명세서.md`
+- **예상 공수**: 1.5~3 MD (컬럼·RPC·UI·복원·검증·회귀, 필드 수에 비례)
+- **우선순위**: Low~Medium — 현재 운영상 거부 사례 미확인. 실제 SHXK 거부/반송 로그에서 특정 필드 부재가 원인으로 확인되면 상향.
+- **결정 요청**: Jaison/JSJung — 위 8개 필드별 필요 여부(결정 요청 표는 Issue #1278 PR③ 코멘트 참조).
+
+---
+
+## [IMP-192] `ups-actual-cost`/`ups-actual-charges` 실패 지점의 핵심 알림(`logClientError(CRITICAL)`) 미구성
+
+- **발견 경위**: 2026-11-16, TASK-B-352(Issue #1325)에서 두 파일의 모든 실패 반환 지점에 `logger.error`/`logger.warn`을 보강(#1183 처리)하면서, ZEN_A4 핵심 지점 알림 4기준(금전·고객접점·침묵성·사고이력)을 대조한 결과 **`ups-actual-*`는 3개 기준 해당**(실비·청구 기록=금전 영향 / 오더 상세 화면 노출=고객접점 / #1183 이력)했다.
+- **현재 상태**: B-352는 로그만 보강했고, `logClientError()`(→`zen_error_logs` `/admin/error-logs`) 연동은 Task 지시상 **범위 밖**으로 두었다. 따라서 원가/청구 저장 실패는 Sentry/Axiom/Vercel 로그에는 남으나 운영자 화면(`/admin/error-logs`)에는 자동 노출되지 않는다.
+- **영향**: 정산 금액 정합성에 직결되는 DB 쓰기 실패가 운영자 대시보드에서 보이지 않아, 침묵성 실패(수동 확인 전까지 미인지) 가능성이 남는다.
+- **목표 구현**: `ups-actual-cost.ts`·`ups-actual-charges.ts`의 DB 쓰기 실패(약 20지점) 중 금전 영향 상위 지점(원가 upsert, 인보이스 금액 갱신, 조정 비용 insert/update, 마감 후 조정 실패)에 `logClientError(CRITICAL)` 연동 + 알림 문구/식별자 설계. 기존 #1181~#1185 알림 파이프라인과 중복 방지 정책 확인 필요.
+- **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `src/app/actions/finance/ups-actual-charges.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
+- **예상 공수**: 0.3~0.5 MD (연동 지점 선정 + 중복/노이즈 정책 + 알림 확인 테스트)
+- **우선순위**: Medium — 기능 장애는 아니나 금전 정합성 영역의 침묵 실패 방지
+
+
+---
+
+## [IMP-193] `settlement`·`orders` 금전/고객접점 실패 지점의 핵심 알림(`logClientError(CRITICAL)`) 미구성
+
+- **발견 경위**: 2026-11-17, TASK-B-354(Issue #1330)에서 `settlement.ts`·`orders.ts`의 사용자 도달 오류를 로케일 문장으로 전환하고 실패 반환/throw 직전에 `logger.error`/`logger.warn`을 보강했다. ZEN_A4 핵심 지점 알림 4기준(금전·고객접점·침묵성·사고이력)을 대조한 결과 정산 마감·마감 후 조정·입금 상태 변경(`settlement.ts`)과 오더 등록/수정/상태 전이(`orders.ts`)가 **3~4개 기준 해당**이다.
+- **현재 상태**: 로그만 보강했고 `logClientError()`(→`zen_error_logs` `/admin/error-logs`) 연동은 Task 지시상 범위 밖. 따라서 정산/인보이스/오더 저장 실패가 운영자 화면에 자동 노출되지 않는다.
+- **영향**: 금전 정합성(인보이스 금액/마감/입금) 및 고객 접점(오더 등록·수정) 실패가 침묵할 수 있다.
+- **목표 구현**: `settlement.ts`(finalize/markInvoiceFinalized/updatePaymentStatus/createPostFinalizationAdjustment)와 `orders.ts`(createOrder/updateOrder/updateOrderStatus)의 DB·RPC 실패 상위 지점에 `logClientError(CRITICAL)` 연동. 기존 #1181~#1185 및 IMP-192(`ups-actual-*`) 알림과 중복·노이즈 방지 정책을 함께 설계.
+- **관련 파일**: `src/app/actions/finance/settlement.ts`, `src/app/actions/operations/orders.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
+- **예상 공수**: 0.5 MD (지점 선정 + 중복 정책 + 알림 확인 테스트)
+- **우선순위**: Medium — 기능 장애는 아니나 금전/고객접점 영역의 침묵 실패 방지
+
+
+---
+
+## [IMP-194] 상태 전이 거부 사유(`validation.message`·`availability.message`)가 사용자 문구에서 빠짐 — 사유 파라미터화 후속
+
+- **발견 경위**: TASK-B-354(Issue #1330)에서 `orders.ts`의 상태 전이 거부를 `Errors.status_change_denied`/`ups_edit_registered_locked` 등 로케일 키로 대체하면서, 기존에 사용자에게 표시되던 구체 사유(`canChangeStatus().message`, UPS 수정 불가 사유)는 `logger.warn`에만 남게 되었다.
+- **현재 상태**: 사용자는 "상태를 변경할 권한이 없습니다." 같은 일반 문구만 보고, 어떤 규칙에 걸렸는지 알 수 없다(로그에는 남음).
+- **영향**: 관리자/대리점이 상태 변경 실패 원인을 화면에서 파악하기 어려워 문의·재시도 증가 가능.
+- **목표 구현**: `Errors.status_change_denied`에 `{reason}` 파라미터를 추가하고, `canChangeStatus`/`getUpsEditAvailability`의 사유를 로케일별 키(예: `status_change_reason.*`)로 매핑해 전달. 사유 코드 표를 `lib/logistics/status-machine`에 정의.
+- **관련 파일**: `src/app/actions/operations/orders.ts`, `src/lib/logistics/status-machine.ts`, `src/lib/orders/ups-edit-availability.ts`, `messages/{ko,en,zh,ja}.json`
+- **예상 공수**: 0.3~0.5 MD (사유 코드 매핑 + 4개 로케일 문구 + 테스트)
+- **우선순위**: Low~Medium — 기능 장애는 아니나 운영 UX 개선
+
+---
+
+## [IMP-195] `changePassword`·회원가입 비밀번호 정책 위반 사유가 `generic` 치환으로 약화 — Supabase 오류 코드별 세분화 후속
+
+- **발견 경위**: TASK-B-355(B-355 리뷰)에서 `changePassword`의 Supabase 원문 노출을 `generic`으로 치환했고, TASK-B-356(Issue #1334)에서 회원가입 비밀번호 오류도 `Errors.auth_password_invalid`("비밀번호가 보안 정책을 충족하지 않습니다.")로 통일했다. 결과적으로 "최소 길이/문자 조합/재사용 금지" 등 구체 사유가 사용자에게 전달되지 않는다.
+- **현재 상태**: Supabase `AuthApiError`의 `code`(예: `weak_password`)를 활용하지 않고 메시지 문자열 매칭으로만 분기한다.
+- **영향**: 사용자가 비밀번호 정책을 만족시키기 위해 시행착오를 반복할 수 있다(기능 오류는 아님).
+- **목표 구현**: Supabase 오류 `code`/`weak_password.reasons`를 코드별 로케일 문구로 매핑(길이·조합·재사용 등). `changePassword`·`signup` 공통 헬퍼로 정리.
+- **관련 파일**: `src/app/[locale]/(auth)/login/actions.ts`, `src/app/actions/admin/auth.ts`, `messages/{ko,en,zh,ja}.json`
+- **예상 공수**: 0.3 MD (코드 매핑 + 문구 + 테스트)
+- **우선순위**: Low — 보안 정보 비노출은 유지하면서 안내 품질만 개선
+
+---
+
+## [IMP-201] `exceljs@4.4.0` 유지 저하 대비 — 대체 검토 및 `WorkbookWriter` 미사용 가드 (조건부 수용 후속)
+
+- **발견 경위**: TASK-B-360(Issue #1366) ⒝에서 Team B가 Excel 출력을 위해 `exceljs@4.4.0`을 `dependencies`에 추가(JSJung 결정 2026-11-21, 병합 PR #1411). Aiden이 2026-11-22 의존 경로를 검증하고 Edward 승인으로 **조건부 수용**했다.
+- **현재 상태**: exceljs 마지막 publish는 2024-12(유지 저하). `package-lock.json` 검증 결과 `brace-expansion@1.1.14`가 개발 전용에서 **운영 의존성**으로 바뀌었고 `audit-baseline`이 12→15건(`brace-expansion:high`·`exceljs:moderate`·`uuid:moderate` 추가). 단 Team B 코드는 `new ExcelJS.Workbook()` + `wb.xlsx.writeBuffer()`(jszip 경로)만 사용하며, archiver·glob·brace-expansion이 실행되는 `WorkbookWriter`(스트리밍) 경로는 쓰지 않는다(exceljs 패키지 소스 확인: archiver는 `lib/stream/xlsx/workbook-writer.js`에서만 사용, `.glob()`·`.directory()` 호출 없음). `uuid`는 인자 없는 `uuidv4()`만 호출.
+- **영향**: 현재 실질 위험은 낮으나, 향후 코드가 `WorkbookWriter`를 쓰거나 exceljs 전이 의존성에 새 권고가 생기면 도달 가능한 경로로 바뀔 수 있다. 유지 저하로 수정 버전이 나오지 않을 수 있다.
+- **목표 구현**: ① `WorkbookWriter`·`archiver` 직접 사용을 금지하는 가드(회귀 테스트 또는 정적 점검)와 `audit-baseline` 사유 메모 보강 ② 대체 라이브러리 검토(A4·fitToWidth·인쇄 제목행·인쇄 영역 실설정이 가능한 후보 비교) 또는 exceljs 유지 근거 갱신 ③ develop 통합 시 `npm audit --omit=dev`를 baseline과 대조(통합 점검 항목).
+- **관련 파일**: `src/lib/finance/billing/statement-excel.ts`, `scripts/audit-baseline.json`, `package.json`
+- **예상 공수**: 0.3~0.5 MD (가드 0.1 + 대체 검토 0.2~0.4)
+- **우선순위**: Low~Medium — 통합 시 대조(③)는 필수, ①②는 본 사업 착수 후 판단
+
+---
+
+## [IMP-202] `'use server'` 파일의 비async export를 CI에서 탐지하는 점검 신설 (DEF-B-162 재발 방지) — Team B 제안 #1417 채택
+
+- **발견 경위**: TASK-B-360 산출물 `src/app/actions/finance/billing-statements.ts`(`'use server'`)가 동기 함수 `normalizeShipperName`을 export. 클라이언트 컴포넌트가 이 파일을 import하는 순간 `npm run build`가 `Server Actions must be async functions`로 실패(PR #1412·#1413). Team B가 IMP 제안 #1417로 건의, Aiden 채택(2026-11-22, Edward 승인).
+- **현재 상태**: 수정은 PR #1416(TASK-B-368, 유틸 분리)으로 해소. 그러나 이 결함은 **잠복형**이다 — 클라이언트 import가 생기기 전까지 CI가 전부 통과(PR #1404·#1410·#1411 green)하다가 UI PR에서 처음 터졌다. 현재 점검 수단이 없어 같은 유형이 재발해도 UI PR 단계에서야 발견된다.
+- **임시 조치**: 2026-11-22 Aiden이 TeamB_Dev `src/**` `'use server'` 파일을 1회 수동 전수 점검(비async export 0건 확인). 상시 장치 없음.
+- **목표 구현**: ① 정적 점검 스크립트(예: `scripts/check-use-server-exports.mjs`, `npm run check:use-server`) — `'use server'` 파일의 top-level export 중 async 함수·type·interface 외(일반 function·const·let·class·enum, `export default`, 재export 포함)를 탐지해 목록 출력. ② CI `pr-checks.yml`에 **advisory(비차단)** 체크로 추가(기존 `check:ds11`·`check:doc-links`와 같은 방식, baseline 래칫 검토). ③ 이미 잡힌 유형 1건을 단언하는 단위 테스트(소스 문자열 단독 검사가 아닌 AST 또는 파싱 기반 여부는 설계 시 결정).
+- **관련 파일**: `scripts/`(신규, Team A 소유 영역), `.github/workflows/pr-checks.yml`, `package.json`(scripts 항목), `tests/`
+- **예상 공수**: 0.3~0.5 MD (스크립트 0.2 + CI 연동 0.1 + 테스트 0.1~0.2)
+- **우선순위**: Low~Medium — 빌드 차단형 결함의 조기 탐지 장치. 담당은 미지정(본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단)
+
+---
+
+## [IMP-203] 회귀 테스트 실행 시간 단축 — vitest `projects` 분리(순수 단위 병렬 / 실DB 직렬) (#1427 협의 3번)
+
+- **발견 경위**: TASK-1168(#1406) 검증 중 Riley가 전체 회귀가 로컬에서 10분 도구 한계에 걸린다고 보고(#1427). Aiden이 2026-11-22 develop에서 실측: 전체 365초(269파일·1979테스트), 파일별 테스트 실행 시간 합은 80초뿐이고 나머지는 파일마다 반복되는 environment·import 오버헤드. 41개 파일 부분 실측에서 `--maxWorkers=1` 62.66초 / `=4` 62.14초로 차이가 없음(`fileParallelism: false`가 워커 증설을 무력화). Edward 결정(2026-11-22): 1번(`--maxWorkers` 명시) 불채택, 2번(#1428) 보류 등록, 3번 IMP 등록만.
+- **현재 상태**: `vitest.config.ts` L26 `fileParallelism: false` 하나로 269개 파일 전체를 직렬 실행한다. 설정 주석상 목적은 "통합 테스트가 DB 상태를 공유해 병렬 시 경합". 그러나 DB를 쓰지 않는 순수 단위 테스트까지 같은 제약을 받는다. `tests/unit/` 아래에는 `docker exec` 실DB 테스트(`migrations/`·`db/` 등 29개 파일)가 섞여 있어 디렉터리 기준 분리도 단순하지 않다.
+- **임시 조치**: 회귀를 백그라운드로 실행해 결과를 파일로 저장하면 10분 도구 한계를 피할 수 있다(Aiden 실측 6분 5초). 구체 방법은 각 구현 Agent가 스스로 정한다(Edward 방침). CI는 같은 회귀를 약 4분 20초에 마친다.
+- **목표 구현**: ① 파일별 DB 의존 여부를 분류(`docker exec`·`supabase` 호출 여부로 전수 grep, 분류 근거 기록). ② vitest `projects`로 순수 단위(병렬)와 실DB(`fileParallelism: false` 직렬) 분리. ③ 분리 전후 **전체 테스트 수·통과 수 동일** 및 CI 실행 시간 비교, 병렬 구간의 간헐 실패 여부 반복 실행으로 확인. ④ `test:regression` 동작·`check:lrtm` 영향 점검.
+- **관련 파일**: `vitest.config.ts`, `package.json`, `tests/setup.ts`, `tests/unit/**`, `tests/integration/**`
+- **예상 공수**: 1~1.5 MD (분류 0.5 + 설정 0.2 + 안정성 검증 0.3~0.8)
+- **우선순위**: Low — 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단. 위험: DB 경합 오분류 시 간헐 실패가 생겨 오히려 신뢰도를 떨어뜨릴 수 있으므로 검증 설계 필수. 관련: #1427(Close), #1428(보류, 2번).

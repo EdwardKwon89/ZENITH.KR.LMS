@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from 'next-intl';
 import React, { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import ZenDataGrid from "@/components/ui/ZenDataGrid";
@@ -22,6 +23,7 @@ export default function UpgradeRequestClient({
 }: { 
   initialData: GradePromotionRequest[] 
 }) {
+  const errT = useTranslations('Errors');
   const [allData, setAllData] = useState(initialData);
   const [selectedRequest, setSelectedRequest] = useState<GradePromotionRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -137,8 +139,8 @@ export default function UpgradeRequestClient({
         setIsModalOpen(false);
       }
     } catch (err) {
-      const error = err as Error;
-      toast.error(error.message);
+      console.error(err);
+      toast.error(errT('generic', { code: 'UPGRADE_REVIEW' }));
     } finally {
       setIsLoading(false);
     }

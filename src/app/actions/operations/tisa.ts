@@ -2,6 +2,7 @@
 
 import { logger } from "@/lib/logger";
 import { validateUserAction, checkPermission } from "@/lib/auth/guards";
+import { createAdminClient } from "@/utils/supabase/server";
 
 export interface TisaSnapshotResult {
   id: string;
@@ -39,22 +40,32 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
 
   const isAdmin = checkPermission(profile.role, "/admin");
 
-  // 1. Query existing snapshot
-  const { data: snapshot } = await supabase
-    .from("zen_order_rate_snapshots")
-    .select(`
-      id, rate_card_id, applied_unit_price, applied_currency,
-      applied_rule, snapshot_at, is_manual, override_reason,
-      carrier_cost_amount, platform_fee_amount, metadata
-    `)
-    .eq("order_id", orderId)
-    .maybeSingle();
+  // 1. Query existing snapshot (DEF-157: 비관리자는 원가·수수료 제외 안전 뷰 조회)
+  const { data: snapshot } = isAdmin
+    ? await supabase
+        .from("zen_order_rate_snapshots")
+        .select(`
+          id, rate_card_id, applied_unit_price, applied_currency,
+          applied_rule, snapshot_at, is_manual, override_reason,
+          carrier_cost_amount, platform_fee_amount, metadata
+        `)
+        .eq("order_id", orderId)
+        .maybeSingle()
+    : await supabase
+        .from("zen_order_rate_snapshots_safe")
+        .select(`
+          id, rate_card_id, applied_unit_price, applied_currency,
+          applied_rule, snapshot_at, is_manual, override_reason,
+          metadata
+        `)
+        .eq("order_id", orderId)
+        .maybeSingle();
 
   if (snapshot) {
     // 2. Resolve rate card metadata (version_no, priority, valid_from, valid_to)
     const { data: rateCard } = snapshot.rate_card_id
       ? await supabase
-          .from("zen_rate_cards")
+          .from("zen_rate_cards_safe")
           .select("valid_from, valid_until")
           .eq("id", snapshot.rate_card_id)
           .maybeSingle()
@@ -72,30 +83,32 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
     const totalWeight = await getTotalWeight(supabase, orderId);
 
     const result: TisaSnapshotResult = {
-      id: snapshot.id,
+      id: snapshot.id || "",
       orderId,
       rateCardId: snapshot.rate_card_id || "N/A",
       versionNo: 1,
       status: snapshot.is_manual ? "MANUAL" : "AUTO",
       priority: 10,
-      baseAmount: Number(snapshot.applied_unit_price),
+      baseAmount: Number(snapshot.applied_unit_price ?? 0),
       currency: snapshot.applied_currency || "USD",
       appliedReason: snapshot.override_reason || undefined,
       validFrom: rateCard?.valid_from || order?.created_at || new Date().toISOString(),
       validTo: rateCard?.valid_until || "9999-12-31T23:59:59Z",
       totalWeight,
       totalFreight: totalWeight * Number(snapshot.applied_unit_price || 0),
-      metadata: snapshot.metadata ?? undefined,
+      metadata: (snapshot.metadata as Record<string, unknown> | null) ?? undefined,
     };
 
     // 4. Role-based shape: only add admin fields for admin/manager users
     if (isAdmin) {
-      result.carrierCostAmount = snapshot.carrier_cost_amount
-        ? Number(snapshot.carrier_cost_amount)
-        : undefined;
-      result.platformFeeAmount = snapshot.platform_fee_amount
-        ? Number(snapshot.platform_fee_amount)
-        : undefined;
+      result.carrierCostAmount =
+        "carrier_cost_amount" in snapshot && snapshot.carrier_cost_amount
+          ? Number(snapshot.carrier_cost_amount)
+          : undefined;
+      result.platformFeeAmount =
+        "platform_fee_amount" in snapshot && snapshot.platform_fee_amount
+          ? Number(snapshot.platform_fee_amount)
+          : undefined;
     }
 
     return result;
@@ -110,9 +123,9 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
 
   // 5a. Route selected but no snapshot — trigger auto-capture
   if (routeData?.selected_option_id) {
-    let { data: orderData } = await supabase
+    const { data: orderData } = await supabase
       .from("zen_orders")
-      .select("carrier_id, origin_port_id, dest_port_id, shipper_id, created_at, transport_mode")
+      .select("carrier_id, origin_port_id, dest_port_id, shipper_id, agency_org_id, created_at, transport_mode")
       .eq("id", orderId)
       .maybeSingle();
 
@@ -135,8 +148,20 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
     }
 
     if (orderData) {
-      // Call fn_get_best_matching_rate via rpc
-      const { data: rateResult } = await supabase.rpc("fn_get_best_matching_rate", {
+      // Aiden 확정 조건 ①: service_role 로 RPC/INSERT 를 수행하기 전에
+      // 호출자의 역할·소유(화주 org / 배정 대리점)를 서버에서 명시 검증한다.
+      const isShipperOrgMember = !!profile.org_id && orderData.shipper_id === profile.org_id;
+      const isAgencyStakeholder = !!profile.org_id && orderData.agency_org_id === profile.org_id;
+      if (!isAdmin && !isShipperOrgMember && !isAgencyStakeholder) {
+        logger.warn(`[TISA] rate snapshot auto-capture denied: order=${orderId} user=${profile.id}`);
+        return null;
+      }
+
+      // fn_get_best_matching_rate 는 SECURITY INVOKER 라서 화주 세션에서는
+      // base 테이블 RLS(0행)로 매칭이 불가능하다. 위에서 접근 권한을 검증했으므로
+      // RPC 실행과 스냅샷 기록만 service_role 클라이언트로 수행한다.
+      const adminClient = await createAdminClient();
+      const { data: rateResult } = await adminClient.rpc("fn_get_best_matching_rate", {
         p_carrier_id: orderData.carrier_id,
         p_origin_port: orderData.origin_port_id,
         p_dest_port: orderData.dest_port_id,
@@ -148,8 +173,9 @@ export async function getOrderRateSnapshot(orderId: string): Promise<TisaSnapsho
       if (rateResult && rateResult.length > 0) {
         const match = rateResult[0] as any;
 
-        // Insert snapshot
-        const { data: inserted } = await supabase
+        // RPC 반환에는 carrier_cost 가 포함되지만, 응답(result)에는 관리자에게만
+        // 노출한다(비관리자 경로에서는 어떤 필드로도 반환하지 않는다).
+        const { data: inserted } = await adminClient
           .from("zen_order_rate_snapshots")
           .insert({
             order_id: orderId,

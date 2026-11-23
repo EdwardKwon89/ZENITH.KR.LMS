@@ -185,7 +185,7 @@ export class DatabaseRouteAdapter implements IVirtualMapAdapter {
 
   private async lookupRate(carrierId: string, transportMode: string): Promise<number> {
     const { data, error } = await this.supabase
-      .from('zen_rate_cards')
+      .from('zen_rate_cards_safe')
       .select('tiers')
       .eq('carrier_id', carrierId)
       .eq('transport_mode', transportMode)

@@ -1,6 +1,7 @@
 'use server';
 
 import { logger } from '@/lib/logger';
+import { trError } from '@/lib/i18n/action-error';
 import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
 import { AdminRepository } from '@/lib/repositories';
@@ -19,11 +20,11 @@ export async function findPersonalId(fullName: string) {
 
     if (error) {
       logger.error('[AUTH_ACTION] findPersonalId Error:', error);
-      return { error: '데이터 조회 중 오류가 발생했습니다.' };
+      return { error: await trError('fetch_failed') };
     }
 
     if (!profiles || profiles.length === 0) {
-      return { error: '일치하는 회원 정보를 찾을 수 없습니다.' };
+      return { error: await trError('find_member_not_found') };
     }
 
     const results = (profiles as any[]).map((p: { email: string; phone_number?: string | null }) => {
@@ -46,7 +47,8 @@ export async function findPersonalId(fullName: string) {
 
     return { success: true, results };
   } catch (err) {
-    return { error: '서버 내부 오류가 발생했습니다.' };
+    logger.error('[AUTH_ACTION] findPersonalId catch:', err);
+    return { error: await trError('internal_error') };
   }
 }
 
@@ -63,13 +65,13 @@ export async function findCorporateId(orgName: string, regNo: string) {
     const { data: org, error: orgError } = await adminRepo.findCorporateAdminEmail(orgName, regNo);
     if (orgError || !org?.id) {
       logger.error('[AUTH_ACTION] findCorporateId Org Error:', orgError);
-      return { error: '일치하는 법인 정보를 찾을 수 없습니다.' };
+      return { error: await trError('find_corp_not_found') };
     }
 
     const { data: profile, error: profileError } = await adminRepo.findAdminByOrgId(org.id);
     if (profileError || !profile?.email) {
       logger.error('[AUTH_ACTION] findCorporateId Profile Error:', profileError);
-      return { error: '법인 담당자 정보를 찾을 수 없습니다.' };
+      return { error: await trError('find_corp_admin_not_found') };
     }
 
     const [user, domain] = profile.email.split('@');
@@ -80,7 +82,8 @@ export async function findCorporateId(orgName: string, regNo: string) {
 
     return { success: true, maskedEmail };
   } catch (err) {
-    return { error: '서버 내부 오류가 발생했습니다.' };
+    logger.error('[AUTH_ACTION] findCorporateId catch:', err);
+    return { error: await trError('internal_error') };
   }
 }
 
@@ -97,13 +100,14 @@ export async function sendPasswordReset(email: string, locale: string = 'ko') {
     });
 
     if (error) {
-      logger.error('[AUTH_ACTION] sendPasswordReset Error:', error.message);
-      return { error: error.message };
+      logger.error('[AUTH_ACTION] sendPasswordReset Error:', error);
+      return { error: await trError('generic', { code: 'PASSWORD_RESET' }) };
     }
 
     return { success: true };
   } catch (err) {
-    return { error: '비밀번호 재설정 요청 중 오류가 발생했습니다.' };
+    logger.error('[AUTH_ACTION] sendPasswordReset catch:', err);
+    return { error: await trError('password_reset_failed') };
   }
 }
 
@@ -116,13 +120,14 @@ export async function changePassword(password: string) {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      logger.error('[AUTH_ACTION] changePassword Error:', error.message);
-      return { error: error.message };
+      logger.error('[AUTH_ACTION] changePassword Error:', error);
+      return { error: await trError('generic', { code: 'PASSWORD_UPDATE' }) };
     }
 
     return { success: true };
   } catch (err) {
-    return { error: '비밀번호 변경 중 오류가 발생했습니다.' };
+    logger.error('[AUTH_ACTION] changePassword catch:', err);
+    return { error: await trError('password_change_failed') };
   }
 }
 
@@ -133,7 +138,7 @@ export async function changePasswordWithReauth(currentPassword: string, newPassw
   try {
     const { supabase, user } = await validateUserAction();
     if (!user?.email) {
-      return { error: '사용자 이메일을 확인할 수 없습니다.' };
+      return { error: await trError('email_not_available') };
     }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -141,19 +146,20 @@ export async function changePasswordWithReauth(currentPassword: string, newPassw
       password: currentPassword,
     });
     if (signInError) {
-      logger.error('[AUTH_ACTION] reauth Error:', signInError.message);
-      return { error: '현재 비밀번호가 올바르지 않습니다.' };
+      logger.error('[AUTH_ACTION] reauth Error:', signInError);
+      return { error: await trError('current_password_incorrect') };
     }
 
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
-      logger.error('[AUTH_ACTION] changePassword Error:', error.message);
-      return { error: error.message };
+      logger.error('[AUTH_ACTION] changePassword Error:', error);
+      return { error: await trError('generic', { code: 'PASSWORD_UPDATE' }) };
     }
 
     return { success: true };
   } catch (err) {
-    return { error: '비밀번호 변경 중 오류가 발생했습니다.' };
+    logger.error('[AUTH_ACTION] changePasswordWithReauth catch:', err);
+    return { error: await trError('password_change_failed') };
   }
 }
 

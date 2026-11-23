@@ -5,6 +5,7 @@ import { validateAdminAction } from "@/lib/auth/guards";
 import { revalidatePath } from "next/cache";
 import { AdminRepository } from '@/lib/repositories';
 import { createAdminClient } from '@/utils/supabase/server';
+import { trError } from '@/lib/i18n/action-error';
 
 /**
  * 신규 가입한 조직(화주/포워더 등)을 승인합니다.
@@ -14,7 +15,10 @@ export async function approveOrganization(orgId: string) {
   const adminRepo = new AdminRepository(supabase);
 
   const { data: newId, error } = await adminRepo.approveOrganization(orgId);
-  if (error) throw new Error(`Org approval RPC failed: ${error.message}`);
+  if (error) {
+    logger.error('approveOrganization: RPC failed', error);
+    throw new Error(await trError('generic', { code: 'ORGANIZATION_APPROVE' }));
+  }
 
   logger.info(`Organization ${orgId} approved by admin ${user.id}. Assigned ID: ${newId}`);
 
@@ -30,7 +34,10 @@ export async function rejectOrganization(orgId: string, reason: string) {
   const adminRepo = new AdminRepository(supabase);
 
   const { error } = await adminRepo.rejectOrganization(orgId, reason);
-  if (error) throw new Error(`Org rejection RPC failed: ${error.message}`);
+  if (error) {
+    logger.error('rejectOrganization: RPC failed', error);
+    throw new Error(await trError('generic', { code: 'ORGANIZATION_REJECT' }));
+  }
 
   revalidatePath("/admin/organizations");
   return { success: true };
@@ -44,7 +51,10 @@ export async function requestOrganizationSupplement(orgId: string, reason: strin
   const adminRepo = new AdminRepository(supabase);
 
   const { error } = await adminRepo.requestOrganizationSupplement(orgId, reason);
-  if (error) throw new Error(`Supplement request RPC failed: ${error.message}`);
+  if (error) {
+    logger.error('requestOrganizationSupplement: RPC failed', error);
+    throw new Error(await trError('generic', { code: 'ORGANIZATION_SUPPLEMENT' }));
+  }
 
   revalidatePath("/admin/organizations");
   return { success: true };
@@ -63,8 +73,8 @@ export async function getDocumentSignedUrl(filePath: string) {
     .createSignedUrl(filePath, 60 * 60);
 
   if (error) {
-    logger.error('[getDocumentSignedUrl] Failed:', error.message);
-    return { error: error.message };
+    logger.error('[getDocumentSignedUrl] Failed:', error);
+    return { error: await trError('generic', { code: 'DOCUMENT_URL' }) };
   }
 
   return { signedUrl: data.signedUrl };
@@ -91,7 +101,10 @@ export async function getOrganizationsAdmin(filters?: {
     pageSize: filters?.pageSize ?? 50,
   });
 
-  if (error) throw new Error(`Failed to fetch organizations: ${error.message}`);
+  if (error) {
+    logger.error('organization: list lookup failed', error);
+    throw new Error(await trError('generic', { code: 'ORGANIZATION_LIST_LOOKUP' }));
+  }
 
   return { organizations: data || [], total: count || 0 };
 }
@@ -112,7 +125,10 @@ export async function createOrganization(data: {
   const adminRepo = new AdminRepository(adminClient);
 
   const { data: org, error } = await adminRepo.createOrganization(data);
-  if (error) throw new Error(`Failed to create organization: ${error.message}`);
+  if (error) {
+    logger.error('createOrganization: insert failed', error);
+    throw new Error(await trError('generic', { code: 'ORGANIZATION_CREATE' }));
+  }
 
   logger.info(`Organization created by admin: ${org.id} (${data.name}, ${data.type})`);
   revalidatePath("/admin/organizations/manage");
@@ -134,7 +150,10 @@ export async function updateOrganization(id: string, data: {
   const adminRepo = new AdminRepository(adminClient);
 
   const { error } = await adminRepo.updateOrganization(id, data);
-  if (error) throw new Error(`Failed to update organization: ${error.message}`);
+  if (error) {
+    logger.error('updateOrganization: update failed', error);
+    throw new Error(await trError('generic', { code: 'ORGANIZATION_UPDATE' }));
+  }
 
   logger.info(`Organization ${id} updated by admin`);
   revalidatePath("/admin/organizations/manage");
@@ -149,7 +168,10 @@ export async function getOrganizations(status?: string | string[], page = 1, pag
   const adminRepo = new AdminRepository(supabase);
 
   const { data, error, count } = await adminRepo.findOrganizations(status, page, pageSize);
-  if (error) throw new Error(`Failed to fetch organizations: ${error.message}`);
+  if (error) {
+    logger.error('organization: list lookup failed', error);
+    throw new Error(await trError('generic', { code: 'ORGANIZATION_LIST_LOOKUP' }));
+  }
 
   return { organizations: data || [], total: count || 0 };
 }

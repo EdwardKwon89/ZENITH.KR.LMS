@@ -109,7 +109,9 @@ describe('TASK-B-167: registerUpsOrder', () => {
     const result = await registerUpsOrder(ORDER_ID);
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('createorder failed');
+    // TASK-B-351 (Issue #1299): 영문 리터럴 제거 — 미매칭 SHXK 원문은 일반문구+코드로 대체
+    expect(result.error).toBe('택배사 시스템에서 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: CREATEORDER)');
+    expect(result.error).not.toContain('duplicate');
   });
 
   it('getnewlabel을 호출하지 않는다', async () => {
@@ -202,7 +204,8 @@ describe('TASK-B-167: cancelUpsRegistration', () => {
     const result = await cancelUpsRegistration(ORDER_ID);
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('라벨 레코드가 없습니다');
+    // TASK-B-351: Errors.label_not_found 로케일 문구
+    expect(result.error).toBe('발급된 라벨이 없습니다.');
   });
 
   it('removeorder 실패 시 즉시 failure를 반환하고 내부 삭제를 실행하지 않는다', async () => {
@@ -216,7 +219,9 @@ describe('TASK-B-167: cancelUpsRegistration', () => {
     const result = await cancelUpsRegistration(ORDER_ID);
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('UPS 라벨 회수 실패(SHXK)');
+    // TASK-B-351: Errors.label_void_failed — SHXK 원문(API error)은 노출하지 않는다
+    expect(result.error).toBe('라벨 회수에 실패했습니다.');
+    expect(result.error).not.toContain('API error');
     expect(removeorder).toHaveBeenCalled();
   });
 
@@ -308,6 +313,7 @@ describe('TASK-B-167: issueUpsLabel() wrapper', () => {
     const result = await issueUpsLabel(ORDER_ID);
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('라벨 발급 실패');
+    // TASK-B-351: Errors.label_issue_failed 로케일 문구로 전환
+    expect(result.error).toBe('라벨 발급에 실패했습니다.');
   });
 });

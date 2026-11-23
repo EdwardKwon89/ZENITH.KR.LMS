@@ -48,7 +48,8 @@ describe('Issue #553: SHXK response message', () => {
     // 실패 시 zen_ups_label_errors INSERT
     expect(src).toContain("from('zen_ups_label_errors')");
     // error_message에 실제 메시지 전달 (네거티브 컨트롤: 하드코딩 방지)
-    expect(src).toMatch(/error_message:\s*orderResult\.message/);
+    // TASK-B-351: 사용자 반환값은 로케일 문장, DB에는 rawMessage(원문) 우선 저장
+    expect(src).toMatch(/error_message:\s*orderResult\.rawMessage \|\| orderResult\.error/);
     // 하드코딩된 값이 없는지 확인 (네거티브 컨트롤)
     expect(src).not.toContain("error_message: 'WRONG_HARDCODED_VALUE'");
   });

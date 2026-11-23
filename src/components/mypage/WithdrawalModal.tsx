@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { logger } from '@/lib/logger';
 
 import { useState } from 'react';
@@ -15,6 +16,7 @@ interface WithdrawalModalProps {
 }
 
 export default function WithdrawalModal({ isOpen, onClose, locale }: WithdrawalModalProps) {
+  const errT = useTranslations('Errors');
   const [confirmText, setConfirmText] = useState('');
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
@@ -23,7 +25,7 @@ export default function WithdrawalModal({ isOpen, onClose, locale }: WithdrawalM
 
   async function handleWithdraw() {
     if (confirmText !== '탈퇴') {
-      toast.error("'탈퇴'를 정확히 입력해 주세요.");
+      toast.error(errT('withdraw_confirm_input'));
       return;
     }
 
@@ -39,7 +41,7 @@ export default function WithdrawalModal({ isOpen, onClose, locale }: WithdrawalM
       }
     } catch (err: any) {
       logger.error(err);
-      toast.error('탈퇴 처리 중 오류가 발생했습니다.');
+      toast.error(errT('generic', { code: 'WITHDRAW' }));
     } finally {
       setIsPending(false);
     }

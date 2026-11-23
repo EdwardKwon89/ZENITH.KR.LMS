@@ -16,6 +16,7 @@ import { withdrawUser } from '@/app/actions/member';
 export default function ProfilePage() {
   const t = useTranslations('Auth');
   const navT = useTranslations('Navigation');
+  const errT = useTranslations('Errors');
   const params = useParams();
   const router = useRouter();
   const locale = params?.locale as string || 'ko';
@@ -36,7 +37,8 @@ export default function ProfilePage() {
         setProfile(profileData);
         setAddressEntries(addressResult.entries || []);
       } catch (err) {
-        toast.error('프로필 정보를 불러오는 데 실패했습니다.');
+        console.error(err);
+        toast.error(errT('fetch_failed'));
       } finally {
         setIsLoading(false);
       }
@@ -60,7 +62,8 @@ export default function ProfilePage() {
         setProfile((prev: any) => ({ ...prev, full_name: fullName }));
       }
     } catch (err) {
-      toast.error('프로필 수정 중 오류가 발생했습니다.');
+      console.error(err);
+      toast.error(errT('generic', { code: 'PROFILE_SAVE' }));
     } finally {
       setIsPending(false);
     }
@@ -76,7 +79,8 @@ export default function ProfilePage() {
         router.push(`/${locale}/login`);
       }
     } catch (err) {
-      toast.error('탈퇴 처리 중 오류가 발생했습니다.');
+      console.error(err);
+      toast.error(errT('generic', { code: 'WITHDRAW' }));
     }
   }
 

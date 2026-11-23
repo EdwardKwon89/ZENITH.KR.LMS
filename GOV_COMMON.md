@@ -105,7 +105,9 @@ CI는 매 실행마다 `supabase db reset`으로 스키마+SQL 시드를 완전�
 - 반복 재발 시 원인 자체(GitHub Actions 인프라)를 문제 삼기보다, 이 대체 절차를 표준 대응으로 계속 적용한다 — 상시 모니터링으로 예방 가능한 종류의 문제가 아님이 확인됨.
 
 ### R-09 | 회귀 테스트 확장 의무
-신규 기능 개발 및 수정 작업 이후에는 반드시 관련 **회귀 테스트 케이스를 신규 추가**하고, `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`를 업데이트해야 합니다.
+신규 기능 개발 및 수정 작업 이후에는 반드시 관련 **회귀 테스트 케이스를 신규 추가**하고, `docs/08_Self_Audit/Checklists/regression-items/TASK-*.md`에 개별 회귀 항목 파일을 등재해야 합니다.
+
+**(2026-11-18, v3.10 — IMP-186(B) / TASK-1150)**: `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`는 자동 생성되는 **추적 인덱스**(수동 편집 금지)이며, 구 단일 맵(§1~§92)은 `lrtm-archive/` 읽기 전용 아카이브로 고정되었다. 개별 Task PR에서는 `regression-items/TASK-*.md` 파일 1개만 추가하며, `npm run check:lrtm`(`scripts/check-lrtm-sync.mjs`)으로 유령 경로(0건)·신규 미등재 Vitest 파일(래칫 `scripts/lrtm-sync-baseline.json`)·`tests/e2e/` 수동 표기(`CI 미실행`/`수동`)를 검증한다. 인덱스 본문은 자동 갱신 Action 도입 전까지 Aiden이 병합 시점에 `npm run build:lrtm`으로 수동 재생성한다.
 
 ### R-10 | 기능-UI 결합 검증 의무
 백엔드 로직(API/RPC)의 완성이 '완료'를 의미하지 않습니다. 해당 기능을 최종 사용자가 호출하고 결과를 확인할 수 있는 **물리적 UI가 완비**되고 실구동이 확인된 경우에만 WBS를 완료로 변경할 수 있습니다. 완료 보고 시 반드시 UI 구동 증적(스크린샷/녹화)을 포함해야 합니다.
@@ -115,8 +117,19 @@ CI는 매 실행마다 `supabase db reset`으로 스키마+SQL 시드를 완전�
 ### R-11 | API 설계 우선 원칙
 모든 기능 개발 시 코드 구현보다 **API 명세(`Ds-11`) 및 데이터 모델 설계**를 최우선으로 완료하고 사용자의 승인을 득해야 합니다. 명세 미확정 상태의 구현은 금지됩니다.
 
+**(2026-11-13, v3.7)** `Ds-11`의 **현행 위치는 `docs/02_Analysis/Ds_11_API_상세_명세서.md`** 이다(구 INDEX+DETAIL 구조 17파일은 2026-07-06 `docs/03_Design/_archive/ds_11/`로 아카이브 — GH#206 #13). 설계 승인 시점에 명세를 확정할 수 없는 변경은 task file `[설계 의견]`·Issue 본문에 근거를 남기고 **Ds-11 반영 시점**을 명시한다. **(2026-11-17, v3.9)** 이 파일은 **인덱스(목차·운영 규칙)** 이고 본문은 **`docs/02_Analysis/ds11/Ds_11_*.md`(도메인·장 단위 9개 파일)** 로 분할되었다(TASK-1163, 3차 배치 전 1,000줄 Hard Limit 대비). 신규 함수는 해당 도메인 파일에 기재하고, 인덱스 경로는 유지된다(참조 링크는 인덱스 기준으로 유효).
+
 ### R-12 | 명세-코드 동기화 의무
 API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으로 업데이트해야 합니다. 코드와 명세의 불일치는 심각한 결함으로 간주됩니다.
+
+**(2026-11-13, v3.7 — DEF-145: 2026-07-16 이후 신규 액션 20개가 Ds-11에 0개 반영된 것을 계기로 집행 수단 신설)**
+- **트리거**: `src/app/actions/**`(`use server`)의 export 함수, Supabase RPC, 외부 연동(SHXK·UPS 등) payload 계약의 **신규·변경·삭제**.
+- **시점**: 구현과 **같은 PR 안에서** Ds-11을 갱신한다(R-11 설계 단계에서 이미 반영했다면 PR에서 일치 여부를 확인). 불가하면 PR 본문에 사유와 후속 IMP 번호를 적는다.
+- **최소 기재 항목**: 함수명·소스 경로·권한·입력·출력·오류.
+- **제외**: 내부 헬퍼, 테스트, `use server`가 아닌 `src/lib` 유틸.
+- **책임**: 구현 Agent가 PR 안에서 갱신하고, Aiden이 머지 전에 확인한다.
+- **자동 점검(1단계, advisory)**: `scripts/check-ds11-sync.mjs`(`npm run check:ds11`)가 `src/app/actions` 함수명이 Ds-11에 언급되는지 확인한다. 2026-11-13 기준 미반영 206개는 `scripts/ds11-sync-baseline.json`에 고정(래칫)하고, **baseline 밖의 신규 미반영**만 PR Checks(`Docs Sync Check`)가 경고한다. baseline은 **줄어들기만** 해야 하며 확대(`--allow-grow`)는 PR 본문에 사유를 적어야 한다. 이 점검은 **이름 언급 여부만** 본다 — 내용 정확성(2단계)과 필수 승격(`--strict`)은 관찰 후 별도 결정한다. (2026-11-17 v3.9: 스캔 대상은 인덱스 + `docs/02_Analysis/ds11/` 직하위 `*.md`.)
+- **문서 링크**: 문서를 이동·삭제·아카이브할 때는 참조를 `grep`으로 전수 점검한다. `scripts/check-doc-links.mjs`(`npm run check:doc-links`)가 baseline 밖의 **신규 깨진 상대 링크**를 경고한다(근거: GH#206 #13 아카이브 때 "깨지는 링크 없음"으로 확인했으나 4곳이 누락됨).
 
 ### R-13 | 테스트 결과물 관리 의무
 모든 테스트 결과(로그, 스크린샷 등)는 ROOT 폴더가 아닌 지정된 `docs/` 하부 폴더에 저장합니다.
@@ -128,12 +141,15 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 ### R-14 | E2E 테스트 환경 표준
 모든 E2E 테스트 및 개발은 **로컬 Supabase 환경**을 원칙으로 수행합니다. 원격(Cloud) Supabase 접속이 필요한 경우에는 반드시 사용자에게 승인을 득한 후 실시합니다.
 
-### R-15 | 개선 사항 도출 및 기록 의무
-작업 수행 중 즉시 수정이 불가하거나 별도 계획이 필요한 개선 사항을 발견한 경우, 반드시 `scratch/post_launch_improvements.md` 파일에 즉시 기록합니다.
-- **항목 형식**: `IMP-NNN` (자동 증가 일련번호)
-- **필수 기재 항목**: 발견 경위, 현재 상태, 임시 조치, 목표 구현, 관련 파일, 예상 공수, 우선순위
-- **우선순위**: `Critical` / `High` / `Medium` / `Low`
-- **면제 조건 없음**: 규모와 관계없이 모든 미결 개선 사항은 기록 대상입니다.
+### R-15 | 개선 사항 도출 및 건의 의무 (v3.8 개정 — IMP 등록은 Aiden 전속)
+작업 수행 중 즉시 수정이 불가하거나 별도 계획이 필요한 개선 사항을 발견한 경우, 반드시 **GitHub Issue로 건의**한다. `IMP-NNN` 번호를 직접 부여하거나 `scratch/post_launch_improvements.md`를 **직접 수정하지 않는다**(Aiden 전속).
+- **건의 방법**: Issue 템플릿 `개선 제안 (IMP)`(`.github/ISSUE_TEMPLATE/imp.yml`, 라벨 `type:imp`). 제목은 `[IMP 제안] 요약`.
+- **필수 기재 항목**: 발견 경위, 현재 상태, 임시 조치, 목표 구현, 관련 파일, 예상 공수, 우선순위 제안(`Critical` / `High` / `Medium` / `Low`).
+- **등록·번호 부여(Aiden 전속)**: Aiden이 건의 Issue를 검토해 채택하면 `IMP-NNN`을 부여하고 `scratch/post_launch_improvements.md`에 기록한 뒤, Issue에 번호를 회신하고 Close한다. 반려·병합(기존 IMP와 중복)도 사유를 코멘트로 남기고 Close한다. 미처리 건은 Aiden이 세션 시작 점검(R-16) 때 `gh issue list --label type:imp --state open`으로 확인한다.
+- **Task 문서 참조**: 번호 부여 전에는 task file·PR 본문에 `IMP 제안 #이슈번호`로 적는다. 번호가 부여되면 Aiden이 회신하므로 그때 `IMP-NNN`으로 정정해도 되고 정정하지 않아도 된다(Issue 링크가 근거).
+- **면제 조건 없음**: 규모와 관계없이 모든 미결 개선 사항은 건의 대상이다. (Aiden 본인이 발견한 항목은 Issue 없이 직접 기록할 수 있다.)
+- **기존 항목**: 이미 등록된 IMP-001~IMP-195는 변경·이관하지 않는다. 번호는 단일 채번자(Aiden)만 이어서 부여한다.
+- **근거**: 2026-11-17 develop→TeamB_Dev 통합 중 `post_launch_improvements.md` 꼬리 추가 충돌(IMP-190/191). 같은 이유로 Team B가 IMP 번호를 3회 정정했다(IMP-170→178, 190→191, 190→192). 여러 팀·에이전트가 한 파일 꼬리에 직접 번호를 부여하는 구조(IMP-186)가 충돌과 번호 중복의 원인이었다.
 
 ### R-16 | 세션 시작 시 담당 Task 확인 의무
 세션 최초 시작 시 반드시 `gh issue list --assignee <본인>` (또는 `--label team:a`/`team:b`)으로 본인에게 할당된 미완료 이슈를 확인한다.
@@ -198,7 +214,7 @@ status:open → [status:draft → (Aiden 확정)] → status:in-progress → sta
 4. **[자가 검증 — `check-R17-DoD` 실행]** `check-R17-DoD` 명령어를 실행하여 완료 보고 전 단계를 자가 점검한다. ❌ 항목(DoD 미체크·증거값 미기재·`TBD`·빈 값) 발견 시 **자체 수정 후 재실행** — 전항목 통과까지 반복. 통과 확인 후 문서 커밋 진행.
 5. **[문서 커밋]** `[Agent] docs: TASK-XXX 완료 보고 — task file` — task file만 포함
 6. **[PR 생성]** `feature/* → develop` PR 생성 — GitHub Issue 번호 연결(`Closes #NNN`) 및 DoD 체크리스트 PR body에 기재. **PR 생성 없이 검토 요청 완료로 간주하지 않음.**
-7. ✅ 전환은 Aiden 단독 권한 (PR 머지 = Issue 자동 Close) — Agent 자체 선언 절대 불가. **Aiden 반려 시** `gh issue edit #NNN --add-label status:rework --remove-label status:review` 실행(Aiden 담당) 후 상세 파일 `[Aiden 검토]` 섹션에 반려 사유 기재.
+7. ✅ 전환은 오케스트레이션 책임자(Edward/Aiden) 권한 (PR 머지 = Issue 자동 Close) — Agent 자체 선언 절대 불가. **Aiden 반려 시** `gh issue edit #NNN --add-label status:rework --remove-label status:review` 실행(Aiden 담당) 후 상세 파일 `[Aiden 검토]` 섹션에 반려 사유 기재.
 
 > ⚠️ **커밋 순서 위반 금지**: 코드 커밋 전 task file 🔔 변경 금지. task file 미업데이트 상태로 단일 커밋 금지. DoD 미체크·증거값 미기재 상태로 문서 커밋 금지. **PR 미생성 상태로 검토 요청 불가.**
 
@@ -248,10 +264,10 @@ status:open → [status:draft → (Aiden 확정)] → status:in-progress → sta
 **현재 팀 구성**: Team A (Aiden · D_Kai) / Team B (JSJung·Jaison 총괄, 구현: Dave·Baker·Mike)
 
 **핵심 규칙 요약**:
-- **브랜치**: `feature/teama-*` · `feature/teamb-*` → `develop` (Aiden PR 리뷰·머지) → `main`
+- **브랜치**: `feature/teama-*` → `develop`(Team A 리더가 오케스트레이션 책임자를 겸직, `TeamA_Dev` 없음) / `feature/teamb-*` → `TeamB_Dev`(Team B 리더) → `develop`(오케스트레이션 책임자, 마일스톤 기준) → `main`
 - **TASK 채번**: Team A `TASK-NNN` / Team B `TASK-B-NNN` / Team C+ `TASK-C-NNN` (팀별 독립 순번). 번호 중복 반복 발생(Issue #358)으로 반드시 착수 전 `./scripts/next-task-number.sh [A|B|C]`로 다음 번호를 확인 후 채번한다 — 눈대중 채번 금지.
 - **파일 소유권**: 각 팀은 본인 팀 Task file(`.agent/tasks/`)만 수정. 타 팀 파일 수정 금지. Task 상태는 GitHub Issue 라벨로 표현되므로 팀 간 충돌 대상 자체가 아니다.
-- **Aiden 전속**: ✅ PR 머지(최종 승인) · `develop → main` 머지 · 팀 간 조율 · 신규 팀 투입 결정
+- **오케스트레이션 책임자(Edward/Aiden) 전속**: ✅ PR 머지(최종 승인) · `TeamB_Dev → develop` 통합 · `develop → main` 머지 및 운영 배포(배포는 211 런북·Edward 명시 지시) · 팀 간 조율 · 신규 팀 투입 결정
 - **릴리즈 노트 자동 생성** (2026-08-19 도입): `develop → main` 병합 완료 직후 `gh release create <태그> --target main --generate-notes`로 태그+릴리즈 노트를 자동 생성한다. 병합된 PR 제목을 GitHub이 자동 취합하므로 별도 CHANGELOG.md 수기 관리는 하지 않는다 — 수기 이중기록은 갱신 누락으로 신뢰를 잃는 패턴이 이미 여러 차례 반복되었음(ACTIVE_TASK.md 폐지 사례 참조).
 
 ### R-18 | 발견 결함 보고 의무
@@ -410,4 +426,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v3.6** (2026-10-01) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.11** (2026-11-20) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)

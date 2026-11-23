@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { createSurcharge, updateSurcharge, deleteSurcharge, getSurcharges } from '@/app/actions/admin/surcharges';
@@ -33,6 +34,7 @@ const SURCHARGE_TYPES = ['FSC', 'SSC', 'THC', 'ODF', 'BAF', 'CAF', 'PSS', 'WRS',
 export function SurchargesTab() {
   const [surcharges, setSurcharges] = useState<Surcharge[]>([]);
   const [carriers, setCarriers] = useState<Carrier[]>([]);
+  const errT = useTranslations('Errors');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -53,7 +55,8 @@ export function SurchargesTab() {
       const data = await getSurcharges();
       setSurcharges(data as unknown as Surcharge[]);
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'SURCHARGE_LOAD' }));
     } finally {
       setLoading(false);
     }
@@ -101,7 +104,7 @@ export function SurchargesTab() {
 
   const handleSave = async () => {
     if (!formData.carrier_id || !formData.valid_from || !formData.amount) {
-      setError('Carrier, Valid From, and Amount are required.');
+      setError(errT('surcharge_required'));
       return;
     }
 
@@ -119,7 +122,8 @@ export function SurchargesTab() {
       resetForm();
       fetchSurcharges();
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'SURCHARGE_SAVE' }));
     }
   };
 
@@ -129,7 +133,8 @@ export function SurchargesTab() {
       await deleteSurcharge(id);
       fetchSurcharges();
     } catch (err: any) {
-      setError(err.message);
+      console.error(err);
+      setError(errT('generic', { code: 'SURCHARGE_DELETE' }));
     }
   };
 

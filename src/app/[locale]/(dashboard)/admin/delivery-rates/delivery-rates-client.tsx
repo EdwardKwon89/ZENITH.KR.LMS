@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from 'next-intl';
 
 import { useState, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
@@ -33,6 +34,7 @@ const EMPTY_FORM = (serviceType: TabType, orgId: string): CreateDeliveryRateData
 });
 
 export default function DeliveryRatesClient({ initialRates, organizations, userRole, userOrgId }: Props) {
+  const te = useTranslations('Errors');
   const [rates, setRates] = useState(initialRates);
   const [activeTab, setActiveTab] = useState<TabType>('LOCAL');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,7 +85,8 @@ export default function DeliveryRatesClient({ initialRates, organizations, userR
       }
       window.location.reload();
     } catch (e) {
-      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+      console.error(e);
+      alert(te('generic', { code: 'RATE_SAVE' }));
     } finally {
       setLoading(false);
     }
@@ -97,7 +100,8 @@ export default function DeliveryRatesClient({ initialRates, organizations, userR
       if (error) throw new Error(error);
       window.location.reload();
     } catch (e) {
-      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+      console.error(e);
+      alert(te('generic', { code: 'RATE_SAVE' }));
     } finally {
       setLoading(false);
     }

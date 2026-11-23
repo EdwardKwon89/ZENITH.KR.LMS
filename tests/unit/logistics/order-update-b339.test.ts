@@ -197,7 +197,7 @@ describe('TASK-B-339: updateOrder — UPS 등록 전까지 수정 (Issue #1254)'
     hasActiveUpsLabelMock.mockResolvedValue(true);
 
     const updateOrder = await loadUpdateOrder();
-    await expect(updateOrder(ORDER_ID, makePayload() as any)).rejects.toThrow(/UPS 등록취소/);
+    await expect(updateOrder(ORDER_ID, makePayload() as any)).rejects.toThrow(/UPS에 등록된 오더는 수정할 수 없습니다/);
 
     expect(repoMock.calls.updateHeader).toHaveLength(0);
     expect(repoMock.calls.insertPackage).toHaveLength(0);

@@ -49,11 +49,17 @@ describe('TASK-B-290: UpsTrackingEventsList 로케일 렌더링 (Issue #1085 / D
     expect(screen.getByText('Departed from facility')).toBeTruthy();
   });
 
-  it('번역본 없는 이벤트는 중문 원문 표출 (ko 로케일에서도 폴백)', () => {
+  it('번역본 없는 이벤트는 사전 ko 번역으로 폴백 (TASK-B-351: 중문 원문 대신)', () => {
     mockUseLocale.mockReturnValue('ko');
     const events = [{ ...baseEvents[0], event_desc_ko: null, event_desc_en: null }];
     render(<UpsTrackingEventsList events={events as any} />);
-    expect(screen.getByText('离开设施')).toBeTruthy();
+    expect(screen.getByText('시설을 출발했습니다')).toBeTruthy();
+  });
+
+  it('ja 로케일 → 사전 ja 번역 표출 (TASK-B-351: 이전에는 en 이었다)', () => {
+    mockUseLocale.mockReturnValue('ja');
+    render(<UpsTrackingEventsList events={baseEvents as any} />);
+    expect(screen.getByText('施設を出発しました')).toBeTruthy();
   });
 
   it('event_time은 TIME 포맷 그대로 표시 (split(" ")[1] 가정 제거)', () => {

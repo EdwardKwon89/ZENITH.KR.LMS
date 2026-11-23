@@ -40,8 +40,8 @@
 |:----|:----|
 | **팀 간 Task 조율** | 팀 간 의존성·우선순위 결정 |
 | **타 팀 Task file 수정** | 팀 A 파일 ← 팀 A만, 팀 B 파일 ← 팀 B만 (Aiden은 전체 가능) |
-| **✅ 최종 전환** | PR 머지 = ✅ 승인 (Aiden 단독) |
-| **develop → main 머지** | Sprint 완료 시 Aiden 단독 권한 |
+| **✅ 최종 전환** | PR 머지 = ✅ 승인 (오케스트레이션 책임자 Edward/Aiden — Agent 자체 선언 불가) |
+| **develop → main 머지·운영 배포** | 오케스트레이션 책임자(Edward/Aiden) 권한. 병합은 Sprint 완료 기준, 운영 배포는 [211 런북](211_PRODUCTION_DEPLOY_RUNBOOK.md)에 따라 Edward 명시 지시로 실행 |
 | **신규 팀 투입 결정** | Edward 승인 후 Aiden 집행 |
 
 ### 🚫 Aiden 금지 사항 — 구현 Agent 대행 실행 (2026-08-19 신설, Issue #895/TASK-1135 절차위반 재발방지)
@@ -56,23 +56,58 @@
 ## 브랜치 전략 (Multi-Team)
 
 ```
-Team A: feature/teama-*  ────────────────────────────→ develop (Aiden PR 리뷰·머지) → main (Sprint 완료 시)
+Team A: feature/teama-*  ────────────────────────────→ develop (오케스트레이션 책임자 겸 Team A 리더 리뷰·머지, TeamA_Dev 없음) → main (Sprint 완료 시)
 Team B: feature/teamb-*  → TeamB_Dev (Jaison 자체 병합) ─┘
 Team C: feature/teamc-*  ────────────────────────────→ develop
 ```
+
+**통합 책임 요약 (2026-11-20 Edward 확정)**
+
+| 구간 | 주체 |
+|:--|:--|
+| 각 팀 작업 브랜치 → `팀_Dev` (예: `TeamB_Dev`) | 각 팀 리더 |
+| `팀_Dev` → `develop` | 오케스트레이션 책임자(Edward/Aiden) |
+| Team A | Team A 리더가 오케스트레이션 책임자를 겸직한다. `TeamA_Dev` 없이 `feature/teama-*`가 `develop`으로 직접 통합된다. |
+| `develop` → `main` 병합 및 운영 배포 | 오케스트레이션 책임자(Edward/Aiden). 배포는 211 런북·Edward 명시 지시 |
 
 ### Team B 고정 통합 브랜치 — `TeamB_Dev` (2026-07-18 Edward 지시)
 
 Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하지 않고**, 먼저 고정 브랜치 `TeamB_Dev`로 자체 병합해 최신 상태를 유지한다.
 
 - **개별 → TeamB_Dev**: Jaison 사전검토(diff + **로컬 검증**: `npm run build` + `npm run test:regression`) 후 팀 자체 판단으로 병합 (Aiden 승인 불요). **GitHub Actions CI 완료 대기는 불요**(2026-07-20 개정 — Aiden이 develop에 직접 반영할 때 쓰는 방식과 동일하게, TeamB_Dev는 내부 통합 브랜치라 최종 게이트가 아니므로 로컬 검증으로 충분. CI 큐 혼잡으로 인한 Team B 대기 시간 문제 완화 목적)
-- **TeamB_Dev → develop**: Aiden이 정기적으로(1일 1~2회 권장) 배치 병합 — develop 병합은 여전히 Aiden 단독 권한(R-17 §0/R-19 불변). **이 단계는 기존 원칙(R-17 v2.2) 그대로 유지** — 실제 GitHub Actions CI 통과 확인이 원칙이며, CI가 15분 내 트리거되지 않을 때만 R-08-1 로컬 대체 검증 허용. 즉 CI 생략이 허용되는 건 개별→TeamB_Dev 단계뿐이고, develop에 실제로 반영되는 이 단계의 검증 기준은 낮아지지 않는다.
+- **TeamB_Dev → develop**: 오케스트레이션 책임자(Edward/Aiden)가 **마일스톤 기준**으로 병합한다(2026-11-20 개정 — 종전 "당일(KST 23:00) 완료분 당일 반영" 원칙 폐지). 마일스톤은 EPIC·설계 문서가 정한 완결 단위(예: 청구서관리 ① 오더정산·② 청구서 DB·③ 서버 액션)이며, Team B 리더가 마일스톤 완료를 Issue에 보고하면 오케스트레이션 책임자가 통합 시점을 정한다. 종료 시점이 불확실한 외부 선행(결제·메일 도메인 등)이나 컷오버일에 묶인 항목은 마일스톤에서 분리해 별도 통합한다. Team B 리더는 통합 PR 제출 전 아래 동기화를 마친 뒤 `develop`을 포함해 `CLEAN` 상태로 제출한다. Edward/Aiden 지시가 있으면 마일스톤 도중에도 추가 통합할 수 있다 — develop 병합은 오케스트레이션 책임자 권한(R-17 §0/R-19 불변). **이 단계는 기존 원칙(R-17 v2.2) 그대로 유지** — 실제 GitHub Actions CI 통과 확인이 원칙이며, CI가 15분 내 트리거되지 않을 때만 R-08-1 로컬 대체 검증 허용. 즉 CI 생략이 허용되는 건 개별→TeamB_Dev 단계뿐이고, develop에 실제로 반영되는 이 단계의 검증 기준은 낮아지지 않는다.
 - 이전에는 `integration/teamb-YYMMDD` 형태로 매일 새 브랜치를 만들었으나(2026-07-16~18), 브랜치명이 바뀔 때마다 CI 트리거 목록을 갱신해야 하는 문제가 반복돼 **고정 브랜치로 전환**(과거 `integration/teamb-*` 브랜치는 이력 보존용으로 남겨두고 신규 작업 대상에서 제외)
-- Aiden의 배치 병합 시 develop→TeamB_Dev 역방향 병합도 함께 수행해 두 브랜치의 드리프트를 방지한다(충돌은 시간순으로 해소 — [107_MULTIAGENT_SCALING_PROPOSAL.md](107_MULTIAGENT_SCALING_PROPOSAL.md) 참조)
+#### develop → TeamB_Dev 동기화와 충돌 처리 (2026-11-14 개정, Edward 승인)
+
+> **근거**: 2026-11-14 점검 — 통합 간격 1~25일로 불규칙, 마지막 develop→TeamB_Dev 동기화(2026-10-01) 이후 198커밋 뒤처져 회귀맵 §번호·IMP 번호 충돌 발생. 반대로 Aiden이 develop 병합 시마다 TeamB_Dev에 밀어 넣으면 **Team B 작업 중 Base가 바뀌어** 이미 끝낸 로컬 검증이 무효가 되고 병합 시점에 충돌이 몰린다. 따라서 동기화는 **당기는 방식(Team B가 시점을 통제)** 으로 한다. 충돌은 시간순으로 해소 — [107_MULTIAGENT_SCALING_PROPOSAL.md](107_MULTIAGENT_SCALING_PROPOSAL.md) 참조.
+
+**1. 동기화 주체·시점**
+- **주체**: Team B 리더(Jaison). Aiden은 TeamB_Dev에 develop을 밀어 넣지 않는다.
+- **시점**: ① **새 Task 착수 전**, ② **TeamB_Dev→develop 통합 PR 제출 전**. 확인은 `git rev-list --count TeamB_Dev..develop` — 0이 아니면 동기화한 뒤 착수·제출한다(작업 사이의 빈틈에 수행).
+- **진행 중인 개별 브랜치**: 강제 rebase하지 않는다. 현재 Task 검증을 마친 뒤 TeamB_Dev를 자기 브랜치에 **병합(merge)** 해 최신화한다(공유 브랜치 이력 보존). 병합 시 충돌은 그 브랜치 작성자가 해소하고 영향 테스트를 로컬에서 재실행한다.
+- **Aiden의 역할**: develop 병합 시 변경한 공유 파일 목록을 PR 본문·Issue에 남기고(선택: Team B에 알림), 통합 PR은 **develop을 포함해 충돌 없이(`CLEAN`)** 올라왔을 때만 병합한다. 아니면 병합을 중단하고 Team B에 동기화를 요청한다.
+
+**2. 병합 방향별 주체**
+
+| 방향 | 병합 주체 | 충돌 해소 주체 |
+|:--|:--|:--|
+| `feature/teamb-*` → TeamB_Dev | Team B(Jaison) | Team B 작성자 |
+| develop → TeamB_Dev (착수 전 동기화) | Team B 리더 | Team B 리더 |
+| TeamB_Dev → develop (통합) | **오케스트레이션 책임자(Edward/Aiden)** | **기본: Team B**(Aiden이 중단·요청 후 TeamB_Dev 쪽에서 동기화). **예외: Aiden/Edward** — ① Edward 지시로 대기 불가 ② Team A 담당 파일(Ds-11·GOV 문서) 충돌 ③ 번호 재부여 등 기계적 충돌 |
+
+**3. 충돌 발생 시 조치**
+1. 격리 워크트리(R-17 §0)에서 해소한다.
+2. 이미 develop에 병합된 내용을 기준으로 한다. 번호 충돌은 Team B 쪽을 재부여하고 참조(task file 등)를 grep으로 전수 정정한다.
+3. 양 팀 로직이 의미상 충돌하거나 Team A 담당 파일이면 한쪽을 임의로 고르지 않고 Aiden에게 보고 후 정한다(R-19, 핵심 가드레일).
+4. 해소 후 `build`와 `test:regression`을 새 DB(`supabase db reset`)에서 재실행한다. 의미 충돌은 통합 PR의 실제 CI로 확인한다(R-17).
+5. PR 본문에 충돌 파일·해소 방식을 기록한다. 같은 유형이 반복되면 R-15에 따라 구조 개선 IMP로 올린다(예: IMP-186 채번, IMP-187 사전 점검 도구).
+6. 반나절 안에 해소되지 않으면 Aiden이 지원한다 — 판단 기준·범위를 정해 주며, 도메인 판단이 필요한 부분은 Team B 확인을 받는다.
+
+**4. 회피**: 분기 기간 단축(Task 사이 동기화), Team A는 Team B 영역 파일 미수정(R-19), 락파일·`package.json`·마이그레이션 등 공유 자원 변경은 별도 PR로 분리하고 사전 고지, 새 마이그레이션·RPC 버전 생성 전 develop·TeamB_Dev 양쪽의 최신 번호 확인(타임스탬프가 늦은 쪽이 양보).
 
 - 각 팀은 `develop`을 베이스로 브랜치 생성
-- PR 대상: `develop` (팀 리더가 PR 생성 + Aiden 검토 요청)
-- `develop → main`: Aiden 단독 권한 (Phase/Sprint 완료 기준)
+- PR 대상: `develop` (Team B는 팀 리더가 TeamB_Dev 통합 PR을 생성하고 오케스트레이션 책임자에게 검토 요청, Team A는 구현 Agent PR을 오케스트레이션 책임자 겸 Team A 리더가 검토)
+- `develop → main` 병합 및 운영 배포: 오케스트레이션 책임자(Edward/Aiden) 권한 (Phase/Sprint 완료 기준, 배포는 211 런북·Edward 명시 지시)
 
 ## 파일 소유권 원칙
 
@@ -83,6 +118,8 @@ Team B는 개별 `feature/teamb-*` 브랜치를 **develop에 직접 PR 제출하
 | GitHub Issue (`team:a` 라벨) | Team A | Team B 라벨/assignee 수정 금지 |
 | GitHub Issue (`team:b` 라벨) | Team B | Team A 라벨/assignee 수정 금지 |
 | 공유 코드 (`rbac.ts` 등) | 공유 | PR 선착순, 후발 팀 리베이스 |
+| 회귀 테스트 맵 (`docs/08_Self_Audit/Checklists/regression-items/TASK-*.md`) | 병렬 무충돌 | **신규 케이스는 Task별 파일로만 추가(R-09 v3.10, TASK-1150)**, `LIVE_REGRESSION_TEST_MAP.md` 인덱스 직접 수정 금지. PR Checks `LRTM Sync Check`가 유령 경로·미등재·E2E 수동 표기를 점검 |
+| API 상세 명세서 Ds-11 (인덱스 `docs/02_Analysis/Ds_11_API_상세_명세서.md` + 본문 분할 `docs/02_Analysis/ds11/Ds_11_*.md` — 신규 함수는 해당 도메인 분할 파일에 기재, TASK-1163) | 공유 | **구현 PR 안에서 갱신(R-12, GOV_COMMON v3.7)**, PR 선착순·후발 팀 리베이스. 신규 Server Action이 baseline(`scripts/ds11-sync-baseline.json`) 밖에서 Ds-11에 없으면 PR Checks `Docs Sync Check`가 경고(비차단) |
 | Migration 파일 | 작성 팀 | 타 팀 읽기 전용 |
 
 ## TASK 번호 채번 규칙 (v2.0 — 팀 접두사 체계)

@@ -1,5 +1,6 @@
 "use server";
 
+import { trError } from '@/lib/i18n/action-error';
 import { logger } from '@/lib/logger';
 import { withAction } from '@/lib/actions/wrapper';
 
@@ -51,7 +52,7 @@ export const logClientError = withAction(async function (data: {
 
   if (error) {
     logger.error("Failed to log error to DB:", error);
-    throw new Error(error.message);
+    throw new Error(await trError('generic', { code: 'ERROR_LOG_SAVE' }));
   }
 
   // CRITICAL 레벨인 경우 관리자들에게 인앱 알림 발송
@@ -139,7 +140,7 @@ export const resolveErrorLog = withAction(async function (id: string) {
     .update({ resolved: true })
     .eq('id', id);
 
-  if (error) throw error;
+  if (error) throw new Error(await trError('generic', { code: 'ERROR_LOG_RESOLVE' }));
   
   revalidatePath('/admin/error-logs');
   return true;

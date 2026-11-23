@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useState } from 'react';
 import { Plus, Edit2, XCircle, Trash2 } from 'lucide-react';
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function AgencyOtherChargesClient({ charges, allOtherCharges, agencyOrgId }: Props) {
+  const te = useTranslations('Errors');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCharge, setEditingCharge] = useState<AgencyOtherChargeRow | null>(null);
   const [form, setForm] = useState({ other_charge_id: '', selling_price: 0, cost_price: 0 });
@@ -52,7 +54,8 @@ export function AgencyOtherChargesClient({ charges, allOtherCharges, agencyOrgId
       });
       window.location.reload();
     } catch (e) {
-      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+      console.error(e);
+      alert(te('generic', { code: 'ACTION_FAILED' }));
     } finally {
       setLoading(false);
     }
@@ -65,7 +68,8 @@ export function AgencyOtherChargesClient({ charges, allOtherCharges, agencyOrgId
       await deactivateAgencyOtherCharge(id);
       window.location.reload();
     } catch (e) {
-      alert(e instanceof Error ? e.message : '처리 중 오류가 발생했습니다.');
+      console.error(e);
+      alert(te('generic', { code: 'ACTION_FAILED' }));
     } finally {
       setLoading(false);
     }

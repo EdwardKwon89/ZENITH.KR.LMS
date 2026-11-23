@@ -58,7 +58,7 @@ describe('ZENITH Document Actions: Data Aggregation', () => {
 
     // When & Then
     await expect(getOrderDocumentData('NON-EXISTENT'))
-      .rejects.toThrow(/해당 번호\(NON-EXISTENT\)의 오더를 찾을 수 없습니다/);
+      .rejects.toThrow('오더를 찾을 수 없습니다.');
   });
 
   it('TC-DOC.3: [Failure] DB 조회 오류 발생 시 예외를 던져야 함', async () => {
@@ -67,6 +67,6 @@ describe('ZENITH Document Actions: Data Aggregation', () => {
 
     // When & Then
     await expect(getOrderDocumentData('ORD-ERR'))
-      .rejects.toThrow(/오더 조회 중 오류 발생: Connection Error/);
+      .rejects.toThrow('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: ORDER_LOOKUP)');
   });
 });

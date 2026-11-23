@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from '@/lib/logger';
+import { trError } from '@/lib/i18n/action-error';
 
 import { validateUserAction } from "@/lib/auth/guards";
 import { USER_ROLES } from "@/lib/auth/rbac";
@@ -36,10 +37,10 @@ async function getAgencyShipperIds(supabase: any, orgId: string): Promise<string
 
 export async function getWarehousedOrders() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
   if (!isAllowed) {
-    throw new Error("권한이 없습니다.");
+    throw new Error(await trError('permission_denied'));
   }
 
   let query = supabase
@@ -66,7 +67,7 @@ export async function getWarehousedOrders() {
 
   if (error) {
     logger.error("getWarehousedOrders error:", error);
-    throw new Error("Failed to fetch warehoused orders");
+    throw new Error(await trError('fetch_failed'));
   }
 
   return { success: true, orders: data || [] };
@@ -74,10 +75,10 @@ export async function getWarehousedOrders() {
 
 export async function getTodayReleasedOrders() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
   if (!isAllowed) {
-    throw new Error("권한이 없습니다.");
+    throw new Error(await trError('permission_denied'));
   }
 
   const todayStart = new Date();
@@ -104,7 +105,7 @@ export async function getTodayReleasedOrders() {
 
   if (historyError) {
     logger.error("getTodayReleasedOrders error:", historyError);
-    throw new Error("Failed to fetch today released orders");
+    throw new Error(await trError('fetch_failed'));
   }
 
   let items = historyData || [];
@@ -125,24 +126,24 @@ export async function getTodayReleasedOrders() {
 
 export async function confirmOutbound(orderId: string) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
   if (!isAllowed) {
-    throw new Error("권한이 없습니다.");
+    throw new Error(await trError('permission_denied'));
   }
 
   const orderRepo = new OrderRepository(supabase);
 
   const { data: order } = await orderRepo.findById(orderId);
-  if (!order) throw new Error("Order not found");
+  if (!order) throw new Error(await trError('order_not_found'));
   if (order.status !== OrderStatus.WAREHOUSED && order.status !== OrderStatus.PACKED) {
-    throw new Error("WAREHOUSED 또는 PACKED 상태의 오더만 출고 확정할 수 있습니다.");
+    throw new Error(await trError('status_outbound_confirm'));
   }
 
   if (profile.role === USER_ROLES.AGENCY) {
     const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
     if (!shipperIds || !shipperIds.includes((order as any).shipper_id)) {
-      throw new Error("본인 소속 화주의 오더만 출고 처리할 수 있습니다.");
+      throw new Error(await trError('own_shipper_outbound'));
     }
   }
 
@@ -167,9 +168,9 @@ export async function confirmOutbound(orderId: string) {
 
 export async function getLatestUpsLabelErrors(orderIds: string[]) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
   if (!Array.isArray(orderIds) || orderIds.length === 0) {
     return { success: true, errors: {} };
   }
@@ -182,7 +183,7 @@ export async function getLatestUpsLabelErrors(orderIds: string[]) {
 
   if (error) {
     logger.error("getLatestUpsLabelErrors error:", error);
-    throw new Error("Failed to fetch ups label errors");
+    throw new Error(await trError('fetch_failed'));
   }
 
   const latestByOrder: Record<string, any> = {};
@@ -201,9 +202,9 @@ export async function getLatestUpsLabelErrors(orderIds: string[]) {
 
 export async function getPickupOrders() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   let query = supabase
     .from("zen_orders")
@@ -230,16 +231,16 @@ export async function getPickupOrders() {
   const { data, error } = await query.order("created_at", { ascending: false });
   if (error) {
     logger.error("getPickupOrders error:", error);
-    throw new Error("Failed to fetch pickup orders");
+    throw new Error(await trError('fetch_failed'));
   }
   return { success: true, orders: data || [] };
 }
 
 export async function confirmPickup(orderId: string) {
   const { profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   await updateOrderStatus(orderId, OrderStatus.SCHEDULED, "[픽업완료]");
 
@@ -252,9 +253,9 @@ export async function confirmPickup(orderId: string) {
 
 export async function cancelPickup(orderId: string) {
   const { profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   await updateOrderStatus(orderId, OrderStatus.REGISTERED, "[픽업취소]");
 
@@ -292,7 +293,7 @@ export async function getTodayPickupHistory() {
 
   if (error) {
     logger.error("getTodayPickupHistory error:", error);
-    throw new Error("Failed to fetch today pickup history");
+    throw new Error(await trError('fetch_failed'));
   }
   return attachOperatorNames(supabase, data || []);
 }
@@ -303,7 +304,7 @@ export async function getTodayPickupHistory() {
 
 export async function getTodayUpsHistory() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
 
   const now = new Date();
   const todayKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
@@ -336,7 +337,7 @@ export async function getTodayUpsHistory() {
 
   if (historyError) {
     logger.error("getTodayUpsHistory error:", historyError);
-    throw new Error("Failed to fetch today UPS history");
+    throw new Error(await trError('fetch_failed'));
   }
 
   let items = historyData || [];
@@ -361,7 +362,7 @@ export async function getTodayUpsHistory() {
 
 export async function getTodayDepartureHistory() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
 
   const now = new Date();
   const todayKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
@@ -394,7 +395,7 @@ export async function getTodayDepartureHistory() {
 
   if (historyError) {
     logger.error("getTodayDepartureHistory error:", historyError);
-    throw new Error("Failed to fetch today departure history");
+    throw new Error(await trError('fetch_failed'));
   }
 
   let items = historyData || [];
@@ -419,14 +420,14 @@ export async function getTodayDepartureHistory() {
 
 export async function cancelInbound(orderId: string) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   const orderRepo = new OrderRepository(supabase);
   const { data: current } = await orderRepo.getStatus(orderId);
   if (!current || current.status !== OrderStatus.WAREHOUSED) {
-    throw new Error("WAREHOUSED 상태의 오더만 입고취소할 수 있습니다.");
+    throw new Error(await trError('status_cancel_inbound'));
   }
 
   const { data: prevData } = await supabase
@@ -455,9 +456,9 @@ export async function cancelInbound(orderId: string) {
 
 export async function getPackedOrders() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   let query = supabase
     .from("zen_orders")
@@ -482,7 +483,7 @@ export async function getPackedOrders() {
   const { data, error } = await query.order("created_at", { ascending: false });
   if (error) {
     logger.error("getPackedOrders error:", error);
-    throw new Error("Failed to fetch packed orders");
+    throw new Error(await trError('fetch_failed'));
   }
   return { success: true, orders: data || [] };
 }
@@ -493,26 +494,29 @@ export async function getPackedOrders() {
 
 export async function confirmUpsRegistration(orderId: string) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   const orderRepo = new OrderRepository(supabase);
   const { data: order } = await orderRepo.findById(orderId);
-  if (!order) throw new Error("Order not found");
+  if (!order) throw new Error(await trError('order_not_found'));
   if (order.status !== OrderStatus.WAREHOUSED) {
-    throw new Error("WAREHOUSED 상태의 오더만 UPS 등록할 수 있습니다.");
+    throw new Error(await trError('status_ups_register'));
   }
 
   if (profile.role === USER_ROLES.AGENCY) {
     const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
     if (!shipperIds || !shipperIds.includes((order as any).shipper_id)) {
-      throw new Error("본인 소속 화주의 오더만 처리할 수 있습니다.");
+      throw new Error(await trError('own_shipper_only'));
     }
   }
 
   const result = await registerUpsOrder(orderId);
-  if (!result.success) return { success: false, error: result.error };
+  if (!result.success) {
+    logger.warn('confirmUpsRegistration: passthrough failure', result.error);
+    return { success: false, error: result.error };
+  }
 
   await updateOrderStatus(orderId, OrderStatus.PACKED, "[UPS등록]");
 
@@ -540,19 +544,22 @@ export async function confirmUpsRegistration(orderId: string) {
 
 export async function undoUpsRegistration(orderId: string) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   const orderRepo = new OrderRepository(supabase);
   const { data: order } = await orderRepo.findById(orderId);
-  if (!order) throw new Error("Order not found");
+  if (!order) throw new Error(await trError('order_not_found'));
   if (order.status !== OrderStatus.PACKED) {
-    throw new Error("PACKED 상태의 오더만 UPS등록취소할 수 있습니다.");
+    throw new Error(await trError('status_ups_undo'));
   }
 
   const result = await cancelUpsRegistration(orderId);
-  if (!result.success) return { success: false, error: result.error };
+  if (!result.success) {
+    logger.warn('undoUpsRegistration: passthrough failure', result.error);
+    return { success: false, error: result.error };
+  }
 
   await updateOrderStatus(orderId, OrderStatus.WAREHOUSED, "[UPS등록취소]");
 
@@ -572,9 +579,9 @@ export async function undoUpsRegistration(orderId: string) {
 
 export async function getReleasedOrders() {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   let query = supabase
     .from("zen_orders")
@@ -599,28 +606,28 @@ export async function getReleasedOrders() {
   const { data, error } = await query.order("created_at", { ascending: false });
   if (error) {
     logger.error("getReleasedOrders error:", error);
-    throw new Error("Failed to fetch released orders");
+    throw new Error(await trError('fetch_failed'));
   }
   return { success: true, orders: data || [] };
 }
 
 export async function confirmDeparture(orderId: string) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   const orderRepo = new OrderRepository(supabase);
   const { data: order } = await orderRepo.findById(orderId);
-  if (!order) throw new Error("Order not found");
+  if (!order) throw new Error(await trError('order_not_found'));
   if (order.status !== OrderStatus.RELEASED) {
-    throw new Error("RELEASED 상태의 오더만 출고확정할 수 있습니다.");
+    throw new Error(await trError('status_departure_confirm'));
   }
 
   if (profile.role === USER_ROLES.AGENCY) {
     const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
     if (!shipperIds || !shipperIds.includes((order as any).shipper_id)) {
-      throw new Error("본인 소속 화주의 오더만 처리할 수 있습니다.");
+      throw new Error(await trError('own_shipper_only'));
     }
   }
 
@@ -639,21 +646,26 @@ export async function confirmDeparture(orderId: string) {
 
 export async function undoDeparture(orderId: string) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   const orderRepo = new OrderRepository(supabase);
   const { data: order } = await orderRepo.findById(orderId);
-  if (!order) return { success: false, error: "Order not found" };
+  if (!order) {
+    logger.warn(`undoDeparture: order not found (${orderId})`);
+    return { success: false, error: await trError('order_not_found') };
+  }
   if (order.status !== OrderStatus.IN_TRANSIT) {
-    return { success: false, error: "IN_TRANSIT 상태의 오더만 출고확정취소할 수 있습니다." };
+    logger.warn(`undoDeparture: invalid status (${order.status})`);
+    return { success: false, error: await trError('status_departure_undo') };
   }
 
   if (profile.role === USER_ROLES.AGENCY) {
     const shipperIds = await getAgencyShipperIds(supabase, profile.org_id);
     if (!shipperIds || !shipperIds.includes((order as any).shipper_id)) {
-      return { success: false, error: "본인 소속 화주의 오더만 처리할 수 있습니다." };
+      logger.warn(`undoDeparture: order not in own shippers (${orderId})`);
+      return { success: false, error: await trError('own_shipper_only') };
     }
   }
 
@@ -672,19 +684,22 @@ export async function undoDeparture(orderId: string) {
 
 export async function undoOutbound(orderId: string) {
   const { supabase, profile } = await validateUserAction();
-  if (!profile) throw new Error("User profile not found");
+  if (!profile) throw new Error(await trError('profile_not_found'));
   const isAllowed = WAREHOUSE_ROLES.includes(profile.role as any);
-  if (!isAllowed) throw new Error("권한이 없습니다.");
+  if (!isAllowed) throw new Error(await trError('permission_denied'));
 
   const orderRepo = new OrderRepository(supabase);
   const { data: order } = await orderRepo.findById(orderId);
-  if (!order) throw new Error("Order not found");
+  if (!order) throw new Error(await trError('order_not_found'));
   if (order.status !== OrderStatus.RELEASED) {
-    throw new Error("RELEASED 상태의 오더만 출고취소할 수 있습니다.");
+    throw new Error(await trError('status_departure_cancel'));
   }
 
   const result = await voidUpsLabel(orderId);
-  if (!result.success) return { success: false, error: result.error };
+  if (!result.success) {
+    logger.warn('undoOutbound: passthrough failure', result.error);
+    return { success: false, error: result.error };
+  }
 
   await updateOrderStatus(orderId, OrderStatus.PACKED, "[출고취소]");
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from '@/lib/logger';
+import { trError } from '@/lib/i18n/action-error';
 import { withAction } from '@/lib/actions/wrapper';
 
 import fs from "fs";
@@ -47,7 +48,7 @@ export const createVoc = withAction(async function (payload: unknown) {
   // Zod 입력 검증
   const validated = validatePayload(createVocSchema, payload);
   if (!validated.success) {
-    throw new Error(`Validation error: ${validated.error}`);
+    throw new Error(await trError('generic', { code: 'VOC_VALIDATION' }));
   }
   const data = validated.data;
 
@@ -55,7 +56,7 @@ export const createVoc = withAction(async function (payload: unknown) {
 
   if (!profile) {
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] No profile found for user ${user?.id}\n`);
-    throw new Error("User profile not found");
+    throw new Error(await trError('profile_not_found'));
   }
 
   // 1. 오더 소유권 확인
@@ -69,13 +70,13 @@ export const createVoc = withAction(async function (payload: unknown) {
   if (orderError) {
     logger.error("[DEBUG] Order verification FAILED:", orderError);
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] Order verification FAILED: ${JSON.stringify(orderError)}\n`);
-    throw new Error(`Order verification failed: ${orderError.message}`);
+    throw new Error(await trError('generic', { code: 'VOC_ORDER_VERIFY' }));
   }
   
   if (!order) {
     logger.error("[DEBUG] Order NOT FOUND");
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] Order NOT FOUND: ${data.order_id}\n`);
-    throw new Error("Order not found");
+    throw new Error(await trError('order_not_found'));
   }
 
   logger.info(`[DEBUG] Order found: no=${order.order_no}, shipper_id=${order.shipper_id}`);
@@ -83,7 +84,7 @@ export const createVoc = withAction(async function (payload: unknown) {
   if (order.shipper_id !== profile.org_id) {
     logger.error(`[DEBUG] UNAUTHORIZED: order.shipper_id(${order.shipper_id}) !== profile.org_id(${profile.org_id})`);
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] UNAUTHORIZED: ${order.shipper_id} !== ${profile.org_id}\n`);
-    throw new Error("UNAUTHORIZED: Access denied to this order");
+    throw new Error(await trError('permission_denied'));
   }
 
   // 2. zen_voc INSERT
@@ -108,7 +109,7 @@ export const createVoc = withAction(async function (payload: unknown) {
   if (vocError) {
     logger.error("[DEBUG] VOC creation FAILED:", vocError);
     fs.appendFileSync('scratch/voc_action.log', `[ERROR] VOC creation FAILED: ${JSON.stringify(vocError)}\n`);
-    throw new Error(`VOC creation failed: ${vocError.message}`);
+    throw new Error(await trError('generic', { code: 'VOC_CREATE' }));
   }
 
   logger.info("[DEBUG] VOC creation SUCCESS:", voc);
@@ -178,7 +179,10 @@ export async function getVocList({
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error) return { success: false, error: error.message, vocs: [] as VocItem[], total: 0 };
+  if (error) {
+    logger.error('[VOC] getVocList error:', error);
+    return { success: false, error: await trError('generic', { code: 'VOC_LIST' }), vocs: [] as VocItem[], total: 0 };
+  }
 
   const vocs: VocItem[] = data.map((item: any) => ({
     ...item,
@@ -252,7 +256,7 @@ export const answerVoc = withAction(async function (payload: {
     .single();
 
   if (ansError) {
-    throw new Error(`Answer failed: ${ansError.message}`);
+    throw new Error(await trError('generic', { code: 'VOC_ANSWER' }));
   }
 
   // 2. VOC 상태 확인 및 업데이트 (OPEN -> IN_PROGRESS)
@@ -306,7 +310,7 @@ export const updateVocStatus = withAction(async function (vocId: string, status:
     .single();
 
   if (current?.status === 'CLOSED' && status !== 'CLOSED') {
-    throw new Error("INVALID_TRANSITION: CLOSED status cannot be reverted");
+    throw new Error(await trError('voc_closed_not_revertable'));
   }
 
   const { error } = await supabase
@@ -315,7 +319,7 @@ export const updateVocStatus = withAction(async function (vocId: string, status:
     .eq("id", vocId);
 
   if (error) {
-    throw new Error(`Status update failed: ${error.message}`);
+    throw new Error(await trError('generic', { code: 'VOC_STATUS_SAVE' }));
   }
 
   revalidatePath("/(dashboard)/voc", "page");

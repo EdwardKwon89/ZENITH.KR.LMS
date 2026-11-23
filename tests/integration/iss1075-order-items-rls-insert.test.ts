@@ -222,7 +222,7 @@ describe('TASK-B-286: zen_order_items RLS INSERT 누락 — 아이템 소실 (Is
 
     // 2) updateOrder()가 아이템 저장 실패로 throw해야 함 (방어 코드)
     const { updateOrder } = await import('@/app/actions/operations/orders');
-    await expect(updateOrder(ORDER_REG, buildPayload(ORDER_REG) as any)).rejects.toThrow(/아이템 저장 실패/);
+    await expect(updateOrder(ORDER_REG, buildPayload(ORDER_REG) as any)).rejects.toThrow(/요청을 처리하지 못했습니다.*\(코드: ITEM_SAVE\)/);
 
     // 3) 복원
     psql(`

@@ -93,7 +93,7 @@ export const getAvailableServiceRates = withAction(async function (
     .maybeSingle();
 
   let rateQuery = supabase
-    .from("zen_rate_cards")
+    .from("zen_rate_cards_safe")
     .select("id, carrier_id, transport_mode, tiers, currency, carrier:zen_carriers!carrier_id(name, org_id)")
     .eq("is_active", true)
     .eq("transport_mode", params.transportMode);

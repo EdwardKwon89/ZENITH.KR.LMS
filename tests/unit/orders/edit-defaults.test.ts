@@ -189,3 +189,16 @@ describe('TASK-B-340: 화주 국가코드 빈 값 기본값 정정 (Issue #1256)
     expect(res.address).toBe('Saved Street 1');
   });
 });
+
+// TASK-B-346 PR② (Issue #1278): 수정 화면에서 수하인 회사명(recipient_company) 복원
+describe('TASK-B-346 PR②: buildOrderEditDefaults — 수하인 회사명 복원 (Issue #1278)', () => {
+  it('저장된 recipient_company를 defaultValues에 보존한다', () => {
+    const defaults = buildOrderEditDefaults(baseOrder({ recipient_company: 'Acme Trading Co' })) as any;
+    expect(defaults.recipient_company).toBe('Acme Trading Co');
+  });
+
+  it('recipient_company null/undefined → 빈 문자열', () => {
+    expect((buildOrderEditDefaults(baseOrder({ recipient_company: null })) as any).recipient_company).toBe('');
+    expect((buildOrderEditDefaults(baseOrder({ recipient_company: undefined })) as any).recipient_company).toBe('');
+  });
+});

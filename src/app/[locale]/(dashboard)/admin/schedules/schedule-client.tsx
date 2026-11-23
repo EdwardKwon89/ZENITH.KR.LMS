@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from 'next-intl';
 
 import React, { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
@@ -33,6 +34,7 @@ export default function ScheduleClient({
   ports: any[],
   carriers: any[]
 }) {
+  const te = useTranslations('Errors');
   const [data, setData] = useState(initialData);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<VesselSchedule | null>(null);
@@ -151,7 +153,8 @@ export default function ScheduleClient({
       await upsertVesselSchedule(scheduleData);
       window.location.reload(); 
     } catch (error) {
-      alert(error instanceof Error ? error.message : "저장 중 오류가 발생했습니다.");
+      console.error(error);
+      alert(te('generic', { code: 'SCHEDULE_SAVE' }));
     } finally {
       setIsLoading(false);
     }

@@ -103,6 +103,11 @@ vi.mock('@/components/orders/UpsTradeDocumentActions', () => ({ default: () => <
 import UpsOrderDetailPage from '@/app/[locale]/(dashboard)/orders/[orderId]/ups-detail/page';
 import { getOrderDetails } from '@/app/actions/operations/orders';
 
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => 'ko',
+}));
+
 const baseOrder = {
   id: 'o1',
   order_no: 'ZEN-2026-000073',

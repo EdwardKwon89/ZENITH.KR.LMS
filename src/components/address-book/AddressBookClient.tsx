@@ -1,10 +1,13 @@
 "use client";
+import { useTranslations } from 'next-intl';
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, Edit2, Star, MapPin } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput } from '@/components/ui/ZenUI';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { stripNonDigits } from '@/lib/validation/shxk-limits';
 import {
   createAddressBookEntry,
   updateAddressBookEntry,
@@ -35,6 +38,7 @@ interface AddressBookClientProps {
 }
 
 export default function AddressBookClient({ initialEntries }: AddressBookClientProps) {
+  const te = useTranslations('Errors');
   const [entries, setEntries] = useState<AddressBookEntry[]>(initialEntries);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +71,8 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
       }
       reset();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save');
+      console.error(err);
+      alert(te('generic', { code: 'ADDRESS_SAVE' }));
     } finally {
       setIsSubmitting(false);
     }
@@ -85,7 +90,8 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
       city: entry.city || undefined,
       zipcode: entry.zipcode || undefined,
       recipient_pccc: entry.recipient_pccc || undefined,
-      recipient_phone: entry.recipient_phone || undefined,
+      // TASK-B-347 (Issue #1279): 레거시 하이픈 포함 저장분도 숫자만으로 정규화해 표시
+      recipient_phone: stripNonDigits(entry.recipient_phone || '') || undefined,
       recipient_email: entry.recipient_email || undefined,
       country_code: entry.country_code || undefined,
       display_mode: entry.display_mode,
@@ -99,7 +105,8 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
       await deleteAddressBookEntry(id);
       setEntries((prev) => prev.filter((e) => e.id !== id));
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete');
+      console.error(err);
+      alert(te('generic', { code: 'ADDRESS_DELETE' }));
     }
   };
 
@@ -134,7 +141,7 @@ export default function AddressBookClient({ initialEntries }: AddressBookClientP
             placeholder="현지어 주소 (선택)"
             {...register('recipient_address_local')}
           />
-          <ZenInput
+          <PhoneInput
             placeholder="연락처"
             {...register('recipient_phone')}
           />

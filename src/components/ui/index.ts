@@ -2,6 +2,7 @@ export { ZenCard } from './ZenCard';
 export { ZenButton } from './ZenButton';
 export { ZenAurora } from './ZenAurora';
 export { ZenInput } from './ZenInput';
+export { PhoneInput } from './PhoneInput';
 export { ZenTextarea } from './ZenTextarea';
 export { ZenBadge } from './ZenBadge';
 export { ZenSelect } from './ZenSelect';

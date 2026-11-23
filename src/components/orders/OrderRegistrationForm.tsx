@@ -14,6 +14,7 @@ import {
   ChevronRight, AlertCircle, CheckCircle2, Box, Layers, Plane, Ship, Zap, Truck, PackageCheck, Lock
 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { createOrder } from '@/app/actions/orders';
 import { updateOrder } from '@/app/actions/operations/orders';
 import { createAddressBookEntry } from '@/app/actions/operations/address-book';
@@ -23,7 +24,7 @@ import { UpsFreightEstimate } from '@/app/actions/ups/freight';
 import { UpsServiceSelector } from './UpsServiceSelector';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { orderRegistrationSchema, OrderRegistrationInput } from '@/lib/validation/order';
-import { HS_CODE_MAX, ITEM_NAME_MAX, PHONE_MAX_DIGITS, stripNonDigits } from '@/lib/validation/shxk-limits';
+import { HS_CODE_MAX, ITEM_NAME_MAX, stripNonDigits } from '@/lib/validation/shxk-limits';
 import { resolveShipperAddressDefaults } from '@/lib/orders/edit-defaults';
 import type { OrderEditScope } from '@/lib/logistics/status-machine';
 import { estimateFreightCost, TransportMode } from '@/utils/logistics/freight-calculator';
@@ -254,6 +255,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   measuredPackageIds = [],
 }) => {
   const t = useTranslations('Orders');
+  const te = useTranslations('Errors');
   const router = useRouter();
   const [affiliation, setAffiliation] = React.useState<Affiliation>(null);
   const [isLoadingAffiliation, setIsLoadingAffiliation] = React.useState(true);
@@ -439,7 +441,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
       setShowAddressBookInput(false);
       setAddressBookDisplayName('');
     } catch (err: any) {
-      toast.error('주소록 저장 실패', { description: err.message });
+      console.error(err);
+      toast.error(te('generic', { code: 'ADDRESS_SAVE' }));
     } finally {
       setSavingToAddressBook(false);
     }
@@ -804,7 +807,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
         setStep(3);
       } else {
         setRatesError(err.message || "요율 정보를 불러오는 데 실패했습니다.");
-        toast.error("요율 조회 실패", { description: err.message });
+        console.error(err);
+        toast.error(te('generic', { code: 'RATE_LOOKUP' }));
       }
     } finally {
       setRatesLoading(false);
@@ -1151,16 +1155,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                             </div>
                             <div>
                               <p className="text-slate-400 font-bold uppercase tracking-tighter mb-1">{t('shipper_contact')} (Phone){transportMode === 'UPS' && <span className="text-rose-500"> *</span>}</p>
-                              <ZenInput 
-                                placeholder="01012345678"
-                                inputMode="numeric"
-                                maxLength={PHONE_MAX_DIGITS}
+                              <PhoneInput 
                                 disabled={shipperNameMode === 'auto'}
                                 {...register('shipper_contact_phone')}
-                                onChange={(e) => {
-                                  e.target.value = stripNonDigits(e.target.value);
-                                  register('shipper_contact_phone').onChange(e);
-                                }}
                                 className={`bg-white/80 py-1.5 text-[11px] ${shipperNameMode === 'auto' ? 'opacity-60 bg-slate-100' : ''}`}
                               />
                             </div>
@@ -1262,6 +1259,9 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                           key={refetchAddressBook}
                           onSelect={(entry) => {
                             setValue('recipient_name', entry.recipient_name);
+                            // TASK-B-346 (Issue #1278): 주소록(zen_address_book)에는 회사명 컬럼이 없으므로
+                            //   주소록 선택 시 회사명을 비운다(이전 입력값이 다른 주소로 남는 것 방지).
+                            setValue('recipient_company', '');
                             setValue('recipient_address', entry.recipient_address);
                             setValue('recipient_address_detail', entry.recipient_address_detail || '');
                             setValue('recipient_address_local', entry.recipient_address_local || '');
@@ -1280,11 +1280,13 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <ZenInput placeholder="Full Name" {...register('recipient_name')} error={!!errors.recipient_name} className="py-2 text-xs" />
                       </div>
                       <div>
+                        {/* TASK-B-346 (Issue #1278): 수하인 회사명 — SHXK consignee_company (선택) */}
+                        <label className="text-[10px] font-bold text-slate-500 mb-1 block">Company</label>
+                        <ZenInput placeholder="Company Name" {...register('recipient_company')} error={!!errors.recipient_company} className="py-2 text-xs" />
+                      </div>
+                      <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone <span className="text-rose-500">*</span></label>
-                        <ZenInput placeholder="01012345678" inputMode="numeric" maxLength={PHONE_MAX_DIGITS} {...register('recipient_phone')} onChange={(e) => {
-                            e.target.value = stripNonDigits(e.target.value);
-                            register('recipient_phone').onChange(e);
-                          }} error={!!errors.recipient_phone} className="py-2 text-xs" />
+                        <PhoneInput {...register('recipient_phone')} error={!!errors.recipient_phone} className="py-2 text-xs" />
                       </div>
                       <div>
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">PCCC</label>
@@ -1418,7 +1420,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <label className="text-[10px] font-bold text-slate-500 mb-1 block">
                           {t('pickup_contact_tel')} <span className="text-rose-500">*</span>
                         </label>
-                        <ZenInput
+                        <PhoneInput
+                          allowHyphens
                           placeholder="010-XXXX-XXXX"
                           {...register('pickup_contact_tel')}
                           error={!!errors.pickup_contact_tel}
