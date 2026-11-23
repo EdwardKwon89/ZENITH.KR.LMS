@@ -62,7 +62,7 @@
 
 즉 A 경로는 "원가 측 항목은 저장하지만 청구 행을 만들지 않고, 기존 비용 행 합계로 마감"한다. 마감 후에는 이 금액을 추가하려면 마감 후 조정 경로가 필요하다.
 
-> 참고: 중량 변경이 없는 A 경로는 `recomputeRevenue`를 호출하지 않으므로 규칙 2(재계산)가 적용되지 않는다. 이는 확정 규칙 2가 "정산마감 시" 전반을 의미하는지, "청구중량이 바뀐 경우"만 의미하는지에 대한 **JSJung 확인 항목**이다(§4-1).
+> 참고: 중량 변경이 없는 A 경로는 `recomputeRevenue`를 호출하지 않으므로 규칙 2(재계산)가 적용되지 않는다. 이는 확정 규칙 2가 "정산마감 시" 전반을 의미하는지, "청구중량이 바뀐 경우"만 의미하는지에 대한 **JSJung 확인 항목**이다(§3-1).
 
 ### 1-4. 경로 C — `recordUpsActualCharges` (현행 별도 실비 등록)
 
@@ -209,7 +209,16 @@
 
 ---
 
-## 4. [작업 결과]
+## 4. 관련 DEF (R-18, 수정 금지·보고만)
+
+| DEF | 내용 | 이 Task와의 관계 |
+|:--|:--|:--|
+| **DEF-B-165** | 일괄 마감 `finalizeDailyShipperInvoices` AGENCY 허용·UPS 포함 가능·success true vs DB 미변경 | 규칙 1(마감 admin 전용)과 충돌. 이 Task는 일괄 마감을 변경하지 않는다 |
+| **DEF-B-166** | `markInvoiceFinalized` 0행 무시 + `zen_invoice_history` 거짓 기록·MANAGER 마감 실패 경로 | §2-2(6) MANAGER 정책 부재와 동일 계열. 이 Task는 정책을 넓히지 않는다 |
+
+상세 파일: `.agent/defects/DEF-B-165_*.md`, `.agent/defects/DEF-B-166_*.md` (TASK-B-377에서 등록).
+
+## 5. [작업 결과]
 
 - **설계 의견 전용**: 코드·마이그레이션 변경 없음. 실측은 임시 vitest 파일로 수행 후 삭제(커밋 없음).
 - 실측 근거: §1-2~1-5 표(실DB, ADMIN, `estimateUpsFreight` stub).
