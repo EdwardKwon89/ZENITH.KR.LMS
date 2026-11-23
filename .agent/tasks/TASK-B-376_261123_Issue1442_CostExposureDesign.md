@@ -5,7 +5,7 @@
 | **Issue** | [#1442](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1442) (DEF-150 후속, #1356·#1440·#1441 연장) |
 | **담당(Worker)** | Dave (Team B) |
 | **검증(Auditor)** | Jaison |
-| **상태** | 📝 설계 의견 (`status:draft`) — **구현 금지** |
+| **상태** | 🔔 리뷰 대기 (`status:review`) — Jaison 설계 승인 반영 |
 | **브랜치** | `feature/teamb-task-b376-iss1442-cost-exposure-design` (base `origin/TeamB_Dev` 1a04b4b9d — #1440·#1441 병합 후) |
 | **채번** | `.agent/tasks` TASK-B-376 없음 — 이슈 지정 번호 사용 |
 
@@ -50,7 +50,7 @@ agency  error=null rows=[{"cost_type":"BASE_FREIGHT","total_amount":100},{"cost_
 | # | 경로 | SHIPPER 도달 | AGENCY 도달 | `UPS_ACTUAL_ADJUSTMENT` 노출 | 근거 |
 |:-:|:--|:--:|:--:|:--:|:--|
 | 1 | `orders/[orderId]/page.tsx` → `OrderFinanceSummary` | ✅ | ✅ | **화면에 라인·합계 표시** | 실측 스크린샷 |
-| 2 | `orders/[orderId]/ups-detail/page.tsx` | ✅ | ✅ | 서버 조회만(비용 배열은 invoice_id 조회에만 사용, 화면 미전달) | `costs` 사용처 grep |
+| 2 | `orders/[orderId]/ups-detail/page.tsx` | ✅ | ✅ | **서버 조회만**(비용 배열은 invoice_id 조회에만 사용, 화면 미전달) — 사용자 세션 → A안 적용 | `costs` 사용처 grep |
 | 3 | `finance/page.tsx` | ⚠️ CORPORATE/SHIPPER 가능 | ❌(프록시 차단) | `is_revenue=true` 합계에 **간접 포함**(라벨 없음) | `requireAuth`만, costs 합산 |
 | 4 | `daily-billing.ts` `getShipperDailyBillingSummary` | ✅ | ✅ | `totalActualAdjustment` 필드 반환 | L250~ |
 | 5 | `daily-billing.ts` `getShipperDailyOrdersDetails` | ✅ | ✅ | `actualAdjustment` 필드 반환 | L380~ |
@@ -58,13 +58,13 @@ agency  error=null rows=[{"cost_type":"BASE_FREIGHT","total_amount":100},{"cost_
 | 7 | `order-revenue-cost.ts` `getOrderRevenueCost` | ✅(자기 오더) | ✅ | `is_revenue=true` 합계(revenue)에 포함 | L72~ |
 | 8 | `order-revenue-cost.ts` `getOrderRevenueCostList` | ✅ | ✅ | 동일 합계에 포함 | L130~ |
 | 9 | `settlement.ts` `generateInvoicesForOrder` | ❌(Admin/Agency 전용) | ✅ | 계산 입력으로 사용, 반환은 인보이스 | L19~ |
-| 10 | `settlement.ts` `calculateSettlementAction` | ❌ | ✅(소속만) | 반환 `costs`에 포함될 수 있음 | L287~ |
+| 10 | `settlement.ts` `calculateSettlementAction` | ❌ | ✅(소속만) | **A안 후 반환 `costs`에서 adjustment 제외**(`findFullByOrderId` 사용자 세션). 계산 엔진은 admin client라 금액 계산 불변 | L287~, `finance.repository.ts` L118 |
 | 11 | `ups-actual-cost.ts` `getUpsActualCost` | ⚠️(§1.3 미가드) | ⚠️ | **다른 테이블(zen_ups_actual_cost)** — 이번 이슈 범위 밖 | L118 |
 | 12 | `claims.ts` `getClaimDetails` | ⚠️(자기 org) | ⚠️ | `costs:zen_order_costs(...)` 조인 포함, UI 표시 여부 미확인 | L246 |
 | 13 | `statistics.ts` `getCostProfitStats` | ❌ | ❌ | Admin 전용(`validateAdminAction`) | L8 |
 | + | `lib/finance/settlement/settlement.ts` | ❌ | ❌ | admin client 사용(세션 노출 없음) | L28 |
 | + | `invoice-generator.ts` | ❌ | ⚠️(호출자에 따라) | 인보이스 계산 내부(반환 없음) | L32~ |
-| + | `finance.repository.ts` | ❌ | ⚠️ | 호출 액션의 역할 가드에 의존 | L111~ |
+| + | `finance.repository.ts` | ❌ | ⚠️ | `findByOrderId`는 id/invoice_id만, `findFullByOrderId`는 `calculateSettlementAction`에서만 — A안으로 adjustment 제외 | L111~123 |
 | + | `UpsActualAdjustmentForm` | ❌(#1440 렌더 차단) | ❌ | — | page.tsx |
 
 > ⚠️는 "역할·RLS 조건에 따라 도달 가능/반환 경로 존재"를 뜻하며, 1·4·5는 화면/응답에 명시 필드로 확인됨.
@@ -103,7 +103,40 @@ CREATE POLICY ... FOR SELECT USING (기존 조건 AND cost_type <> 'UPS_ACTUAL_A
 
 → 이번 이슈는 **UPS_ACTUAL_ADJUSTMENT만** 차단하고, 원가 전반은 JSJung 결정 후 별도 Task로 분리 권장.
 
-## 6. [작업 결과]
+## 6. 구현 (설계 승인 반영)
+
+Jaison 승인(2026-11-23): **A안**, 범위는 `UPS_ACTUAL_ADJUSTMENT`만. 인보이스 총액 영향은 JSJung 결정 대기로 PR 본문에 명시.
+
+| # | 파일 | 변경 |
+|:--|:--|:--|
+| 1 | `supabase/migrations/20261123110000_task_b376_cost_type_rls.sql` (신규) | `Shippers can view their order costs`·`Agency can view shipper order costs`를 `DROP/CREATE`(멱등). 기존 조건 유지 + 화주/대리점 분기에만 `cost_type <> 'UPS_ACTUAL_ADJUSTMENT'`. 관리자 정책·ADMIN/SUPER_ADMIN 분기 유지 |
+| 2 | `tests/integration/task-b376-cost-adjustment-rls.test.ts` (신규) | 실제 세션·실DB: 화주/대리점 BASE 1행·ADJUSTMENT 0행, ADMIN/SUPER 2행, MANAGER 0행(현행 유지), 정책 재생성 되돌리기, 일일청구 실비 필드 0, AGENCY finalize 총액 불변 |
+| 3 | `docs/02_Analysis/evidence/task-b376/order-detail-{shipper,agency}-after.png` (신규) | A안 적용 후 화면 — adjustment 라인/115 사라짐 |
+| 4 | `docs/08_Self_Audit/Checklists/regression-items/TASK-B-376_Issue1442_cost-adjustment-rls.md` (신규) | R-09 회귀 항목 |
+
+### 구현 후 실측
+
+| TC | 결과 |
+|:--|:--|
+| 화주/대리점 SELECT | `['BASE_FREIGHT']` (ADJUSTMENT 0행) |
+| ADMIN/SUPER_ADMIN SELECT | `['BASE_FREIGHT','UPS_ACTUAL_ADJUSTMENT']` |
+| MANAGER SELECT | `[]` (기존과 동일 — `zen_order_costs`에 MANAGER 정책 없음) |
+| 정책 되돌리기 | 기존 정책 재생성 시 화주/대리점에 ADJUSTMENT 1행 복구 → 제한 정책 재적용 시 0행 |
+| `getShipperDailyBillingSummary` | `totalActualAdjustment=0`, base>0 |
+| `getShipperDailyOrdersDetails` | `actualAdjustment=0`, base>0 |
+| AGENCY `finalizeInvoice` | 호출 전후 `total_amount` 115 불변 |
+| UI (실제 로그인) | 화주/대리점 주문 상세에서 adjustment 라인·115 **미표시** (`*-after.png`) |
+
+### 화면 영향 (JSJung 결정 대기)
+화주 화면 비용 합계는 `100`이 되지만 연결 인보이스 총액은 `115`로 남습니다. PDF 라인 합계도 총액보다 작아집니다. A안의 의도된 결과로 수용 가능한지 JSJung 확인이 필요합니다.
+
+## 7. [작업 결과]
+
+- 검증: 실DB 세션 테스트 **8/8 PASS**, 정책 되돌리기 실측, `npm run test:regression` **296 files / 2,269 tests PASS**, `npm run build` **EXIT=0**, `zen_error_logs` 신규 ERROR 0건
+- 코드(마이그레이션)·테스트 커밋: `1a89e293b`
+- 문서 커밋: 본 task file
+- PR: #1443 (draft → ready), `Refs #1442`·`Refs #1356`
+
 
 - 설계 의견 + 실측 스크린샷 2장. **구현·마이그레이션 없음.**
 - 증적: `docs/02_Analysis/evidence/task-b376/order-detail-shipper.png`, `order-detail-agency.png`
