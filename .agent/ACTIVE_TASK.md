@@ -53,7 +53,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1467](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1467) | [IMP 제안] 대리점 화주 등급·할인율 수정(updateAgencyShipperGrade)의 역마진(정책 할인율) 가드 검토 — DEF-149 §1.1 후속 | b | p3 | open | 미배정 | 2026-11-23 |
 | [#1463](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1463) | [Team B] TASK-B-382: MANAGER의 UPS 정산마감 관련 테이블 RLS 정책 정렬 (규칙 1 이행, 설계 의견부터) | b | p2 | draft | 미배정 | 2026-11-23 |
 | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | draft | 미배정 | 2026-11-23 |
-| [#1455](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1455) | [Team B] TASK-B-380: 대시보드 React 중복 key 경고 해소 (DEF-B-163) | b | p3 | open | 미배정 | 2026-11-23 |
+| [#1455](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1455) | [Team B] TASK-B-380: 대시보드 React 중복 key 경고 해소 (DEF-B-163) | b | p3 | in-progress | 미배정 | 2026-11-23 |
 | [#1453](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1453) | [Team B] TASK-B-379: 청구 금액 함수 base 테이블 의존 제거 + 입고 실측 스냅샷 갱신 주체 정리 (#1449 C, 설계 의견부터) | b | p2 | open | 미배정 | 2026-11-23 |
 | [#1452](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1452) | [Team B] TASK-B-378: 청구서 번호 채번 함수 실행 권한·역할 검사 정렬 (#1449 B) | b | p2 | review | 미배정 | 2026-11-23 |
 | [#1451](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1451) | [Team B] TASK-B-377: UPS 원가 열람 admin 전용 정렬 + 화주·대리점 부가운임 항목별 표시·라벨 중립화 (#1449 A·#1442 대체, 설계 의견부터) | b | p1 | draft | 미배정 | 2026-11-23 |
