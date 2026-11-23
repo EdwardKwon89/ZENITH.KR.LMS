@@ -138,4 +138,4 @@ shipper_agency_select_other_charges
 
 - 설계 의견 + before 스크린샷 2장(`docs/02_Analysis/evidence/task-b377/before-{shipper,agency}.png`).
 - **구현·마이그레이션 없음** (설계 확정 전).
-- PR: #1452 (draft, `Refs #1451`·`Refs #1449`) — after 스크린샷은 구현 단계에서.
+- PR: #1454 (draft, `Refs #1451`·`Refs #1449`) — after 스크린샷은 구현 단계에서.
