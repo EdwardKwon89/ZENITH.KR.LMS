@@ -3,7 +3,7 @@
 | 항목 | 내용 |
 |:-----|:------|
 | **Issue** | [#960](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/960) |
-| **DEF** | [DEF-B-028](../defects/DEF-B-028_shipper_invoices_leaks_admin_to_agency_tier_to_shipper.md) |
+| **DEF** | [DEF-B-028](../defects/DEF-B-028_shipper_invoices_billed_org_alignment.md) |
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
