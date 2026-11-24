@@ -36,7 +36,7 @@ Login successful.
       48 |     await generateBtn.click();
       49 |
       50 |     // Verify Invoiced Status
-        at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts:47:31
+        at ~/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts:47:31
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/e2e-05-settlement-E2E-05-S-9d844-lement-and-generate-invoice-chromium/test-failed-1.png
@@ -69,7 +69,7 @@ Login successful.
       67 |
       68 |     // Open detail/Tax invoice sheet (Assuming clicking row or a button)
       69 |     await targetRow.click();
-        at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts:66:29
+        at ~/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts:66:29
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/e2e-05-settlement-E2E-05-S-8808b--2-should-issue-tax-invoice-chromium/test-failed-1.png
@@ -97,7 +97,7 @@ Login successful.
        98 |     await exportBtn.click();
        99 |     const download = await downloadPromise;
       100 |
-        at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts:97:34
+        at ~/WorkSpace/ZENITH_LMS_001/tests/e2e/e2e-05-settlement.spec.ts:97:34
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
     test-results/e2e-05-settlement-E2E-05-S-479f9-hould-download-excel-export-chromium/test-failed-1.png

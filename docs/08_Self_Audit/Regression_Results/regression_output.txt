@@ -3,7 +3,7 @@
 > vitest run
 
 
- RUN  v4.1.4 /Users/edward.kwon/WorkSpace/ZENITH_LMS_001
+ RUN  v4.1.4 ~/WorkSpace/ZENITH_LMS_001
 
 (node:64093) Warning: `--localstorage-file` was provided without a valid path
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -19,15 +19,15 @@ stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Busines
 
 stderr | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
 [TRACKING_SYNC] Notification trigger failed for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at TrackingManager.syncOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at TrackingManager.syncOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at TrackingManager.getTrackingData (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:133:9)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/tracking-business-qa.test.ts:65:5
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at TrackingManager.getTrackingData (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:133:9)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/tracking-business-qa.test.ts:65:5
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
 stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
 [TRACKING_MANAGER] Order 3ff5b116-29cd-4d90-8dd0-0e99c36a2155 is delayed. Last event was 246.1h ago (Threshold: 48h)
@@ -37,15 +37,15 @@ stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Busines
 
 stderr | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
 [TRACKING_SYNC] Notification trigger failed for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at TrackingManager.syncOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at TrackingManager.syncOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at TrackingManager.getTrackingData (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/tracking-business-qa.test.ts:65:5
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at TrackingManager.getTrackingData (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/tracking-business-qa.test.ts:65:5
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
 stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
 [QA-02] Verified Raw Log: 4e5f2276-ac86-4d0a-a215-c50b73bed4ff
@@ -65,15 +65,15 @@ stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Busines
 
 stderr | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should maintain sync integrity without duplicating events
 [TRACKING_SYNC] Notification trigger failed for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at TrackingManager.syncOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at TrackingManager.syncOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at TrackingManager.getTrackingData (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/tracking-business-qa.test.ts:88:5
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at TrackingManager.getTrackingData (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/tracking-business-qa.test.ts:88:5
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
 stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should maintain sync integrity without duplicating events
 [TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API
@@ -90,15 +90,15 @@ stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Busines
 
 stderr | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should maintain sync integrity without duplicating events
 [TRACKING_SYNC] Notification trigger failed for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at TrackingManager.syncOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at TrackingManager.syncOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at TrackingManager.getTrackingData (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/tracking-business-qa.test.ts:92:5
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at TrackingManager.getTrackingData (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/tracking-business-qa.test.ts:92:5
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
 stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should maintain sync integrity without duplicating events
 [QA-02] Verified Sync Integrity: No duplicates for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
@@ -189,15 +189,15 @@ stdout | tests/unit/logistics/tracking.test.ts > TrackingManager > should preven
 
 stderr | tests/unit/logistics/tracking.test.ts > TrackingManager > should prevent duplicate tracking events
 [TRACKING_SYNC] Notification trigger failed for test-order-id: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at TrackingManager.syncOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at TrackingManager.syncOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at TrackingManager.getTrackingData (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:133:9)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/tracking.test.ts:71:5
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at TrackingManager.getTrackingData (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:133:9)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/tracking.test.ts:71:5
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
 stdout | tests/unit/logistics/tracking.test.ts > TrackingManager > should prevent duplicate tracking events
 [TRACKING_MANAGER] Order test-order-id is delayed. Last event was 244.1h ago (Threshold: 48h)
@@ -207,28 +207,28 @@ stdout | tests/unit/logistics/tracking.test.ts > TrackingManager > should preven
 
 stderr | tests/unit/logistics/tracking.test.ts > TrackingManager > should prevent duplicate tracking events
 [TRACKING_SYNC] Notification trigger failed for test-order-id: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at TrackingManager.syncOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at TrackingManager.syncOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at TrackingManager.getTrackingData (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/tracking.test.ts:71:5
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at TrackingManager.getTrackingData (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/tracking.test.ts:71:5
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
 stdout | tests/unit/logistics/tracking.test.ts > TrackingManager > should sync order status when new events are added
 [TRACKING_SYNC] Order test-order-id status updated to DELIVERED
 
 stderr | tests/unit/logistics/tracking.test.ts > TrackingManager > should sync order status when new events are added
 [TRACKING_SYNC] Notification trigger failed for test-order-id: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at TrackingManager.syncOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at TrackingManager.syncOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/tracking.test.ts:87:5
+    at ~/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/tracking.test.ts:87:5
 
 stdout | tests/unit/logistics/tracking.test.ts > TrackingManager > TC-OPS-04: [Success] should detect delay when last event is older than threshold
 [TRACKING_MANAGER] Found config for delay-order-id: provider_type=API
@@ -241,40 +241,40 @@ stdout | tests/unit/logistics/tracking.test.ts > TrackingManager > TC-OPS-04: [S
 
 stderr | tests/unit/logistics/tracking.test.ts > TrackingManager > TC-OPS-04: [Success] should detect delay when last event is older than threshold
 [TRACKING_SYNC] Notification trigger failed for delay-order-id: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at TrackingManager.syncOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at TrackingManager.syncOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:184:7)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at TrackingManager.getTrackingData (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/tracking.test.ts:137:19
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at TrackingManager.getTrackingData (~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/tracking.ts:150:11)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/tracking.test.ts:137:19
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
  ✓ tests/unit/logistics/tracking.test.ts (3 tests) 9ms
 (node:64214) Warning: `--localstorage-file` was provided without a valid path
 (Use `node --trace-warnings ...` to show where the warning was created)
 stderr | tests/integration/finance.test.ts > ZENITH Finance Integration: WBS 3.2 Integrity Test > Scenario 1: Auto-Invoicing on Order Release > TC-F.1: [Success] 오더가 RELEASED 상태가 될 때 정산서가 자동 생성되어야 함
 [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at Module.updateOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/orders.ts:442:11)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at Module.updateOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/app/actions/orders.ts:442:11)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:71:22
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:71:22
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
 stderr | tests/integration/finance.test.ts > ZENITH Finance Integration: WBS 3.2 Integrity Test > Scenario 4: Multi-Currency & Security Expansion (TC-F.4~6) > TC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)
 [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at Module.updateOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/orders.ts:442:11)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at Module.updateOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/app/actions/orders.ts:442:11)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:133:22
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:133:22
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
  ✓ tests/integration/finance.test.ts (6 tests) 11ms
 (node:64224) Warning: `--localstorage-file` was provided without a valid path

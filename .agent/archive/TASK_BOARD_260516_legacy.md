@@ -1379,7 +1379,7 @@ IMP-059 섹션에 아래 내용 추가:
 ## 🆕 신규 에이전트 온보딩 안내 — Ring
 
 > **프로젝트**: ZENITH_LMS (지능형 통합 물류 플랫폼 — Next.js · Supabase · TypeScript · Vercel)
-> **작업 디렉토리**: `/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`
+> **작업 디렉토리**: `~/WorkSpace/ZENITH_LMS_001`
 
 **필독 문서**:
 
@@ -1428,7 +1428,7 @@ IMP-059 섹션에 아래 내용 추가:
 ## 🆕 온보딩 안내 — B_Kai
 
 > **프로젝트**: ZENITH_LMS (지능형 통합 물류 플랫폼 — Next.js · Supabase · TypeScript · Vercel)
-> **작업 디렉토리**: `/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`
+> **작업 디렉토리**: `~/WorkSpace/ZENITH_LMS_001`
 
 **필독 문서 (세션 시작 시)**:
 

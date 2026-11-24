@@ -1,5 +1,5 @@
 
- RUN  v4.1.4 /Users/edward.kwon/WorkSpace/ZENITH_LMS_001
+ RUN  v4.1.4 ~/WorkSpace/ZENITH_LMS_001
 
 stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
 [TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API

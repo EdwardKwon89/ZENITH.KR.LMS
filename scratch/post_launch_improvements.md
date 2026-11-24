@@ -1320,7 +1320,7 @@
 
 - **발견 경위**: Issue #31 (B_Kai 보고) — TASK-151 커밋이 Riley 브랜치(`feature/ups-spr07-riley-e2e-uat-spec`)에 오염된 사건에서 도출. Edward 확인 2026-06-18.
 - **현재 상태**:
-  - 모든 Agent가 동일 Local Workspace(`/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`) 공유
+  - 모든 Agent가 동일 Local Workspace(`~/WorkSpace/ZENITH_LMS_001`) 공유
   - 착수 전 `git checkout feature/[본인 브랜치]` 단계가 R-17 절차에 명시되지 않음
   - 타 Agent 브랜치 checkout 상태에서 커밋 시 cross-branch 오염 발생 가능
 - **임시 조치**: TASK-156 발령 (B_Kai 브랜치 오염 복구), GOV_COMMON.md R-17 §0 신설

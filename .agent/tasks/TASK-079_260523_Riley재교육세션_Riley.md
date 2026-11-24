@@ -96,7 +96,7 @@ Riley는 TASK-069~072 기간 동안 R-17 v1.4 절차를 3회 위반하였습니�
 
 ## 작업 결과
 
-- **작성 보고서**: [SAR_2026-05-23_005_Riley재교육.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/SAR_reports/SAR_2026-05-23_005_Riley재교육.md)
+- **작성 보고서**: [SAR_2026-05-23_005_Riley재교육.md](file://~/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/SAR_reports/SAR_2026-05-23_005_Riley재교육.md)
 - **회귀 테스트 결과**: 219/219 PASS (`rtk npm run test:regression` 성공 확인)
 - **코드 커밋 해시**: 해당 없음 (문서 전용 거버넌스 Task)
 - **문서 커밋 해시**: 4580e8f

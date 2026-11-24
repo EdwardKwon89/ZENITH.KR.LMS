@@ -34,7 +34,7 @@
 ---
 
 ## 🔍 결함 대응 이력 (SAR Link)
-- [SAR-001: Router Undefined Error](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/SAR_reports/SAR_2026-04-19_001_Router_Undefined.md) - **[FIXED]**
+- [SAR-001: Router Undefined Error](file://~/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/SAR_reports/SAR_2026-04-19_001_Router_Undefined.md) - **[FIXED]**
 
 ## 📊 종합 통계
 - **Total TCs**: 13

@@ -1,5 +1,5 @@
 
- RUN  v4.1.4 /Users/edward.kwon/WorkSpace/ZENITH_LMS_001
+ RUN  v4.1.4 ~/WorkSpace/ZENITH_LMS_001
 
 (node:87568) Warning: `--localstorage-file` was provided without a valid path
 (Use `node --trace-warnings ...` to show where the warning was created)
@@ -98,11 +98,11 @@ stderr | tests/unit/logistics/voc.test.ts > VOC Action Unit Tests > should throw
 
 stderr | tests/unit/logistics/voc.test.ts > VOC Action Unit Tests > should throw error when user tries to create VOC for an order they do not own
 [ERROR] [Action Error] Error: UNAUTHORIZED: Access denied to this order
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/misc/voc.ts:85:11
+    at ~/WorkSpace/ZENITH_LMS_001/src/app/actions/misc/voc.ts:85:11
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at Module.<anonymous> (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/voc.test.ts:107:20
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at Module.<anonymous> (~/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/voc.test.ts:107:20
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
  ✓ tests/unit/logistics/voc.test.ts (2 tests) 9ms
 (node:87662) Warning: `--localstorage-file` was provided without a valid path
@@ -112,53 +112,53 @@ stderr | tests/unit/logistics/voc.test.ts > VOC Action Unit Tests > should throw
 (Use `node --trace-warnings ...` to show where the warning was created)
 stderr | tests/integration/finance.test.ts > ZENITH Finance Integration: WBS 3.2 Integrity Test > Scenario 1: Auto-Invoicing on Order Release > TC-F.1: [Success] 오더가 RELEASED 상태가 될 때 정산서가 자동 생성되어야 함
 [ERROR] [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:7:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/misc/notifications.ts:47:46)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/orders.ts:267:13
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:7:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/misc/notifications.ts:47:46)
+    at ~/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/orders.ts:267:13
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
     at async Promise.all (index 1)
-    at Module.updateOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/orders.ts:260:3)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:72:22
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at Module.updateOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/orders.ts:260:3)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:72:22
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
 stderr | tests/integration/finance.test.ts > ZENITH Finance Integration: WBS 3.2 Integrity Test > Scenario 4: Multi-Currency & Security Expansion (TC-F.4~6) > TC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)
 [ERROR] [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:7:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/misc/notifications.ts:47:46)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/orders.ts:267:13
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:7:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/misc/notifications.ts:47:46)
+    at ~/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/orders.ts:267:13
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
     at async Promise.all (index 1)
-    at Module.updateOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/orders.ts:260:3)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:134:22
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at Module.updateOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/orders.ts:260:3)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:134:22
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
  ✓ tests/integration/finance.test.ts (6 tests) 9ms
 stderr | tests/unit/member/grade-promotion.test.ts > Grade Promotion Unit Tests > Member Actions > should prevent promotion request if one is pending
 [ERROR] [Action Error] Error: 이미 대기 중인 승급 신청이 있습니다.
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/admin/member.ts:169:11
+    at ~/WorkSpace/ZENITH_LMS_001/src/app/actions/admin/member.ts:169:11
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at Module.<anonymous> (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/member/grade-promotion.test.ts:140:22
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at Module.<anonymous> (~/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/unit/member/grade-promotion.test.ts:140:22
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 
  ✓ tests/unit/member/grade-promotion.test.ts (5 tests) 8ms
 stderr | tests/unit/rates/rates.test.ts > Rates Actions Unit Tests > TC-RATES-01: should restrict createRateCard to ADMIN or MANAGER
 [ERROR] [Action Error] Error: 요율 등록 권한이 없습니다.
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/admin/rates.ts:21:11
+    at ~/WorkSpace/ZENITH_LMS_001/src/app/actions/admin/rates.ts:21:11
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at Module.<anonymous> (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/rates/rates.test.ts:43:20
+    at Module.<anonymous> (~/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/unit/rates/rates.test.ts:43:20
 
 stderr | tests/unit/rates/rates.test.ts > Rates Actions Unit Tests > TC-RATES-03: should restrict deleteRateCard to ADMIN only
 [ERROR] [Action Error] Error: 요율 삭제 권한은 관리자(ADMIN)만 가능합니다.
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/admin/rates.ts:107:11
+    at ~/WorkSpace/ZENITH_LMS_001/src/app/actions/admin/rates.ts:107:11
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at Module.<anonymous> (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/rates/rates.test.ts:67:20
+    at Module.<anonymous> (~/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/unit/rates/rates.test.ts:67:20
 
  ✓ tests/unit/rates/rates.test.ts (4 tests) 7ms
 (node:87735) Warning: `--localstorage-file` was provided without a valid path
@@ -196,10 +196,10 @@ stdout | tests/unit/customs/customs-declaration.test.ts > Customs Server Actions
  ✓ tests/unit/logistics/order-actions.test.ts (4 tests) 6ms
 stderr | tests/unit/member/corporate.test.ts > Corporate Actions Unit Tests > TC-MEM-04: should return error if unauthorized role tries to update org info
 [ERROR] [Action Error] Error: 조직 정보를 수정할 권한이 없습니다.
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/admin/corporate.ts:46:11
+    at ~/WorkSpace/ZENITH_LMS_001/src/app/actions/admin/corporate.ts:46:11
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at Module.<anonymous> (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/member/corporate.test.ts:75:20
+    at Module.<anonymous> (~/WorkSpace/ZENITH_LMS_001/src/lib/actions/wrapper.ts:13:20)
+    at ~/WorkSpace/ZENITH_LMS_001/tests/unit/member/corporate.test.ts:75:20
 
  ✓ tests/unit/member/corporate.test.ts (4 tests) 6ms
 (node:87841) Warning: `--localstorage-file` was provided without a valid path
