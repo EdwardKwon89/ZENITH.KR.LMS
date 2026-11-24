@@ -155,6 +155,7 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 세션 최초 시작 시 반드시 `gh issue list --assignee <본인>` (또는 `--label team:a`/`team:b`)으로 본인에게 할당된 미완료 이슈를 확인한다.
 - `status:blocked` 라벨 이슈: 전제조건 미충족 — 착수 금지
 - `status:draft` 라벨 이슈: Aiden 설계 확정 대기 중 — 구현 착수 금지, 추가 대기
+- `status:ready` 라벨 이슈: **착수 가능** — 설계 확정(또는 불요)·블로커 해소·담당자 지정이 끝난 착수 대기 상태 **(v3.12)**. 착수 시 담당 Agent가 `status:in-progress`로 전환한다
 - 이슈 상태와 상세 파일(`.agent/tasks/`) 내용이 불일치하면 착수 전 Aiden에게 보고하고 정정 지시를 기다린다. (SAR-2026-05-13-001 반영 및 신규 오케스트레이션 체계 확장)
 - **(2026-08-14, R-17 v3.0)** 신규 Task는 GitHub Issue 생성으로 발령되며, 그 이슈의 라벨·assignee가 유일한 진실 공급원이다. `.agent/ACTIVE_TASK.md`는 GitHub Action이 관리하는 열람용 자동 미러일 뿐 — 착수 확인은 이 파일이 아니라 `gh issue list`로 직접 한다.
 - **(2026-10-01, v3.6)** 착수 전 `/admin/error-logs`(Admin 계정, production)에서 담당 기능 관련 키워드로 검색해 이미 조용히 실패 중인 기존 결함이 있는지 먼저 확인한다 — DEF-B-149가 도입 시점부터 약 4개월간 아무도 발견 못 한 채 방치됐던 사례(logger.error는 쌓이지만 화면엔 안 뜨던 이중 파이프라인 문제, TASK-1141/IMP-169로 해소) 재발 방지. 발견한 오류가 담당 Task 범위 밖이면 R-18 절차(DEF 등록 후 보고)를 따르고, 범위 안이면 수정 완료 후 해당 행을 "Resolved" 처리한다.
@@ -164,9 +165,25 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 
 **전체 흐름**:
 ```
-status:open → [status:draft → (Aiden 확정)] → status:in-progress → status:review → (머지) → Close
-                   ↑선택적                        ↑구현                ↑보고           ↑Aiden 단독
+status:open → [status:draft → (Aiden 확정)] → status:ready → status:in-progress → status:review → (머지) → Close
+                   ↑선택적                      ↑착수 대기      ↑구현                ↑보고           ↑Aiden 단독
 ```
+
+**상태 정의 (v3.12, 2026-11-24 — `status:ready` 신설)**:
+
+| 상태 | 의미 | 부여·전환 주체 |
+|:--|:--|:--|
+| `status:open` | 미착수. 상태 라벨이 없으면 open으로 간주 | 발령자 |
+| `status:draft` | 설계 의견 제출, Aiden 설계 확정 대기 — **착수 금지** | 담당 Agent 부여 / **제거는 Aiden 전속** |
+| `status:ready` | **착수 가능** — 설계 확정(또는 불요 판단)·블로커 해소·담당자 지정 완료, 구현 전 | **Aiden 부여**(draft 확정 시·blocked 해제 시). 단순 Task는 open 상태에서 바로 착수 가능 |
+| `status:in-progress` | 구현 중 | 담당 Agent(착수 시) |
+| `status:review` | 완료 보고·검토 요청 | 담당 Agent(PR 생성과 함께) |
+| `status:rework` | 반려 후 재작업 | Aiden |
+| `status:blocked` | 전제조건 미충족 — **착수 금지** | 해제는 Aiden 전속 |
+| Close (`status:done`) | 완료 | PR 머지 시 자동. Aiden·Edward 전속 |
+
+- `status:draft`·`status:ready`는 Project 상태 필드에서 **Open**으로 표시된다(`[Sync] Issue Label → Project Status`).
+- 착수 가능한 라벨은 `status:ready` 또는 `status:open`(단순 Task)이며, `status:draft`·`status:blocked`는 착수할 수 없다.
 
 **Task 발령 절차**:
 - 신규 Task는 **GitHub Issue 생성**으로 발령한다. Team A는 Aiden, Team B는 JSJung·Jaison(R-19)이 발령 주체.
@@ -200,11 +217,11 @@ status:open → [status:draft → (Aiden 확정)] → status:in-progress → sta
 3. 상세 파일을 Issue 본문을 기반으로 신규 생성(목표·DoD·전제조건 기재)하고 복잡도 판단 후 진행 방식 결정:
    - **단순 Task** (구현 방향 자명): 착수 직행
    - **복잡 Task** (대안 복수·설계 결정 필요): 아래 설계 의견 절차로 진행
-4. **[GitHub Issue 라벨 갱신]** `gh issue edit #NNN --add-label status:in-progress --remove-label status:open` 실행.
+4. **[GitHub Issue 라벨 갱신]** `gh issue edit #NNN --add-label status:in-progress --remove-label status:open --remove-label status:ready` 실행(해당 라벨이 있는 쪽을 제거).
 
 **설계 의견 절차** (선택적, 복잡 Task 시):
 1. 상세 파일 `[설계 의견]` 섹션에 제안 방안·근거·리스크 작성, `gh issue edit #NNN --add-label status:draft` 실행
-2. Aiden 검토 후 `[설계 확정]` 섹션 기록 + `status:draft` 제거·`status:in-progress` 부여 (Aiden 전속)
+2. Aiden 검토 후 `[설계 확정]` 섹션 기록 + `status:draft` 제거·**`status:ready` 부여** (Aiden 전속, v3.12 — 이후 담당 Agent가 착수 시 `status:in-progress`로 전환)
 3. 착수 승인 전까지 구현 코드 작성 금지
 
 **완료 보고 절차** (커밋 순서 엄수 — R-17 v3.0):
@@ -234,7 +251,7 @@ status:open → [status:draft → (Aiden 확정)] → status:in-progress → sta
 **파일 조작 규칙**:
 - 상세 파일(`.agent/tasks/TASK-XXX_*.md`)은 담당 Agent만 수정 가능 (단, `[설계 확정]`·`[Aiden 검토]` 섹션은 Aiden 전속)
 - `.agent/ACTIVE_TASK.md`는 GitHub Action이 관리하는 열람 전용 자동 미러다 — 어떤 Agent도 수기 편집 금지(팀별 수기 상세 표는 2026-08-14부로 폐지)
-- 전제조건 블로커 해제(`status:blocked` 제거) 및 설계 착수 승인 전환은 Aiden 전속
+- 전제조건 블로커 해제(`status:blocked` 제거, 해제 시 `status:ready` 또는 `status:open` 부여) 및 설계 착수 승인 전환은 Aiden 전속
 
 **아카이브 규칙**:
 - 완료(Close)된 Issue의 상세 파일은 주 단위로 Aiden이 `.agent/archive/TASK_LOG_YYMMWW.md`로 이관 후 삭제
@@ -426,4 +443,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v3.11** (2026-11-20) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.12** (2026-11-24) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
