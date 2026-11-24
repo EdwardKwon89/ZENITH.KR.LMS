@@ -1,5 +1,5 @@
-// TASK-B-367 (Issue #1377): unmarkOrderCostSettled — 실제 로컬 DB fixture 검증.
-//   청구서 포함 오더 거부 / DRAFT 헤더 삭제(CASCADE)로 해제된 오더 성공 / 어떤 tier든 차단.
+// TASK-B-367 (Issue #1377) + TASK-B-382 (Issue #1463): unmarkOrderCostSettled — 실제 로컬 DB fixture 검증.
+//   M2 포함 확인 RPC(세션 클라이언트)로 포함 오더 거부 / DRAFT 헤더 삭제(CASCADE)로 해제된 오더 성공 / tier 무관 차단.
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
@@ -9,6 +9,8 @@ dotenv.config({ path: '.env.local' });
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
+const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+const PASSWORD = 'B367Unmark!2026';
 
 function psql(sql: string): string {
   const escaped = sql.replace(/"/g, '\\"').replace(/\$/g, '\\$');
@@ -48,17 +50,24 @@ function cleanup() {
   psql(`DELETE FROM public.zen_organizations WHERE id IN ('${ADMIN_ORG}','${SHIPPER_ORG}','${AGENCY_ORG}');`);
 }
 
-function setup() {
+async function setup() {
   try { cleanup(); } catch { /* leftover rows — 아래 unique order_no 로 정리 */ }
   psql(`DELETE FROM public.zen_orders WHERE order_no LIKE 'ZEN-367-%';`);
+  // M2 RPC는 함수 내부에서 auth.uid() 역할을 검사하므로 service client가 아니라
+  // 실제 로그인 세션(authenticated) 클라이언트로 앱 액션을 호출한다.
+  const { error: createError } = await serviceClient.auth.admin.createUser({
+    id: ADMIN_USER,
+    email: '367-unmark-admin@test.kr',
+    password: PASSWORD,
+    email_confirm: true,
+  });
+  if (createError) throw new Error(`createUser: ${createError.message}`);
   psql(`
     INSERT INTO public.zen_organizations (id, name, type, status) VALUES
       ('${ADMIN_ORG}', '367 Admin Org', 'CORPORATE', 'ACTIVE'),
       ('${SHIPPER_ORG}', '367 Shipper Org', 'SHIPPER', 'ACTIVE'),
       ('${AGENCY_ORG}', '367 Agency Org', 'AGENCY', 'ACTIVE')
     ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, status = EXCLUDED.status;
-    INSERT INTO auth.users (id, email) VALUES ('${ADMIN_USER}', '367-unmark-admin@test.kr')
-    ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email;
     INSERT INTO public.zen_profiles (id, org_id, email, role, status) VALUES
       ('${ADMIN_USER}', '${ADMIN_ORG}', '367-unmark-admin@test.kr', 'ADMIN', 'ACTIVE')
     ON CONFLICT (id) DO UPDATE SET org_id = EXCLUDED.org_id, role = EXCLUDED.role, status = EXCLUDED.status;
@@ -98,11 +107,17 @@ function statusOf(orderId: string): string {
   return psql(`SELECT cost_settlement_status || '|' || (cost_settled_at IS NULL) || '|' || (cost_settled_by IS NULL) FROM public.zen_orders WHERE id='${orderId}';`);
 }
 
-beforeAll(() => {
-  if (!SERVICE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY missing');
-  setup();
+beforeAll(async () => {
+  if (!SERVICE_KEY || !ANON_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY / NEXT_PUBLIC_SUPABASE_ANON_KEY missing');
+  await setup();
+  const sessionClient = createClient(URL, ANON_KEY, { auth: { persistSession: false } });
+  const { error: signInError } = await sessionClient.auth.signInWithPassword({
+    email: '367-unmark-admin@test.kr',
+    password: PASSWORD,
+  });
+  if (signInError) throw new Error(`signIn: ${signInError.message}`);
   mockValidateUserAction.mockResolvedValue({
-    supabase: serviceClient,
+    supabase: sessionClient,
     user: { id: ADMIN_USER },
     profile: { id: ADMIN_USER, role: 'ADMIN', org_id: ADMIN_ORG },
   });

@@ -922,14 +922,21 @@ export async function unmarkOrderCostSettled(orderId: string): Promise<{ success
       logger.warn(`unmarkOrderCostSettled: not settled (${orderId}, ${order.cost_settlement_status})`);
       return { success: false, error: await trError('not_found') };
     }
-    // 어떤 tier든 청구서 항목이 있으면 거부 — 조회 오류는 "없음"이 아니라 실패로 처리.
-    const { data: items, error: itemsError } = await supabase
-      .from('zen_billing_statement_items').select('id').eq('order_id', orderId).limit(1);
-    if (itemsError) {
-      logger.error('unmarkOrderCostSettled: statement items lookup failed', itemsError);
+    // TASK-B-382 (#1463): 포함 여부는 SECURITY DEFINER RPC로만 확인한다(청구서 데이터 미노출).
+    // RPC 오류·비정상 반환은 "미포함"으로 해석하지 않고 해제를 차단(fail-closed).
+    const { data: included, error: inclusionError } = await supabase.rpc(
+      'zen_billing_statement_order_included',
+      { p_order_id: orderId },
+    );
+    if (inclusionError) {
+      logger.error('unmarkOrderCostSettled: statement inclusion RPC failed', inclusionError);
       return { success: false, error: await trError('generic', { code: 'STATEMENT_ITEM_LOOKUP' }) };
     }
-    if (items && items.length > 0) {
+    if (typeof included !== 'boolean') {
+      logger.error('unmarkOrderCostSettled: unexpected statement inclusion result', included ?? null);
+      return { success: false, error: await trError('generic', { code: 'STATEMENT_ITEM_LOOKUP' }) };
+    }
+    if (included) {
       logger.warn(`unmarkOrderCostSettled: order included in billing statement (${orderId})`);
       return { success: false, error: await trError('statement_includes_order') };
     }
