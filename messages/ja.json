@@ -277,7 +277,8 @@
     "statement_empty": "オーダーのない請求書は発行できません。",
     "statement_not_found": "請求書が見つかりません。",
     "target_not_allowed": "請求先が自分の範囲外か、正しくありません。",
-    "unsupported_cost_currency": "KRW以外の売上項目があるため請求書を作成できません。（原価管理で通貨を確認してください）"
+    "unsupported_cost_currency": "KRW以外の売上項目があるため請求書を作成できません。（原価管理で通貨を確認してください）",
+    "own_agency_only": "ご所属代理店のリソースのみ処理できます。"
   },
   "Common": {
     "phoneHelp": "数字のみ入力（ハイフンなし、最大 {max} 桁）",

@@ -58,7 +58,7 @@ gh issue list --state all --search "TASK-B-368 in:title"        # → 본 이슈
 ### 착수 절차 실측 (R-17 §0)
 
 ```bash
-① pwd                                  → /Users/am/Documents/workspace/SNTL_LMS/ZENITH_LMS-worktrees/mike
+① pwd                                  → <로컬 워크트리>
 ② git branch --show-current            → feature/teamb-task-b368-iss1415-normalize-shipper-name
    (origin/TeamB_Dev `19403fdec` = PR #1411 병합본에서 생성)
 ③ ./scripts/check-db-freshness.sh      → OK (pending 0)

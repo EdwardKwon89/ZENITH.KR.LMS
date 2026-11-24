@@ -41,7 +41,7 @@
     "consignee_street": "it venture tower",
     "consignee_postcode": "02750",
     "consignee_telephone": "+8639383020288",
-    "consignee_email": "jungjs72@gmail.com",
+    "consignee_email": "user@example.test",
     "consignee_tariff": "P393920202"
   },
   "reference_no": "ZEN2026000007",

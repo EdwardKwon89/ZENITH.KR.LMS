@@ -24,7 +24,7 @@
 
 - **build PASS** ✅
 - **Playwright AGENCY 실 테스트**: `agency@zenith.kr` 계정으로 `/agency/ups-rates` 및 `/agency/shippers` 정상 접근 확인 (200 OK, no redirect) ✅
-- SHIPPER 계정: `jungjs72@gmail.com` 패스워드 불명으로 curl 테스트 불가 → 코드 검증으로 대체 (동일 패턴)
+- SHIPPER 계정: `user@example.test` 패스워드 불명으로 curl 테스트 불가 → 코드 검증으로 대체 (동일 패턴)
 
 ### 커밋
 

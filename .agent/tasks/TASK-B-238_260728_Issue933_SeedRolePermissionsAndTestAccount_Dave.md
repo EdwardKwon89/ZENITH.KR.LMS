@@ -10,19 +10,19 @@
 
 ## 개요
 
-로컬 DB가 `supabase db reset`으로 초기화되면서 수동으로 만들었던 `jungjs72@gmail.com` shipper 테스트 계정이 사라진 것을 JSJung이 확인. RBAC 관련 데이터(`zen_role_permissions`)는 마이그레이션으로 이미 재현되지만 시드 스크립트 자체에는 명시적으로 들어있지 않음. JSJung 확정: 실행 가능한 seed 코드로 `scripts/seed-local.ts`에 추가.
+로컬 DB가 `supabase db reset`으로 초기화되면서 수동으로 만들었던 `user@example.test` shipper 테스트 계정이 사라진 것을 JSJung이 확인. RBAC 관련 데이터(`zen_role_permissions`)는 마이그레이션으로 이미 재현되지만 시드 스크립트 자체에는 명시적으로 들어있지 않음. JSJung 확정: 실행 가능한 seed 코드로 `scripts/seed-local.ts`에 추가.
 
 **Jaison이 설계를 확정했으므로 설계 판단 없이 아래 스펙대로 구현**하면 됩니다.
 
 ## 조치안 (Jaison 확정 설계 — 그대로 구현)
 
-### 1. `jungjs72@gmail.com` 테스트 계정 추가
+### 1. `user@example.test` 테스트 계정 추가
 
-`shipperOrg`(Global Shipper Corp, 기존 재사용)에 소속된 SHIPPER 역할 계정으로 추가. 비밀번호는 `createUser()` 헬퍼가 내부적으로 `password1234`로 고정 생성하므로 별도 처리 불필요.
+`shipperOrg`(Global Shipper Corp, 기존 재사용)에 소속된 SHIPPER 역할 계정으로 추가. 비밀번호는 `createUser()` 헬퍼가 내부적으로 생성하므로 별도 처리 불필요.
 
 `main()` 함수의 기존 계정 생성 블록(873~879행 근처, `shipper@zenith.kr` 생성 라인 바로 아래)에 추가:
 ```ts
-await createUser(supabase, 'jungjs72@gmail.com', 'JSJung Shipper Test', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
+await createUser(supabase, 'user@example.test', 'JSJung Shipper Test', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
 ```
 
 ### 2. `zen_role_permissions` RBAC 데이터 명시적 시딩 추가
@@ -62,7 +62,7 @@ async function seedRolePermissions(supabase: any) {
 - [ ] `git fetch origin && git checkout TeamB_Dev && git pull origin TeamB_Dev` 후 `feature/teamb-238-...` 브랜치 생성 (`./scripts/next-task-number.sh B` 직접 재확인 — 238 나와야 정상)
 - [ ] 위 스펙대로 `scripts/seed-local.ts` 수정
 - [ ] `npm run db:seed`(또는 `supabase db reset --yes`) 실행 후 실측:
-  - `auth.users`에 `jungjs72@gmail.com` 존재, `jungjs72@gmail.com`/`password1234`로 실제 로그인 가능한지 확인
+  - `auth.users`에 테스트 계정 존재, 테스트 계정으로 실제 로그인 가능한지 확인(비밀번호는 비공개 보관)
   - `zen_role_permissions`에 두 행이 정확히 존재하는지(재실행 시 중복 삽입 안 되는지 멱등성도 확인)
   - 결과를 완료 보고에 정확히 기재
 - [ ] `npm run test:regression` 직접 실행 후 정확한 결과 기재(시드 스크립트 자체는 회귀 테스트 대상 아님 — 기존 테스트에 영향 없는지만 확인)
@@ -84,14 +84,14 @@ async function seedRolePermissions(supabase: any) {
 | **커밋 해시** | `41a39d69` |
 | **변경 파일** | `scripts/seed-local.ts` |
 | **테스트 결과** | `vitest run` — 140 files · 943 tests **ALL PASS** (회귀 영향 없음) |
-| **실측 검증** | `npm run db:seed` — jungjs72@gmail.com 생성 확인 · 로그인 OK · RBAC 중복 없음(멱등) |
+| **실측 검증** | `npm run db:seed` — user@example.test 생성 확인 · 로그인 OK · RBAC 중복 없음(멱등) |
 
 ### 체크리스트 완료 현황
 
 - [x] 브랜치 생성
 - [x] `scripts/seed-local.ts` 수정 — test account + seedRolePermissions 함수 + main() 호출
 - [x] `npm run db:seed` 실행 후 실측:
-  - `auth.users`에 `jungjs72@gmail.com` 존재 확인 ✅
-  - `jungjs72@gmail.com` / `password1234` 로그인 성공 ✅
+  - `auth.users`에 `user@example.test` 존재 확인 ✅
+  - 테스트 계정 로그인 성공 ✅(비밀번호는 비공개 보관)
   - `zen_role_permissions`에 MANAGER/AGENCY 2행 존재 (재실행 중복 없음, 멱등) ✅
 - [x] `npm run test:regression` — 943/943 ALL PASS (기존 테스트 영향 없음)

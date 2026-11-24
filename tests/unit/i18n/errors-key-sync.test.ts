@@ -35,7 +35,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
   const baseline = errorsOf(loadMessages(BASELINE));
   const baselineKeys = Object.keys(baseline).sort();
 
-  it('ko 기준 키가 110개이고 모두 비어 있지 않은 문자열이다', () => {
+  it('ko 기준 키가 111개이고 모두 비어 있지 않은 문자열이다', () => {
     expect(baselineKeys).toEqual([
       'adhoc_name_required',
       'adhoc_requires_agency',
@@ -104,6 +104,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'order_ids_required',
       'order_not_eligible',
       'order_not_found',
+      'own_agency_only',
       'own_shipper_only',
       'own_shipper_outbound',
       'packages_not_found',

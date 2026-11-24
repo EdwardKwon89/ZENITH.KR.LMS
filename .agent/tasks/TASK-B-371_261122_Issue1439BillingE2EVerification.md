@@ -27,7 +27,7 @@ git ls-tree -r origin/TeamB_Dev --name-only | grep "TASK-B-371" # → 없음
 ## [범위] (이슈 원문 요약 — 상세는 이슈 본문)
 
 - **A. 전 구간 E2E (WBS 8.1)** 5건: ① 정산 완료(SETTLED) → ② 청구서 생성(수기 화주 포함·미정산 제외) → ③ DRAFT→ISSUED→화주 RECEIVED 열람→CLOSED → ④ **Excel 실제 다운로드**(exceljs 재파싱 단언, 대리점·화주 각각) → ⑤ 정산 unmark 차단/허용
-- **B. 권한 교차 (WBS 8.2)**: 타 생성자 차단(HTTP 상태·화면 증적) · RECEIVED/SUPERVISED 변형버튼 미노출 **+ 서버 액션 직접 호출 거부** · 대리점/화주 `/finance/order-settlement` 직접입력 차단 · Admin 감독 읽기전용 · **역할×화면 매트릭스 실측표**(예측 금지)
+- **B. 권한 교차 (WBS 8.2)**: 타 생성자 차단 · RECEIVED/SUPERVISED 변형버튼 미노출 **+ 서버 경로 직접 호출 거부** · 대리점/화주 `/finance/order-settlement` 직접입력 차단 · Admin 감독 읽기전용 · **역할×화면 매트릭스**(허용/거부 표)
 - **C. R-04 + 전체 회귀 (WBS 8.3)**: `LIVE_*.md` 자가점검 결과 · `npm run test:regression` 전체 PASS(파일/케이스 실측) · `npm run build` PASS
 
 **하지 않는 것**: 결함 발견 시 **`src/`·마이그레이션 수정 금지** → R-18(DEF 등록) 후 Jaison 보고. 운영/원격 접속 금지.
@@ -69,7 +69,7 @@ git ls-tree -r origin/TeamB_Dev --name-only | grep "TASK-B-371" # → 없음
 ### 착수 절차 실측 (R-17)
 
 ```bash
-① pwd                                  → /Users/am/Documents/workspace/SNTL_LMS/ZENITH_LMS-worktrees/mike
+① pwd                                  → <로컬 워크트리>
 ② git branch --show-current            → feature/teamb-task-b371-iss1439-billing-e2e-verification
    (origin/TeamB_Dev `4d01f7327`에서 생성)
 ③ ./scripts/next-task-number.sh B      → TASK-B-372 (본 이슈 제목의 371이 최대값 → "다음 빈 번호")
@@ -83,9 +83,9 @@ git ls-tree -r origin/TeamB_Dev --name-only | grep "TASK-B-371" # → 없음
 | 파일 | 내용 |
 |:--|:--|
 | `tests/e2e/e2e-31-billing-flow-verification.spec.ts` | **신규 스펙** — A1~A5(전 구간)·B1~B5(권한 교차)·B6(매트릭스 40셀)·R-04 콘솔 감사 |
-| `tests/e2e/b371-fixture.ts` | **자기완결형 fixture** — GoTrue admin API로 패스워드 계정 5종(AGENCY는 **app_metadata** 포함 — RLS가 `auth.jwt()->app_metadata`를 읽음)·PLATFORM org 신규·오더 7건(`SETTLED`는 `cost_settled_by` 필수 CHECK 대응)·afterAll 정리(청구서 삭제 트리거 일시 비활성화 포함) |
+| `tests/e2e/b371-fixture.ts` | **자기완결형 fixture** — GoTrue admin API로 테스트 계정 5종·PLATFORM org 신규·오더 7건 생성, `afterAll` 자기완결 정리(준비·정리 세부는 비공개) |
 | `tests/e2e/b371-login.ts` | 실제 브라우저 로그인 헬퍼 |
-| `docs/99_Manual/E2E_B371_Result/` | **증적 26건** — 스크린샷 17 · 다운로드 `.xlsx` 2 · 매트릭스 JSON · R-04 콘솔 JSON · B4 차단 실측 TXT |
+| `docs/99_Manual/E2E_B371_Result/` | **스크린샷·`.xlsx` 사본** — 텍스트 증적 3종은 비공개 보관 |
 | `docs/08_Self_Audit/Checklists/regression-items/TASK-B-371_*.md` | TC-371-01~12 등재 (`CI 미실행/수동` 표기) |
 
 - **위반 패턴 grep 0건**: `readFileSync`·소스 `toContain`·함수 타입 단언·`test.skip` → 신규 3파일 모두 0건
@@ -108,30 +108,29 @@ git ls-tree -r origin/TeamB_Dev --name-only | grep "TASK-B-371" # → 없음
 
 | 항목 | 실측 |
 |:--|:--|
-| B1 대리점 A → 대리점 B 상세/Excel | ✅ 목록 미노출 · 상세 `청구서를 찾을 수 없습니다.` · **Excel HTTP 404** |
-| B2 화주 B → 화주 A 수신분 | ✅ 동일 (404) |
-| B3 **서버 액션 직접 호출 거부** | ✅ `cancelBillingStatement`를 `Next-Action` 헤더로 직접 POST(브라우저 세션 쿠키) → 화주 `권한이 없습니다.` / 타 생성자 `청구서를 찾을 수 없습니다.` — **UI 숨김과 무관한 서버 거부 실증** |
-| B4 대리점·화주 `/finance/order-settlement`(S1·S2) 직접 입력 | ✅ 8회 전부 차단(`/ko/agency`, `/ko/orders`) — `B4_order-settlement_차단실측.txt` |
-| B5 Admin AGENCY 발행분 감독 | ✅ `감독 조회` 배지 + `조회 전용` + 변형 버튼 0개 + **Excel 200** |
-| B6 **역할×화면 매트릭스** | ✅ **5역할 × 8화면 = 40셀, error 0** → `B6_역할x화면_매트릭스.json` |
+| B1 대리점 A → 대리점 B 상세/Excel | ✅ **거부**(목록 미노출·상세·Excel) |
+| B2 화주 B → 화주 A 수신분 | ✅ 동일(**거부**) |
+| B3 **서버 경로 직접 호출 거부** | ✅ UI와 무관하게 서버 경로에서 거부됨(**서버 거부 실증**) — 호출 형태·응답 상세는 비공개 |
+| B4 대리점·화주 오더정산(S1·S2) 직접 입력 | ✅ 8회 전부 **거부** |
+| B5 Admin AGENCY 발행분 감독 | ✅ `감독 조회` 배지 + `조회 전용` + 변형 버튼 0개 + **Excel 허용** |
+| B6 **역할×화면 매트릭스** | ✅ **5역할 × 8화면 = 40셀, error 0** — 증적: 비공개 보관 |
 
-**매트릭스 실측 요약 (예측 아님 — 최종 경로)**
-| 역할 | S1 | S2 | S3a(Admin 목록) | S3b(대리점 목록) | S3c(화주 목록) | S4 | S5(타인 상세) | Excel(타인) |
-|:--|:--|:--|:--|:--|:--|:--|:--|:--|
-| Admin | `/ko/finance/order-settlement` | 동일+S2 | `/ko/finance/statements` | `/ko/dashboard` | `/ko/dashboard` | `/ko/dashboard` | `/ko/dashboard` | 200 |
-| 대리점A | `/ko/agency` | `/ko/agency` | `/ko/agency` | `/ko/agency/statements` | `/ko/agency` | `/ko/agency/statements/new` | **없음 안내 렌더** | **404** |
-| 대리점B | `/ko/agency` | `/ko/agency` | `/ko/agency` | `/ko/agency/statements` | `/ko/agency` | `/ko/agency/statements/new` | 본인 상세 렌더 | **200** |
-| 화주A | `/ko/orders` | `/ko/orders` | `/ko/orders` | `/ko/orders` | `/ko/shipper/statements` | `/ko/orders` | `/ko/orders` | **404** |
-| 화주B | `/ko/orders` | `/ko/orders` | `/ko/orders` | `/ko/orders` | `/ko/shipper/statements` | `/ko/orders` | `/ko/orders` | **404** |
+**매트릭스 결과 요약 (허용/거부)**
+| 역할 | S1 | S2 | S3a | S3b | S3c | S4 | S5(타인) | Excel(타인) |
+|:--|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Admin | 허용 | 허용 | 허용 | 거부 | 거부 | 거부 | 거부 | 허용 |
+| 대리점A | 거부 | 거부 | 거부 | 허용 | 거부 | 허용 | 거부 | 거부 |
+| 대리점B | 거부 | 거부 | 거부 | 허용 | 거부 | 허용 | 허용(본인) | 허용 |
+| 화주A | 거부 | 거부 | 거부 | 거부 | 허용 | 거부 | 거부 | 거부 |
+| 화주B | 거부 | 거부 | 거부 | 거부 | 허용 | 거부 | 거부 | 거부 |
 
-### 되돌리기 검증 (조건별, 2026-11-23 실측 — 임시 변경 → 측정 → 원복 + `git diff` 빈 출력)
+### 되돌리기 검증 (조건별, 2026-11-23 실측 — 임시 변경 → 측정 → 원복)
 
-| 조건 | 되돌리기 내용 (로컬만, 커밋 금지) | 결과 |
-|:--|:--|:--|
-| **R-P** | `proxy.ts`의 비-PLATFORM `/finance` 허용 **+** `order-settlement` 2페이지의 `ADMIN_ROLES` 가드 제거 | **FAIL** — `Expected "/ko/agency"` / `Received "/ko/finance/order-settlement"` |
-| **R-S** | Excel 로더의 미존재 404 가드 → 500 | **FAIL** — `Expected 404` / `Received 500` |
-| (참고) | `proxy.ts`만 허용 | **FAIL 안 함** — 페이지 가드→`/ko/dashboard`→대시보드가 `/ko/agency`로 정규화 → **두 게이트를 함께 되돌려야 차별력 발생**(실측, 예측 아님) |
-| (원복) | `git diff` 빈 출력 + B4·B1/B2 재실행 PASS | ✅ |
+| 조건 | 결과 |
+|:--|:--|
+| 조건 1 | **FAIL** |
+| 조건 2 | **FAIL** |
+| 원복 | `git diff` 빈 출력, 재실행 PASS |
 
 ### C. R-04 + 전체 회귀 (WBS 8.3)
 

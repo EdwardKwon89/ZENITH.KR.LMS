@@ -1,9 +1,9 @@
-# TASK-B-247: Issue #957 / DEF-B-026 — 청구서 조회 화면 role 차단 + 메뉴 누락 수정
+# TASK-B-247: Issue #957 / DEF-B-026 — 청구서 조회 화면 접근 정렬
 
 | 항목 | 내용 |
 |:-----|:------|
 | **Issue** | [#957](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/957) |
-| **DEF** | [DEF-B-026](../defects/DEF-B-026_shipper_invoices_page_role_gap_and_unreachable.md) |
+| **DEF** | [DEF-B-026](../defects/DEF-B-026_shipper_invoices_page_access_alignment.md) |
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |
@@ -98,7 +98,7 @@ const getStatusBadge = (status: string) => {
   1. `CORPORATE`/`AGENCY_SHIPPER`/`INDIVIDUAL` role 각각으로 `getShipperInvoices()`를 호출했을 때 에러 없이 성공하고, `.eq('shipper_id', profile.org_id)` 필터가 실제로 걸리는지 mock 호출 인자로 검증(원래 코드로 되돌리면 에러가 던져지는지 재현 확인)
   2. `AGENCY`/`ADMIN` 기존 케이스가 리팩터링 후에도 그대로 동작하는지 확인(회귀 없음)
 - [ ] `npm run build` · `npm run test:regression` 직접 실행 후 정확한 결과 기재
-- [ ] **R-10 필수**: 로컬에서 `jungjs72@gmail.com`(CORPORATE) 또는 `jungjs@aventusm.com`(AGENCY_SHIPPER) 계정으로 로그인 → 사이드바에서 새 메뉴("청구서 조회") 클릭 → `/shipper/invoices` 페이지에서 실제 본인 소속 화주의 청구서 목록이 에러 없이 뜨는지 스크린샷으로 확인.
+- [ ] **R-10 필수**: 로컬에서 `shipper@example.test`(CORPORATE) 또는 `agency-shipper@example.test`(AGENCY_SHIPPER) 계정으로 로그인 → 사이드바에서 새 메뉴("청구서 조회") 클릭 → `/shipper/invoices` 페이지에서 실제 본인 소속 화주의 청구서 목록이 에러 없이 뜨는지 스크린샷으로 확인.
 
 ## 완료 보고 절차 (R-17 준수)
 
@@ -117,7 +117,7 @@ const getStatusBadge = (status: string) => {
 | **변경 파일** | 6개 파일 (shipper-invoices.ts · NaviSidebar.tsx · i18n 2개 · invoices/page.tsx · tests) |
 | **테스트 결과** | `vitest run` — 144 files · 974 tests **ALL PASS** |
 | **빌드 결과** | `npm run build` — **SUCCESS** |
-| **R-10** | jungjs72@gmail.com(CORPORATE) → /shipper/invoices 정상 접속 확인 ✅ |
+| **R-10** | user@example.test(CORPORATE) → /shipper/invoices 정상 접속 확인 ✅ |
 
 ### 기존 테스트 개선
 - `shipper-invoices.test.ts`: `toContain`/`readFileSync` 소스 문자열 검사(3건) → 실제 함수 호출 기반 behavioral 테스트(8건)로 전면 교체

@@ -277,7 +277,8 @@
     "statement_empty": "没有订单的账单无法签发。",
     "statement_not_found": "找不到该账单。",
     "target_not_allowed": "开账对象不属于您的范围或无效。",
-    "unsupported_cost_currency": "存在非 KRW 的营收项目，无法生成账单。（请在成本管理中检查币种）"
+    "unsupported_cost_currency": "存在非 KRW 的营收项目，无法生成账单。（请在成本管理中检查币种）",
+    "own_agency_only": "只能处理您所属代理商的资源。"
   },
   "Common": {
     "phoneHelp": "仅限数字（不含连字符，最多 {max} 位）",

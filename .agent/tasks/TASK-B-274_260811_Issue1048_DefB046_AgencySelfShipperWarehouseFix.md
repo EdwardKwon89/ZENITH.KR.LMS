@@ -83,8 +83,8 @@ async function getAgencyShipperIds(supabase: any, orgId: string): Promise<string
 - **회귀 테스트**: `npm run test:regression` → **160파일 / 1135건 ALL PASS** (기존 157→160파일, 1094→1135건으로 +3파일/+41건)
 - **빌드**: `npm run build` → `✓ Compiled successfully in 17.0s`
 - **TypeScript**: 신규 파일 0건(기존 pre-existing 57건과 동일, 신규 추가 없음)
-- **(R-10) 실기기 브라우저 검증**: `tests/e2e/r10-defb046-agency-self-shipper.spec.ts` — `agency@zenith.kr`(Zenith Agency Partners, password1234) 실기기 로그인 → `/ko/warehouse/ups-receive` 이동 → **자가화주 WAREHOUSED 오더 `UPS-SELF-AGENCY-274`(shipper_id = agency 본인 org) 노출 확인** (1 passed, 18.7s). 스크린샷: `docs/99_Manual/E2E_NN_Result/TASK-B-274/r10_ups_receive_self_shipper.png`(창고 화면), `r10_agency_dashboard.png`(대시보드).
-  - 참고: MASTER AIR 계정(`james@sntl.co.kr`)은 시드 미포함이라 비밀번호 불명 — task 문구 "MASTER AIR(또는 동등 AGENCY 계정)"의 동등 계정(agency@zenith.kr)으로 검증함. 실측 오더 `ZEN-2026-000008`(MASTER AIR 자가화주)은 DB에서 WAREHOUSED 상태로 존재 확인 완료.
+- **(R-10) 실기기 브라우저 검증**: `tests/e2e/r10-defb046-agency-self-shipper.spec.ts` — `user@example.test`(Zenith Agency Partners, 비밀번호는 비공개 보관) 실기기 로그인 → `/ko/warehouse/ups-receive` 이동 → **자가화주 WAREHOUSED 오더 `UPS-SELF-AGENCY-274`(shipper_id = agency 본인 org) 노출 확인** (1 passed, 18.7s). 스크린샷: `docs/99_Manual/E2E_NN_Result/TASK-B-274/r10_ups_receive_self_shipper.png`(창고 화면), `r10_agency_dashboard.png`(대시보드).
+  - 참고: task 문구 "MASTER AIR(또는 동등 AGENCY 계정)"의 동등 계정(agency@zenith.kr)으로 검증함. 실측 오더 `ZEN-2026-000008`(MASTER AIR 자가화주)은 DB에서 WAREHOUSED 상태로 존재 확인 완료.
   - 검증용 자가화주 오더 `UPS-SELF-AGENCY-274` + order_status_history 2건 + package 1건을 로컬 DB에 INSERT(실측 오더 수정 없음).
 
 ## [발견 이슈]

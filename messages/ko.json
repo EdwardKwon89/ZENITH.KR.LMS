@@ -277,7 +277,8 @@
     "statement_empty": "오더가 없는 청구서는 발행할 수 없습니다.",
     "statement_not_found": "청구서를 찾을 수 없습니다.",
     "target_not_allowed": "청구 대상이 내 소속이 아니거나 올바르지 않습니다.",
-    "unsupported_cost_currency": "통화가 KRW가 아닌 매출 항목이 있어 청구서를 만들 수 없습니다. (원가 관리에서 통화를 확인해 주세요)"
+    "unsupported_cost_currency": "통화가 KRW가 아닌 매출 항목이 있어 청구서를 만들 수 없습니다. (원가 관리에서 통화를 확인해 주세요)",
+    "own_agency_only": "본인 소속 대리점만 처리할 수 있습니다."
   },
   "Common": {
     "phoneHelp": "숫자만 입력 (하이픈 제외, 최대 {max}자리)",
