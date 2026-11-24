@@ -214,6 +214,8 @@ feature/ups-spr{NN}-devteam-{작업명}
 status:open (미착수) → status:in-progress (구현 중) → status:review (검토 요청) → 머지·Close (Aiden 승인)
 ```
 
+> 설계 확정이 필요한 Task는 `status:draft`(확정 대기) → `status:ready`(착수 가능, Aiden 부여) → `status:in-progress` 순서이며, `draft`·`blocked` 상태에서는 착수하지 않는다. 정본은 GOV_COMMON.md R-17(v3.12).
+
 ### Team B 착수 절차
 
 1. `gh issue list --assignee <본인>`으로 할당 Issue 확인
