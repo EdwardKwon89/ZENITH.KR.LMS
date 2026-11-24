@@ -13,7 +13,7 @@
 
 | 구분 | 내용 |
 |:--|:--|
-| **A. DEF-151 (원 Issue)** | `src/app/actions/ups/rates.ts` 원가 포함 조회 6종 역할 가드 + 비관리자 화면의 `rates-public.ts` 전환 + `/agency/other-charges` 원가 payload 제거 |
+| **A. DEF-151 (원 Issue)** | `src/app/actions/ups/rates.ts` 요율 조회 6종 역할 가드 + 비관리자 화면의 `rates-public.ts` 전환 + `/agency/other-charges` 원가 payload 제거 |
 | **B. 신규 (Aiden 2026-11-23)** | `src/app/actions/agency/other-charges.ts` 3개 액션의 대리점 소유권(IDOR) 가드 — #1469와 동일 패턴 |
 | **C. Low (Issue §2.3)** | `getAgencyPricingPolicies` 가드, `getPublicWeightTierRates` 유효기간 필터 |
 | **제외** | RLS 정책·테이블 GRANT 변경(§2-6 잔여 위험), 요율 계산 로직 변경 |
@@ -73,6 +73,7 @@
 
 - TASK-B-091 원칙: **대리점이 볼 수 있는 원가는 "대리점 계산 원가"뿐**이고 플랫폼 원가는 보이지 않는다. `/agency/ups-rates`·`/shipper/ups-rates`가 `rates-public.ts`로 전환된 이유다.
 - **SUB_ADMIN은 AGENCY가 아니다**: SNTL Master Agency로 `/admin/ups-rates` 권한과 **기본요율 원가만 편집**하는 역할(TASK-192)이다. 따라서 "대리점 원가만" 원칙의 적용 대상이 아니며, 기본요율 원가 열람은 유지한다.
+- **용어 정합**: 규칙 4의 "원가"는 **UPS 실제 원가(admin 전용)**이고, B안의 "대리점 단계"는 **대리점 본인의 매입 단계 금액**(TASK-B-091 원칙)이다. 서로 다른 개념이다.
 - 단, SUB_ADMIN에게 5종 플랫폼 원가까지 허용할 근거는 없다 → C안(혼합)으로 최소화.
 
 ### 2-3. 구현 설계 (A: DEF-151)
@@ -89,8 +90,8 @@
    - `/agency/other-charges/page.tsx`: `getUpsOtherCharges()` → `getPublicOtherCharges()` (Team A 파일, 이 이슈 예외 허용). 클라이언트는 코드·명칭·단위만 사용하므로 public 인터페이스로 충분(코드 확인). 플랫폼 원가는 사용하지 않는다.
    - `admin/ups-rates/page.tsx`: SUB_ADMIN이면 기본요율은 `getUpsBaseRates`, 나머지 5종은 `rates-public.ts`로 전환(또는 탭 비노출). 또한 페이지의 **직접 fuel 조회**도 SUB_ADMIN 경로에서 원가가 전달되지 않도록 public 함수로 교체.
    - `UpsBaseRateMatrix`: admin은 기존 `getUpsBaseRates`, 비관리자는 `rates` prop(public)만 사용하도록 정리. client 번들에서 admin 액션 import를 제거하거나 `fetchRates` prop으로 주입.
-   - **타입 정합**: `AgencyOtherChargesClient.allOtherCharges`를 `UpsOtherCharge[]`→`PublicOtherCharge[]`로, SUB_ADMIN용 `UpsRatesClient` prop도 public 타입으로 조정한다(필드 사용은 id·코드·명칭·단위뿐임을 코드로 확인).
-4. **페이지 가드 보강**: `admin/ups-rates/page.tsx`는 현재 `requireAuth()`만 호출한다. 액션 가드와 동일하게 `checkPermission(profile.role, '/admin/ups-rates')`(또는 역할 검사)를 추가해 비관리자 진입을 차단(미들웨어와 이중 방어).
+   - **타입 정합**: `AgencyOtherChargesClient.allOtherCharges`를 public 타입으로, SUB_ADMIN용 `UpsRatesClient` prop도 public 타입으로 조정한다(클라이언트 사용 항목과 일치함을 코드로 확인).
+4. **페이지 가드 보강**: `admin/ups-rates/page.tsx`에 `checkPermission(profile.role, '/admin/ups-rates')`(또는 역할 검사)를 추가해 비관리자 진입을 차단(미들웨어와 이중 방어).
 5. **Low**
    - `getAgencyPricingPolicies`(호출처 0): `requireAdminManagerOrSubAdmin` 추가(방어). RLS(`admin_all`/`sub_admin_scoped`/`agency_select`)는 유지.
    - `getPublicWeightTierRates`: `valid_from <= refDate` + `valid_until is null or >= refDate` 필터 추가(기본요율과 동일).
@@ -111,11 +112,13 @@
 | 1. 플랫폼 원가 계열 | 포함 | **미포함** | 미포함 | 미포함 |
 | 1. 플랫폼 판매가 계열 | 포함 | 포함 | **미포함** | 포함 |
 | 2. 대리점 단계(자기 원가·판매가·할인율·부가운임) | 포함 | **포함(자기 것)** | 미포함 | 해당 없음 |
-| 3. 화주 단계(최종 운임·화주 할인율) | 포함 | 포함(자기 소속 화주) | 포함 | 해당 없음 |
+| 3. 화주 단계(최종 운임·항목별 판매 금액(기본·유류·부가 합계·급증)·화주 할인율) | 포함 | 포함(자기 소속 화주) | 포함 | 해당 없음 |
 | 중량·통화·부가항목(판매) | 포함 | 포함 | 포함 | 포함 |
 
 - **대리점 소속 화주에게 1단계 판매가를 주면 대리점 원가가 노출**되므로, 소속 화주에게는 1단계 판매가를 전달하지 않는다.
 - 등록 폼의 대체 경로(화주 최종 운임이 없을 때 1단계 판매가 사용)가 **소속 화주에게 발생하지 않도록** DTO에서 화주 단계를 보장한다. `estimated_cost`는 변경 전후 동일해야 한다.
+- **항목 집합 근거**: 화주 단계의 항목별 판매 금액은 견적 패널·등록 폼이 읽는 집합과 일치한다(`UpsFreightEstimatePanel`·`OrderRegistrationForm`·`UpsFreightEstimateSection` 코드 대조). 상세 목록은 비공개 전달.
+- **부가항목 행 금액 기준**: 대리점 소속 화주의 항목 행 금액은 **화주 청구 단계 기준**, 비소속 화주는 **플랫폼 판매가 기준**으로 한다. 이 정의로 표시값이 바뀌면 R-10 "표시 금액 동일"의 **예외**로 명시하고, 화주·대리점 경로별 변경 전후 스크린샷과 JSJung 확인을 거친다. 바뀌지 않으면 동일 확인 방법을 기록한다.
 
 #### (2) 처리 방향 비교 — 서버 내부 호출 불변
 
@@ -177,9 +180,10 @@
 #### (6) PR-2 포함/분리
 
 - **core 분리 + 세션 DTO 진입점 + 클라이언트 전환 + 회귀 테스트**는 **PR-2에 포함 권장**.
+- **구현 순서**: B-382(#1465) 함수 적용 → **B-373 PR-2(core 분리)** → **B-381(#1462, core import 기준)**. B-381이 먼저면 import 경로를 다시 바꿔야 하므로 이 순서를 따른다.
 - JSJung ③ B안 확정에 따라 DTO 범위를 위 표로 고정한다.
 - 범위 확장 점검에서 발견한 별도 보안 Task 대상 1건은 **PR-2에서 수정하지 않는다**(상세 비공개 보고).
-- 회귀 테스트는 **역할·소속 조합별 키 집합 단언**(관리자/대리점/화주 소속/화주 자가)으로 작성하고, `estimated_cost` 변경 전후 동일을 확인한다.
+- 회귀 테스트는 **"DTO 키 집합 = 화면 사용 집합"** 을 역할·소속 조합별(관리자/대리점/화주 소속/화주 자가)로 단언하고, `estimated_cost` 변경 전후 동일을 확인한다.
 
 ### 2-4. 구현 설계 (B: 대리점 소유권 가드, PR-1 권장)
 
@@ -255,6 +259,12 @@
 | 6 | PR-2: 대리점 자기 `agency_other_charges` 매입가 편집 유지 R-10 화면 증적 필요 |
 | 7 | PR-2: Aiden 점검 기준 5개 반영 완료. **JSJung ③ B안 확정** — core 분리+세션 DTO를 PR-2 포함. 범위 확장 점검의 별도 보안 Task 대상 1건은 상세 비공개 |
 
+### JSJung 확인 항목
+
+| # | 항목 | 상태 |
+|:-:|:--|:--|
+| 1 | 부가항목 행 금액 기준(소속 화주=화주 청구 단계) 적용 시 표시값 변경 여부 | **확인 필요** — 변경 시 R-10 예외·화주/대리점 경로 스크린샷 |
+
 ### JSJung 확정 (2026-11-23, Jaison 회신)
 
 | # | 항목 | 확정 |
@@ -268,7 +278,7 @@
 - 설계 의견 + 실측(6종×5역할, 소유권 허용/거부, RLS 정의, 호출처 전수). 공개 문서에는 허용/거부 결과만 기재.
 - Aiden·Jaison 조건부 승인(2026-11-23). **PR-1(소유권) 착수 승인**, PR-2는 설계 확정 후.
 - **PR-1 구현**: #1478 TeamB_Dev 병합 완료.
-- **7차 변경**: JSJung ③ B안·core 분리·DTO·mock 영향 20개 반영.
+- **8차 변경**: Aiden 조건 3건(화주 단계 항목 완전성·부가항목 기준 단계·규칙4 용어 정합) + 경미(요율 6종 표현, DTO=화면 집합, 구현 순서) 반영.
 - 범위 확장 점검에서 별도 보안 Task 대상 1건 발견 — 상세는 비공개 보고(공개 문서 미기재).
 - PR: #1476 (draft, `Refs #1362`).
-- **커밋 해시**: `93bfcdc6b` (현재 코드 서술 완화 커밋). 해시 갱신 커밋 별도.
+- **커밋 해시**: `<CONTENT_COMMIT>` (8차 내용 커밋). 해시 갱신 커밋 별도.
