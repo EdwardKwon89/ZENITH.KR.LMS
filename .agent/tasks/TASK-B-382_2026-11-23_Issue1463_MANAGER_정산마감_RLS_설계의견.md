@@ -393,6 +393,7 @@ JSJung ② **B안(정책 0개)** 확정으로 MANAGER 인보이스·원가 RLS �
 | **검증 결과** | 단위 13/13 PASS, 실DB 함수 7/7 PASS, 실DB 앱 통합 5/5 PASS. `npm run test:regression` **298파일 / 2282케이스 전부 PASS**, `npm run build` PASS, `npm run check:ds11` 신규 미반영 0, `npm run check:lrtm` 유령 경로 0 |
 | **Ds-11 / 회귀맵** | `Ds_11_04_Finance_Settlement.md` §4.2 RPC 항목, `Ds_11_11B_UPS_Agency_Actuals.md` `unmarkOrderCostSettled` 항목 갱신. 회귀항목 `TASK-B-382_Issue1463_billing-inclusion-rpc.md` 신규 등재 |
 | **순서·의존** | 설계 확정 구현 순서 B-382 → B-381 → B-377 유지. **#1475는 M2 함수 적용 후 병합** — 적용 전/후 양쪽 검증 항목 등재(후 상태는 로컬 실DB에서 확인). PR #1465 설계 draft는 병합하지 않고 유지 |
+| **PR / CI** | 구현 PR [#1511](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1511) (base `TeamB_Dev`, `Closes #1463`). PR Checks Run `45389571994` **conclusion: success**, Regression Tests pass(11m9s), advisory 6종 전부 pass. 설계 draft PR #1465는 미병합 유지 |
 | **절차** | 이력 재작성(force-push) 없음. `origin/TeamB_Dev` 최신(aef912cdc)을 일반 병합으로 반영. Squash 병합 후 구현 브랜치 삭제 예정 |
 | **비공개 사항** | 실측 상세·재현 형태는 공개 문서에 기재하지 않고 Jaison·Aiden에게 비공개 전달(별도 채널). 기능 결함 1건은 본 범위 밖 별도 Task 유지 |
 
