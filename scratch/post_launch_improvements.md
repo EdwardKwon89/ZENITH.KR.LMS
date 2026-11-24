@@ -2265,7 +2265,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **목표 구현**: ① V2 확인을 `out="$(vercel inspect "$NEW_URL" 2>&1)"; grep -q "$ALIAS_HOST" <<<"$out"`처럼 출력을 변수에 담은 뒤 검사하도록 바꿔 파이프 SIGPIPE를 제거. ② `vercel inspect` 자체가 실패(비정상 종료·타임아웃)한 경우와 "alias 미연결"을 구분하고, 실패 시 몇 회 재시도(예: 3회) 후 판정. ③ 같은 패턴(`| grep -q` + `pipefail`)이 `scripts/` 다른 스크립트에 있는지 전수 점검. ④ 211 §2-A 검증 상태 문장을 실배포 결과(2026-11-23: V1·V3 자동 통과, V2 오탐 → 수정 후 재검증 필요)로 갱신하고, 수정 후 다음 배포에서 정상 경로를 확인한 뒤 다시 갱신.
 - **관련 파일**: `scripts/deploy-prod.sh`, `docs/00_GUIDE/211_PRODUCTION_DEPLOY_RUNBOOK.md`
 - **예상 공수**: 0.2~0.3 MD (스크립트 수정 0.1 + 전수 점검 0.05 + 런북 갱신 0.05~0.1). 정상 경로 재검증은 다음 배포 때.
-- **우선순위**: Medium — 오탐이 "배포 실패"로 오인돼 중복 배포나 불필요한 롤백으로 이어질 수 있는 배포 가드의 신뢰성 문제. 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단.
+- **우선순위**: High — 2026-11-23 하루에 3회 재발(10:11·20:59·23:29 KST, 매번 수동 확인으로 우회)해 2026-11-24 Edward 확정으로 Medium→High 상향, **다음 배포 전 처리 권장**. 원 사유: 오탐이 "배포 실패"로 오인돼 중복 배포나 불필요한 롤백으로 이어질 수 있는 배포 가드의 신뢰성 문제. 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단.
 
 ---
 
@@ -2293,3 +2293,75 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/lib/auth/rbac.ts`, `src/lib/orders/rate-snapshot-refresh.ts`, `src/app/actions/operations/orders.ts`, `docs/02_Analysis/ds11/`, 신규 마이그레이션·관리 화면
 - **예상 공수**: 3~5 MD (설계 1 + 저장·API 1 + 화면 1 + 회귀·권한 테스트 1~2) — 추정
 - **우선순위**: Low~Medium — 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단. 선행 조건: #1449 C 완료(허용 판단 단일화). 관련: #1364, #1448.
+
+---
+
+## [IMP-207] 청구서 Excel 출력 조회의 `in()` URL 길이 제한 — 100~200건 청크 조회 (Team B 제안 IS #1418 1번 채택, IMP-197 연계)
+
+- **발견 경위**: PR #1411(청구서 Excel 출력) 승인 검토 중 Jaison이 병합 후 후속(비차단)으로 지정, Team B가 IS #1418로 건의. 2026-11-24 Aiden 채택(R-15). 같은 IS의 2번(날짜 달력 검증, nit)·3번(JSDoc 겹침, 미관)은 IMP 번호 없이 반려 — 해당 파일을 수정하는 Task에서 처리.
+- **현재 상태**: `src/lib/finance/billing/statement-excel-data.ts`(TeamB_Dev 소재, 통합 전 develop에는 없음)의 라벨·기준일·항목 조회가 청구서 항목 전체 order id를 한 번에 `.in('order_id', orderIds)`로 보낸다. UUID 37자 × N이라 수백 건 이상이면 프록시 URL 한도(대략 8~16KB)에 걸려 대형 청구서의 Excel 출력이 500으로 실패한다(데이터 정합성에는 영향 없음, 에러 로그 남음).
+- **임시 조치**: 없음(대리점 월 청구 수백 건 규모에서 막힐 수 있음).
+- **목표 구현**: 100~200건 단위 청크 조회로 분할(또는 RPC 대체). TeamB_Dev 쪽 IMP-197(오더정산 목록의 `.in()`·500건 상한)과 같은 계열이므로 통합 시 상호 참조하고 청크 헬퍼를 공용화 검토.
+- **관련 파일**: `src/lib/finance/billing/statement-excel-data.ts`, `src/app/actions/finance/billing-statements.ts`
+- **예상 공수**: 0.3 MD (청크 헬퍼 + 테스트)
+- **우선순위**: Medium — 실사용 규모에서 대형 청구서 출력 불가. 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단. 관련: IS #1418, IMP-197(TeamB_Dev).
+
+---
+
+## [IMP-208] 오더정산 S2 — 요율 스냅샷 없는 기존 오더의 시스템 등록값 대체 소스 (Team B 제안 IS #1432 채택)
+
+- **발견 경위**: Dave가 TASK-B-369(IS #1425) 오더정산 S2 구현 중 건의(IS #1432). 2026-11-24 Aiden 채택(R-15).
+- **현재 상태**: 시스템 청구·부피중량은 `zen_order_rate_snapshots.metadata.platform`에서만 읽는다. 스냅샷이 없는 과거 오더는 시스템 값이 `—`로 표시되어 "시스템 등록값 vs UPS 청구서값" 대비 목적이 약해진다. 화면은 정상 동작한다.
+- **임시 조치**: 스냅샷 값이 없으면 `—` 표시.
+- **목표 구현**: 스냅샷 우선, 없으면 `zen_order_packages`(중량·치수)와 `zen_ups_products.volumetric_divisor`로 청구·부피중량을 계산하는 서버측 fallback(신규 조회 액션 또는 Ds-11 등재 헬퍼). 계산 규칙은 `src/lib/ups/pricing-engine.ts`가 단일 출처.
+- **관련 파일**: 오더정산 상세 페이지, `src/lib/ups/pricing-engine.ts`, `src/app/actions/finance/ups-actual-cost.ts`
+- **예상 공수**: 0.3~0.5 MD
+- **우선순위**: Low — 표시 보조 정보. 선행 조건: PR #1462(TASK-B-381) 구현 후 정산 화면 구조 확인. 본 사업 전 최소 발령 원칙에 따라 기록만. 관련: IS #1432.
+
+---
+
+## [IMP-209] 오더정산 관리자 역할 상수(`ADMIN_ROLES`) 공용 모듈 분리 (Team B 제안 IS #1433 채택, IMP-206 연계)
+
+- **발견 경위**: Dave가 TASK-B-369(IS #1425) 리뷰 반영 중 건의(IS #1433). 2026-11-24 Aiden 채택(R-15).
+- **현재 상태**: 오더정산 S1·S2 서버 페이지와 `ups-actual-cost.ts` 서버 액션이 `['ZENITH_SUPER_ADMIN','ADMIN','MANAGER']`를 각각 하드코딩한다(현재 값은 일치). 서버 액션 파일은 `'use server'`라 상수 export가 불가능하다. 한 곳만 바뀌면 페이지 접근과 액션 권한이 어긋날 수 있다.
+- **임시 조치**: 세 곳의 값을 수동으로 일치 유지.
+- **목표 구현**: `src/lib/auth/admin-roles.ts`(또는 rbac 인접)에 `ADMIN_ROLES`/`isAdminRole()` 단일 출처를 만들고 서버 액션·페이지 가드가 참조(기존 `assertAdmin` 동작 불변). PR #1476(TASK-B-373 PR-2)이 추출하는 요율 권한 공유 가드(`ups-rate-permissions.ts`)와 중복 정의되지 않도록 설계를 함께 정합하고, IMP-206(역할별 기능 허용 설정)의 선행 단계(허용 판단 단일화)로 삼는다.
+- **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `src/app/[locale]/(dashboard)/finance/order-settlement/page.tsx`, `.../[orderId]/page.tsx`, `src/lib/auth/rbac.ts`
+- **예상 공수**: 0.2 MD
+- **우선순위**: Low~Medium — 권한 불일치 재발 방지. 본 사업 전 최소 발령 원칙에 따라 기록만. 관련: IS #1433, IMP-206.
+
+---
+
+## [IMP-210] 오더정산 S2 — UPS 청구서 PDF 첨부 (WBS 2.6 선택 범위, Team B 제안 IS #1434 채택)
+
+- **발견 경위**: Dave가 TASK-B-369(IS #1425) WBS 2.6 선택 범위("UPS 청구서 PDF 첨부, 설계 Q8")를 화면·문구 범위 준수를 위해 미구현하고 건의(IS #1434). 2026-11-24 Aiden 채택(R-15).
+- **현재 상태**: S2 상세에서 UPS 청구서 번호·발행일만 입력하며 PDF 원본은 첨부·조회할 수 없다.
+- **임시 조치**: 없음.
+- **목표 구현**: 기존 `invoice-files` 업로드/다운로드 액션을 재사용해 S2에 PDF 첨부·미리보기·다운로드 영역 추가. 권한·Storage RLS 경로 확인 필요.
+- **관련 파일**: `src/app/actions/finance/invoice-files.ts`, `src/components/finance/order-settlement/OrderSettlementDetail.tsx`, Storage 정책
+- **예상 공수**: 0.3~0.5 MD
+- **우선순위**: Low — 선택 범위(증빙 편의). 선행 조건: PR #1462(TASK-B-381) 이후 정산 화면 구조 확정. 본 사업 전 최소 발령 원칙에 따라 기록만. 관련: IS #1434.
+
+---
+
+## [IMP-211] 화주 등급·할인율 수정(`updateAgencyShipperGrade`) 경로의 역마진 가드 — IMP-155 후속 (Team B 제안 IS #1467 채택)
+
+- **발견 경위**: IS #1349(DEF-149 §1.1) Jaison 지시에 따라 TASK-B-374가 실측한 범위 한계를 Team B가 IS #1467로 건의. 2026-11-24 Aiden 채택(R-15), 우선순위는 Team B 제안(p3)에서 Medium으로 상향.
+- **현재 상태**: `validateAgencyReverseMargin(supabase, agencyOrgId, zoneId, shipperDiscountRate)`는 zone 단위 정책(`zen_agency_pricing_policies`)의 `discount_rate`와 비교하므로 `zone_id`가 필수다. `updateAgencyShipperGrade(id, grade, discountRate)`는 등급·할인율만 받아 zone 컨텍스트가 없어 이 함수를 호출할 수 없고, zone 요율 설정 경로(`zone-discounts.ts:65`)에만 가드가 적용돼 있다. 즉 **등급·할인율 변경 경로는 IMP-155의 역마진 가드를 우회**한다. TASK-B-374는 소유권 가드만 구현했다.
+- **임시 조치**: 없음(운영자 주의에 의존).
+- **목표 구현**: 설계 의견 선행. 선택지 — ① 해당 대리점의 활성 정책 전체를 조회해 `discountRate <= min(policy.discount_rate)`를 검증(권장, 정책 없으면 종전대로 허용), ② zone 정책 미보유 시 명시적 기본 상한을 정책 테이블에 추가(설계 변경), ③ `discountRate` 변경분만 검증 범위로 한정. 정책 행이 전부 없는 대리점과 일부 zone만 보유한 대리점의 기대 동작은 설계에서 확인.
+- **관련 파일**: `src/lib/ups/discount-guard.ts`, `src/app/actions/agency/zone-discounts.ts`, `updateAgencyShipperGrade`(`src/app/actions/agency/shippers.ts`)
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 가격을 정하는 경로의 가드 누락(금전적 영향). 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단. 관련: IS #1467, IMP-155, IS #1349.
+
+---
+
+## [IMP-212] 청구서 번호 채번 함수(`next_billing_statement_seq`) 후속 — 월 순번 상한 소진·허용 역할의 직접 호출 한계 (PR #1474 검토 후속, Aiden 발견)
+
+- **발견 경위**: 2026-11-23 PR #1474(TASK-B-378, 채번 함수 역할 검사·GRANT 정렬) 검토 중 Aiden이 발견, 두 항목을 후속으로 남김. 2026-11-24 Edward 승인으로 등록(R-15, Aiden 본인 발견).
+- **현재 상태**: ① 월 순번이 10,000번째에서 절단되어 `statement_no` UNIQUE 충돌로 청구서 생성이 실패한다(PR #1474가 동작을 실측해 테스트로 고정만 함). ② 역할 검사만으로는 "청구서 생성 RPC 경로에서만 실행"이 보장되지 않는다(허용 역할의 직접 호출 한계, 공개 저장소라 상세 미기재).
+- **임시 조치**: 없음(현재 운영에는 청구서 생성 구조가 적용되지 않음).
+- **목표 구현**: ① 번호 폭 확장 또는 상한 도달 시 명시적 오류·모니터링 — 결함(DEF)으로 별도 등록해 처리(DEF 채번은 열린 PR 브랜치 합산 후 확정, DEF-B-172는 다른 건이 사용). ② 직접 호출 가드(생성 RPC가 설정한 호출 출처 확인 등) 후속 설계. 청구서관리 구현 마무리 시점에 함께 판단.
+- **관련 파일**: `supabase/migrations/20261123120000_task_b378_billing_seq_role_check.sql`(TeamB_Dev 소재), `tests/unit/migrations/taskb359-billing-statement-db.test.ts`, IS #1452, PR #1474
+- **예상 공수**: 0.5 MD (추정, 설계 후 확정)
+- **우선순위**: Medium — 상한은 장기 규모에서 발생, 직접 호출 한계는 청구서관리 운영 전 판단 필요. 관련: IS #1452(TASK-B-378), PR #1474.
