@@ -84,38 +84,38 @@ Audit Agent(Business QA)는 평시(설계/구현)에는 신속한 피드백을 �
 
 ---
 
-## 🔐 5. 테스트 계정 정보 (Verification Credentials)
+## 🔐 5. 테스트 계정 정보 (로컬 개발/테스트 환경 전용)
 
-시스템 기능 검증 및 UAT 수행을 위한 표준 테스트 계정 정보입니다.
+로컬 `npm run db:seed` 환경에서 기능 검증 및 UAT를 수행하기 위한 역할별 테스트 계정 구분입니다. **상용(Production) 환경에서는 사용하지 않으며, 비밀번호 리터럴은 공개 문서에 기재하지 않습니다(`scripts/seed-local.ts` 로컬 설정 참조).**
 
-### 5-1. `npm run db:seed`로 재현 가능한 계정 (2026-07-19 검증 완료 — `scripts/seed-local.ts`)
+### 5-1. `npm run db:seed`로 재현 가능한 계정 (2026-07-19 검증 완료 — `scripts/seed-local.ts`, 로컬 전용)
 
-`supabase db reset` 후 반드시 `npm run db:seed`를 실행해야 아래 계정이 생성됩니다(reset만으로는 `auth.users` 0건).
+`supabase db reset` 후 반드시 `npm run db:seed`를 실행해야 아래 로컬 계정이 생성됩니다(reset만으로는 `auth.users` 0건).
 
 | 이메일 (ID) | 비밀번호 | 권한 (Role) | 소속 조직 | 비고 |
 | :--- | :--- | :--- | :--- | :--- |
-| `manager@zenith.kr` | `password1234` | MANAGER | Zenith Logistics (PLATFORM) | |
-| `operator@zenith.kr` | `password1234` | OPERATOR | Zenith Logistics (PLATFORM) | |
-| `admin@zenith.kr` | `password1234` | ADMIN | Zenith Logistics (PLATFORM) | UAT 마스터 계정 (UAT_MASTER.md 기준) |
-| `agency@zenith.kr` | `password1234` | **AGENCY** | Zenith Agency Partners (AGENCY) | UAT-15/16/17-03/20 검증용 — 2026-07-19 시드 보완(이전엔 문서에만 있고 재현 스크립트에 없었음) |
-| `agency_shipper@zenith.kr` | `password1234` | **AGENCY_SHIPPER** | Agency Shipper Co (SHIPPER) | `agency@zenith.kr` 소속(zen_agency_shippers 연결 완료) — 2026-07-19 신규 추가, UPS 특송 화주단 UAT 필수 |
-| `uat02_corp_shipper@zenith.kr` | `password1234` | CORPORATE | Global Shipper Corp (SHIPPER) | UAT-17 DIRECT/PICKUP 검증용 |
-| `shipper@zenith.kr` | `password1234` | CORPORATE | Global Shipper Corp (SHIPPER) | |
-| `carrier@zenith.kr` | `password1234` | CARRIER | Fast Carrier Ltd (CARRIER) | |
-| `individual@zenith.kr` | `password1234` | INDIVIDUAL | — | |
+| `manager@zenith.kr` | `<로컬 시드 설정값>` | MANAGER | Zenith Logistics (PLATFORM) | |
+| `operator@zenith.kr` | `<로컬 시드 설정값>` | OPERATOR | Zenith Logistics (PLATFORM) | |
+| `admin@zenith.kr` | `<로컬 시드 설정값>` | ADMIN | Zenith Logistics (PLATFORM) | UAT 마스터 계정 (UAT_MASTER.md 기준) |
+| `agency@zenith.kr` | `<로컬 시드 설정값>` | **AGENCY** | Zenith Agency Partners (AGENCY) | UAT-15/16/17-03/20 검증용 |
+| `agency_shipper@zenith.kr` | `<로컬 시드 설정값>` | **AGENCY_SHIPPER** | Agency Shipper Co (SHIPPER) | `agency@zenith.kr` 소속 |
+| `uat02_corp_shipper@zenith.kr` | `<로컬 시드 설정값>` | CORPORATE | Global Shipper Corp (SHIPPER) | UAT-17 DIRECT/PICKUP 검증용 |
+| `shipper@zenith.kr` | `<로컬 시드 설정값>` | CORPORATE | Global Shipper Corp (SHIPPER) | |
+| `carrier@zenith.kr` | `<로컬 시드 설정값>` | CARRIER | Fast Carrier Ltd (CARRIER) | |
+| `individual@zenith.kr` | `<로컬 시드 설정값>` | INDIVIDUAL | — | |
 
 ### 5-2. ⚠️ 문서에만 존재 — 재현 스크립트 미확인 (신뢰하지 말 것)
 
-아래 계정은 과거 특정 UAT 라운드에서 수기로 생성됐던 것으로 추정되며, `scripts/seed-local.ts` 전체 이력을 확인해도 생성 코드가 없습니다. `supabase db reset` 이후에는 존재하지 않을 가능성이 높습니다 — 사용 전 반드시 `psql`로 실재 확인할 것.
+아래 계정은 과거 특정 UAT 라운드에서 수기로 생성됐던 것으로 추정되며, `scripts/seed-local.ts` 전체 이력을 확인해도 생성 코드가 없습니다.
 
 | 이메일 (ID) | 비밀번호 | 권한 (Role) | 비고 |
 | :--- | :--- | :--- | :--- |
-| `temp_admin@zenith.kr` | `admin1234` | ZENITH_SUPER_ADMIN | |
-| `test_corp_001@zenith.kr` | `admin1234` | ADMIN | |
-| `governance_master@zenith.kr`| `admin1234` | ADMIN | |
+| `temp_admin@zenith.kr` | `<로컬 수기 설정값>` | ZENITH_SUPER_ADMIN | |
+| `test_corp_001@zenith.kr` | `<로컬 수기 설정값>` | ADMIN | |
+| `governance_master@zenith.kr`| `<로컬 수기 설정값>` | ADMIN | |
 
 > [!NOTE]
-> 모든 테스트 계정의 초기 비밀번호는 `admin1234` 또는 `password1234`로 설정되어 있습니다. 보안이 필요한 상용 환경 배포 시에는 반드시 변경해야 합니다.
+> 모든 테스트 계정은 **로컬 개발 환경 전용**이며, 상용 환경에 시드하거나 사용하지 않습니다.
 > **재발 방지 원칙**: 이 문서에 계정을 추가할 때는 반드시 `scripts/seed-local.ts`에도 동시에 반영한다 — 문서와 재현 스크립트가 따로 노는 것이 agency@zenith.kr 누락 사고(2026-07-19)의 근본 원인이었다.
 
 ---

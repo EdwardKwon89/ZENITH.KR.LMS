@@ -54,11 +54,11 @@
 상세는 `docs/08_Self_Audit/Reviews/TASK-1156_DEF-147_admin_접근통제_점검.md` 참조.
 
 - 8개 경로 × 8역할 = **64셀 전부 실측**(미측정 0). 미들웨어는 조직 유형만 보고 전 경로를 통과시키나, 페이지 서버 역할 게이트는 4개 경로에만 존재 → 4개(`rates`·`customs-rates`·`delivery-rates`·`ups-rates`)는 구조적 공백.
-- 🔴 High: 화주 세션이 `zen_rate_cards` 24건 전량 + `carrier_cost`·`margin_rate`·`platform_fee_rate`를 PostgREST로 조회 가능(RLS 스코프 누락). 화면은 액션이 거부하므로 데이터 계층에서만 노출.
-- ⚠️ Medium: 대리점 UPS 실비 저장은 코드 가드·UI가 허용하나 RLS INSERT가 403으로 차단(불일치).
-- ⛔ Low(신규): 운송사(`CARRIER`)가 `/admin/transport-costs` 진입 시 HTTP 500 3회 반복 재현(리다이렉트 아님). 같은 계정의 `transport-costs`는 DB 권한표에 있으나 페이지가 500을 던짐.
-- ✅ 쓰기 상승 실증은 전부 차단(비관리자 PostgREST INSERT 403).
-- DEF-149 연계(§5.5): `agency/shippers.ts` 5개 함수는 소유권 미검증 + admin client 우회 → 코드 계층 IDOR. 단, 사용자 세션 RLS로 교차 대리점 조회·수정 0건, customs/delivery `org_id` 변조 42501 차단 확인.
+- 🔴 High (`DEF-153` 연계): 비관리자 세션의 요율 카드 데이터 계층 접근 이슈 보고 → **해소됨 (`TASK-1166` PR #1399)**.
+- ⚠️ Medium: 대리점 실비 저장 코드 가드·UI vs RLS 불일치.
+- ⛔ Low(신규): 운송사(`CARRIER`) `/admin/transport-costs` 진입 시 HTTP 500 3회 반복 재현(가용성 결함).
+- ✅ 쓰기 상승 실증은 전부 차단.
+- `DEF-149` 연계(§5.5): `agency/shippers.ts` 소유권 검증 보완 대상 보고 → **해소됨 (PR #1473)**.
 - 리뷰 문서 §7.2에 경로별 허용 역할 표(P4 ① 설계안) 제시. 🔶 4건은 Aiden 확정 대기.
 
 ## 6. 발견 사항 (R-18/R-15)

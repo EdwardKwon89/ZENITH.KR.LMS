@@ -124,7 +124,7 @@
                   - img [ref=e209]
                   - text: 2026-04-25 20:25
               - link [ref=e212] [cursor=pointer]:
-                - /url: https://ayowrwmufagzstqiqrnj.supabase.co/storage/v1/object/sign/invoices/INV-UAT-001/v1_1777116329290.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8yNzM5ODAzMi1iNGY1LTQ5YjUtYmFiYi03Njc2N2Q2MmNiNDQiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbnZvaWNlcy9JTlYtVUFULTAwMS92MV8xNzc3MTE2MzI5MjkwLnBkZiIsImlhdCI6MTc3NzExNjMzMCwiZXhwIjoxNzc3MTE5OTMwfQ.tcmDRClXTkylofFAbYeP66QfKNEETWpstRn5F5uBplE
+                - /url: https://ayowrwmufagzstqiqrnj.supabase.co/storage/v1/object/sign/invoices/INV-UAT-001/v1_1777116329290.pdf?token=[REDACTED_EXPIRED]
                 - button [ref=e213]:
                   - img [ref=e215]
             - paragraph [ref=e219]:

@@ -82,7 +82,7 @@
 #### getUpsActualCharges(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-charges.ts:279-299`
 - **설명**: 특정 UPS 오더(`orderId`)에 등록된 실비 청구 항목 목록(`zen_ups_actual_charges` + `entered_by_profile` 조인)을 등록일 오름차순으로 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-charges.ts:280`, 로그인 세션만 검증하며 액션 내 별도 역할·소유권 가드 없음 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-charges.ts:280`, 목표: 역할·소유권 가드 정렬 대상 — `DEF-150` 참조)
 - **Input**: `orderId: string` (오더 UUID)
 - **Output**: `Promise<Array<Record<string, unknown>>>` (`ups-actual-charges.ts:298`)
 - **오류**: 미인증 시 `validateUserAction` 예외 throw; DB 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ACTUAL_CHARGES_LOOKUP' }))` throw (`L293-296`)
@@ -90,7 +90,7 @@
 #### getUpsChargeReconciliation(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-charges.ts:301-364`
 - **설명**: 특정 UPS 오더(`orderId`)의 예상 비용 합계(`zen_order_costs`), 실제 청구 합계(`estimated + zen_ups_actual_charges`), 차액(`variance`), 통화 및 인보이스 마감 여부를 대사하여 반환합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-charges.ts:302`, 로그인 세션만 검증하며 액션 내 별도 역할·소유권 가드 없음 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-charges.ts:302`, 목표: 역할·소유권 가드 정렬 대상 — `DEF-150` 참조)
 - **Input**: `orderId: string` (오더 UUID)
 - **Output**: `Promise<{ estimated: number; estimatedBreakdown: Array<{ costType: string; amount: number; currency: string }>; actual: number; variance: number; currency: string; isFinalized: boolean; invoiceNo: string | null; invoiceDate: string | null }>` (`ups-actual-charges.ts:354-363`)
 - **오류**: 예상 비용 조회 실패(`ESTIMATED_COST_LOOKUP`, `L311-314`) 또는 실비 조회 실패(`ACTUAL_CHARGES_LOOKUP`, `L333-336`) 시 `logger.error` 후 `Error(await trError('generic', ...))` throw
@@ -108,7 +108,7 @@
 #### getOrderReleasedDate(supabase, orderId, fallbackCreatedAt?)
 - **Path**: `src/app/actions/finance/ups-actual-cost.ts:56-69`
 - **설명**: `order_status_history`에서 오더(`orderId`)가 `RELEASED` 상태로 전환된 최신 시각(없으면 `fallbackCreatedAt` 또는 당일)을 `YYYY-MM-DD` 문자열로 반환합니다.
-- **권한**: **없음 (누락됨)** — `'use server'` 파일에서 `export`되어 있으나 내부 헬퍼 용도로 작성되어 `validateUserAction()` 등 인증/역할 가드가 없음 (`DEF-150` 참조)
+- **권한**: 서버 내부 헬퍼 정리 대상 (`DEF-150` 참조 — 비공개 Advisory 관리)
 - **Input**: `supabase: any` (SupabaseClient), `orderId: string`, `fallbackCreatedAt?: string`
 - **Output**: `Promise<string>` (`YYYY-MM-DD`, `ups-actual-cost.ts:68`)
 - **오류**: 별도 에러 throw 없이 조회 결과가 없으면 `fallbackCreatedAt` 또는 현재 UTC 날짜(`YYYY-MM-DD`) 반환 (`L66-68`)
@@ -116,7 +116,7 @@
 #### getUpsActualCost(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-cost.ts:72-91`
 - **설명**: 특정 오더(`orderId`)의 UPS 실제 원가 확정 기록(`zen_ups_actual_cost` + `entered_by_profile` 조인)을 단건 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-cost.ts:73`, 로그인 세션만 검증하며 `assertAdmin` 역할 가드 없음 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-cost.ts:73`, 목표: 관리자 전용 가드 정렬 대상 — `DEF-150` 참조)
 - **Input**: `orderId: string` (오더 UUID)
 - **Output**: `Promise<Record<string, unknown> | null>` (`ups-actual-cost.ts:90`)
 - **오류**: 미인증 시 `validateUserAction` 예외 throw; DB 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ACTUAL_COST_LOOKUP' }))` throw (`L86-89`)

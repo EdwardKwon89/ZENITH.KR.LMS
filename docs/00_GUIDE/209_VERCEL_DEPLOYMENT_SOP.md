@@ -114,18 +114,10 @@ curl -s -o /dev/null -w "%{http_code}\n" -L https://zenith-lms-hazel.vercel.app
 ```
 200이 아니면(500 등) 대부분 환경변수 문제 — 2단계로 돌아가 확인.
 
-## 5. 시연용 데이터 시드 (필요 시)
+## 5. 테스트 데이터 시드 (로컬 개발 전용 — 원격 절차 폐기)
 
-`scripts/seed-local.ts`는 `SUPABASE_URL` 환경변수를 지정하면 그 대상으로 시드함(기본값은 로컬 유지).
-
-```bash
-export SUPABASE_URL="https://ayowrwmufagzstqiqrnj.supabase.co"
-export SUPABASE_SERVICE_ROLE_KEY="<Production 환경변수에서 가져온 값>"
-npx tsx scripts/seed-local.ts
-unset SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY
-```
-
-시드 계정(전부 비밀번호 `password1234`): `admin@zenith.kr`, `manager@zenith.kr`, `agency@zenith.kr`, `sntl@zenith.kr`(SUB_ADMIN), `sntl_sub1@zenith.kr`(AGENCY), `test_shipper@zenith.kr`(AGENCY_SHIPPER) 등.
+> [!CAUTION]
+> **원격(Production) 시드 절차 폐기**: `scripts/seed-local.ts`는 **로컬 개발 환경(`127.0.0.1`) 전용**입니다. 운영 DB에 테스트/시드 계정을 주입하지 마십시오(계정·비밀번호 정보는 로컬 시드 스크립트에서 관리하며 공개 문서에 기재하지 않음).
 
 ## 6. 최종 검증
 
