@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | open | 미배정 | 2026-11-23 |
+| [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | open | 미배정 | 2026-11-24 |
 | [#1467](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1467) | [IMP 제안] 대리점 화주 등급·할인율 수정(updateAgencyShipperGrade)의 역마진(정책 할인율) 가드 검토 — DEF-149 §1.1 후속 | b | p3 | open | 미배정 | 2026-11-23 |
 | [#1463](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1463) | [Team B] TASK-B-382: MANAGER의 UPS 정산마감 관련 테이블 RLS 정책 정렬 (규칙 1 이행, 설계 의견부터) | b | p2 | open | 미배정 | 2026-11-24 |
 | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | draft | 미배정 | 2026-11-23 |
@@ -64,7 +64,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1428](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1428) | [보류] 회귀 테스트 2파일 DB 질의 방식 통일 (npx supabase db query → docker exec psql) | b | p4 | - | 미배정 | 2026-11-22 |
 | [#1418](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1418) | [IMP] 청구서 Excel 출력 후속 3건 — in() URL 청크 조회·날짜 달력 검증·JSDoc 정리 (#1411 검토 후속) | b | p3 | open | 미배정 | 2026-11-22 |
 | [#1371](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1371) | [Team B → Aiden] Gale(Gemini 4 Argon) 페르소나 등록 요청 — agent-worktree-init.sh 등 | a | p3 | open | 미배정 | 2026-11-18 |
-| [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | blocked | 미배정 | 2026-11-23 |
+| [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | open | 미배정 | 2026-11-24 |
 | [#1368](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1368) | [Team B] TASK-B-362: 청구서관리 ⑤ 청구서 PDF 생성·다운로드 및 발행 이메일 | b | p2 | blocked | 미배정 | 2026-11-17 |
 | [#1364](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1364) | [Team B] EPIC: 청구서관리 — 오더정산·청구서 생성/관리 (추적용) | b | p2 | in-progress | 미배정 | 2026-11-23 |
 | [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) | [Aiden → Team B] DEF-151 UPS 요율 조회 액션 원가 포함 반환·가드 공백, /agency/other-charges 원가 노출 수정 요청 | b | p1 | in-progress | 미배정 | 2026-11-23 |
