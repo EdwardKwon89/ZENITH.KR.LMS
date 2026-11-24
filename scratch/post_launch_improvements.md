@@ -1736,7 +1736,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ## [IMP-157] createOrder()의 agency_org_id/예상운임 스냅샷 생성이 role==='AGENCY_SHIPPER' 문자열에만 의존 — **[2026-08-09 정정] 대리점 소속 화주뿐 아니라 비대리점 직접 화주 전체가 동일하게 누락됨(Critical), DEF-B-035/Issue 등록·TASK-B-258 배정**
 
-- **발견 경위**: JSJung 요청으로 "jungjs72@gmail.com 계정으로 입력된 오더가 agency@zenith.kr에서 검색이 안 됨" 재현·근본원인 분석 중 발견. `jungjs72@gmail.com`(role: `CORPORATE`)을 `agency@zenith.kr` 소속으로 `zen_agency_shippers`에 연결한 뒤 UPS 오더 3건(`ZEN-2026-000004/5/6`)을 등록했으나, 전부 `agency_org_id`가 NULL로 남아 대리점 세션(RLS 정책 `agency_shipper_select_own_orders`: `agency_org_id = 자기 org_id`)에서 조회 자체가 안 됨.
+- **발견 경위**: JSJung 요청으로 "화주 계정(`shipper-a@example.com`)으로 입력된 오더가 agency@zenith.kr에서 검색이 안 됨" 재현·근본원인 분석 중 발견. `shipper-a@example.com`(role: `CORPORATE`)을 `agency@zenith.kr` 소속으로 `zen_agency_shippers`에 연결한 뒤 UPS 오더 3건(`ZEN-2026-000004/5/6`)을 등록했으나, 전부 `agency_org_id`가 NULL로 남아 대리점 세션(RLS 정책 `agency_shipper_select_own_orders`: `agency_org_id = 자기 org_id`)에서 조회 자체가 안 됨.
 - **근본 원인**: `createOrder()`(`src/app/actions/operations/orders.ts:121-146`)가 `agency_org_id` 조회(121행)와 UPS 예상운임 스냅샷 생성(`saveOrderRateSnapshot()` 호출, 146행) 둘 다 `profile.role === USER_ROLES.AGENCY_SHIPPER`(문자열 완전일치)로만 게이트됨. 그러나 대리점 소속 여부는 role이 아니라 `zen_agency_shippers` 테이블(role 무관)로 관리되는 별개의 관계 — role이 `CORPORATE`/`INDIVIDUAL` 등이어도 실제로는 대리점에 소속될 수 있는데, 이 코드는 그 케이스를 전혀 감지하지 못함.
 - **부수 피해(더 심각)**: 같은 조건문 때문에 **UPS 예상운임 스냅샷(`zen_order_rate_snapshots`) 생성 자체가 통째로 스킵**됨 — role이 AGENCY_SHIPPER가 아닌 대리점 소속 화주가 등록한 UPS 오더는 예상운임이 전혀 계산되지 않은 채로 남음(ups-detail 화면 전체 공란, agency/shipper 인보이스용 platform breakdown 데이터 부재).
 - **[2026-08-09 정정 — 범위 확대, Critical로 재분류]**: JSJung의 "admin 매입/매출이 산정되고 있나요?" 질문에 답하며 재검토한 결과, 위 서술은 문제를 "대리점 소속인데 role이 다른 케이스"로만 좁게 기술하고 있었으나 **실제로는 훨씬 넓은 범위**를 덮는 문제임을 확인:
@@ -1835,7 +1835,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ## [IMP-166] james 계정 복구 스크립트가 zen_sequences 카운터 미동기화 → 신규 오더 order_no 충돌 재발
 
-- **발견 경위**: 2026-08-17, PR#1155 검토 과정의 `supabase db reset`으로 로컬 DB가 초기화된 후 `scratch/restore-james-zen007-full.ts`로 james@sntl.co.kr + ZEN-2026-000007 오더를 복구. 이후 JSJung이 `/orders/new`에서 신규 오더 등록 시 `duplicate key value violates unique constraint "zen_orders_order_no_key"` 오류 보고. 원인: 복구 스크립트가 `zen_orders.order_no = 'ZEN-2026-000007'`을 직접 INSERT하지만, 채번 테이블 `zen_sequences`(prefix='ZEN', year='2026')의 `last_value`는 seed 값(6)에 머물러 있어, 다음 `get_next_order_sequence()` 호출 시 6→7로 증가하며 동일한 'ZEN-2026-000007'을 재발급 → 충돌.
+- **발견 경위**: 2026-08-17, PR#1155 검토 과정의 `supabase db reset`으로 로컬 DB가 초기화된 후 `scratch/restore-james-zen007-full.ts`로 `user-a@example.com` + ZEN-2026-000007 오더를 복구. 이후 JSJung이 `/orders/new`에서 신규 오더 등록 시 `duplicate key value violates unique constraint "zen_orders_order_no_key"` 오류 보고. 원인: 복구 스크립트가 `zen_orders.order_no = 'ZEN-2026-000007'`을 직접 INSERT하지만, 채번 테이블 `zen_sequences`(prefix='ZEN', year='2026')의 `last_value`는 seed 값(6)에 머물러 있어, 다음 `get_next_order_sequence()` 호출 시 6→7로 증가하며 동일한 'ZEN-2026-000007'을 재발급 → 충돌.
 - **현재 상태**: 즉시 조치 완료 — `zen_sequences` 테이블의 ZEN/2026 `last_value`를 7로 수동 보정. `restore-james-zen007-full.ts`에도 7단계(시퀀스 동기화: 복원한 order_no의 순번 이상으로 `zen_sequences.last_value`를 upsert)를 추가해 향후 이 스크립트를 재실행해도 동일 문제가 재발하지 않도록 수정함.
 - **임시 조치**: 스크립트 자체 수정으로 근본 해결(재현 시 별도 수동 조치 불필요).
 - **목표 구현**: (완료) — 스크립트가 이제 자동으로 시퀀스를 동기화하므로 추가 구현 불필요. 다만 이런 유형의 "특정 order_no를 직접 INSERT하는" 복구/시드 스크립트가 이 프로젝트에 더 있다면(예: `scripts/seed-local.ts`) 동일 패턴(시퀀스 카운터 동기화 누락)이 있는지 별도 점검 권장.

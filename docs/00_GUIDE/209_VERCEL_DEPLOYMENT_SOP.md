@@ -12,14 +12,14 @@ tags: ["procedure"]
 이 문서는 develop 브랜치의 최신 상태를 원격 Vercel + 원격 Supabase에 배포하는 표준 절차를 정의합니다. **2026-07-27 Edward 지시로, 이 절차는 매번 자동 수행하지 않으며 Edward가 명시적으로 지시한 시점에만 실행합니다.**
 
 > [!WARNING]
-> **(2026-10-11 개정)** 원격 Supabase(`Zenith_LMS`, ref `ayowrwmufagzstqiqrnj`)는 2026-10-05~10-15 Pilot 집중운영 시작 이후 **실제 업무 데이터**를 담고 있습니다. 문서 최초 작성 시점(2026-07-27)의 "고객 시연용 더미 데이터" 전제는 더 이상 유효하지 않습니다. 배포·마이그레이션 시 반드시 **기존 데이터 보전**을 전제로 작업하십시오 — 상세 원칙은 아래 2단계 참조.
+> **(2026-10-11 개정)** 원격 Supabase(`운영 프로젝트(식별자 비공개)`)는 2026-10-05~10-15 Pilot 집중운영 시작 이후 **실제 업무 데이터**를 담고 있습니다. 문서 최초 작성 시점(2026-07-27)의 "고객 시연용 더미 데이터" 전제는 더 이상 유효하지 않습니다. 배포·마이그레이션 시 반드시 **기존 데이터 보전**을 전제로 작업하십시오 — 상세 원칙은 아래 2단계 참조.
 
 ## 0. 핵심 전제
 
 - **이 Vercel 프로젝트(`zenith-lms`)는 GitHub 저장소 연동이 되어 있지 않습니다.** develop/main에 push해도 자동으로 배포가 트리거되지 않습니다 — 배포는 항상 `vercel` CLI로 수동 실행해야 합니다.
 - 프로젝트 식별 정보(`.vercel/project.json`에 저장됨, 매 세션 재확인 불필요):
-  - Vercel: `projectId: prj_3DkFOUBTjJGffYZGJmofCr5WFX7U`, `orgId: team_Pfa6SmZARJ5rLIqQtuF7SARO`, 프로젝트명 `zenith-lms`
-  - Supabase(원격 데모): 프로젝트명 `Zenith_LMS`, ref `ayowrwmufagzstqiqrnj` (Seoul 리전)
+  - Vercel: `운영 프로젝트(식별자 비공개 — 로컬 .vercel/project.json 참조)`
+  - Supabase(원격 데모): `운영 프로젝트(식별자 비공개)` (Seoul 리전)
 - Production URL(고정 alias): **https://zenith-lms-hazel.vercel.app**
 
 ## 1. develop → main 병합
@@ -38,10 +38,10 @@ gh pr merge <PR번호> --merge --admin --delete-branch
 
 ## 2. 원격 Supabase 확인 및 마이그레이션 적용
 
-**주의**: 무료/유휴 티어 특성상 원격 Supabase 프로젝트가 **일시정지(Paused)** 상태일 수 있음 — 이 경우 CLI로는 재개 불가, Edward가 [대시보드](https://supabase.com/dashboard/project/ayowrwmufagzstqiqrnj)에서 직접 재개해야 함.
+**주의**: 무료/유휴 티어 특성상 원격 Supabase 프로젝트가 **일시정지(Paused)** 상태일 수 있음 — 이 경우 CLI로는 재개 불가, Edward가 [대시보드](https://supabase.com/dashboard/project/<운영_프로젝트_ref>)에서 직접 재개해야 함.
 
 ```bash
-supabase link --project-ref ayowrwmufagzstqiqrnj
+supabase link --project-ref <운영_프로젝트_ref>
 supabase migration list          # pending 마이그레이션 확인
 ```
 
@@ -68,7 +68,7 @@ vercel env ls
 > [!IMPORTANT]
 > **`vercel env add NAME production` 실행 시 값을 stdin으로 파이핑하면 Vercel이 값 끝에 개행문자(`\n`)를 은연중 추가하는 버그성 동작이 있음** — 이로 인해 Supabase API가 "Invalid API key"를 반환함(2026-07-27 실제 발생 확인). **반드시 `--value` 플래그로 값을 직접 전달할 것**:
 > ```bash
-> vercel env add NEXT_PUBLIC_SUPABASE_URL production --value "https://ayowrwmufagzstqiqrnj.supabase.co" --yes
+> vercel env add NEXT_PUBLIC_SUPABASE_URL production --value "https://<운영_프로젝트_ref>.supabase.co" --yes
 > ```
 > 다른 환경(예: 기존 Preview)에서 값을 가져와야 하면 `vercel env pull <file> --environment=preview --git-branch=<branch>`로 받은 뒤 `--value`로 재등록. 값 확인 시 `sed -E 's/^[A-Z_]+="//; s/"$//'`로 quote만 제거(다시 pull해서 `\n` 잔존 여부 재확인 권장).
 
@@ -114,18 +114,10 @@ curl -s -o /dev/null -w "%{http_code}\n" -L https://zenith-lms-hazel.vercel.app
 ```
 200이 아니면(500 등) 대부분 환경변수 문제 — 2단계로 돌아가 확인.
 
-## 5. 시연용 데이터 시드 (필요 시)
+## 5. 테스트 데이터 시드 (로컬 개발 전용 — 원격 절차 폐기)
 
-`scripts/seed-local.ts`는 `SUPABASE_URL` 환경변수를 지정하면 그 대상으로 시드함(기본값은 로컬 유지).
-
-```bash
-export SUPABASE_URL="https://ayowrwmufagzstqiqrnj.supabase.co"
-export SUPABASE_SERVICE_ROLE_KEY="<Production 환경변수에서 가져온 값>"
-npx tsx scripts/seed-local.ts
-unset SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY
-```
-
-시드 계정(전부 비밀번호 `password1234`): `admin@zenith.kr`, `manager@zenith.kr`, `agency@zenith.kr`, `sntl@zenith.kr`(SUB_ADMIN), `sntl_sub1@zenith.kr`(AGENCY), `test_shipper@zenith.kr`(AGENCY_SHIPPER) 등.
+> [!CAUTION]
+> **원격(Production) 시드 절차 폐기**: `scripts/seed-local.ts`는 **로컬 개발 환경(`127.0.0.1`) 전용**입니다. 운영 DB에 테스트/시드 계정을 주입하지 마십시오(계정·비밀번호 정보는 로컬 시드 스크립트에서 관리하며 공개 문서에 기재하지 않음).
 
 ## 6. 최종 검증
 

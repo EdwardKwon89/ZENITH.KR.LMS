@@ -77,7 +77,7 @@
 #### getTaxInvoiceHistory(invoiceId)
 - **Path**: `src/app/actions/finance/invoice.ts:282-294`
 - **설명**: 특정 인보이스(`invoiceId`)에 대해 발행된 세금계산서 이력 목록을 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/invoice.ts:283`, 로그인 세션만 검증하며 액션 내 별도 역할·소유권 가드 없음 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` (`src/app/actions/finance/invoice.ts:283`, 목표: 인보이스 접근 권한 정렬 대상 — `DEF-150` 참조)
 - **Input**: `invoiceId: string` (인보이스 UUID)
 - **Output**: `Promise<TaxInvoice[]>` (`invoice.ts:293`)
 - **오류**: 미인증 시 `validateUserAction` 예외 throw; DB 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'INVOICE_HISTORY_LOOKUP' }))` throw (`invoice.ts:288-291`)

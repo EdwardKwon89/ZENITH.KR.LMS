@@ -23,12 +23,12 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/orders | ADMIN 계정 로그인 후 오더 목록 진입 | `admin@zenith.kr` / `password1234` | 오더 목록 정상 표시 | ☐ |
+| 1 | /ko/orders | ADMIN 계정 로그인 후 오더 목록 진입 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | 오더 목록 정상 표시 | ☐ |
 | 2 | /ko/orders/[id] | ICN→SIN 직항 구간 오더 선택 → 상세 페이지 진입 | — | 오더 상세 정보 표시 | ☐ |
 | 3 | /ko/orders/[id] | '경로 탭' 또는 'Route Options' 섹션 클릭 | — | COST·TIME·BALANCED 3종 카드 표시 | ☐ |
 | 4 | 각 카드 | 카드 내용 중 segments 배열 확인 | — | 1개 segment만 표시 (직항), segment[0].via = null | ☐ |
 | 5 | Supabase Studio | `SELECT * FROM zen_route_options WHERE order_id = '[orderId]'` | — | option_type = COST/TIME/BALANCED 3행, segments JSON에 1개 segment만 존재 | ☐ |
-| 6 | — | SHIPPER 계정 동일 오더 진입 | `shipper@zenith.kr` / `password1234` | SHIPPER도 동일한 3종 경로 옵션 확인 가능 | ☐ |
+| 6 | — | SHIPPER 계정 동일 오더 진입 | `shipper@zenith.kr` / `<로컬 시드 비밀번호>` | SHIPPER도 동일한 3종 경로 옵션 확인 가능 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
@@ -135,7 +135,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/tracking | SHIPPER 계정으로 추적 대시보드 진입 | `shipper@zenith.kr` / `password1234` | 추적 통계·목록 정상 표시 | ☐ |
+| 1 | /ko/tracking | SHIPPER 계정으로 추적 대시보드 진입 | `shipper@zenith.kr` / `<로컬 시드 비밀번호>` | 추적 통계·목록 정상 표시 | ☐ |
 | 2 | /ko/tracking | Hub 경유 오더의 Order Info 클릭 | — | 오더 상세 페이지로 이동 | ☐ |
 | 3 | /ko/orders/[id] | 타임라인 섹션 확인 | — | 현재까지 등록된 이벤트 표시 (최소 BOOKED) | ☐ |
 | 4 | Supabase Studio | `INSERT INTO zen_tracking_events`로 이벤트 수동 등록 (레그1 출발) | event_code=`TRANSIT_DEPARTED`, segment_index=0 | 오더 타임라인에 'Leg 1 · 출발' 레이블로 표시 | ☐ |
@@ -143,7 +143,7 @@
 | 6 | Supabase Studio | 환적지 도착 이벤트 등록 | event_code=`TRANSIT_ARRIVED_HUB`, segment_index=0, hub_port_code=`HKG` | 타임라인에 'Leg 1 · 환적지 도착' + 허브 마커(맵핀) + hub_port_code 표시 | ☐ |
 | 7 | Supabase Studio | 환적지 출발 이벤트 등록 | event_code=`TRANSIT_DEPARTED_HUB`, segment_index=1, hub_port_code=`HKG` | 타임라인에 'Leg 2 · 환적지 출발' 표시 | ☐ |
 | 8 | Supabase Studio | 최종 목적지 도착 등록 | event_code=`TRANSIT_ARRIVED_DEST`, segment_index=1 | 타임라인에 'Leg 2 · 목적지 도착' 표시, 상태 배지 DELIVERED | ☐ |
-| 9 | /ko/orders/[id] | ADMIN 계정으로 동일 오더 진입 | `admin@zenith.kr` / `password1234` | 동일 타임라인 이벤트 표시 확인 | ☐ |
+| 9 | /ko/orders/[id] | ADMIN 계정으로 동일 오더 진입 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | 동일 타임라인 이벤트 표시 확인 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
@@ -248,7 +248,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/orders/[id] | ADMIN 계정으로 Hub 경유 오더 진입 | `admin@zenith.kr` / `password1234` | COST·TIME·BALANCED 3종 + Hub 경유 경로 표시 | ☐ |
+| 1 | /ko/orders/[id] | ADMIN 계정으로 Hub 경유 오더 진입 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | COST·TIME·BALANCED 3종 + Hub 경유 경로 표시 | ☐ |
 | 2 | 경로 카드 | Hub 경유 경로 카드의 세그먼트별 비용 확인 | — | segment[0].carrier ≠ segment[1].carrier, 각각 cost 필드 표시 | ☐ |
 | 3 | — | 총비용 = segment[0].cost + segment[1].cost 합산 확인 | — | 경로 카드 총비용 = 세그먼트 비용 합계와 일치 | ☐ |
 | 4 | Supabase Studio | `SELECT * FROM zen_rate_cards WHERE carrier_id IN ('[carrier1]','[carrier2]')` | — | 각 carrier의 구간별 rate/cost 확인 가능 | ☐ |

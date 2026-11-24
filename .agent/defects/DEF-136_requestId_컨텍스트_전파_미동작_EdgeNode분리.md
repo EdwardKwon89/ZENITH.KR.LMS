@@ -1,15 +1,15 @@
 # DEF-136: requestId 컨텍스트 전파 미동작 — Edge Middleware/Node Server Action 런타임 분리로 AsyncLocalStorage 단절
 
 **발견일**: 2026-08-19
-**발견자**: Aiden — Edward 요청으로 프로덕션 실사용(james@sntl.co.kr) 로그 직접 확인 중 발견
+**발견자**: Aiden — Edward 요청으로 프로덕션 실사용(`user-a@example.com`) 로그 직접 확인 중 발견
 **긴급도**: Medium — 장애/오류는 없으나, TASK-1130이 완료 보고한 핵심 기능(요청 단위 로그 추적)이 실제로는 동작하지 않음. 진단 도구로서의 신뢰성 문제.
 
 ## 현상
 
-프로덕션 런타임 로그(Vercel)에서 실제 사용자(james@sntl.co.kr) 활동을 직접 확인한 결과:
+프로덕션 런타임 로그(Vercel)에서 실제 사용자(`user-a@example.com`) 활동을 직접 확인한 결과:
 
 ```json
-{"level":"info","timestamp":"2026-08-19T08:59:11.708Z","message":"[DEBUG] validateUserAction: getUser result","data":[{"hasUser":true,"email":"james@sntl.co.kr","error":null}]}
+{"level":"info","timestamp":"2026-08-19T08:59:11.708Z","message":"[DEBUG] validateUserAction: getUser result","data":[{"hasUser":true,"email":"user-a@example.com","error":null}]}
 ```
 
 정상 요청·실제 에러(Resend 발송 실패) 로그 전부 확인했으나 **`requestId`/`userId`/`orgId`/`route` 필드가 단 하나도 찍히지 않음**. 반면 `x-request-id` 응답 헤더는 정상적으로 붙어 있음(`curl` 실측 확인).

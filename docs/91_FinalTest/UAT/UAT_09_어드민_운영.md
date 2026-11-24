@@ -21,10 +21,10 @@
 
 | 순서 | 화면·URL                | 수행 액션                             | 입력 데이터                                               | 기대 결과                                                  | 확인 |
 | :--: | :---------------------- | :------------------------------------ | :-------------------------------------------------------- | :--------------------------------------------------------- | :--: |
-| 1    | /ko/admin/organizations | ADMIN 계정으로 조직 관리 페이지 진입  | `admin@zenith.kr` / `password1234`                        | 조직 목록 표시 (상태 필터: PENDING·APPROVED·REJECTED)      | ☐    |
+| 1    | /ko/admin/organizations | ADMIN 계정으로 조직 관리 페이지 진입  | `admin@zenith.kr` / `<로컬 시드 비밀번호>`                        | 조직 목록 표시 (상태 필터: PENDING·APPROVED·REJECTED)      | ☐    |
 | 2    | /ko/admin/organizations | PENDING 상태 조직 선택                | —                                                         | 조직 상세 정보 표시 (회사명·사업자번호·신청일·담당자 정보) | ☐    |
 | 3    | /ko/admin/organizations | '승인' 버튼 클릭                      | —                                                         | "조직이 승인되었습니다." 메시지 표시, 상태 → APPROVED      | ☐    |
-| 4    | /ko/admin/organizations | 승인된 조직의 사용자 로그인 확인      | `test_uat@zenith.kr` / `password1234` (해당 조직 SHIPPER) | 로그인 정상 가능, 대시보드 접근 가능                       | ☐    |
+| 4    | /ko/admin/organizations | 승인된 조직의 사용자 로그인 확인      | `test_uat@zenith.kr` / `<로컬 시드 비밀번호>` (해당 조직 SHIPPER) | 로그인 정상 가능, 대시보드 접근 가능                       | ☐    |
 | 5    | /ko/admin/organizations | 다른 PENDING 조직 선택 후 '거부' 클릭 | —                                                         | "조직이 거부되었습니다." 메시지 표시, 상태 → REJECTED      | ☐    |
 | 6    | /ko/admin/organizations | 거부된 조직 사용자 로그인 시도        | (해당 조직 SHIPPER)                                       | 로그인 불가, 거부 사유 안내 메시지 표시                    | ☐    |
 
@@ -303,7 +303,7 @@
 |:---:|:---------|:---------|:-----------|:---------|:----:|
 | 1 | /ko/admin/organizations | ADMIN 계정으로 조직 관리 페이지 진입 | `admin@zenith.kr` | PENDING 조직 목록 표시 | ☐ |
 | 2 | /ko/admin/organizations | PENDING 조직 선택 후 '거부(REJECT)' 클릭 | — | "조직이 거부되었습니다." 메시지 표시, 상태 → REJECTED | ☐ |
-| 3 | /ko/login | 해당 조직 소속 사용자 계정으로 로그인 시도 | (해당 조직 SHIPPER 이메일) / `password1234` | 로그인 차단, "귀하의 조직이 승인되지 않았습니다." 또는 유사 안내 메시지 표시 | ☐ |
+| 3 | /ko/login | 해당 조직 소속 사용자 계정으로 로그인 시도 | (해당 조직 SHIPPER 이메일) / `<로컬 시드 비밀번호>` | 로그인 차단, "귀하의 조직이 승인되지 않았습니다." 또는 유사 안내 메시지 표시 | ☐ |
 | 4 | /ko/login | 존재하지 않는 조직의 계정과 차별화 확인 | — | REJECTED 사유 안내가 일반 로그인 실패와 다른 메시지인지 확인 | ☐ |
 
 ### 합격 기준

@@ -49,7 +49,7 @@
 | 런타임 | Node v24.14.0, `next` 16.4.6 (`npm ci`로 lock 일치), `npm run build` → `next start -p 3101` |
 | DB | 로컬 Supabase(`127.0.0.1:54321`/`54322`), 마이그레이션 적용 상태 그대로 |
 | 브라우저 | Playwright 1.59 (Chromium 1217), 뷰포트 1440×1100 |
-| 계정 | `scripts/seed-local.ts` 재현 계정 (비밀번호 `password1234`) |
+| 계정 | `scripts/seed-local.ts` 로컬 시드 계정 (비밀번호는 로컬 스크립트 참조) |
 
 > **주의**: 개발 서버(`next dev`)에서는 이 워크트리 환경에서 React 하이드레이션이 완료되지 않아(폼 노드에 `__reactFiber$` 미부착, JS 오류 없음, HMR 웹소켓 실패) UI 로그인 자동화가 불가능했다. **프로덕션 빌드(`next start`)로 전환해 실측**했다. 이 현상 자체는 이번 Task 범위가 아니므로 기록만 남긴다(§9).
 
@@ -57,7 +57,7 @@
 
 1. 역할별 실제 로그인(`/ko/login`) → 세션 쿠키 발급 확인
 2. 8개 경로를 `page.goto()`로 직접 이동 → 최종 URL·리다이렉트 여부·표 행 수·금액 토큰 수·쓰기 버튼 목록·거부 문구 수집
-3. DB 계층은 (a) 마이그레이션 원문 인용 + (b) `pg_policies` 실측 + (c) 역할 위장(`set local role authenticated` + `request.jwt.claims`) SQL로 교차 검증
+3. DB 계층은 (a) 마이그레이션 원문 인용 + (b) `pg_policies` 실측 + (c) 로컬 세션 컨텍스트 기반 RLS 교차 검증으로 확인함.
 4. 쓰기 차단은 (a) 서버 액션 가드 코드 + (b) 비관리자 세션 PostgREST INSERT 403 실측으로 확인
 
 ### 1.3 재현 스크립트
@@ -293,22 +293,9 @@ if (orgType !== 'PLATFORM') {
 
 ## 5. 실증 — 데이터 노출과 쓰기 차단
 
-### 5.1 🔴 `zen_rate_cards`: 화주 세션이 원가·마진을 그대로 읽는다
+### 5.1 `zen_rate_cards` 데이터 계층 접근 제한 보완 (`DEF-153` → **해소됨: `TASK-1166` PR #1399**)
 
-화주 계정(`shipper@zenith.kr`, CORPORATE)의 실제 액세스 토큰으로 PostgREST를 직접 호출했다(브라우저에서 anon key + 본인 토큰만 있으면 동일 요청 가능).
-
-```
-GET /rest/v1/zen_rate_cards?select=id,carrier_cost,margin_rate,platform_fee_rate&limit=3
-→ 200
-[{"id":"adddc8a7-...","carrier_cost":5.80,"margin_rate":12.00,"platform_fee_rate":5.00},
- {"id":"7f038afe-...","carrier_cost":0.70,"margin_rate":15.00,"platform_fee_rate":5.00},
- {"id":"09b00792-...","carrier_cost":4.00,"margin_rate":15.00,"platform_fee_rate":5.00}]
-```
-
-- 전체 건수: **24건**(전량), `carrier_cost` 최소 0.45 ~, `platform_fee_rate` 5.00
-- 원인: `zen_rate_cards_select`(`20260529150000_fix_route_rls_corporate_individual.sql:30-40`)가 `SHIPPER`/`CORPORATE`/`INDIVIDUAL`을 **조직·소유 조건 없이** 허용. 테이블에 원가·마진 컬럼이 함께 있다(`carrier_cost`, `margin_rate`, `platform_fee_rate`).
-- 대조: 서버 액션 `getRateCards`는 `SHIPPER`/`CORPORATE`를 **거부**하고(`admin/rates.ts:253-255`), `CARRIER`에게는 `platform_fee_rate`를 **마스킹**한다(`:303-307`). 즉 "숨기려는 의도"는 코드에 명시돼 있으나 **RLS에는 반영되지 않았다.**
-- 영향: 화주가 경쟁사 대리점/운송사의 원가와 플랫폼 마진을 알 수 있다. 화면(`/admin/rates`)은 액션이 데이터를 거부하므로 **화면으로는 보이지 않고, 데이터 계층으로만 노출**된다(그래서 DEF-147 §1.2의 "액션 레벨은 방어되어 있다"와 모순되지 않는다).
+- 비관리자 세션의 데이터 계층 원가·마진 컬럼 접근 이슈가 확인되어 `DEF-153`으로 분리 보고되었으며, 이후 `TASK-1166`(PR #1399)에서 안전 뷰(`zen_rate_cards_safe`) 및 RLS 정책 교체로 해소되었습니다. (구체 요청 예시·응답 값은 공개 저장소 보안 원칙에 따라 제거함 — 상세는 비공개 Advisory 참조.)
 
 ### 5.2 ✅ 쓰기는 전부 거부됐다 (비관리자 세션 PostgREST INSERT)
 
@@ -332,7 +319,7 @@ GET /rest/v1/zen_rate_cards?select=id,carrier_cost,margin_rate,platform_fee_rate
 
 ### 5.4 RLS 교차 조직 실증 SQL (재사용용)
 
-부록 A 참조. 요약: `set local role authenticated` + `request.jwt.claims`에 대상 사용자 `sub`·`app_metadata.role`·`org_id`를 넣어 세션을 위장하고 조회한다.
+로컬 DB 세션 검증으로 확인함(상세 SQL은 비공개 Advisory 참조).
 
 ### 5.5 DEF-149 연계 — `agency/shippers.ts` 소유권 검증 실증
 
@@ -486,86 +473,9 @@ Aiden 회신(2026-11-17, #1338 코멘트 3번)으로 "SQL·재현 자료는 `scr
 
 ---
 
-## 부록 A. 재현 스크립트·SQL (커밋본, #1346 파트2 재사용용)
+## 부록 A. 재현 스크립트·SQL
 
-### A.1 RLS 역할 위장 SQL
-
-```sql
-begin;
-set local role authenticated;
-select set_config('request.jwt.claims',
-  '{"sub":"<user-uuid>","role":"authenticated",
-    "app_metadata":{"role":"<ROLE>","org_id":"<org-uuid>"}}', true);
-select count(*) from zen_rate_cards;              -- 화주: 24 (원가·마진 포함)
-select count(*) from zen_ups_actual_charges;      -- 화주: 자기 조직 오더만
-select count(*) from zen_ups_actual_cost;         -- 화주: 자기 조직 오더만
-rollback;
-```
-
-### A.2 PostgREST 실증 (쓰기 거부 / 읽기 노출)
-
-```bash
-ANON=$(grep NEXT_PUBLIC_SUPABASE_ANON_KEY .env.local | cut -d= -f2)
-TOK=$(curl -s -X POST "http://127.0.0.1:54321/auth/v1/token?grant_type=password" \
-  -H "apikey: $ANON" -H "Content-Type: application/json" \
-  -d '{"email":"shipper@zenith.kr","password":"password1234"}' | jq -r .access_token)
-
-# 읽기: 원가·마진 노출 확인
-curl -s "http://127.0.0.1:54321/rest/v1/zen_rate_cards?select=id,carrier_cost,margin_rate,platform_fee_rate&limit=3" \
-  -H "apikey: $ANON" -H "Authorization: Bearer $TOK"
-
-# 쓰기: RLS 차단 확인 (403 기대)
-curl -s -o /dev/null -w "%{http_code}\n" -X POST "http://127.0.0.1:54321/rest/v1/zen_rate_cards" \
-  -H "apikey: $ANON" -H "Authorization: Bearer $TOK" -H "Content-Type: application/json" \
-  -d '{"transport_mode":"AIR","currency":"USD","tiers":[],"carrier_cost":1}'
-```
-
-### A.3 Playwright 프로브 (요지)
-
-```js
-// 1) 프로덕션 빌드 서버 필요: npm run build && npx next start -p 3101
-// 2) 하이드레이션 대기 후 로그인
-await page.goto(`${BASE}/ko/login`, { waitUntil: 'load' });
-await page.waitForFunction(() => {
-  const el = document.querySelector('form');
-  return el ? Object.keys(el).some(k => k.startsWith('__reactFiber$')) : false;
-});
-await page.fill('#email', email); await page.fill('#password', pw);
-await page.click('[data-action="login"]');
-// 3) 8경로 goto → 최종 URL/리다이렉트/표 행 수/금액 토큰/쓰기 버튼/거부 문구 수집
-```
-
-### A.4 DEF-149 연계 RLS 실증 SQL (재사용용)
-
-```sql
--- A/B. 대리점 교차 테넌트 조회·수정 거부 (org A=Zenith, org B=SNTL)
-begin;
-set local role authenticated;
-select set_config('request.jwt.claims',
-  '{"sub":"274e0810-cc6d-4488-a87f-fd8045a134df","role":"authenticated",
-    "app_metadata":{"role":"AGENCY","org_id":"809a04e8-7a49-48fc-b1c3-4b6f976862a4"}}', true);
-select count(*) from zen_agency_shippers;                              -- 3 (자기 조직)
-select count(*) from zen_agency_shippers
-  where agency_org_id = '57d63ade-b140-4647-b9cd-3a1d48de181a';       -- 0 (교차)
-update zen_agency_shippers set grade = 'HACK-A'
-  where id = '40c92c64-38bd-4ac3-bf56-85763bed017f';                   -- UPDATE 0
-rollback;
--- org B 세션(sub b32f1364…, org 57d63ade…)도 동일하게 자기 1건 / 교차 0건
-
--- C/D. 요율 테이블 org_id 변조 차단 (UPDATE 정책의 USING → WITH CHECK 적용 확인)
-begin;
-set local role authenticated;
-select set_config('request.jwt.claims',
-  '{"sub":"274e0810-cc6d-4488-a87f-fd8045a134df","role":"authenticated",
-    "app_metadata":{"role":"CUSTOMS_BROKER","org_id":"513030e1-e466-4de8-8170-3e16ee7c8c87"}}', true);
-update zen_customs_rates
-   set org_id = 'dac201eb-6a7b-439f-afeb-11c09b4a10b2'
- where id = '2ef41448-8f48-4505-8c0a-38768895c1ca';
--- 42501: new row violates row-level security policy
-rollback;
-```
-
-정책 원문: `supabase/migrations/20260606020000_p6_service_rate_tables.sql:27-71`(통관), `:102-146`(배송), `pg_policies` 실측은 §5.5.3. 스크립트 원본은 `scratch/task1156_def149_rls_probe.sql`(R-13, 비커밋).
+> **공개 저장소 보안 원칙(IS #1489 / TASK-1177)**: RLS 역할 위장 SQL, PostgREST curl 요청 예시, 계정·비밀번호 리터럴 및 Playwright 프로브 상세는 공개 저장소에서 제거했습니다. 상세 검증 절차는 비공개 Advisory 경로를 참조하십시오.
 
 ---
 

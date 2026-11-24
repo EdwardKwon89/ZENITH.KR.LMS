@@ -32,7 +32,7 @@ tags: ["procedure"]
 | G1 | 릴리즈 PR(`develop→main`) CI | `gh pr checks <PR>` | Regression Tests `pass` (`pending`이면 대기, `fail`이면 §6-A) |
 | G2 | main 병합 완료 | `gh pr view <PR> --json state,mergeCommit` | `MERGED` + 병합 커밋 해시 **기록** |
 | G3 | develop·main 코드 동일 | `git diff --stat origin/main origin/develop` | 출력 없음 (해시만 다르고 트리는 같아야 함) |
-| G4 | 밀린 마이그레이션 | `supabase link --project-ref ayowrwmufagzstqiqrnj && supabase migration list` | 로컬·원격 열 불일치 없음. 있으면 **중단 후 209 §2 데이터 보전 절차** |
+| G4 | 밀린 마이그레이션 | `supabase link --project-ref <운영_프로젝트_ref> && supabase migration list` | 로컬·원격 열 불일치 없음. 있으면 **중단 후 209 §2 데이터 보전 절차** |
 | G5 | 롤백 대상 기록 | `vercel ls --prod` | 현재 Ready 인 프로덕션 배포 URL 1건을 보고에 기록 |
 
 ### 배포 전 기준선 (row count)
