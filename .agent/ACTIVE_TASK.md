@@ -50,8 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1490](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1490) | [Aiden 요청] 공개 저장소 문서의 노출 기재 정리 — Team B 소유 파일 (IS #1487 후속) | b | p1 | ready | jungjs | 2026-11-24 |
-| [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | open | jungjs | 2026-11-24 |
+| [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | ready | jungjs | 2026-11-24 |
 | [#1463](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1463) | [Team B] TASK-B-382: MANAGER의 UPS 정산마감 관련 테이블 RLS 정책 정렬 (규칙 1 이행, 설계 의견부터) | b | p2 | ready | jungjs | 2026-11-24 |
 | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | open | 미배정 | 2026-11-24 |
 | [#1453](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1453) | [Team B] TASK-B-379: 청구 금액 함수 base 테이블 의존 제거 + 입고 실측 스냅샷 갱신 주체 정리 (#1449 C, 설계 의견부터) | b | p2 | open | 미배정 | 2026-11-23 |
