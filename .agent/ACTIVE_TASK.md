@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1498](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1498) | [Team A] TASK-1179: scripts/seed-local.ts 실사용자·실사업자 정보 가상 값 교체 (IS #1487·#1490 후속) | a | p1 | ready | 미배정 | 2026-11-24 |
+| [#1498](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1498) | [Team A] TASK-1179: scripts/seed-local.ts 실사용자·실사업자 정보 가상 값 교체 (IS #1487·#1490 후속) | a | p1 | in-progress | 미배정 | 2026-11-24 |
 | [#1494](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1494) | [Team A] TASK-1178: 공개 문서·로그의 로컬 절대경로 마스킹 (Team A 소유 파일, IS #1487 후속) | a | p3 | review | 미배정 | 2026-11-24 |
 | [#1490](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1490) | [Aiden 요청] 공개 저장소 문서의 노출 기재 정리 — Team B 소유 파일 (IS #1487 후속) | b | p1 | review | jungjs | 2026-11-24 |
 | [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | draft | 미배정 | 2026-11-24 |
