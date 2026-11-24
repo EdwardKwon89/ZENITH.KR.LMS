@@ -179,6 +179,30 @@
 - **권장: (a)**. 서버 내부 호출은 **동작 불변**이며 import 경로만 core로 바뀐다.
   - 내부 호출자: `operations/orders.ts`(직접 import + `rate-snapshot-refresh`에 `estimateFn` 주입), `finance/ups-actual-cost.ts`, 단위 테스트 4개(`freight-actions`·`rate-snapshot-refresh`·`ups-actual-cost`·`ups-estimate-panel`).
   - **#1462 B-381의 `recomputeRevenue`도 같은 함수를 import** — 구현 순서·충돌 조정 필요(같은 담당자).
+  - **mock 영향 20개(unit 19 + integration 1)**: `grep -rlE "vi\.mock\(['\"]@/app/actions/ups/freight" tests` 전수 결과. core import로 바뀌면 기존 mock이 가로채지 못하므로 **모든 mock 경로를 core로 갱신**(세션 진입점 mock과 core mock 구분)하고 **한 PR에서 전체 회귀 PASS**를 증빙한다.
+    ```
+    tests/integration/task-b370-snapshot-safe-view.test.ts
+    tests/unit/agency/order-rate-snapshots.test.ts
+    tests/unit/finance/task-b352-error-locale.test.ts
+    tests/unit/finance/task-b364-cost-integration.test.ts
+    tests/unit/finance/task-b366-cost-settlement.test.ts
+    tests/unit/finance/ups-actual-cost.test.ts
+    tests/unit/logistics/inbound.test.ts
+    tests/unit/logistics/order-update-b339.test.ts
+    tests/unit/orders/defb058-edit-mode-autofill-overwrite.test.tsx
+    tests/unit/orders/direct-shipper-ups-snapshot.test.ts
+    tests/unit/orders/edit-form-warehoused-unlocked.test.tsx
+    tests/unit/orders/iss1089-ups-redirect-ups-detail.test.tsx
+    tests/unit/orders/iss1091-hscode-english-filter.test.tsx
+    tests/unit/orders/iss1100-shipper-name-toggle.test.tsx
+    tests/unit/orders/iss1102-shipper-info-ui-simplify.test.tsx
+    tests/unit/orders/iss1104-addressinput-toggle.test.tsx
+    tests/unit/orders/order-registration-form-b301.test.tsx
+    tests/unit/orders/task-b367-settled-cargo-guard.test.ts
+    tests/unit/orders/ups-product-code-select.test.tsx
+    tests/unit/orders/ups-product-guard.test.ts
+    ```
+  - 클라이언트 import 전환 대상: `src/components/orders/UpsFreightEstimateSection.tsx` **1곳**. 다른 클라이언트 호출처 없음(전수 grep).
 - DTO 범위는 **세션 역할 + 화주의 대리점 소속 여부**로 정한다. 클라이언트 인자로 범위를 정하지 않는다.
   - SHIPPER: `shipperOrgId`는 세션 org로 고정, `agencyOrgId`는 서버에서 소속 조회.
   - AGENCY: `agencyOrgId`는 세션 org, 대상 `shipperOrgId`는 **자기 소속인지 검증(PR-1 패턴)**.
@@ -206,17 +230,14 @@
 | `getUpsBaseRates` 외 5종 | 없음 | 포함 | 포함 | 포함 | PR-2 가드 C안 |
 | `getPublicBaseRates` 외 5종 | 없음 | 미포함 | 미포함 | 미포함 | 판매가 전용 |
 | `calculateSettlementAction` | AGENCY/ADMIN | — | 원장 포함 | 포함 | 원가 아님(청구 원장) |
-| `getOrderRevenueCost` | **없음** | **원가 포함(측정)** | 자기 원가 포함 | 실제 원가 포함 | **DEF-B-172** |
-| `getOrderRevenueCostList` | **없음(스코프만)** | **원가 포함(측정)** | 자기 원가 포함(소속 링크 시) | 실제 원가 포함 | **DEF-B-172** |
 
-- `getOrderRevenueCost(List)`는 실DB 세션 실측에서 SHIPPER 응답에 대리점 원가·마진이 포함됐다. **B-377(#1451)과 별개로 DEF-B-172**로 보고하며, 이번 PR-2에서는 수정하지 않는다.
-- 근거 명령: `grep -rn "getOrderRevenueCost\|getOrderRevenueCostList" src --include='*.ts' --include='*.tsx'`로 호출처를 전수 확인했다.
+- **범위 확장 점검에서 별도 보안 Task 대상 1건 발견 — 상세는 비공개 보고.** 함수명·역할별 응답 내용은 공개 문서에 적지 않는다.
 
 #### (6) PR-2 포함/분리
 
 - **core 분리 + 세션 DTO 진입점 + 클라이언트 전환 + 회귀 테스트**는 **PR-2에 포함 권장**.
 - JSJung ③ B안 확정에 따라 DTO 범위를 위 표로 고정한다.
-- **DEF-B-172**(매출/매입 현황 화주 원가 노출)는 별도 Task로 분리하며 PR-2에서 수정하지 않는다.
+- 범위 확장 점검에서 발견한 별도 보안 Task 대상 1건은 **PR-2에서 수정하지 않는다**(상세 비공개 보고).
 - 회귀 테스트는 **역할·소속 조합별 키 집합 단언**(관리자/대리점/화주 소속/화주 자가)으로 작성하고, `estimated_cost` 변경 전후 동일을 확인한다.
 
 ### 2-4. 구현 설계 (B: 대리점 소유권 가드, PR-1 권장)
@@ -291,7 +312,7 @@
 | 4 | Low 2건은 **PR-2 포함** |
 | 5 | PR-1: `shippers.ts` 미수정·새 파일/키 금지·`own_agency_only` 재사용·쓰기 전 검증·DB 불변 테스트 |
 | 6 | PR-2: 대리점 자기 `agency_other_charges` 매입가 편집 유지 R-10 화면 증적 필요 |
-| 7 | PR-2: Aiden 점검 기준 5개 반영 완료. **JSJung ③ B안 확정** — core 분리+세션 DTO를 PR-2 포함, DEF-B-172는 별도 |
+| 7 | PR-2: Aiden 점검 기준 5개 반영 완료. **JSJung ③ B안 확정** — core 분리+세션 DTO를 PR-2 포함. 범위 확장 점검의 별도 보안 Task 대상 1건은 상세 비공개 |
 
 ### JSJung 확정 (2026-11-23, Jaison 회신)
 
@@ -306,7 +327,7 @@
 - 설계 의견 + 실측(6종×5역할, 소유권 허용/거부, RLS 정의, 호출처 전수). 공개 문서에는 허용/거부 결과만 기재.
 - Aiden·Jaison 조건부 승인(2026-11-23). **PR-1(소유권) 착수 승인**, PR-2는 설계 확정 후.
 - **PR-1 구현**: #1478 TeamB_Dev 병합 완료.
-- **7차 변경**: JSJung ③ B안·core 분리·DTO·DEF-B-172 반영.
-- **DEF-B-172** 신규: `getOrderRevenueCost(List)` 화주 원가 노출 — 별도 Task, PR-2 미수정.
+- **7차 변경**: JSJung ③ B안·core 분리·DTO·mock 영향 20개 반영.
+- 범위 확장 점검에서 별도 보안 Task 대상 1건 발견 — 상세는 비공개 보고(공개 문서 미기재).
 - PR: #1476 (draft, `Refs #1362`).
 - **커밋 해시**: `17f73c590` (7차 내용 커밋). 해시 갱신 커밋 별도.
