@@ -107,8 +107,26 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 - [x] 재유입 방지 3층(L1 차단·L2 경고·L3 안전망) + 단위 테스트 계획
 - [x] R-13 질의안(안 A/B 문안 초안) 기재 — Aiden 확정 요청
 - [x] 기존 증적 인용 규칙("증적: 비공개 보관") 제안(범위 밖 선언)
-- [ ] task file 커밋 → `[작업 결과]` 해시(별도 커밋) → draft PR(`Refs #1513`) → `gh pr checks`
+- [x] task file 커밋 → `[작업 결과]` 해시(별도 커밋) → draft PR(`Refs #1513`) → `gh pr checks`
 
 ## [작업 결과]
 
-_(커밋 후 기재)_
+### 착수 절차 실측 (R-17)
+```bash
+① agent-worktree-init · fetch/rebase origin/TeamB_Dev (7fcd1bbc7 = IS #1490 JSON 정리 병합본)
+② ls .agent/tasks | grep B-385 → 없음(신규) · next-task-number → TASK-B-386 (이슈 확정번호 B-385)
+③ 브랜치 feature/teamb-task-b385-iss1513-e2e-evidence-outside-repo · check-db-freshness OK
+④ gh issue edit 1513 --add-label status:draft --remove-label status:open
+```
+
+### 산출물
+- **설계 의견**(본 문서) — 실측 11종(명령 형태·건수만) · 범위 제안 **(나)** · 공통 헬퍼 방식 · 재유입 3층 가드 · **R-13 질의안(안 A/B)** · 인용 규칙 제안
+- 구현 **미착수**(Aiden `[설계 확정]` 대기)
+
+### 코드(문서) 커밋
+- `f0f11776119a1d7644f3ee77c8dc2800a06fab89` (설계 의견 문서)
+
+### 다음 절차
+draft PR(`Refs #1513`) → Jaison diff 검토 → **Aiden `[설계 확정]`**(R-13 문안 확정 포함) → 구현 착수.
+
+
