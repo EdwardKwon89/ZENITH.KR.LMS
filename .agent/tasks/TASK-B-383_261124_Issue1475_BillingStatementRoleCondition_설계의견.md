@@ -95,8 +95,26 @@ ls .agent/tasks | grep -i "B-383"    # → 없음 (신규 생성)
 - [x] 병합 순서·의존성 (#1463 상태 실측 기록)
 - [x] 테스트 계획(실세션 매트릭스·양성 대조·되돌리기 실측·afterAll 원복·잔여 0) + 롤백 계획(원문은 마이그레이션 파일에만·reload schema)
 - [x] Ds-11 판정 · E2E·error-logs 계획
-- [ ] task file 커밋 → `[작업 결과]` 커밋 해시(별도 커밋) → draft PR(`Refs #1475`) → `gh pr checks`
+- [x] task file 커밋 → `[작업 결과]` 커밋 해시(별도 커밋) → draft PR(`Refs #1475`) → `gh pr checks`
 
 ## [작업 결과]
 
-_(커밋 후 기재)_
+### 착수 절차 실측 (R-17)
+```bash
+① ./scripts/agent-worktree-init.sh mike → 워크트리 재사용
+② git fetch origin && git rebase origin/TeamB_Dev → e1911e541 기준 브랜치 생성
+   feature/teamb-task-b383-iss1475-billing-statement-role-condition
+③ ls .agent/tasks | grep B-383 → 없음 (신규) · next-task-number.sh B → TASK-B-384 (이슈 확정번호 B-383 사용)
+④ gh issue edit 1475 --add-label status:draft --remove-label status:open
+⑤ 의존성 #1463(B-382) 상태 실측 → OPEN · 설계는 PR #1465에서 Aiden 확정 · 함수 적용 미착수 → 병합 보류 기재
+```
+
+### 산출물
+- **설계 의견 task file**(본 문서) — 공개 기재 기준 준수(목표 상태·판정 기준만, 변경 전 실측 상세는 비공개)
+- **변경 전 실측**: 실제 세션 SELECT 매트릭스 9행(역할 9종 × 헤더/항목 × 플랫폼/대리점 발행) · 잔여 0건 — 상세는 Jaison·Aiden에게 **별도 비공개 전달**(임시 측정 스크립트는 삭제, 커밋 0건)
+
+### 코드 커밋
+- `bc226b3e9c140e62074f59e9ae09c7bf9df8a127` (본 문서 — 설계 의견)
+
+### 다음 단계 (R-17)
+draft PR 생성 → `gh pr checks` → Jaison diff 검토 → **Aiden 설계 확정** 후 구현 착수(구현 순서 B-382 → B-381 → B-377 → B-383 병합).
