@@ -89,9 +89,9 @@ ON CONFLICT (role_code, path) DO NOTHING;
 - [x] 회귀 테스트 886/886 ALL PASS
 - [x] `npm run build` — SUCCESS
 - [x] behavioral 회귀 테스트 추가 — TC-P7-MGR-01~03(MANAGER checkPermission), TC-P7-AGENCY-10(AGENCY checkPermission) — 4건
-- [x] R-10: ADMIN/MANAGER/AGENCY 3개 계정 사이드바(정산/재무 확장) + 페이지 진입 확인 스크린샷 (AGENCY 비밀번호: `Password1234` — GoTrue 정책으로 대문자 P 필요)
+- [x] R-10: ADMIN/MANAGER/AGENCY 3개 계정 사이드바(정산/재무 확장) + 페이지 진입 확인 스크린샷 (테스트 계정 비밀번호는 비공개 보관)
 
 ## [발견 이슈]
 
-- `agency@zenith.kr` 로컬 비밀번호는 `Password1234`(대문자 P) — GoTrue 정책으로 재설정됨
+- 테스트 계정 비밀번호는 비공개 보관(GoTrue 정책으로 재설정됨)
 - `proxy.ts` 화이트리스트 누락을 발견해 함께 수정 (스펙 외 추가 조치사항)

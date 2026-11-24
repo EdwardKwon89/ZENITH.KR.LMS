@@ -11,7 +11,7 @@
 
 ## 개요
 
-PR#959(TASK-B-247, 직전 작업)의 R-10 스크린샷을 Jaison이 직접 확인하던 중, `jungjs72@gmail.com`(화주)이 `/shipper/invoices`에서 본인 인보이스뿐 아니라 **본인 소속 대리점이 관리자에게 지불하는 원가성 인보이스(ADMIN_TO_AGENCY)까지 함께 노출**되는 것을 발견했습니다. 상세 내용은 DEF-B-028 참조.
+PR#959(TASK-B-247, 직전 작업)의 R-10 스크린샷을 Jaison이 직접 확인하던 중, `user@example.test`(화주)이 `/shipper/invoices`에서 본인 인보이스뿐 아니라 **본인 소속 대리점이 관리자에게 지불하는 원가성 인보이스(ADMIN_TO_AGENCY)까지 함께 노출**되는 것을 발견했습니다. 상세 내용은 DEF-B-028 참조.
 
 원인: `getShipperInvoices()`의 화주 계열 필터가 `shipper_id` 기준인데, 이 컬럼은 인보이스 티어와 무관하게 항상 원본 화주 org_id로 동일하게 저장됩니다. 실제로 "누구에게 청구되는가"는 `billed_org_id`(ADMIN_TO_AGENCY는 대리점, AGENCY_TO_SHIPPER/ADMIN_TO_SHIPPER는 화주)입니다.
 
@@ -52,7 +52,7 @@ if (shipperRoles.includes(profile.role as any)) {
   1. CORPORATE/AGENCY_SHIPPER/INDIVIDUAL/SHIPPER role 호출 시 `.eq('billed_org_id', profile.org_id)`가 실제로 호출되는지 확인(기존 TASK-B-247의 `invoiceChain.eq` 검증 테스트를 `shipper_id` → `billed_org_id`로 수정)
   2. ADMIN_TO_AGENCY 티어 인보이스(billed_org_id=대리점, shipper_id=화주)가 화주 role 세션에서 결과에 **포함되지 않는지** 실측(원래 코드로 되돌리면 포함되는 걸 재현 확인 — 이번 DEF의 핵심 회귀 테스트)
 - [ ] `npm run build` · `npm run test:regression` 직접 실행 후 정확한 결과 기재
-- [ ] **R-10 필수**: 로컬에서 `jungjs72@gmail.com`으로 `/shipper/invoices` 접속 → 본인에게 청구된 인보이스만 보이고, 대리점의 ADMIN_TO_AGENCY 인보이스(예: `INV-20260728-6441`)는 더 이상 목록에 없는지 스크린샷으로 확인. Agency 계정으로도 기존과 동일하게 양쪽 다 보이는지 회귀 확인.
+- [ ] **R-10 필수**: 로컬에서 `user@example.test`으로 `/shipper/invoices` 접속 → 본인에게 청구된 인보이스만 보이고, 대리점의 ADMIN_TO_AGENCY 인보이스(예: `INV-20260728-6441`)는 더 이상 목록에 없는지 스크린샷으로 확인. Agency 계정으로도 기존과 동일하게 양쪽 다 보이는지 회귀 확인.
 
 ## 완료 보고 절차 (R-17 준수)
 
@@ -71,4 +71,4 @@ if (shipperRoles.includes(profile.role as any)) {
 | **변경 파일** | `shipper-invoices.ts` (1줄) · `shipper-invoices.test.ts` |
 | **테스트 결과** | `vitest run` — 144 files · 976 tests **ALL PASS** |
 | **빌드 결과** | `npm run build` — **SUCCESS** |
-| **R-10** | jungjs72@gmail.com 화주 + agency@zenith.kr 대리점 스크린샷 |
+| **R-10** | user@example.test 화주 + agency@zenith.kr 대리점 스크린샷 |

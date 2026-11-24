@@ -2,7 +2,7 @@
 
 | 항목 | 내용 |
 |:-----|:------|
-| **발견 경위** | JSJung이 로컬에서 "master air" 대리점을 `/register`로 직접 가입·생성한 뒤, 신규 계정(`james@sntl.co.kr`)으로 오더를 조회했더니 다른 화주·대리점의 오더까지 검색되는 것을 발견 |
+| **발견 경위** | JSJung이 로컬에서 "master air" 대리점을 `/register`로 직접 가입·생성한 뒤, 신규 계정(`user@example.test`)으로 오더를 조회했더니 다른 화주·대리점의 오더까지 검색되는 것을 발견 |
 | **긴급도** | **즉시(Critical)** — 공개 회원가입 경로를 통한 플랫폼 전체 관리자 권한 획득 가능 |
 | **현재 상태** | 미수정 — 코드가 프로덕션에 배포된 상태라면 지금도 동일하게 재현됨 |
 
@@ -38,7 +38,7 @@ WHERE org_id = target_org_id;
 
 ```
 zen_organizations: "master air" (AGENCY) — status=ACTIVE
-zen_profiles: james@sntl.co.kr — role=ADMIN, status=ACTIVE, org_id=<master air>
+zen_profiles: user@example.test — role=ADMIN, status=ACTIVE, org_id=<master air>
 ```
 가입~승인 전 과정에서 `role`이 한 번도 AGENCY로 정정되지 않고 그대로 ADMIN 상태로 활성화됨을 확인.
 

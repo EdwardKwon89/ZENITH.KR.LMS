@@ -9,7 +9,7 @@
 
 ## 현상 (실측 확인)
 
-`/ko/tracking` 페이지에서 오더 `ZEN-2026-000001`(UPS, `jungjs@aventusm.com` 직접 등록)의 Tracking Number가 실제 운송장번호가 아니라 `ZN-ZEN-2026-000001`(내부 가상 시뮬레이터 값)로 그대로 노출됨. 같은 UPS 오더인 `UPS-SEED-AGENCY-001`은 정상적으로 `1Z-SEED-UPS-001` 형식을 보여줘 대조됨.
+`/ko/tracking` 페이지에서 오더 `ZEN-2026-000001`(UPS, `user@example.test` 직접 등록)의 Tracking Number가 실제 운송장번호가 아니라 `ZN-ZEN-2026-000001`(내부 가상 시뮬레이터 값)로 그대로 노출됨. 같은 UPS 오더인 `UPS-SEED-AGENCY-001`은 정상적으로 `1Z-SEED-UPS-001` 형식을 보여줘 대조됨.
 
 DB 직접 조회 결과:
 ```

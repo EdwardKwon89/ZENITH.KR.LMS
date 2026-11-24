@@ -46,7 +46,7 @@
 | # | 파일 | 변경 |
 |:--|:--|:--|
 | 1 | `src/app/actions/finance/ups-actual-charges.ts` | `assertAdminOrAgency` → **`assertAdminOnly`**(`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만). `recordUpsActualCharges`·`searchDeliveredUpsOrders`·`getUpsActualCharges`·`getUpsChargeReconciliation` **4개 모두** 적용. 비관리자는 `logger.warn` + `permission_denied`(조회는 throw) |
-| 2 | 〃 | AGENCY 분기·스코프 필터·`writeDb`/admin client 분기 제거(리뷰 지시). 관리자 가드 통과 후 4개 함수 DB 접근은 `createAdminClient()` 사용(SUPER_ADMIN이 `zen_ups_actual_charges` RLS 정책에 없음 — 정책 교체는 별도 Task) |
+| 2 | 〃 | AGENCY 분기·스코프 필터·`writeDb`/admin client 분기 제거(리뷰 지시). 관리자 가드 통과 후 4개 함수 DB 접근은 `createAdminClient()` 사용(관리자 RLS 정책 범위 정렬은 별도 Task) |
 | 3 | 〃 | `recordUpsActualCharges`: 금액 `Number.isFinite` 검증 유지. 마감 인보이스 판정은 기존 관리자 흐름 유지 |
 | 4 | `src/app/[locale]/(dashboard)/orders/[orderId]/page.tsx` | `UpsActualAdjustmentForm`을 **관리자(`isAdmin` 또는 MANAGER)일 때만 렌더**. 폼은 `getUpsActualCharges`·`getUpsChargeReconciliation`·`recordUpsActualCharges` 3개를 호출하므로 비관리자 렌더 제거로 호출 자체 차단(PR 본문 기재) |
 | 5 | `src/lib/orders/order-released-date.ts` (신규) | `getOrderReleasedDate` 이동(§1.2 유지) |
@@ -97,8 +97,8 @@
 
 ## 4. [발견 이슈]
 
-1. **[후속 Task] RLS `shipper_agency_select` 제거** — JSJung 확정 규칙(실비는 관리자 전용)에 따라 화주·대리점의 직접 SELECT 정책도 제거해야 한다. Jaison 지시대로 **별도 설계 의견 PR**(마이그레이션)로 분리하며, 새 task 번호는 TASK-B-375로 채번 예정(로컬 task file 기준 B-372 다음, #1349=B-374·#1362=B-373 제외). 설계 의견에 (a) 정책 제거 후 관리자 세션의 `zen_order_costs` 읽기 유지 (b) 화주·대리점 세션 SELECT 0건 실DB 검증 (c) 이 테이블을 읽는 뷰·함수 전수 조회 결과를 포함한다.
-2. **[구조] SUPER_ADMIN RLS 갭** — `zen_ups_actual_charges` 관리자 정책이 `ADMIN`·`MANAGER`만 포함해 SUPER_ADMIN은 사용자 세션으로 조회/쓰기 불가. 관리자 가드 통과 후 `createAdminClient()`를 사용해 기능을 보장하고, 정책 교체 시 함께 정리한다.
+1. **[후속 Task] 화주·대리점 직접 SELECT 정책 제거** — JSJung 확정 규칙(실비는 관리자 전용)에 따라 화주·대리점의 직접 조회 정책도 제거해야 한다. Jaison 지시대로 **별도 설계 의견 PR**(마이그레이션)로 분리하며, 새 task 번호는 TASK-B-375로 채번 예정(로컬 task file 기준 B-372 다음, #1349=B-374·#1362=B-373 제외). 설계 의견에 (a) 정책 제거 후 관리자 세션의 `zen_order_costs` 읽기 유지 (b) 화주·대리점 세션 SELECT 0건 실DB 검증 (c) 이 테이블을 읽는 뷰·함수 전수 조회 결과를 포함한다.
+2. **[구조] 관리자 RLS 정책 범위 정렬** — 관리자 3역할이 동일하게 조회·쓰기 가능하도록 정책을 정렬한다. 정책 교체 전까지는 관리자 가드 통과 후 `createAdminClient()`로 기능을 보장한다.
 3. **[참고] §1.3/§1.4는 PR-2** — `getUpsActualCost`·`getInvoicePdfHistory`·`getTaxInvoiceHistory`와 MANAGER `isAdmin`/`{error}` 로깅은 별도 PR-2 설계 의견 대상.
 
 ## 5. [작업 결과]
