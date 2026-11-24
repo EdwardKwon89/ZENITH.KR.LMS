@@ -283,5 +283,5 @@ zen_ups_settlement_run_charges
 - Jaison 6차 보완 3건: M5 청구서 포함 제외, `recomputeRevenue` 목적 명시, §3 확정/근거 정리.
 - 7차 지시: PAID는 방어 가드로만, M5 제외 조건·테스트, 상태 표기·§5 갱신.
 - 코드·마이그레이션 변경 없음. PR은 draft 유지(`status:draft`).
-- **커밋 해시**: `<CONTENT_COMMIT>` (M4-b 추가 커밋). 해시 갱신 커밋은 별도.
+- **커밋 해시**: `9a8f77e58` (M4-b 추가 커밋). 해시 갱신 커밋은 별도.
 - PR: #1462 (draft, `Refs #1459`, `Refs #1451`, `Refs #1453`, `Refs #1463`, `Refs #1369`).
