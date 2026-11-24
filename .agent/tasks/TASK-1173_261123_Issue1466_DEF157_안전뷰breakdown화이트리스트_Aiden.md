@@ -7,7 +7,7 @@
 | **검증(Auditor)** | Edward (운영 적용 승인) · CI |
 | **발령일** | 2026-11-23 19:14 KST (Edward 지시) |
 | **우선순위** | P1 (`priority:p1`, `team:a`, `type:fix`) |
-| **상태** | 🔄 구현·로컬 검증 완료 — PR 검토·운영 적용 승인 대기 |
+| **상태** | ✅ 완료 — PR #1468 병합(develop `2dceb720`), 운영 DB 적용·검증 완료(2026-11-23 19:26 KST) |
 | **브랜치** | `fix/teama-task-1173-safe-view-breakdown` (`origin/develop` `ba204c52` 기준) |
 
 > 보안 세부는 저장소에 기재하지 않는다(비공개 Advisory `GHSA-hx46-6xqh-88fc`, Edward에게 직접 보고). 범위·DoD는 Issue #1466 본문이 기준이다.
