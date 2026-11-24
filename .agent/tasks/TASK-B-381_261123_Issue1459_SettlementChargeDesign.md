@@ -262,6 +262,18 @@ zen_ups_settlement_run_charges
 
 - DEF-B-165·166·167·169·170, DEF-B-168 링크. 영향표는 §2-8. DEF 번호 신규 등록 없음(설계 단계).
 
+## [설계 확정] (Aiden 전속 — R-17)
+
+| 항목 | 내용 |
+|:--|:--|
+| **확정 대상** | 설계 의견 8차 (head `b688a7eb1`, 내용 커밋 `f2df3a7cf`) |
+| **확정 일시** | 2026-11-24 09:49 KST 조건부 확정 → 10:59 KST 조건 반영 확인·**확정** |
+| **근거 코멘트** | 조건부 확정: [PR #1462 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1462#issuecomment-7118469514) / 확정: [PR #1462 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1462#issuecomment-7119651852) / 운영 읽기 전용 조회 결과: [PR #1462 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1462#issuecomment-7119652114) |
+| **확정 범위** | 단일 신규 경로(`finalizeUpsSettlement` + `finalize_ups_settlement_run`), run 저장소·tier 단위 RLS·불변성, run 전용 `billing_items_amounts`, 컷오버 폐기, 비UPS 무변경, UPS 자동 인보이스 중단(서버 측 가드), M1~M5 배포 순서 |
+| **조건 4건 반영 확인** | ① `ups_invoice_exists` DEFINER RPC 내부 확인(§2-1 2단계·§2-11 9번) ② `generateInvoicesForOrder` 서버 측 UPS 거부(§2-4·§2-11 10번) ③ M4 행위자·M4/M5 전 읽기 전용 조회·별도 승인(§2-12) ④ 환율 기준일 정의(§2-1 5단계) — 비차단 2건(`isBeforeCutover`·`legacy_invoiced_order` 제거 정리표)도 반영 |
+| **유지되는 전제** | 구현 순서 B-382 → B-381 → B-377. M4·M5(운영 DB 변경)는 로컬 리허설 후 R-14·Edward 별도 승인으로만 실행. 구현은 별도 PR이며 이 PR(설계 문서)은 draft·Squash 병합. #1453(B-379)의 MANAGER 스냅샷 결정은 단계 4(`recomputeRevenue`)의 선행 조건 |
+| **상태 라벨** | IS #1459 `status:draft` 제거(2026-11-24 10:59 KST) → `status:open`. **담당자 지정 후 Aiden이 `status:ready` 부여**, 착수 시 담당 Agent가 `status:in-progress` 전환 |
+
 ## 5. [작업 결과]
 
 - **설계 의견 8차**: Aiden 조건부 확정 조건 4건(`ups_invoice_exists` RPC 내부, 자동 생성 서버 가드, M4 행위자·사전 조회, 환율 기준일) + 비차단 2건 반영.
