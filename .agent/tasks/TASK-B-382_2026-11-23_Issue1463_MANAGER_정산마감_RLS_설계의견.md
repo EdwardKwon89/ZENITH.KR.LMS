@@ -6,11 +6,11 @@
 | **담당(Worker)** | Baker (Team B) |
 | **검증(Auditor)** | Jaison |
 | **설계 확정** | **JSJung → Aiden** (2026-11-24 확정 — §[설계 확정]) |
-| **상태** | 설계 확정 완료(v5.2): 정책 0개(B안), 산출물 2개(M2 함수 + `unmarkOrderCostSettled` 호출 교체). 이슈 `status:open` → 담당자 지정 후 `status:ready`, 착수 시 `status:in-progress`. 본 문서는 설계 의견이며 구현 없음 |
-| **브랜치** | `feature/teamb-task-b382-iss1463-manager-rls-design` (base `origin/TeamB_Dev` @ `83bb486f1`) |
+| **상태** | **구현 완료(검증 PASS) — 이슈 `status:review`**: 설계 확정(v5.2)대로 정책 0개(B안), 산출물 2개(M2 함수 + `unmarkOrderCostSettled` RPC 호출 교체)만 구현. §[작업 결과-구현] 참조 |
+| **브랜치** | 구현: `feature/teamb-task-b382-iss1463-manager-rls-impl` (base `origin/TeamB_Dev` @ `aef912cdc`). 설계 전용 draft: `feature/teamb-task-b382-iss1463-manager-rls-design` (PR #1465, 병합 금지·유지) |
 | **연관** | DEF-B-168, TASK-B-381(#1459 / **PR #1462 7차**), TASK-B-377(#1451 / PR #1454), TASK-B-379(#1453), **#1475(TASK-B-383, Mike)** |
 | **공개 저장소 주의** | 목표 상태(변경 후 허용/거부)·판정 기준·산출물만 기재합니다. 실측 근거는 "실측 완료, 상세 비공개" 한 줄로 대체하고 상세는 Jaison·Aiden에게 비공개 채널로 전달합니다. 현재 코드의 역할별 결과·가시성·정책 조건 해석·필드 값·재현 호출 형태는 기재하지 않습니다. |
-| **개정 이력** | `54ddba60a` 최초 → `6f400bf0d` 1차 → `e6b10c6e9` 2차 → `6d857341f` 3차 → `1f6f2c614` 4차 → `32d01d742` v5 → `60bedef3c` v5 해시 기재 → `20e78c7a5` v5.1 → `0d1fa60c0` v5.1 해시 기재 → `f3257bb14` v5.2 → `f862ffcac` v5.2 해시 기재 → `f61531fab` Aiden `[설계 확정]` 기록 → `c37c25e72` 공개 기재 정정 |
+| **개정 이력** | `54ddba60a` 최초 → `6f400bf0d` 1차 → `e6b10c6e9` 2차 → `6d857341f` 3차 → `1f6f2c614` 4차 → `32d01d742` v5 → `60bedef3c` v5 해시 기재 → `20e78c7a5` v5.1 → `0d1fa60c0` v5.1 해시 기재 → `f3257bb14` v5.2 → `f862ffcac` v5.2 해시 기재 → `f61531fab` Aiden `[설계 확정]` 기록 → `c37c25e72` 공개 기재 정정 → `fc1344497` 해시 기재 → **`6641185eb` 구현 코드 커밋** |
 
 | 버전 | 일자 | 반영 내용 |
 |:--|:--|:--|
@@ -19,6 +19,7 @@
 | **v5.1** | 2026-11-24 | Jaison 5차 재검토 승인, 보완 4건 반영 (커밋 `20e78c7a5`; 해시 기재 `0d1fa60c0`) |
 | **v5.2** | 2026-11-24 | JSJung 결정 ② **B안(정책 0개)** 확정 반영 — M1 미생성·①② 종결·산출물 2개·핵심 테스트 승격 (커밋 `f3257bb14`; 해시 기재 `f862ffcac`) |
 | **공개 기재 정정** | 2026-11-24 | 현재 상태 서술 전수 삭제, DEF-B-171 보고서 비공개 이관, Aiden 비차단 정정 2건(§4-3 경로 수·§8-1 M4 표현) 반영 (커밋 `c37c25e72`) |
+| **구현** | 2026-11-24 | 확정 산출물 2개 구현(M2 함수 마이그레이션 + `unmarkOrderCostSettled` RPC 교체), 회귀 테스트·Ds-11·회귀항목 반영 (커밋 `6641185eb`) |
 
 ---
 
@@ -65,7 +66,7 @@
 
 | 대상 | 변경 후 기준 |
 |:--|:--|
-| MANAGER / 인보이스·원가 | 정책 신설 없음(거부 유지) |
+| MANAGER / 인보이스·원가 | 정책 신설 없음 |
 | MANAGER / UPS 정산마감 | SECURITY DEFINER RPC로 허용(RLS 비의존) |
 | 청구서 헤더·항목 | MANAGER에게 SELECT 권한 부여 없음; 포함 여부는 boolean 함수로만 제공 |
 | 그 외 역할·스냅샷·헤더 정책 | 변경 없음(소관 Task 유지) |
@@ -253,7 +254,7 @@
 
 | 항목 | 확정 |
 |:--|:--|
-| SUB_ADMIN | **제외 확정·비차단** — 정책 추가·삭제 없음. 원가 테이블 SUB_ADMIN 접근 정렬은 #1451(A) 별도. 계정 존재·사용 여부는 업무 확인(§9-2 ④ — 답이 늦어도 진행 가능) |
+| SUB_ADMIN | **이번 범위 제외** — 정책 추가·삭제 없음. 계정 존재·사용 여부는 업무 확인(§9-2 ④ — 답이 늦어도 진행 가능) |
 | `createPostFinalizationAdjustment` 가드 | UPS 인보이스 경로 제거로 **함수 소멸 → 결정 #2 종결(해당 없음)**. 전역 `validateAdminAction()` 변경은 금지 |
 | 스냅샷 | **#1453 소관, B-381 7차 앱 액션 4단계가 선행 조건**(§6) |
 
@@ -265,7 +266,7 @@
 
 | # | 산출물 | 내용 | 시점 |
 |:--|:--|:--|:--|
-| M2 | `supabase/migrations/<ts>_task_b382_billing_inclusion_rpc.sql` | 위 §7-1 존재 확인 `SECURITY DEFINER` 함수 + GRANT/REVOKE + `NOTIFY pgrst` (정책 마이그레이션 없음, B안 확정 반영) | JSJung ② B안 확정 반영 |
+| M2 | `supabase/migrations/20261124100000_task_b382_billing_inclusion_rpc.sql` | 위 §7-1 존재 확인 `SECURITY DEFINER` 함수 + GRANT/REVOKE + `NOTIFY pgrst` (정책 마이그레이션 없음, B안 확정 반영) | JSJung ② B안 확정 반영 |
 | M3 | 앱 변경 메모(마이그레이션 아님) | ① `unmarkOrderCostSettled`의 RPC 호출 교체 ② 비UPS 앱 가드 정리는 **별도 Task**(업무 발생 시, 본 Task 범위 아님) | 별도 PR/커밋 |
 | M4 | TASK-B-379 | 스냅샷 정책 | 별도 Task(#1453), **앱 액션 `finalizeUpsSettlement` 4단계** 선행 조건 |
 
@@ -375,3 +376,40 @@ JSJung ② **B안(정책 0개)** 확정으로 MANAGER 인보이스·원가 RLS �
 - **v5.1 커밋 해시: `20e78c7a5`**, 해시 기재 `0d1fa60c0`.
 - **v5.2 커밋 해시: `f3257bb14`**, 해시 기재 `f862ffcac` (Aiden `[설계 확정]` 기록 커밋 `f61531fab`).
 - **공개 기재 정정 커밋 해시: `c37c25e72`** — 해당 커밋에서 현재 상태 서술 삭제·DEF 보고서 제거·비차단 정정 2건을 반영했고, 본 커밋은 해시 기재 전용입니다.
+
+---
+
+## 11. [작업 결과-구현] (설계 확정 범위만)
+
+- 코드 커밋: `6641185ebdda5ce96c485fc4d58c68fc86054476`
+
+| 항목 | 내용 |
+|:--|:--|
+| **구현 커밋** | `6641185eb` `[Baker] fix: TASK-B-382 청구서 포함 확인 RPC 도입·정산 해제 fail-closed (Issue #1463)` |
+| **산출물** | **M2** `supabase/migrations/20261124100000_task_b382_billing_inclusion_rpc.sql` — `public.zen_billing_statement_order_included(p_order_id uuid) RETURNS boolean`, `SECURITY DEFINER`·`search_path=public`, `REVOKE PUBLIC/anon`·`GRANT authenticated`, 내부 허용 역할 ADMIN·MANAGER·ZENITH_SUPER_ADMIN, 비허용은 예외 거부. **M3** `src/app/actions/finance/ups-actual-cost.ts`의 `unmarkOrderCostSettled` 포함 여부 확인을 RPC 호출로 교체 — RPC 오류·비정상 반환은 해제 차단(fail-closed), 세션 클라이언트 유지, ADMIN·SUPER_ADMIN 동작 불변 |
+| **미생성** | M1(정책 마이그레이션) 없음 — 정책 0개(B안) 확정. 헤더 정책·SUB_ADMIN·AGENCY/SHIPPER/OPERATOR 권한 확대 없음 |
+| **롤백** | 앱 RPC 호출 제거 → `DROP FUNCTION IF EXISTS public.zen_billing_statement_order_included(uuid);` 순서. 정책 롤백은 해당 없음. 마이그레이션 파일 하단에 주석으로 기재 |
+| **테스트** | `tests/unit/db/taskb382-billing-inclusion-rpc.test.ts`(포함/미포함, 3역할, 상태 무관, 비허용 역할·anon 거부, boolean 단일 반환, EXECUTE 권한, 롤백 SQL), `tests/unit/finance/task-b367-unmark-cost-settled.test.ts`(RPC 오류 fail-closed·ADMIN/MANAGER/SUPER 양성 대조), `tests/integration/task-b367-unmark-cost-settled.test.ts`(실DB 앱 경로) |
+| **검증 결과** | 단위 13/13 PASS, 실DB 함수 7/7 PASS, 실DB 앱 통합 5/5 PASS. `npm run test:regression` **298파일 / 2282케이스 전부 PASS**, `npm run build` PASS, `npm run check:ds11` 신규 미반영 0, `npm run check:lrtm` 유령 경로 0 |
+| **Ds-11 / 회귀맵** | `Ds_11_04_Finance_Settlement.md` §4.2 RPC 항목, `Ds_11_11B_UPS_Agency_Actuals.md` `unmarkOrderCostSettled` 항목 갱신. 회귀항목 `TASK-B-382_Issue1463_billing-inclusion-rpc.md` 신규 등재 |
+| **순서·의존** | 설계 확정 구현 순서 B-382 → B-381 → B-377 유지. **#1475는 M2 함수 적용 후 병합** — 적용 전/후 양쪽 검증 항목 등재(후 상태는 로컬 실DB에서 확인). PR #1465 설계 draft는 병합하지 않고 유지 |
+| **절차** | 이력 재작성(force-push) 없음. `origin/TeamB_Dev` 최신(aef912cdc)을 일반 병합으로 반영. Squash 병합 후 구현 브랜치 삭제 예정 |
+| **비공개 사항** | 실측 상세·재현 형태는 공개 문서에 기재하지 않고 Jaison·Aiden에게 비공개 전달(별도 채널). 기능 결함 1건은 본 범위 밖 별도 Task 유지 |
+
+---
+
+## 12. 검증 (DoD)
+
+- [x] M2 함수 실DB 7/7 PASS — 포함/미포함 boolean, 허용 3역할(ADMIN·MANAGER·ZENITH_SUPER_ADMIN), DRAFT/ISSUED 상태 무관, 비허용 역할(AGENCY·SHIPPER) 예외 거부, anon EXECUTE 미보유, `boolean` 단일 반환 + `SECURITY DEFINER`, `authenticated`만 EXECUTE, 롤백 SQL 유효·트랜잭션 원복 (`tests/unit/db/taskb382-billing-inclusion-rpc.test.ts`)
+- [x] M3 앱 단위 13/13 PASS — RPC 오류·비정상 반환 fail-closed(`generic{STATEMENT_ITEM_LOOKUP}`) 및 UPDATE 미실행, 포함 `true` → `statement_includes_order`, 미포함 `false` → 해제 성공, ADMIN·MANAGER·ZENITH_SUPER_ADMIN 양성 대조, 청구서 항목 테이블 직접 조회 0건 (`tests/unit/finance/task-b367-unmark-cost-settled.test.ts`)
+- [x] 실DB 앱 통합 5/5 PASS — 실제 로그인 세션(authenticated)으로 포함 오더 거부 / DRAFT 헤더 삭제(CASCADE) 후 해제 성공 (`tests/integration/task-b367-unmark-cost-settled.test.ts`)
+- [x] 정책 0개(B안) 확정 범위 준수 — M1 정책 마이그레이션 미생성, 헤더 정책·SUB_ADMIN·AGENCY/SHIPPER/OPERATOR 권한 확대 없음, `ups_invoice_exists` 검사는 B-381 RPC 내부 유지
+- [x] 산출물 2개만 구현 — M2 함수 + `unmarkOrderCostSettled` RPC 교체 (추가 범위 없음)
+- [x] 배포·롤백 순서 명시 — M2 → 스키마 reload → M3 / 앱 RPC 호출 제거 → 함수 제거. #1475는 M2 적용 후 병합(전/후 양쪽 검증 항목 등재)
+- [x] Ds-11 갱신 + `npm run check:ds11` PASS (허용 목록 밖 신규 미반영 0)
+- [x] 회귀항목 신규 등재 + `npm run check:lrtm` PASS (유령 경로 0, E2E 표기 누락 0, 허용 목록 밖 신규 미등재 0)
+- [x] 전체 회귀 PASS — `npm run test:regression` **298파일 / 2282케이스 PASS**
+- [x] `npm run build` PASS
+- [x] 이력 재작성 없음 — `origin/TeamB_Dev` 최신(aef912cdc) 일반 병합, force-push 없음. Squash 병합 후 구현 브랜치 삭제 예정
+- [x] 공개 기재 원칙 준수 — 실측 상세·재현 형태는 비공개(Jaison·Aiden), 공개 문서는 목표 상태·판정 기준만 기재
+- [x] `check-R17-DoD` 전항목 통과
