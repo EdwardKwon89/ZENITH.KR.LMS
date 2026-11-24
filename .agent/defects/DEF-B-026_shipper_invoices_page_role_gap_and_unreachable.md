@@ -8,7 +8,7 @@
 
 ## 현상 (실측 확인)
 
-`/shipper/invoices` 페이지(`getShipperInvoices()` 사용)의 `allowedRoles`가 `[SHIPPER, ADMIN, ZENITH_SUPER_ADMIN, AGENCY]`로 하드코딩되어 있는데, **실제 화주 계정 대부분의 role은 `CORPORATE`(예: `jungjs72@gmail.com`) 또는 `AGENCY_SHIPPER`(예: `jungjs@aventusm.com`)** — 즉 오늘 세션에서 다룬 두 테스트 계정 다 이 페이지에 접속하면 "조회 권한이 없습니다" 에러를 만납니다. `INDIVIDUAL` role도 마찬가지로 빠져있습니다.
+`/shipper/invoices` 페이지(`getShipperInvoices()` 사용)의 `allowedRoles`가 `[SHIPPER, ADMIN, ZENITH_SUPER_ADMIN, AGENCY]`로 하드코딩되어 있는데, **실제 화주 계정 대부분의 role은 `CORPORATE`(예: `shipper@example.test`) 또는 `AGENCY_SHIPPER`(예: `agency-shipper@example.test`)** — 즉 오늘 세션에서 다룬 두 테스트 계정 다 이 페이지에 접속하면 "조회 권한이 없습니다" 에러를 만납니다. `INDIVIDUAL` role도 마찬가지로 빠져있습니다.
 
 미들웨어(`proxy.ts`)의 `isAllowedPath`는 `/shipper` 프리픽스가 `orgType !== 'PLATFORM'`이면 role 무관하게 전부 허용하므로 여기서는 막히지 않음 — **서버 액션(`shipper-invoices.ts`)의 role 화이트리스트 하나만이 실제 차단 지점**입니다.
 

@@ -19,7 +19,7 @@
 
 ## 재현 (Playwright + 브라우저 콘솔 계측)
 
-`agency@zenith.kr`(→ 이후 `james@sntl.co.kr`/MASTER AIR) 실 로그인 → `/agency/ups-rates` → Expedited 선택 시:
+`agency@zenith.kr`(→ 이후 `user@example.test`/MASTER AIR) 실 로그인 → `/agency/ups-rates` → Expedited 선택 시:
 ```
 matrixRates.length = 1560 (총 행수는 정확)
 uniqueIds = 1544 (16개 ID 중복)

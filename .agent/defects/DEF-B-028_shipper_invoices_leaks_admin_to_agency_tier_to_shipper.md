@@ -8,7 +8,7 @@
 
 ## 현상 (실측 확인)
 
-`jungjs72@gmail.com`(CORPORATE, 대리점 Zenith Agency Partners 소속 화주)으로 `/shipper/invoices`에 접속한 스크린샷(`docs/99_Manual/E2E_28_Result/01_shipper_invoices.png`)에서, 본인에게 청구된 인보이스(AGENCY_TO_SHIPPER)뿐 아니라 **본인 소속 대리점이 관리자(Admin)에게 지불하는 원가성 인보이스(ADMIN_TO_AGENCY, 예: `INV-20260728-6441` ₩263,070)까지 함께 노출**됨을 확인.
+`user@example.test`(CORPORATE, 대리점 Zenith Agency Partners 소속 화주)으로 `/shipper/invoices`에 접속한 스크린샷(`docs/99_Manual/E2E_28_Result/01_shipper_invoices.png`)에서, 본인에게 청구된 인보이스(AGENCY_TO_SHIPPER)뿐 아니라 **본인 소속 대리점이 관리자(Admin)에게 지불하는 원가성 인보이스(ADMIN_TO_AGENCY, 예: `INV-20260728-6441` ₩263,070)까지 함께 노출**됨을 확인.
 
 ## 근본 원인
 

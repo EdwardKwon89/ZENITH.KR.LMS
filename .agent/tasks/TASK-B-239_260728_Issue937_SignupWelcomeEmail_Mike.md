@@ -16,7 +16,7 @@ JSJung 확인: 신규 가입 시 확인 메일이 발송되어야 하고, 그 �
 
 JSJung이 실제로 `createAgencyShipper()`로 계정을 생성했는데 메일이 오지 않아 Jaison이 재현 조사:
 
-1. **Resend API 자체가 거부(운영 이슈, 이번 Task 범위 밖)**: 현재 Resend 계정이 샌드박스 모드로, `onboarding@resend.dev` 발신 주소는 **Resend 계정 소유자 본인 이메일(`jungjs72@gmail.com`)에게만** 발송 가능하고 다른 수신자는 403으로 거부됨(직접 API 호출로 재현 확인). 도메인 인증은 별도 운영 조치 필요 — 이번 Task에서 손대지 않음.
+1. **Resend API 자체가 거부(운영 이슈, 이번 Task 범위 밖)**: 현재 Resend 계정이 샌드박스 모드로, `onboarding@resend.dev` 발신 주소는 **Resend 계정 소유자 본인 이메일(`user@example.test`)에게만** 발송 가능하고 다른 수신자는 403으로 거부됨(직접 API 호출로 재현 확인). 도메인 인증은 별도 운영 조치 필요 — 이번 Task에서 손대지 않음.
 2. **코드 버그(이번 Task에서 함께 수정)**: `src/lib/notifications/email.ts`의 기존 4개 발송 함수(`sendStatusChangeEmail`/`sendFreightChangeEmail`/`sendShipperWelcomeEmail`/`sendInvoiceFinalizedEmail`) 전부 `resend.emails.send()`의 반환값 `{data, error}`에서 **`error` 필드를 전혀 확인하지 않음** — resend-node SDK는 API 레벨 오류를 예외로 던지지 않고 반환값으로 주는데 이를 체크 안 해서 실제로 거부돼도 "성공"처럼 처리됨.
 
 **Jaison이 설계를 확정했으므로 설계 판단 없이 아래 스펙대로 구현**하면 됩니다.
@@ -105,7 +105,7 @@ try {
   3. `signup()` 통합 — 가입 성공 시 `sendSignupWelcomeEmail`이 올바른 인자로 호출되는지, 이메일 발송이 실패해도(mock에서 error 반환) `signup()` 자체는 `{success:true}`를 반환하는지(non-fatal 확인 — 이 케이스를 반드시 mock으로 실패시켜 재현할 것)
   4. 기존 4개 함수(`sendStatusChangeEmail` 등)의 기존 테스트가 리팩터링 후에도 그대로 PASS하는지 확인(회귀 없음)
 - [ ] `npm run build` · `npm run test:regression` 직접 실행 후 정확한 결과 기재
-- [ ] **R-10 주의사항**: Resend 계정이 현재 샌드박스 모드라 **`jungjs72@gmail.com`(Resend 계정 소유자 본인 이메일)으로만 실제 발송 테스트가 가능**합니다. 다른 임의의 이메일로 테스트하면 코드가 정확해도 403으로 거부되는 게 정상이니 혼동하지 마세요. 로컬에서 `jungjs72@gmail.com`으로 실제 회원가입을 수행해 이메일이 실제로 도착하는지 확인 → 스크린샷/캡처로 증적 남길 것
+- [ ] **R-10 주의사항**: Resend 계정이 현재 샌드박스 모드라 **`user@example.test`(Resend 계정 소유자 본인 이메일)으로만 실제 발송 테스트가 가능**합니다. 다른 임의의 이메일로 테스트하면 코드가 정확해도 403으로 거부되는 게 정상이니 혼동하지 마세요. 로컬에서 `user@example.test`으로 실제 회원가입을 수행해 이메일이 실제로 도착하는지 확인 → 스크린샷/캡처로 증적 남길 것
 
 ## 완료 보고 절차 (R-17 준수)
 
