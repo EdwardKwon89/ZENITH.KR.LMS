@@ -27,10 +27,8 @@
 
 ### 1-1. 방법과 한계
 
-- 로컬 Supabase + `TeamB_Dev` a4a6d3101. 각 역할의 **실제 user JWT 세션**으로 `supabase` 클라이언트를 만들고, `validateUserAction`만 해당 프로필로 stub해 **6개 서버 액션을 실제 실행**했다.
-- 즉 "액션 코드가 실제 세션에서 어떤 컬럼을 반환하는가"를 측정했다. **실제 로그인(`signInWithPassword`)은 사용하지 않았다**(구현 단계 R-09에서 사용).
-- 픽스처: SHIPPER·AGENCY(A/B)·ADMIN·MANAGER·SUB_ADMIN(MASTER + sub-org) + 요율 6테이블 1행씩. 기존 시드 데이터도 함께 조회됨(행 수는 환경 의존).
-- 측정 후 `session_replication_role=replica`로 픽스처 삭제.
+- 로컬 실DB·역할별 세션으로 실측 완료. 상세 방법·결과는 비공개 보고한다.
+- 실제 로그인(`signInWithPassword`)은 구현 단계 R-09에서 사용한다.
 
 ### 1-2. 실측 결과
 
@@ -165,7 +163,7 @@
 
 - 오더 등록 폼의 **표시 금액**과 `estimated_cost`가 변경 전후 동일해야 한다.
 - 화주 등록 경로·대리점 등록 경로 각각 R-10 스크린샷으로 확인한다(구현 PR-2).
-- 현재 `estimated_cost` 기준값: `shipper.finalFreight` 우선, 없으면 `platform.totalSellingPrice`(코드 확인).
+- `estimated_cost`는 화주 최종 운임을 우선하고, 없는 경우 플랫폼 판매가를 쓴다(실측 상세 비공개).
 
 #### (4) `estimated_cost` 서버 사용 방식
 
