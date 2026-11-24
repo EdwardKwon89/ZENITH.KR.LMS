@@ -23,7 +23,7 @@ ls .agent/tasks | grep -i "B-38"    # → 없음 (신규 생성 · TASK-B-380 �
 
 **수정**: `src/app/[locale]/(dashboard)/dashboard/page.tsx` — "Carrier" 컬럼에 `id: "carrier"` 지정(1줄 + 주석).
 **신규**: `tests/e2e/e2e-33-b380-dashboard-dup-key.spec.ts` (3역할 실제 렌더 console.error 0건 단언 + error-logs).
-**증적**: `docs/99_Manual/E2E_B380_Result/` (before/after ×3역할 스크린샷·JSON, 수정 전 표시값 실측).
+**증적**: before/after ×3역할 스크린샷은 `docs/99_Manual/E2E_B380_Result/` · **JSON 증적: 비공개 보관**.
 
 **하지 않는 것**: `ZenDataGrid` key 방식 변경(19개 파일 영향) · 화면 표시 변경(의도 확인 회신 후) · DEF-B-164 · `scratch/`(R-15).
 
@@ -80,7 +80,7 @@ ls .agent/tasks | grep -i "B-38"    # → 없음 (신규 생성 · TASK-B-380 �
 
 ### 2. 의도 확인 (이슈 작업 2번 — 질문 게시 완료)
 
-- **실측**: 두 컬럼 **전 행에서 같은 값**(B371 Shipper A/B, B371 Agency A…) — `00_수정전_표시값_실측.json`(20행 전수)
+- **실측**: 두 컬럼 **전 행에서 같은 값**(B371 Shipper A/B, B371 Agency A…) — **JSON 증적: 비공개 보관**(20행 전수 실측)
 - **`DashboardOrder` 필드 전수**: `id·order_no·shipper_name·origin·dest·status·transport_mode·created_at` — **carrier(운송사) 필드 없음**, `transport_mode`는 운송수단(UPS) 한정
 - → 이슈에 스크린샷과 함께 **질문 게시**(코멘트 `7101141826`): (a) 화주명 2회 표시가 의도인지 (b) 다른 필드를 보여야 한다면 어떤 필드인지. **회신 전 표시 변경 없음**(지시 준수).
 
@@ -105,12 +105,12 @@ ls .agent/tasks | grep -i "B-38"    # → 없음 (신규 생성 · TASK-B-380 �
 | AGENCY | `/ko/agency` (프록시 리다이렉트 — `/ko/dashboard` 접근 불가 실측) | — | 0 → 0 |
 | SHIPPER | `/ko/orders?page=1` (프록시 리다이렉트) | — | 0 → 0 |
 
-- `pageerror` 3역할 **0건** · `zen_error_logs` **delta 0** (`after_콘솔점검_3역할.json`)
+- `pageerror` 3역할 **0건** · `zen_error_logs` **delta 0** (**JSON 증적: 비공개 보관**)
 - **되돌리기 실측**: `id: "carrier"` 1줄 제거 → **FAIL (exit 1, Admin duplicate-key=85)** / 복원 → **PASS**(기준선 0건)
 
 ### 6. UI 증적 (R-10)
 
-- `docs/99_Manual/E2E_B380_Result/` — **before/after × 3역할 스크린샷** 6장 + `before/after_콘솔점검_3역할.json` + `00_수정전_표시값_실측.json` + `after_B6_역할x화면_매트릭스.json`·`after_B7_R04_콘솔점검.json`(수정 후 재현 명령 결과, `consoleErrors: 0`)
+- `docs/99_Manual/E2E_B380_Result/` — **before/after × 3역할 스크린샷** 6장 · 나머지 JSON 증적 전량 **비공개 보관**(R-21 §3, 재현 명령 결과 포함)
 - **에러 로그 확인 — 無** (`zen_error_logs` delta 0, 최근 10분 행 없음)
 - 표시 대조: before/after 모두 Admin 20행·동일 URL·헤더 6개 그대로
 
@@ -121,6 +121,9 @@ ls .agent/tasks | grep -i "B-38"    # → 없음 (신규 생성 · TASK-B-380 �
 - `check:lrtm` OK · `check:doc-links` OK · `check:audit` OK · `tsc` 관련 **0건**
 - `git diff origin/TeamB_Dev...HEAD -- scratch` → **출력 없음** (R-15)
 - **R-12(Ds-11)**: **해당 없음** — 서버 액션(`getDashboardStats`)·RPC·API 변경 **0**(클라이언트 컬럼 정의만 변경) → Ds-11 갱신 대상 아님
+
+### 증적 처리 (IS #1490 후속, 2026-11-24)
+- **JSON 증적 5개 제거, 비공개 보관** (R-21 §3 — 저장소 밖 보관, 경로는 별도 전달. 인용 문구는 "증적: 비공개 보관"으로 정리)
 
 ### 발견 이슈
 
