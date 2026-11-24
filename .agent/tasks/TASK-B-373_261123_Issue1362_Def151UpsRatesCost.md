@@ -32,48 +32,9 @@
 - 픽스처: SHIPPER·AGENCY(A/B)·ADMIN·MANAGER·SUB_ADMIN(MASTER + sub-org) + 요율 6테이블 1행씩. 기존 시드 데이터도 함께 조회됨(행 수는 환경 의존).
 - 측정 후 `session_replication_role=replica`로 픽스처 삭제.
 
-### 1-2. 6종 액션 원가 컬럼 반환 (측정)
+### 1-2. 실측 결과
 
-| 액션 | 원가 컬럼 | SHIPPER | AGENCY | ADMIN | MANAGER | SUB_ADMIN |
-|:--|:--|:--:|:--:|:--:|:--:|:--:|
-| `getUpsBaseRates` | `cost_price` | **반환** | **반환** | 반환 | 반환 | 반환 |
-| `getUpsFuelSurcharge` | `cost_rate` | **반환** | **반환** | 반환 | 반환 | 반환 |
-| `getUpsOtherCharges` | `cost_price` | **반환** | **반환** | 반환 | 반환 | 반환 |
-| `getUpsSurgeFees` | `cost_rate_per_kg` | **반환** | **반환** | 반환 | 반환 | 반환 |
-| `getUpsWeightTierRates` | `price_per_kg_cost` | **반환** | **반환** | 반환 | 반환 | 반환 |
-| `getUpsFreightMinimums` | `min_charge_cost` | **반환** | **반환** | 반환 | 반환 | 반환 |
-
-- 6종 모두 `select('*')` + `validateUserAction()`만 사용한다(`src/app/actions/ups/rates.ts:41~129`).
-- **모든 역할이 원가 컬럼을 받는다.** 액션 레벨 가드가 없다.
-- 행 수(예: base 1,561 / surge 250)는 시드·픽스처에 의존하므로 보안 경계로 쓰지 않는다. **컬럼 노출 여부**가 핵심이다.
-
-### 1-3. RLS 정책 (실DB 정의)
-
-| 테이블 | SELECT 정책 | 원가 컬럼 |
-|:--|:--|:--|
-| `zen_ups_fuel_surcharges` | `authenticated_select: true` | 노출 |
-| `zen_ups_other_charges` | `authenticated_select: is_active=true` | 노출 |
-| `zen_ups_surge_fees` | `authenticated_select: is_active=true` | 노출 |
-| `zen_ups_base_rates` | agency/shipper/sub_admin(`has_managed_sub_agency`) select | 노출 |
-| `zen_ups_weight_tier_rates` | agency/shipper select | 노출 |
-| `zen_ups_freight_minimums` | agency/shipper select | 노출 |
-
-- **RLS는 행(row)만 제한하고 컬럼은 제한하지 않는다.** 그래서 액션 `select('*')`가 원가를 그대로 반환한다.
-- DB 권한 수준의 잔여 위험은 이 Task에서 다루지 않는다(§2-6, 별도 p2 Task·상세 비공개).
-
-### 1-4. 대리점 부가요금 소유권 공백 (측정)
-
-`src/app/actions/agency/other-charges.ts` 3개 액션은 `checkPermission('/agency')`만 확인하고 `createAdminClient()`(service_role)로 쿼리한다 → **RLS 우회**.
-
-| 호출(AGENCY A 세션) | 현재 결과(허용/거부만) |
-|:--|:--|
-| `getAgencyOtherCharges(B)` | **허용**(거부되어야 함) |
-| `upsertAgencyOtherCharge(B, …)` | **허용**(거부되어야 함) |
-| `deactivateAgencyOtherCharge(B_row)` | **허용**(거부되어야 함) |
-
-- `zen_agency_other_charges`에는 `agency_own` RLS가 있으나 **admin client가 우회**하므로 액션 가드가 없으면 교차 테넌트 접근이 성립한다.
-- #1469(`agency/shippers.ts`)는 같은 문제를 `ownAgencyError`로 닫았다. 이 파일만 미적용.
-- 구체 값·호출 형태는 공개 문서에 적지 않는다(필요 시 비공개 전달).
+- 실측 완료, 상세는 비공개 보고.
 
 ### 1-5. 호출처 전수 (R-20)
 
@@ -112,7 +73,7 @@
 
 ### 2-2. TASK-B-091 원칙과 SUB_ADMIN
 
-- TASK-B-091 원칙: **대리점이 볼 수 있는 원가는 "대리점 계산 원가"뿐**이고 플랫폼 `cost_price`는 보이지 않는다. `/agency/ups-rates`·`/shipper/ups-rates`가 `rates-public.ts`로 전환된 이유다.
+- TASK-B-091 원칙: **대리점이 볼 수 있는 원가는 "대리점 계산 원가"뿐**이고 플랫폼 원가는 보이지 않는다. `/agency/ups-rates`·`/shipper/ups-rates`가 `rates-public.ts`로 전환된 이유다.
 - **SUB_ADMIN은 AGENCY가 아니다**: SNTL Master Agency로 `/admin/ups-rates` 권한과 **기본요율 원가만 편집**하는 역할(TASK-192)이다. 따라서 "대리점 원가만" 원칙의 적용 대상이 아니며, 기본요율 원가 열람은 유지한다.
 - 단, SUB_ADMIN에게 5종 플랫폼 원가까지 허용할 근거는 없다 → C안(혼합)으로 최소화.
 
@@ -127,7 +88,7 @@
    - `getUpsFuelSurcharge`·`getUpsOtherCharges`·`getUpsSurgeFees`·`getUpsWeightTierRates`·`getUpsFreightMinimums`: `requireAdminOrManager`
    - `validateUserAction()` → 역할 검사 → 거부 시 `logger.warn` + `trError('permission_denied')` throw.
 3. **비관리자 화면 전환**
-   - `/agency/other-charges/page.tsx`: `getUpsOtherCharges()` → `getPublicOtherCharges()` (Team A 파일, 이 이슈 예외 허용). 클라이언트는 `id·charge_code·charge_name·unit`만 사용하므로 public 인터페이스로 충분(코드 확인). 플랫폼 `cost_price`는 사용하지 않는다.
+   - `/agency/other-charges/page.tsx`: `getUpsOtherCharges()` → `getPublicOtherCharges()` (Team A 파일, 이 이슈 예외 허용). 클라이언트는 코드·명칭·단위만 사용하므로 public 인터페이스로 충분(코드 확인). 플랫폼 원가는 사용하지 않는다.
    - `admin/ups-rates/page.tsx`: SUB_ADMIN이면 기본요율은 `getUpsBaseRates`, 나머지 5종은 `rates-public.ts`로 전환(또는 탭 비노출). 또한 페이지의 **직접 fuel select**(L13~16)도 SUB_ADMIN에게 원가를 반환하므로 public 함수로 교체.
    - `UpsBaseRateMatrix`: admin은 기존 `getUpsBaseRates`, 비관리자는 `rates` prop(public)만 사용하도록 정리. client 번들에서 admin 액션 import를 제거하거나 `fetchRates` prop으로 주입.
    - **타입 정합**: `AgencyOtherChargesClient.allOtherCharges`를 `UpsOtherCharge[]`→`PublicOtherCharge[]`로, SUB_ADMIN용 `UpsRatesClient` prop도 public 타입으로 조정한다(필드 사용은 id·코드·명칭·단위뿐임을 코드로 확인).
@@ -141,18 +102,9 @@
 
 > 공개 저장소 기준: **포함/미포함 결과표만** 기록하고 구체 필드명·응답 값·재현 호출 형태는 쓰지 않는다.
 
-#### (1) 응답 실측 — 역할 × 응답 객체
+#### (1) 목표 DTO — 역할 × 단계
 
-클라이언트가 호출하는 견적 액션(`estimateUpsFreight`)을 SHIPPER·AGENCY·ADMIN 세션으로 실행한 결과, **세 역할 모두 동일한 전체 응답**을 받았다(내부 계산용 원가·내부율 포함).
-
-| 역할 | 플랫폼 판매가 | 플랫폼 원가 | 중량·통화·부가항목(판매) | breakdown 원가·내부율 | 대리점 판매가 | 대리점 원가·내부율 | 화주 판매가·할인율 | 화면 사용 |
-|:--|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--|
-| SHIPPER | 포함 | **포함** | 포함 | **포함** | 포함 | **포함** | 포함 | 화주 최종·중량·통화·부가항목 |
-| AGENCY | 포함 | **포함** | 포함 | **포함** | 포함 | **포함** | 포함 | 플랫폼 판매가·대리점 단계·화주 단계·중량/통화/부가항목 |
-| ADMIN | 포함 | 포함 | 포함 | 포함 | 포함 | 포함 | 포함 | 전체(원가 포함) |
-
-- 화면이 실제 사용하는 값은 **판매가·중량·통화·부가항목·화주 할인율** 계열이다(코드 확인).
-- 원가·내부율은 화면에서 사용하지 않는다.
+- 실측 완료, 상세는 비공개 보고.
 
 **목표 DTO — JSJung ③ B안 (세션 역할 + 화주의 대리점 소속 여부)**
 
@@ -220,18 +172,9 @@
 - `zen_orders.estimated_cost`에 저장되고 수정 화면 기본값·이력 비교에 쓰이는 **참고 표시용 파생값**이다.
 - 청구·정산 계산에는 사용되지 않는다(코드 검색 결과).
 
-#### (5) 범위 확장 점검 — 견적·요율 반환 액션
+#### (5) 범위 확장 점검
 
-| 액션 | 역할 가드 | SHIPPER | AGENCY | ADMIN | 비고 |
-|:--|:--|:--:|:--:|:--:|:--|
-| `estimateUpsFreight` | 없음 | 원가 포함 | 원가 포함 | 원가 포함 | PR-2 core 분리+DTO |
-| `previewUpsActualCost` | admin 가드 | — | — | 포함(의도) | — |
-| `getUpsActualCost` | 없음/RLS | 포함(RLS) | 포함(RLS) | 포함 | B-377/#1451 |
-| `getUpsBaseRates` 외 5종 | 없음 | 포함 | 포함 | 포함 | PR-2 가드 C안 |
-| `getPublicBaseRates` 외 5종 | 없음 | 미포함 | 미포함 | 미포함 | 판매가 전용 |
-| `calculateSettlementAction` | AGENCY/ADMIN | — | 원장 포함 | 포함 | 원가 아님(청구 원장) |
-
-- **범위 확장 점검에서 별도 보안 Task 대상 1건 발견 — 상세는 비공개 보고.** 함수명·역할별 응답 내용은 공개 문서에 적지 않는다.
+- 실측 완료, 상세는 비공개 보고. 이번 PR-2에서는 수정하지 않는다.
 
 #### (6) PR-2 포함/분리
 
@@ -265,7 +208,7 @@
 2. ADMIN·MANAGER → 6종 허용 + 원가 컬럼 포함(양성 대조).
 3. SUB_ADMIN → `getUpsBaseRates` 허용(원가 포함), 나머지 5종 거부(C안).
 4. **되돌리기**: 가드를 제거하면 SHIPPER/AGENCY가 원가를 받아 **FAIL**하는지 조건별 표로 실측 후 원복.
-5. `/agency/other-charges`·`/agency/ups-rates` 응답 payload에 `cost_price`/`cost_rate` 등 미포함(실제 세션·RSC payload).
+5. `/agency/other-charges`·`/agency/ups-rates` 응답 payload에 원가 계열 미포함(실제 세션·RSC payload).
 6. `admin/ups-rates` 관리자 화면 무회귀, `/admin/error-logs` 신규 ERROR 0.
 
 **B. 소유권 (PR-1)**
@@ -289,7 +232,7 @@
 
 ### 2-7. Ds-11·R-12
 
-- `docs/02_Analysis/ds11/Ds_11_11A_UPS_Rates.md` §11.15~11.17의 "역할 가드 없음 — DEF-151 참조"를 수정 후 상태(6종 가드·public 전환)로 갱신.
+- `docs/02_Analysis/ds11/Ds_11_11A_UPS_Rates.md` §11.15~11.17의 DEF-151 관련 서술을 수정 후 상태(6종 가드·public 전환)로 갱신.
 - `rates.ts` 시그니처는 변경 없음(내부 가드만) → 시그니처 변경 없음 근거를 PR에 기재.
 - `agency/other-charges.ts` 3종 가드·오류(`own_agency_only`)도 같은 문서/인덱스에 반영.
 - `npm run check:ds11` 통과.
