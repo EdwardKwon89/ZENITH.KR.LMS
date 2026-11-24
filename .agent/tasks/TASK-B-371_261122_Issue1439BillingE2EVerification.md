@@ -108,30 +108,29 @@ git ls-tree -r origin/TeamB_Dev --name-only | grep "TASK-B-371" # → 없음
 
 | 항목 | 실측 |
 |:--|:--|
-| B1 대리점 A → 대리점 B 상세/Excel | ✅ 목록 미노출 · 상세 `청구서를 찾을 수 없습니다.` · **Excel HTTP 404** |
-| B2 화주 B → 화주 A 수신분 | ✅ 동일 (404) |
+| B1 대리점 A → 대리점 B 상세/Excel | ✅ **거부**(목록 미노출·상세·Excel) |
+| B2 화주 B → 화주 A 수신분 | ✅ 동일(**거부**) |
 | B3 **서버 경로 직접 호출 거부** | ✅ UI와 무관하게 서버 경로에서 거부됨(**서버 거부 실증**) — 호출 형태·응답 상세는 비공개 |
-| B4 대리점·화주 `/finance/order-settlement`(S1·S2) 직접 입력 | ✅ 8회 전부 차단(`/ko/agency`, `/ko/orders`) — `B4_order-settlement_차단실측.txt` |
-| B5 Admin AGENCY 발행분 감독 | ✅ `감독 조회` 배지 + `조회 전용` + 변형 버튼 0개 + **Excel 200** |
+| B4 대리점·화주 오더정산(S1·S2) 직접 입력 | ✅ 8회 전부 **거부** |
+| B5 Admin AGENCY 발행분 감독 | ✅ `감독 조회` 배지 + `조회 전용` + 변형 버튼 0개 + **Excel 허용** |
 | B6 **역할×화면 매트릭스** | ✅ **5역할 × 8화면 = 40셀, error 0** → `B6_역할x화면_매트릭스.json` |
 
-**매트릭스 실측 요약 (예측 아님 — 최종 경로)**
-| 역할 | S1 | S2 | S3a(Admin 목록) | S3b(대리점 목록) | S3c(화주 목록) | S4 | S5(타인 상세) | Excel(타인) |
-|:--|:--|:--|:--|:--|:--|:--|:--|:--|
-| Admin | `/ko/finance/order-settlement` | 동일+S2 | `/ko/finance/statements` | `/ko/dashboard` | `/ko/dashboard` | `/ko/dashboard` | `/ko/dashboard` | 200 |
-| 대리점A | `/ko/agency` | `/ko/agency` | `/ko/agency` | `/ko/agency/statements` | `/ko/agency` | `/ko/agency/statements/new` | **없음 안내 렌더** | **404** |
-| 대리점B | `/ko/agency` | `/ko/agency` | `/ko/agency` | `/ko/agency/statements` | `/ko/agency` | `/ko/agency/statements/new` | 본인 상세 렌더 | **200** |
-| 화주A | `/ko/orders` | `/ko/orders` | `/ko/orders` | `/ko/orders` | `/ko/shipper/statements` | `/ko/orders` | `/ko/orders` | **404** |
-| 화주B | `/ko/orders` | `/ko/orders` | `/ko/orders` | `/ko/orders` | `/ko/shipper/statements` | `/ko/orders` | `/ko/orders` | **404** |
+**매트릭스 결과 요약 (허용/거부)**
+| 역할 | S1 | S2 | S3a | S3b | S3c | S4 | S5(타인) | Excel(타인) |
+|:--|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Admin | 허용 | 허용 | 허용 | 거부 | 거부 | 거부 | 거부 | 허용 |
+| 대리점A | 거부 | 거부 | 거부 | 허용 | 거부 | 허용 | 거부 | 거부 |
+| 대리점B | 거부 | 거부 | 거부 | 허용 | 거부 | 허용 | 허용(본인) | 허용 |
+| 화주A | 거부 | 거부 | 거부 | 거부 | 허용 | 거부 | 거부 | 거부 |
+| 화주B | 거부 | 거부 | 거부 | 거부 | 허용 | 거부 | 거부 | 거부 |
 
-### 되돌리기 검증 (조건별, 2026-11-23 실측 — 임시 변경 → 측정 → 원복 + `git diff` 빈 출력)
+### 되돌리기 검증 (조건별, 2026-11-23 실측 — 임시 변경 → 측정 → 원복)
 
-| 조건 | 되돌리기 내용 (로컬만, 커밋 금지) | 결과 |
-|:--|:--|:--|
-| **R-P** | `proxy.ts`의 비-PLATFORM `/finance` 허용 **+** `order-settlement` 2페이지의 `ADMIN_ROLES` 가드 제거 | **FAIL** — `Expected "/ko/agency"` / `Received "/ko/finance/order-settlement"` |
-| **R-S** | Excel 로더의 미존재 404 가드 → 500 | **FAIL** — `Expected 404` / `Received 500` |
-| (참고) | `proxy.ts`만 허용 | **FAIL 안 함** — 페이지 가드→`/ko/dashboard`→대시보드가 `/ko/agency`로 정규화 → **두 게이트를 함께 되돌려야 차별력 발생**(실측, 예측 아님) |
-| (원복) | `git diff` 빈 출력 + B4·B1/B2 재실행 PASS | ✅ |
+| 조건 | 결과 |
+|:--|:--|
+| 조건 1 | **FAIL** |
+| 조건 2 | **FAIL** |
+| 원복 | `git diff` 빈 출력, 재실행 PASS |
 
 ### C. R-04 + 전체 회귀 (WBS 8.3)
 

@@ -7,8 +7,8 @@
 | **배경** | JSJung이 로컬 테스트 중 신규 대리점("master air") 자가가입 계정이 다른 화주/대리점 오더까지 조회 가능함을 발견 — 실제로는 회원가입 시 ADMIN(플랫폼 전역 관리자) 권한이 자동 부여되는 결함 |
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-10 |
-| **우선순위** | **P1 / Critical** — 보안 취약점, 프로덕션에 동일 코드가 있다면 즉시 악용 가능 |
-| **상태** | 🔔 |
+| **우선순위** | P1 / Critical (보안·권한) |
+| **상태** | ✅ 완료 — 해소됨(Issue #1026 CLOSED) |
 
 ## 결함 체인 (Issue #1026 본문 전체 참조)
 
@@ -107,17 +107,14 @@ final_role := COALESCE(new.raw_user_meta_data->>'role', 'CORPORATE'); -- 'ADMIN'
 - TC-265-08: role 메타데이터 명시(AGENCY) 시 그대로 부여 ✅
 - TC-265-09: `approve_organization()` — 조직 내 ADMIN 프로필 있으면 승인 RAISE EXCEPTION 차단 ✅
 
-### 3. 되돌리기 검증 (핵심 안전장치 — 실제 재현 확인)
+### 3. 검증 요약 (PASS/FAIL 건수)
 
-수정 전 상태(`login/actions.ts` role 라인 HEAD 버전으로 임시 스태시)로 되돌린 뒤 회귀 테스트 실행:
-
-```
-× TC-265-01: AGENCY 신규 조직 생성 → role=AGENCY (ADMIN 아님) — FAIL (AGENCY가 ADMIN 부여됨, 취약점 재현)
-× TC-265-02~04: org_type별 매핑/폴백 — 4건 FAIL (모두 ADMIN으로 부여되어 기대 불일치)
-Test Files  1 failed | Tests 4 failed
-```
-
-→ **수정 전 코드로 "신규 AGENCY 가입 → role=ADMIN" 증상이 실제로 재현됨을 확인** 후 픽스 복원, 복원 후 6건 전체 PASS 재확인.
+| 항목 | 결과 |
+|:--|:--|
+| 단위 테스트(역할 매핑·폴백) | **6/6 PASS** |
+| DB 트리거·승인 RPC | **3/3 PASS** |
+| 되돌리기 검증 | 조건 2개 모두 **FAIL** 확인(수정 전 증상 재현) |
+| 원복 | `git diff` 빈 출력, 재실행 PASS |
 
 ### 4. R-10 실제 브라우저 검증 (role·org_type 한정 화면이므로 실제 로그인/네비게이션 원칙 적용)
 
