@@ -51,12 +51,12 @@ Supabase: Cloud 프로젝트 연결
 
 | 역할 | 이메일 | 비밀번호 | 비고 |
 |:----:|:------|:---------|:-----|
-| ADMIN | `admin@zenith.kr` | `password1234` | 기존 확인 계정 |
-| ADMIN (보조) | `admin_e2e@zenith.kr` | `password1234!` | E2E 전용 계정 |
-| SHIPPER | `uat02_corp_shipper@zenith.kr` | `password1234` | 기존 확인 계정 |
-| SHIPPER (보조) | `shipper@zenith.kr` | `password1234` | audit spec 확인 |
-| MASTER | `master@zenith.kr` | `password1234` | ⚠️ UAT 전 계정 생성 필요 |
-| MANAGER | `manager@zenith.kr` | `password1234` | ⚠️ UAT 전 계정 생성 필요 |
+| ADMIN | `admin@zenith.kr` | `로컬 시드 계정 — 값은 시드 스크립트 참조` | 기존 확인 계정 |
+| ADMIN (보조) | `admin_e2e@zenith.kr` | `로컬 시드 계정 — 값은 시드 스크립트 참조` | E2E 전용 계정 |
+| SHIPPER | `uat02_corp_shipper@zenith.kr` | `로컬 시드 계정 — 값은 시드 스크립트 참조` | 기존 확인 계정 |
+| SHIPPER (보조) | `shipper@zenith.kr` | `로컬 시드 계정 — 값은 시드 스크립트 참조` | audit spec 확인 |
+| MASTER | `master@zenith.kr` | `로컬 시드 계정 — 값은 시드 스크립트 참조` | ⚠️ UAT 전 계정 생성 필요 |
+| MANAGER | `manager@zenith.kr` | `로컬 시드 계정 — 값은 시드 스크립트 참조` | ⚠️ UAT 전 계정 생성 필요 |
 
 > ⚠️ MASTER·MANAGER 계정은 1차 UAT 시작 전 ADMIN 계정으로 직접 생성·승인 후 사용
 
@@ -260,7 +260,7 @@ Supabase: Cloud 프로젝트 연결
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/login | 이메일·비밀번호 입력 후 '로그인' 클릭 | admin@zenith.kr / password1234 | 대시보드로 이동 | ☐ |
+| 1 | /ko/login | 이메일·비밀번호 입력 후 '로그인' 클릭 | admin@zenith.kr / <로컬 시드 비밀번호> | 대시보드로 이동 | ☐ |
 | 2 | /ko/orders | 오더 목록 확인 | — | 오더 테이블 정상 표시 | ☐ |
 
 ### 합격 기준

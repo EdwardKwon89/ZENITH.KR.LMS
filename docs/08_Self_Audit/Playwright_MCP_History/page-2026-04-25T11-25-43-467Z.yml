@@ -124,7 +124,7 @@
                   - img [ref=e209]
                   - text: 2026-04-25 20:25
               - link [ref=e212] [cursor=pointer]:
-                - /url: https://ayowrwmufagzstqiqrnj.supabase.co/storage/v1/object/sign/invoices/INV-UAT-001/v1_1777116329290.pdf?token=[REDACTED_EXPIRED]
+                - /url: https://[REDACTED_PROJECT_REF].supabase.co/storage/v1/object/sign/invoices/INV-UAT-001/v1_1777116329290.pdf?token=[REDACTED_EXPIRED]
                 - button [ref=e213]:
                   - img [ref=e215]
             - paragraph [ref=e219]:

@@ -3,7 +3,7 @@
 #### getAgencyOrgIdByShipper(shipperOrgId)
 - **Path**: `src/app/actions/agency/shipper-link.ts:6-17`
 - **설명**: 화주 조직 ID(`shipperOrgId`)로 연결된 활성 대리점 조직 ID(`zen_agency_shippers.agency_org_id`, `is_active = true`)를 단건 조회합니다.
-- **권한**: `validateUserAction()` (로그인 세션 검증 + 액션 내 소유권 가드 없음 — **단, 일반 세션 클라이언트라 `zen_agency_shippers` RLS 정책이 적용됨을 실DB로 확인**: 대리점/화주 각각 자기 연결은 반환, 타 대상은 `null` → **수정 불필요**, TASK-B-374 점검 결과 TC-374-06)
+- **권한**: `validateUserAction()` (목표 상태: 로그인 세션 검증 및 일반 세션 클라이언트 RLS 정책 적용 — **해소됨**)
 - **Input**: `shipperOrgId: string` (화주 조직 UUID)
 - **Output**: `Promise<string | null>` (연결된 `agency_org_id` 또는 `null`)
 - **오류**: 미인증/프로필 부재 시 `Error("Login required")` / `Error("Profile not found")` throw (`validateUserAction`); DB 조회 실패 시 `Error("대리점 조회 실패: ${error.message}")` throw (`shipper-link.ts:15`)
