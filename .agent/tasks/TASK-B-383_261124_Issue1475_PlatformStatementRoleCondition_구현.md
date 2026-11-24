@@ -2,7 +2,7 @@
 
 | 항목 | 내용 |
 |:-----|:-----|
-| 이슈 | [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) · DEF-B-171 · Jaison 배정 · `status:in-progress` |
+| 이슈 | [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) · DEF-B-171 · Jaison 배정 · `status:review` |
 | 담당 | **Mike (Worker)** / 검증: Jaison · 설계: PR #1488 `[설계 확정]` 범위 내 |
 | 브랜치 | `feature/teamb-task-b383-iss1475-platform-statement-role-cond` (base: `origin/TeamB_Dev` `4982a27f3`) |
 | 상태 | 📋 검토 대기 (`status:review`) |
