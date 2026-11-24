@@ -417,6 +417,18 @@ JSJung ② **B안(정책 0개)** 확정으로 MANAGER 인보이스·원가 RLS �
 
 ---
 
+## [설계 확정] (Aiden 전속 — R-17)
+
+| 항목 | 내용 |
+|:--|:--|
+| **확정 대상** | 설계 의견 v5.2 (head `f862ffcac`, 본문 `f3257bb14`) |
+| **확정 일시** | 2026-11-24 09:49 KST **확정**. 전제(PR #1462 조건 1 반영)는 같은 날 10:59 KST 반영 확인 |
+| **근거 코멘트** | [PR #1465 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1465#issuecomment-7118469813) / 전제 확인: [PR #1462 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1462#issuecomment-7119651852) |
+| **확정 범위** | 정책 0개(B안), 산출물 2개(M2 존재 확인 `SECURITY DEFINER` 함수 + `unmarkOrderCostSettled` RPC 교체), 함수는 예외로 거부하는 fail-closed |
+| **유지되는 전제** | "UPS 정산마감은 RLS 비의존"은 `ups_invoice_exists` 검사가 DEFINER RPC 안에서 수행되는 한 성립(PR #1462 §2-1·§2-9, 반영 확인 완료). 구현 순서 B-382 → B-381 → B-377, #1475는 M2 함수 적용 후 병합. 비UPS 경로의 앱 가드·RLS 불일치는 업무 발생 시 별도 Task |
+| **잔여 비차단 정정** | §4-3 "비UPS 경로 7개" → 8개, §8-1 M4의 "B-381 7차 단계 4" 표현 통일 — 구현 PR 또는 이 파일을 다시 수정할 때 반영 |
+| **상태 라벨** | IS #1463 `status:draft` 제거(2026-11-24 09:59 KST) → `status:open`(10:08 KST). **담당자(Baker) 지정 후 Aiden이 `status:ready` 부여**, 착수 시 담당 Agent가 `status:in-progress` 전환 |
+
 ## [발견 이슈]
 
 | DEF# | 제목 | 긴급도 | 상세 보고서 |
