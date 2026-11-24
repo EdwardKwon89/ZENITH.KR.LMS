@@ -41,7 +41,7 @@ async function createUser(supabase: any, email: string, fullName: string, role: 
       id: user.id,
       email: email,
       full_name: fullName,
-      phone_number: '010-1234-5678',
+      phone_number: '010-0000-0000',
       role: role,
       status: 'ACTIVE',
       org_id: orgId
@@ -408,9 +408,9 @@ async function seedShipperInvoices(supabase: any, shipperOrgId: string) {
  * 기존 시드에는 이런 조합이 없어 2026-07-28 세션에서 실제 UI/수동 SQL로 임시로 만들어 검증했음.
  * 리셋 시 사라지므로(CI/check-db-freshness.sh --fix) 동일 시나리오를 여기 이식한다.
  *
- * - Zenith Agency Partners(대리점) 소속 화주 2곳: jungjs72@gmail.com(shipperOrgId 재사용,
- *   role을 CORPORATE→AGENCY_SHIPPER로 전환 — 위 3-1 createUser 참조) + 신규 "Jongseok Jeong"
- *   개인 화주(jungjs@aventusm.com, 정상 자가등록 시나리오 재현용 실제 주소/사업자번호 포함)
+ * - Zenith Agency Partners(대리점) 소속 화주 2곳: shipper-a@example.test(shipperOrgId 재사용,
+ *   role을 CORPORATE→AGENCY_SHIPPER로 전환 — 위 3-1 createUser 참조) + 신규 "Shipper B Co"
+ *   개인 화주(shipper-b@example.test, 정상 자가등록 시나리오 재현용 가상 주소/사업자번호 포함)
  * - 오더 7건(ZEN-2026-000001~007), 각각 AGENCY_TO_SHIPPER(화주 판매가) + ADMIN_TO_AGENCY(대리점 원가)
  *   양쪽 티어 인보이스 보유 — DEF-B-027(상세 펼침 빈 목록)·DEF-B-028(화주에 원가 노출)·
  *   DEF-B-029(요약 breakdown 0)·DEF-B-030(색상) 전부 이 데이터로 재현/재검증 가능
@@ -513,29 +513,29 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
   const agencyOrg = await getOrCreateOrg(supabase, 'Zenith Agency Partners', 'AGENCY');
   await createUser(supabase, 'agency@zenith.kr', 'Zenith Agency Partners Operator', 'AGENCY', agencyOrg.id, 'AGENCY');
 
-  const aventusmOrg = await getOrCreateOrg(supabase, 'Jongseok Jeong', 'SHIPPER');
+  const shipperBOrg = await getOrCreateOrg(supabase, 'Shipper B Co', 'SHIPPER');
   await supabase
     .from('zen_organizations')
     .update({
-      biz_no: '215-46-56633',
-      rep_name: '정대표',
-      contact_name: 'Jongseok Jeong',
-      contact_email: 'jungjs@aventusm.com',
-      contact_phone: '010-4282-4027',
+      biz_no: '000-00-00002',
+      rep_name: '홍길동',
+      contact_name: 'Shipper B Contact',
+      contact_email: 'shipper-b@example.test',
+      contact_phone: '010-0000-0002',
       country_code: 'KR',
       state_province: '11',
       city: 'Seongbuk-gu',
-      address: '서울 성북구 동소문로 290-1',
-      address_detail: 'bio venture tower 203',
+      address: '서울 성북구 가상로 100',
+      address_detail: '가상빌딩 203호',
       zipcode: '02734',
-      address_english: '290-1 Dongsomun-ro, Seongbuk-gu, Seoul, Republic of Korea',
+      address_english: '100 Gasang-ro, Seongbuk-gu, Seoul, Republic of Korea',
     })
-    .eq('id', aventusmOrg.id);
-  await createUser(supabase, 'jungjs@aventusm.com', 'Jongseok Jeong', 'AGENCY_SHIPPER', aventusmOrg.id, 'CUSTOMER');
+    .eq('id', shipperBOrg.id);
+  await createUser(supabase, 'shipper-b@example.test', 'Shipper B Contact', 'AGENCY_SHIPPER', shipperBOrg.id, 'CUSTOMER');
 
-  // jungjs72@gmail.com은 3-1 createUser에서 이미 AGENCY_SHIPPER로 생성됨(shipperOrgId 재사용) —
+  // shipper-a@example.test는 3-1 createUser에서 이미 AGENCY_SHIPPER로 생성됨(shipperOrgId 재사용) —
   // 여기서는 두 화주 org를 대리점에 연결만 한다(실측 discount_rate=0 그대로 반영).
-  for (const linkedShipperOrgId of [shipperOrgId, aventusmOrg.id]) {
+  for (const linkedShipperOrgId of [shipperOrgId, shipperBOrg.id]) {
     await supabase
       .from('zen_agency_shippers')
       .upsert(
@@ -543,7 +543,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { onConflict: 'agency_org_id,shipper_org_id' },
       );
   }
-  console.log(`  - Linked Global Shipper Corp + Jongseok Jeong -> Zenith Agency Partners (discount_rate=0)`);
+  console.log(`  - Linked Global Shipper Corp + Shipper B Co -> Zenith Agency Partners (discount_rate=0)`);
 
   // IMP-157 조사 중 실측 반영된 Zone별 할인율 — 최초 20%/25% 조합은 화주 할인율이 대리점 자체
   // 할인율보다 높아 역마진이 발생하는 시나리오였음(IMP-155 검증용). DEF-B-031(2026-07-29,
@@ -560,7 +560,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
         { agency_org_id: agencyOrg.id, zone_id: zone.id, discount_rate: 0.40, is_active: true },
         { onConflict: 'agency_org_id,zone_id' },
       );
-    for (const linkedShipperOrgId of [shipperOrgId, aventusmOrg.id]) {
+    for (const linkedShipperOrgId of [shipperOrgId, shipperBOrg.id]) {
       await supabase
         .from('zen_agency_shipper_zone_discounts')
         .upsert(
@@ -574,7 +574,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
   type CostRow = { cost_type: string; amount: number };
   type OrderFixture = {
     orderNo: string;
-    shipperKey: 'global' | 'aventusm';
+    shipperKey: 'global' | 'shipperB';
     status: string;
     upsProduct: string;
     recipientCountry: string;
@@ -589,7 +589,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
 
   const orderFixtures: OrderFixture[] = [
     {
-      orderNo: 'ZEN-2026-000001', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_NONDOC',
+      orderNo: 'ZEN-2026-000001', shipperKey: 'shipperB', status: 'DELIVERED', upsProduct: 'WW_SAVER_NONDOC',
       recipientCountry: 'JP', recipientState: '40', recipientCity: 'Buzen-shi', recipientName: 'brook shields',
       deliveryMethod: 'DIRECT', packageDims: { l: 60, w: 30, h: 30, kg: 8.63 },
       costs: [
@@ -599,7 +599,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
       adminToAgencyBreakdown: { baseFreight: 202560, fuelSurcharge: 62456, surgeFee: 191.97, otherCharges: 30000 },
     },
     {
-      orderNo: 'ZEN-2026-000002', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_NONDOC',
+      orderNo: 'ZEN-2026-000002', shipperKey: 'shipperB', status: 'DELIVERED', upsProduct: 'WW_SAVER_NONDOC',
       recipientCountry: 'US', recipientState: 'FL', recipientCity: 'Apopka', recipientName: 'james bonds',
       deliveryMethod: 'DIRECT', packageDims: { l: 35, w: 20, h: 10, kg: 2.69 },
       costs: [
@@ -609,7 +609,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
       adminToAgencyBreakdown: { baseFreight: 230880, fuelSurcharge: 71188, surgeFee: 6397.3884, otherCharges: 30000 },
     },
     {
-      orderNo: 'ZEN-2026-000003', shipperKey: 'aventusm', status: 'DELIVERED', upsProduct: 'WW_SAVER_DOC',
+      orderNo: 'ZEN-2026-000003', shipperKey: 'shipperB', status: 'DELIVERED', upsProduct: 'WW_SAVER_DOC',
       recipientCountry: 'AU', recipientState: 'NSW', recipientCity: 'Adamstown Heights', recipientName: 'bon jovi',
       deliveryMethod: 'PICKUP', packageDims: { l: 20, w: 15, h: 5, kg: 0.5 },
       costs: [
@@ -649,7 +649,7 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
       adminToAgencyBreakdown: { baseFreight: 166560, fuelSurcharge: 51356, surgeFee: 0.74181, otherCharges: 0 },
     },
     {
-      orderNo: 'ZEN-2026-000007', shipperKey: 'aventusm', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
+      orderNo: 'ZEN-2026-000007', shipperKey: 'shipperB', status: 'IN_TRANSIT', upsProduct: 'WW_SAVER_NONDOC',
       recipientCountry: 'FR', recipientState: '09', recipientCity: 'Paris', recipientName: 'brook shields',
       deliveryMethod: 'DIRECT', packageDims: { l: 50, w: 35, h: 25, kg: 10 },
       costs: [
@@ -661,22 +661,22 @@ async function seedDailyBillingMultiTierFixtures(supabase: any, shipperOrgId: st
   ];
 
   // createOrder()가 실제로 org 등록정보를 오더에 스냅샷 저장하는 shipper_contact_*/shipper_* 필드 —
-  // 화주 계정별 실제 등록정보(위 aventusmOrg.update()/기존 base seed 3-1의 Global Shipper Corp 등록정보와 동일)
+  // 화주 계정별 가상 등록정보(위 shipperBOrg.update()/기존 base seed 3-1의 Global Shipper Corp 등록정보와 동일)
   const shipperSnapshots = {
     global: {
-      contactName: 'JSJung Shipper Test', contactPhone: '010-1234-5678', contactEmail: 'jungjs72@gmail.com',
-      address: '경기 김포시 하성면 마곡로 19', addressDetail: 'samsung electric', countryCode: 'KR',
-      stateProvince: '41', city: 'Gimpo-si', zipcode: '10012', bizNo: '123-45-67890',
+      contactName: 'Shipper A Contact', contactPhone: '010-0000-0001', contactEmail: 'shipper-a@example.test',
+      address: '경기 김포시 가상면 가상로 10', addressDetail: '가상공단 1동', countryCode: 'KR',
+      stateProvince: '41', city: 'Gimpo-si', zipcode: '10012', bizNo: '000-00-00001',
     },
-    aventusm: {
-      contactName: 'Jongseok Jeong', contactPhone: '010-4282-4027', contactEmail: 'jungjs@aventusm.com',
-      address: '서울 성북구 동소문로 290-1', addressDetail: 'bio venture tower 203', countryCode: 'KR',
-      stateProvince: '11', city: 'Seongbuk-gu', zipcode: '02734', bizNo: '215-46-56633',
+    shipperB: {
+      contactName: 'Shipper B Contact', contactPhone: '010-0000-0002', contactEmail: 'shipper-b@example.test',
+      address: '서울 성북구 가상로 100', addressDetail: '가상빌딩 203호', countryCode: 'KR',
+      stateProvince: '11', city: 'Seongbuk-gu', zipcode: '02734', bizNo: '000-00-00002',
     },
   } as const;
 
   for (const fx of orderFixtures) {
-    const shipperOrgIdForOrder = fx.shipperKey === 'global' ? shipperOrgId : aventusmOrg.id;
+    const shipperOrgIdForOrder = fx.shipperKey === 'global' ? shipperOrgId : shipperBOrg.id;
     const snap = shipperSnapshots[fx.shipperKey];
 
     const { data: existingOrder } = await supabase
@@ -1326,8 +1326,8 @@ async function seed() {
 
   // 2-1. 레거시 organizations 테이블에 주소/사업자번호 동기화 (getCurrentUserAffiliation 호환)
   for (const [org, orgName, address, bizNo] of [
-    [shipperOrg, 'Global Shipper Corp', '1201, 12F, Digital-ro 123, Geumcheon-gu, Seoul, South Korea', '123-45-67890'],
-    [carrierOrg, 'Fast Carrier Ltd', '456 Freight Ave, Incheon, South Korea', '987-65-43210'],
+    [shipperOrg, 'Global Shipper Corp', '1201, 12F, Digital-ro 123, Geumcheon-gu, Seoul, South Korea', '000-00-00001'],
+    [carrierOrg, 'Fast Carrier Ltd', '456 Freight Ave, Incheon, South Korea', '000-00-00003'],
     [platformOrg, 'Zenith Logistics', '789 Platform St, Gangnam-gu, Seoul', null],
   ] as const) {
     // zen_organizations에 address 추가 (컬럼 없으면 zen_organizations의 biz_no만 업데이트)
@@ -1364,7 +1364,7 @@ async function seed() {
     await createUser(supabase, 'shipper@zenith.kr', 'Main Shipper', 'CORPORATE', shipperOrg.id, 'CUSTOMER');
     // DEF-B-026~030 검증 과정에서 CORPORATE→AGENCY_SHIPPER로 정정됨(2026-07-28) — createAgencyShipper()가
     // 실제로 신규 화주에게 항상 부여하는 role과 일치시켜 정상 등록 시나리오로 유지(seedDailyBillingMultiTierFixtures 참조)
-    await createUser(supabase, 'jungjs72@gmail.com', 'JSJung Shipper Test', 'AGENCY_SHIPPER', shipperOrg.id, 'CUSTOMER');
+    await createUser(supabase, 'shipper-a@example.test', 'Shipper A Contact', 'AGENCY_SHIPPER', shipperOrg.id, 'CUSTOMER');
     await createUser(supabase, 'carrier@zenith.kr', 'Main Carrier', 'CARRIER', carrierOrg.id, 'PARTNER');
     await createUser(supabase, 'individual@zenith.kr', 'Individual User', 'INDIVIDUAL', null, 'CUSTOMER');
 
