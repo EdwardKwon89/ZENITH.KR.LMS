@@ -87,7 +87,7 @@
    - `validateUserAction()` → 역할 검사 → 거부 시 `logger.warn` + `trError('permission_denied')` throw.
 3. **비관리자 화면 전환**
    - `/agency/other-charges/page.tsx`: `getUpsOtherCharges()` → `getPublicOtherCharges()` (Team A 파일, 이 이슈 예외 허용). 클라이언트는 코드·명칭·단위만 사용하므로 public 인터페이스로 충분(코드 확인). 플랫폼 원가는 사용하지 않는다.
-   - `admin/ups-rates/page.tsx`: SUB_ADMIN이면 기본요율은 `getUpsBaseRates`, 나머지 5종은 `rates-public.ts`로 전환(또는 탭 비노출). 또한 페이지의 **직접 fuel select**(L13~16)도 SUB_ADMIN에게 원가를 반환하므로 public 함수로 교체.
+   - `admin/ups-rates/page.tsx`: SUB_ADMIN이면 기본요율은 `getUpsBaseRates`, 나머지 5종은 `rates-public.ts`로 전환(또는 탭 비노출). 또한 페이지의 **직접 fuel 조회**도 SUB_ADMIN 경로에서 원가가 전달되지 않도록 public 함수로 교체.
    - `UpsBaseRateMatrix`: admin은 기존 `getUpsBaseRates`, 비관리자는 `rates` prop(public)만 사용하도록 정리. client 번들에서 admin 액션 import를 제거하거나 `fetchRates` prop으로 주입.
    - **타입 정합**: `AgencyOtherChargesClient.allOtherCharges`를 `UpsOtherCharge[]`→`PublicOtherCharge[]`로, SUB_ADMIN용 `UpsRatesClient` prop도 public 타입으로 조정한다(필드 사용은 id·코드·명칭·단위뿐임을 코드로 확인).
 4. **페이지 가드 보강**: `admin/ups-rates/page.tsx`는 현재 `requireAuth()`만 호출한다. 액션 가드와 동일하게 `checkPermission(profile.role, '/admin/ups-rates')`(또는 역할 검사)를 추가해 비관리자 진입을 차단(미들웨어와 이중 방어).
