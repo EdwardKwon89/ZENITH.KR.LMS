@@ -53,7 +53,8 @@ git -C "$REPO_ROOT" fetch origin
 # develop 브랜치는 메인 체크아웃(REPO_ROOT)이 이미 점유 중일 수 있으므로,
 # 워크트리는 항상 detached HEAD(origin/develop 시점)로 생성/초기화한다.
 # 실제 작업은 여기서 바로 새 feature 브랜치를 checkout -b 하므로 문제없다.
-if [ -d "$WORKTREE_DIR" ] && git -C "$REPO_ROOT" worktree list | grep -q "$WORKTREE_DIR"; then
+WORKTREE_LIST="$(git -C "$REPO_ROOT" worktree list)"
+if [ -d "$WORKTREE_DIR" ] && grep -qF "$WORKTREE_DIR" <<<"$WORKTREE_LIST"; then
   echo "[worktree-init] 기존 워크트리 재사용: $WORKTREE_DIR"
 
   # 이전 세션의 미커밋 변경분이 있으면 삭제 대신 stash로 보존(유실 방지)
