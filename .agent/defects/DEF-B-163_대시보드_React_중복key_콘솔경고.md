@@ -29,8 +29,7 @@
 npx playwright test tests/e2e/e2e-31-billing-flow-verification.spec.ts -g "B6"
 # → [B371-r04] pageerror=0 console.error=100
 ```
-- 증적: `docs/99_Manual/E2E_B371_Result/B7_R04_콘솔점검.json` (`pageErrors[]`, `consoleErrors[]`)
-- 셀 단위 분포: `docs/99_Manual/E2E_B371_Result/B6_역할x화면_매트릭스.json`
+- 증적: 비공개 보관
 
 ## 원인 후보 (미확정 — 근본 조사 필요)
 
