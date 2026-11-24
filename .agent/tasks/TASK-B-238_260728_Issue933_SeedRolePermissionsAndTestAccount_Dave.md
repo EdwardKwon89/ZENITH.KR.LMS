@@ -18,7 +18,7 @@
 
 ### 1. `user@example.test` 테스트 계정 추가
 
-`shipperOrg`(Global Shipper Corp, 기존 재사용)에 소속된 SHIPPER 역할 계정으로 추가. 비밀번호는 `createUser()` 헬퍼가 내부적으로 시드 기본값으로 고정 생성하므로 별도 처리 불필요.
+`shipperOrg`(Global Shipper Corp, 기존 재사용)에 소속된 SHIPPER 역할 계정으로 추가. 비밀번호는 `createUser()` 헬퍼가 내부적으로 생성하므로 별도 처리 불필요.
 
 `main()` 함수의 기존 계정 생성 블록(873~879행 근처, `shipper@zenith.kr` 생성 라인 바로 아래)에 추가:
 ```ts

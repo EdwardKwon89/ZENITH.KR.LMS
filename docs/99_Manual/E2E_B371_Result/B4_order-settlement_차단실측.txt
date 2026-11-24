@@ -1,8 +1,0 @@
-대리점A /ko/finance/order-settlement → status=200 path=/ko/agency
-대리점A /ko/finance/order-settlement/37100000-0000-4000-8000-000000000012 → status=200 path=/ko/agency
-대리점B /ko/finance/order-settlement → status=200 path=/ko/agency
-대리점B /ko/finance/order-settlement/37100000-0000-4000-8000-000000000012 → status=200 path=/ko/agency
-화주A /ko/finance/order-settlement → status=200 path=/ko/orders
-화주A /ko/finance/order-settlement/37100000-0000-4000-8000-000000000012 → status=200 path=/ko/orders
-화주B /ko/finance/order-settlement → status=200 path=/ko/orders
-화주B /ko/finance/order-settlement/37100000-0000-4000-8000-000000000012 → status=200 path=/ko/orders
