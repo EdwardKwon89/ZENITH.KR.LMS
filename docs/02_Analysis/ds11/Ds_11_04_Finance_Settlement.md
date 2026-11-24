@@ -137,6 +137,15 @@
 - **오류**: 프로필 부재(`profile_not_found`, `L638`), 인보이스 미존재(`invoice_not_found`, `L644`), 이미 취소됨(`invoice_already_canceled`, `L648`), 권한 불충족(`permErr`, `L652`), 취소 업데이트 실패(`generic: INVOICE_CANCEL`, `L661`), 기타 예외 시 `logger.error` 후 `{ success: false, error: await trError('generic', { code: 'UNEXPECTED' }) }` 반환 (`L693-696`)
 - **부수효과**: 기존 `zen_invoices` `'CANCELED'` 업데이트 및 `zen_invoice_history` 취소 이력 INSERT(`L656-667`), `zen_order_costs.invoice_id = null` 연결 해제(`L670-671`), `InvoiceGenerator.generateInvoice(orderId)`로 신규 인보이스 생성·`superseded_by` 기록·신규 이력 INSERT(`L675-688`), `revalidatePath('/finance/invoices')` 및 `revalidatePath(\`/orders/\${orderId}\`)` (`L690-691`)
 
+#### RPC `zen_billing_statement_order_included(p_order_id uuid)` (TASK-B-382 / Issue #1463)
+- **Path**: `supabase/migrations/20261124100000_task_b382_billing_inclusion_rpc.sql`
+- **설명**: 오더가 청구서 항목에 포함되었는지만 `boolean`으로 반환합니다. 헤더 상태와 무관하게(DRAFT·ISSUED·CLOSED 모두) 항목 존재 여부만 판정하며, 청구서 행·컬럼은 반환하지 않습니다. RLS 정책은 신설하지 않습니다(정책 0개 확정).
+- **권한**: `SECURITY DEFINER` + `search_path = public`. `REVOKE ALL FROM PUBLIC, anon` / `GRANT EXECUTE TO authenticated`(세션 클라이언트 전용). 함수 내부에서 `auth.uid()`의 `zen_profiles.role`이 `ADMIN`·`MANAGER`·`ZENITH_SUPER_ADMIN`인지 검사하고, 비허용 역할·프로필 부재는 `false`가 아니라 **예외**로 거부(fail-closed)합니다.
+- **Input**: `p_order_id: uuid`
+- **Output**: `boolean` (포함 `true` / 미포함 `false`)
+- **오류**: `invalid_order_id`, `profile_not_found`, `statement_inclusion_not_allowed: role=%`
+- **호출부**: `unmarkOrderCostSettled`(§11B)가 포함 여부 확인에 사용하며, RPC 오류 시 오더정산 되돌리기를 차단합니다.
+
 ---
 
 ### 4.3 청구서 관리(월 차수) — `src/app/actions/finance/billing-statements.ts` (TASK-B-360 / Issue #1366)

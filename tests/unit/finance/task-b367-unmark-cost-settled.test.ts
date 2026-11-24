@@ -1,12 +1,14 @@
-// TASK-B-367 (Issue #1377): unmarkOrderCostSettled 거부 사유·조건부 UPDATE·조회 오류 단위 검증.
+// TASK-B-367 (Issue #1377) + TASK-B-382 (Issue #1377/1463):
+// unmarkOrderCostSettled 거부 사유·포함 확인 RPC(fail-closed)·조건부 UPDATE 단위 검증.
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 type State = {
   profile: any;
   order: any;
   orderError: any;
-  items: any[];
-  itemsError: any;
+  included: unknown;
+  rpcError: any;
+  rpcCalls: [string, Record<string, unknown>][];
   updated: any[];
   updateError: any;
   updatePayload: any;
@@ -17,8 +19,9 @@ const state: State = {
   profile: { id: 'user-1', role: 'ADMIN', org_id: 'org-1' },
   order: { id: 'order-1', cost_settlement_status: 'SETTLED' },
   orderError: null,
-  items: [],
-  itemsError: null,
+  included: false,
+  rpcError: null,
+  rpcCalls: [],
   updated: [{ id: 'order-1' }],
   updateError: null,
   updatePayload: null,
@@ -52,10 +55,12 @@ const mockSupabase: any = {
         },
       };
     }
-    if (table === 'zen_billing_statement_items') {
-      return { select: () => chain(() => ({ data: state.items, error: state.itemsError })) };
-    }
+    // TASK-B-382: 앱은 청구서 항목 테이블을 직접 조회하지 않는다.
     throw new Error(`unexpected table: ${table}`);
+  },
+  rpc: async (fn: string, args: Record<string, unknown>) => {
+    state.rpcCalls.push([fn, args]);
+    return { data: state.included, error: state.rpcError };
   },
 };
 
@@ -71,14 +76,16 @@ const K = {
   unmarkUpdate: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: UNMARK_UPDATE)',
   unexpected: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: UNEXPECTED)',
 };
+const RPC_NAME = 'zen_billing_statement_order_included';
 
 beforeEach(() => {
   vi.clearAllMocks();
   state.profile = { id: 'user-1', role: 'ADMIN', org_id: 'org-1' };
   state.order = { id: 'order-1', cost_settlement_status: 'SETTLED' };
   state.orderError = null;
-  state.items = [];
-  state.itemsError = null;
+  state.included = false;
+  state.rpcError = null;
+  state.rpcCalls = [];
   state.updated = [{ id: 'order-1' }];
   state.updateError = null;
   state.updatePayload = null;
@@ -89,12 +96,13 @@ beforeEach(() => {
 });
 
 describe('unmarkOrderCostSettled — 거부 사유 (단위)', () => {
-  it('Admin 아님 → permission_denied, DB 조회 없음', async () => {
+  it('Admin 아님 → permission_denied, DB 조회/RPC 0건', async () => {
     state.profile = { id: 'u', role: 'AGENCY', org_id: 'org-1' };
     const res = await unmarkOrderCostSettled('order-1');
     expect(res.success).toBe(false);
     expect(res.error).toBe(K.permission);
     expect(state.eqCalls).toHaveLength(0);
+    expect(state.rpcCalls).toHaveLength(0);
   });
 
   it('오더 조회 오류 → order_not_found + 원본 error 를 logger.error 로 전달', async () => {
@@ -103,34 +111,52 @@ describe('unmarkOrderCostSettled — 거부 사유 (단위)', () => {
     const res = await unmarkOrderCostSettled('order-1');
     expect(res.error).toBe(K.orderNotFound);
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('order lookup failed'), original);
+    expect(state.rpcCalls).toHaveLength(0);
   });
 
-  it('NOT_SETTLED 오더 → not_found', async () => {
+  it('NOT_SETTLED 오더 → not_found, RPC/UPDATE 미실행', async () => {
     state.order = { id: 'order-1', cost_settlement_status: 'NOT_SETTLED' };
     const res = await unmarkOrderCostSettled('order-1');
     expect(res.error).toBe(K.notFound);
+    expect(state.rpcCalls).toHaveLength(0);
     expect(state.updatePayload).toBeNull();
   });
 
-  it('청구서 항목 조회 실패 → generic 실패(청구서 없음으로 오인 금지)', async () => {
-    const original = { message: 'item lookup failed' };
-    state.itemsError = original;
+  it('포함 확인 RPC 오류 → generic 실패(fail-closed), UPDATE 미실행', async () => {
+    const original = { message: 'permission denied for function' };
+    state.rpcError = original;
     const res = await unmarkOrderCostSettled('order-1');
     expect(res.success).toBe(false);
     expect(res.error).toBe(K.statementLookup);
     expect(res.error).not.toBe(K.includes);
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('statement items lookup failed'), original);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('statement inclusion RPC failed'), original);
     expect(state.updatePayload).toBeNull();
   });
 
-  it('청구서 항목 존재(어떤 tier든 order_id 기준) → statement_includes_order', async () => {
-    state.items = [{ id: 'item-1' }];
+  it('RPC 반환값이 boolean이 아니면 해제 차단(fail-closed)', async () => {
+    state.included = null;
+    const res = await unmarkOrderCostSettled('order-1');
+    expect(res.success).toBe(false);
+    expect(res.error).toBe(K.statementLookup);
+    expect(state.updatePayload).toBeNull();
+  });
+
+  it('포함 확인 RPC true → statement_includes_order, UPDATE 미실행', async () => {
+    state.included = true;
     const res = await unmarkOrderCostSettled('order-1');
     expect(res.success).toBe(false);
     expect(res.error).toBe(K.includes);
     expect(logger.warn).toHaveBeenCalled();
-    expect(state.eqCalls.some(([col, val]) => col === 'order_id' && val === 'order-1')).toBe(true);
+    expect(state.rpcCalls).toEqual([[RPC_NAME, { p_order_id: 'order-1' }]]);
     expect(state.updatePayload).toBeNull();
+  });
+
+  it.each(['MANAGER', 'ZENITH_SUPER_ADMIN'])('%s도 포함 오더 해제 거부', async (role) => {
+    state.profile = { id: 'user-1', role, org_id: 'org-1' };
+    state.included = true;
+    const res = await unmarkOrderCostSettled('order-1');
+    expect(res.success).toBe(false);
+    expect(res.error).toBe(K.includes);
   });
 
   it('조건부 UPDATE 오류 → generic 실패', async () => {
@@ -160,9 +186,10 @@ describe('unmarkOrderCostSettled — 거부 사유 (단위)', () => {
 });
 
 describe('unmarkOrderCostSettled — 성공', () => {
-  it('청구서 항목 없음 → 상태 되돌림 + 조건부 UPDATE 술어 확인', async () => {
+  it('미포함(RPC false) → 상태 되돌림 + 조건부 UPDATE 술어 확인', async () => {
     const res = await unmarkOrderCostSettled('order-1');
     expect(res).toEqual({ success: true });
+    expect(state.rpcCalls).toEqual([[RPC_NAME, { p_order_id: 'order-1' }]]);
     expect(state.updatePayload).toEqual({
       cost_settlement_status: 'NOT_SETTLED',
       cost_settled_at: null,
@@ -170,5 +197,11 @@ describe('unmarkOrderCostSettled — 성공', () => {
     });
     expect(state.eqCalls.some(([col, val]) => col === 'id' && val === 'order-1')).toBe(true);
     expect(state.eqCalls.some(([col, val]) => col === 'cost_settlement_status' && val === 'SETTLED')).toBe(true);
+  });
+
+  it('MANAGER 미포함 오더는 기존 동작 유지(해제 허용)', async () => {
+    state.profile = { id: 'user-1', role: 'MANAGER', org_id: 'org-1' };
+    const res = await unmarkOrderCostSettled('order-1');
+    expect(res).toEqual({ success: true });
   });
 });
