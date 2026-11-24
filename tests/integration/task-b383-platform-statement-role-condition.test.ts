@@ -23,7 +23,7 @@ const NOS = { P1: 'ST-202611-71-0001', P2: 'ST-202611-72-0001', A1: 'ST-202611-7
 
 let admin: Id; let orgP = '';
 const platform: Extra[] = [];       // ZENITH_SUPER_ADMIN·MANAGER·OPERATOR (플랫폼 org 공유)
-let agencyA: Id; const agencyAExtra: Extra[] = [];  // SUB_ADMIN (대리점A org 공유 — 실세팅과 동일)
+let agencyA: Id; const agencyAExtra: Extra[] = [];  // SUB_ADMIN (대리점A org 공유 — 목표 구성과 동일)
 let agencyB: Id;
 let shipperS: Id;
 let corpC: Id;
@@ -88,7 +88,7 @@ describe('TASK-B-383 플랫폼 발행 청구서 역할 조건 (목표 상태 단
     platform.push(addOrgUser(orgP, 'PLATFORM', 'MANAGER', 'b383i_manager'));
     platform.push(addOrgUser(orgP, 'PLATFORM', 'OPERATOR', 'b383i_operator'));
     agencyA = await createTestOrg({ prefix: `b383i_agencyA_${KEY}`, role: 'AGENCY', orgType: 'AGENCY' });
-    agencyAExtra.push(addOrgUser(agencyA.orgId, 'AGENCY', 'SUB_ADMIN', 'b383i_subadmin')); // 실세팅: SUB_ADMIN은 대리점 소속
+    agencyAExtra.push(addOrgUser(agencyA.orgId, 'AGENCY', 'SUB_ADMIN', 'b383i_subadmin')); // 목표 구성: SUB_ADMIN은 대리점 소속
     agencyB = await createTestOrg({ prefix: `b383i_agencyB_${KEY}`, role: 'AGENCY', orgType: 'AGENCY' });
     shipperS = await createTestOrg({ prefix: `b383i_shipperS_${KEY}`, role: 'INDIVIDUAL', orgType: 'INDIVIDUAL' });
     corpC = await createTestOrg({ prefix: `b383i_corpC_${KEY}`, role: 'CORPORATE', orgType: 'CORPORATE' });

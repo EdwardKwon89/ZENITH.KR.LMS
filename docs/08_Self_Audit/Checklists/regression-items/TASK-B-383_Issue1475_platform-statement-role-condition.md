@@ -9,12 +9,13 @@
 
 ## 회귀 항목
 
+> 통합 테스트의 `it`은 **3개**(TC-383-01~03)이며, 중첩 케이스 단언은 TC-383-01·03 안에 내장된다. (TC-383-05는 별도 E2E 실행, TC-383-06는 B-382 적용 후 추가)
+
 | TC# | 시나리오 | 기대 | 테스트 파일 | 실행 |
 |:----|:---------|:-----|:------------|:----:|
-| TC-383-01 | **헤더 매트릭스** — 실세션 9종(ADMIN·ZENITH_SUPER_ADMIN·MANAGER·OPERATOR@플랫폼 / SUB_ADMIN·AGENCY@대리점A / AGENCY@대리점B / INDIVIDUAL / CORPORATE) × 발행 조직(플랫폼 2건·대리점 1건) | 목표 표의 모든 셀과 일치 — 플랫폼 발행분은 관리 역할만, 수신자·감독 자격은 유지 | `tests/integration/task-b383-platform-statement-role-condition.test.ts` | CI (vitest) |
+| TC-383-01 | **헤더 매트릭스** — 실세션 9종(ADMIN·ZENITH_SUPER_ADMIN·MANAGER·OPERATOR@플랫폼 / SUB_ADMIN·AGENCY@대리점A / AGENCY@대리점B / INDIVIDUAL / CORPORATE) × 발행 조직(플랫폼 2건·대리점 1건) | 목표 표의 모든 셀과 일치 — 플랫폼 발행분은 관리 역할만, 수신자·감독 자격은 유지 (**중첩 케이스 단언 포함**) | `tests/integration/task-b383-platform-statement-role-condition.test.ts` | CI (vitest) |
 | TC-383-02 | **항목 매트릭스** — 동일 9세션의 항목 조회 | 헤더와 동일한 판정 (항목은 헤더 종속) | 동일 | CI (vitest) |
-| TC-383-03 | **판정 불가 fail-closed** — 조직 조회 결과를 일시 제거 | 비관리 역할 차단(발행자 경로) · 관리 역할은 발행자 자격으로 허용 · **수신자 분기는 조직 조회 무관으로 유지** · 복원 후 발행자 경로 재개 | 동일 | CI (vitest) |
-| TC-383-04 | **중첩 케이스 단언** — 수신자 자격이 발행 조건과 겹치는 셀(TC-383-01·03에 내장) | 수신자 분기가 우선해 허용 유지 | 동일 | CI (vitest) |
+| TC-383-03 | **판정 불가 fail-closed** — 조직 조회 결과를 일시 제거 | 비관리 역할 차단(발행자 경로) · 관리 역할은 발행자 자격으로 허용 · **수신자 분기는 조직 조회 무관으로 유지(중첩 케이스 단언 포함)** · 복원 후 발행자 경로 재개 | 동일 | CI (vitest) |
 | TC-383-05 | **R-10 무회귀** — 청구서 관리 E2E(`e2e-31`) 14시나리오 | **14/14 PASS** + `/admin/error-logs` 신규 ERROR **無**(delta 0) | `tests/e2e/e2e-31-billing-flow-verification.spec.ts` | **CI 미실행/수동** (Playwright) |
 | TC-383-06 | B-382 교차 확인 (정산 해제 경로) | B-382 존재 확인 함수 **적용 후** 측정 — 병합 전 단계에서 추가 | _(병합 조건 연동 — B-382 적용 시점에 추가)_ | 병합 전 |
 
