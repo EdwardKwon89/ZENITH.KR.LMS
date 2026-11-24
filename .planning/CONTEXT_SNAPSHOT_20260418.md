@@ -26,10 +26,10 @@
 2.  **Phase Transition**: Move to `WBS 1.4` (Master Data & Rate Engine Design) after visual confirmation.
 
 ## 5. Artifact Links
-- [Implementation Plan (WBS 1.3)](file:///Users/edward.kwon/.gemini/antigravity/brain/2cdff664-d6aa-4b1e-a40f-d41b723431a2/implementation_plan_wbs_1_3_logic.md)
-- [Fix Implementation Plan (Redirect Loop)](file:///Users/edward.kwon/.gemini/antigravity/brain/2cdff664-d6aa-4b1e-a40f-d41b723431a2/implementation_plan_fix_redirect_loop.md)
-- [SAR Report (Redirect Loop)](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/SAR_reports/SAR_2026-04-18_001_Middleware_Redirect_Loop.md)
-- [Verification Plan](file:///Users/edward.kwon/.gemini/antigravity/brain/2cdff664-d6aa-4b1e-a40f-d41b723431a2/verification_plan_auth_guard.md)
+- [Implementation Plan (WBS 1.3)](file://~/.gemini/antigravity/brain/2cdff664-d6aa-4b1e-a40f-d41b723431a2/implementation_plan_wbs_1_3_logic.md)
+- [Fix Implementation Plan (Redirect Loop)](file://~/.gemini/antigravity/brain/2cdff664-d6aa-4b1e-a40f-d41b723431a2/implementation_plan_fix_redirect_loop.md)
+- [SAR Report (Redirect Loop)](file://~/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/SAR_reports/SAR_2026-04-18_001_Middleware_Redirect_Loop.md)
+- [Verification Plan](file://~/.gemini/antigravity/brain/2cdff664-d6aa-4b1e-a40f-d41b723431a2/verification_plan_auth_guard.md)
 
 ---
 **Handover Note**: The core logic is fixed. Next session should focus on visual confirmation and WBS 1.4 design.
