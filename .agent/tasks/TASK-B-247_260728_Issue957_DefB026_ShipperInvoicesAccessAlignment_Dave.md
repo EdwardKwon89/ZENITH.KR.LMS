@@ -1,9 +1,9 @@
-# TASK-B-247: Issue #957 / DEF-B-026 — 청구서 조회 화면 role 차단 + 메뉴 누락 수정
+# TASK-B-247: Issue #957 / DEF-B-026 — 청구서 조회 화면 접근 정렬
 
 | 항목 | 내용 |
 |:-----|:------|
 | **Issue** | [#957](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/957) |
-| **DEF** | [DEF-B-026](../defects/DEF-B-026_shipper_invoices_page_role_gap_and_unreachable.md) |
+| **DEF** | [DEF-B-026](../defects/DEF-B-026_shipper_invoices_page_access_alignment.md) |
 | **담당** | Dave (Team B) |
 | **생성일** | 2026-07-28 |
 | **우선순위** | P1 |

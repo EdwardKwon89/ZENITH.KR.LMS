@@ -1,4 +1,4 @@
-# DEF-B-050 (High) — RLS 비활성화 테이블 5개, anon/authenticated 키 전체 노출 가능성
+# DEF-B-050 (High) — RLS 적용 테이블 5개 정비
 
 | 항목 | 내용 |
 |:-----|:------|

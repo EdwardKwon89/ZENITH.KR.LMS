@@ -1,9 +1,9 @@
-# TASK-B-265: Issue #1026 / DEF-B-039 (Critical) — 신규 조직 자가가입 시 ADMIN 권한 자동 부여 취약점
+# TASK-B-265: Issue #1026 / DEF-B-039 — 신규 조직 자가가입 권한 정책 정렬
 
 | 항목 | 내용 |
 |:-----|:------|
 | **Issue** | [#1026](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1026) |
-| **DEF** | [DEF-B-039](../defects/DEF-B-039_신규조직가입시_ADMIN권한_자동부여_취약점.md) |
+| **DEF** | [DEF-B-039](../defects/DEF-B-039_신규조직가입_권한부여_기본값_정렬.md) |
 | **배경** | JSJung이 로컬 테스트 중 신규 대리점("master air") 자가가입 계정이 다른 화주/대리점 오더까지 조회 가능함을 발견 — 실제로는 회원가입 시 ADMIN(플랫폼 전역 관리자) 권한이 자동 부여되는 결함 |
 | **담당** | Baker (Team B) |
 | **생성일** | 2026-08-10 |
