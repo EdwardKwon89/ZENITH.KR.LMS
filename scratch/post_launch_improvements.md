@@ -2301,6 +2301,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **발견 경위**: PR #1411(청구서 Excel 출력) 승인 검토 중 Jaison이 병합 후 후속(비차단)으로 지정, Team B가 IS #1418로 건의. 2026-11-24 Aiden 채택(R-15). 같은 IS의 2번(날짜 달력 검증, nit)·3번(JSDoc 겹침, 미관)은 IMP 번호 없이 반려 — 해당 파일을 수정하는 Task에서 처리.
 - **현재 상태**: `src/lib/finance/billing/statement-excel-data.ts`(TeamB_Dev 소재, 통합 전 develop에는 없음)의 라벨·기준일·항목 조회가 청구서 항목 전체 order id를 한 번에 `.in('order_id', orderIds)`로 보낸다. UUID 37자 × N이라 수백 건 이상이면 프록시 URL 한도(대략 8~16KB)에 걸려 대형 청구서의 Excel 출력이 500으로 실패한다(데이터 정합성에는 영향 없음, 에러 로그 남음).
 - **임시 조치**: 없음(대리점 월 청구 수백 건 규모에서 막힐 수 있음).
+- **실측 근거(2026-11-24, D_Kai TASK-1172 로컬 재현 — IS #1458)**: 로컬 PostgREST에서 `.in('order_id', …)` UUID 개수를 늘려 GET 호출한 결과 **220개(요청 약 8.2KB)부터 HTTP 414**(300개 약 11.2KB도 414). 따라서 청크 크기는 **100개 이하(약 3.7KB)** 를 권장(200개는 한도 근접). 같은 계열: IMP-197(500건 상한 조회)도 같은 한도에 걸린다.
 - **목표 구현**: 100~200건 단위 청크 조회로 분할(또는 RPC 대체). TeamB_Dev 쪽 IMP-197(오더정산 목록의 `.in()`·500건 상한)과 같은 계열이므로 통합 시 상호 참조하고 청크 헬퍼를 공용화 검토.
 - **관련 파일**: `src/lib/finance/billing/statement-excel-data.ts`, `src/app/actions/finance/billing-statements.ts`
 - **예상 공수**: 0.3 MD (청크 헬퍼 + 테스트)
