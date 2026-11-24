@@ -206,9 +206,10 @@ zen_ups_settlement_run_charges
 8. 기존 SETTLED·run 없음 초기화 → 재정산 성공(`settlement_run_missing` 해소). **청구서 포함 오더는 초기화 제외(중단·보고)**.
 9. **MANAGER가 비취소 UPS 인보이스가 있는 오더를 정산 → `ups_invoice_exists` 거부**.
 10. `generateInvoicesForOrder` 직접 호출: **UPS 거부**, **비UPS 성공**(회귀).
-11. 옛 UPS 화면·액션 제거 후 비UPS 화면 무회귀.
-12. R-10: 새 정산마감·청구서 화면(화주·대리점) 스크린샷, `/admin/error-logs` 신규 ERROR 0.
-13. `npm run test:regression` PASS, `npm run build`.
+11. **M4-b**: 대상 2건 삭제 후 참조 무결성·연결 파일 0건 확인(실행 전 조회·백업·롤백 리허설).
+12. 옛 UPS 화면·액션 제거 후 비UPS 화면 무회귀.
+13. R-10: 새 정산마감·청구서 화면(화주·대리점) 스크린샷, `/admin/error-logs` 신규 ERROR 0.
+14. `npm run test:regression` PASS, `npm run build`.
 
 ### 2-12. 마이그레이션·배포 순서
 
@@ -218,15 +219,17 @@ zen_ups_settlement_run_charges
 | M2 | `billing_items_amounts` run 전용 + `zen_billing_statement_items`(`freight_adjustment`·`charge_details`) + 통화 가드 제거 | 앱 배포 전 | 함수/컬럼 원복 |
 | M3 | RPC `finalize_ups_settlement_run`(보안 GRANT 포함) | 앱 배포 전 | DROP FUNCTION |
 | M4 | UPS 인보이스 일괄 취소 + 상태 백업 + `zen_invoice_history`(승인된 admin 계정 id를 `changed_by`로 사용). **PAID 발견 시 중단·보고** | 앱 배포 후 **R-14·Edward 승인 후**, 로컬 리허설 후 | 백업에서 상태 복원 |
-| M5 | 기존 SETTLED·run 없음 UPS 오더 `NOT_SETTLED` 초기화(백업·롤백). **청구서 항목 포함 오더 제외** | M4 후, 별도 승인·로컬 리허설 후 | 백업에서 복원 |
+| M4-b | **출처 오더 없는 비취소 인보이스 2건 삭제**. 참조 행·삭제 제약·트리거·연결 파일 없음 확인 → **단순 삭제**. 대상 행 전체 백업·롤백 SQL. 인보이스 id를 컬럼으로 갖지 않는 참조(알림 등)는 **미확인** — 실행 전 확인 | M4 후, **R-14·Edward 별도 승인**, 로컬 리허설 후. 실행 직전 동일 읽기 전용 조회 재수행 | 백업에서 복원 |
+| M5 | 기존 SETTLED·run 없음 UPS 오더 `NOT_SETTLED` 초기화(백업·롤백). **청구서 항목 포함 오더 제외** | M4·M4-b 후, 별도 승인·로컬 리허설 후 | 백업에서 복원 |
 
 **배포 순서**
 1. Ds-11 확정. **M4·M5 전 R-14 승인 아래 읽기 전용 조회**(UPS 인보이스 건수·상태별·PAID 건수·청구서 포함 오더 수)를 수행하고 결과를 task file에 기록한다.
 2. M1·M2·M3 배포(추가형).
 3. 앱 배포: UPS 자동 인보이스 중단 + 신규 정산 화면/액션(비취소 UPS 인보이스가 있으면 `ups_invoice_exists`로 차단).
 4. M4 실행(로컬 리허설·백업·롤백 확인 후, R-14·Edward 승인) → 비취소 UPS 인보이스 0건 확인.
-5. M5 실행(필요 시, 별도 승인) → 기존 SETTLED UPS 오더 재정산 가능.
-6. R-10: 신규 경로로 정산·청구서 생성 확인.
+5. **M4-b 실행**: 실행 직전 읽기 전용 조회 재수행(대상 2건·PAID/참조 없음 확인) → 대상 행 백업 → 삭제 → 참조 무결성 확인. **Jaison·Dave는 실행하지 않는다.**
+6. M5 실행(필요 시, 별도 승인) → 기존 SETTLED UPS 오더 재정산 가능.
+7. R-10: 신규 경로로 정산·청구서 생성 확인.
 
 - 컷오버 설정·`isBeforeCutover`·레거시 분기는 **없다**.
 - 비UPS 오더·인보이스는 무변경.
@@ -280,5 +283,5 @@ zen_ups_settlement_run_charges
 - Jaison 6차 보완 3건: M5 청구서 포함 제외, `recomputeRevenue` 목적 명시, §3 확정/근거 정리.
 - 7차 지시: PAID는 방어 가드로만, M5 제외 조건·테스트, 상태 표기·§5 갱신.
 - 코드·마이그레이션 변경 없음. PR은 draft 유지(`status:draft`).
-- **커밋 해시**: `f2df3a7cf` (8차 내용 커밋). 해시 갱신 커밋은 별도.
+- **커밋 해시**: `<CONTENT_COMMIT>` (M4-b 추가 커밋). 해시 갱신 커밋은 별도.
 - PR: #1462 (draft, `Refs #1459`, `Refs #1451`, `Refs #1453`, `Refs #1463`, `Refs #1369`).
