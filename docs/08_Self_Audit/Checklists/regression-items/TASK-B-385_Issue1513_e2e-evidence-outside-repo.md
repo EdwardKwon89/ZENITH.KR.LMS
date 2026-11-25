@@ -20,10 +20,10 @@
 
 ## 회귀 검증 (2026-11-25, 실측)
 
-- 단위 테스트 **13/13 PASS** (L1 5 · L2 4 · L3 4)
+- 단위 테스트 **14/14 PASS** (L1 5 · L2 4 · L3 5 — Jaison 검토로 L3 테스트 실측화·이관 후 재집계)
 - E2E 스모크 **1/1 PASS** (46.5s) · error-logs delta 0 · 추적 증적 481 → 481 (불변)
 - `npx tsc --noEmit` **217 = baseline 동일 → 신규 0**
-- `npm run test:regression` → **301 files / 2,295 tests 전부 PASS** · `npm run build` → **exit 0** (`✓ Compiled successfully in 8.5s`)
+- `npm run test:regression` → **301 files / 2,296 tests 전부 PASS** · `npm run build` → **exit 0** (8.1s)
 
 ## 되돌리기 검증 (조건별 — 로컬만, 커밋 금지 → 원복)
 
@@ -31,8 +31,8 @@
 |:--|:--|:--|
 | R1 | 헬퍼의 **내부경로 throw 2곳 무효화** | **1 failed / 4 passed** (L1 테스트 FAIL — 가드 민감성 실측) |
 | R2 | L2 **필터 무효화**(전량 통과) | **2 failed / 2 passed** (L2 테스트 FAIL) |
-| R3 | `.gitignore` **L3 블록 제거** | **1 failed / 3 passed** (L3 테스트 FAIL) |
-| (기준선) | 원복 후 재실행 | **13/13 PASS** · 잔존 프로브 0 · `docs/99_Manual` 변경 0건 |
+| R3 | `.gitignore` **L3 블록 제거** | **1 failed / 3 passed** → (검토 반영 후 재측정) **2 failed / 3 passed** (우회 차단·추적 실측 테스트 포함 FAIL) |
+| (기준선) | 원복 후 재실행 | **14/14 PASS** · 잔존 프로브 0(임시 저장소 이관) · `docs/99_Manual` 변경 0건 |
 
 > R1 런이 저장소 안에 만든 임시 디렉토리가 기준선을 1건 오염시킨 것을 발견 → 디렉토리 정리 + **테스트 afterEach에 방어 정리**를 추가해 재측정에서 13/13을 확보했다(오염 경로를 스스로 차단한 사례 — 사전 경고 "테스트가 대상을 검증하지 못함" 대응).
 
