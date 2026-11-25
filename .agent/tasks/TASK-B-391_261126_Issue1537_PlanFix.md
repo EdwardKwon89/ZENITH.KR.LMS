@@ -67,7 +67,7 @@ date                                     # Thu Nov 26 01:32:52 KST 2026
 
 ### PR·보완 기록
 - **PR #1538** (`Refs #1529` · `Refs #1537`, base `TeamB_Dev`, 병합은 Jaison)
-- 보완 반영 커밋(상태 행·PR/해시 기재 + §3-1 설명 정정): `<PLACEHOLDER>`
+- 보완 반영 커밋(상태 행·PR/해시 기재 + §3-1 설명 정정): `2f0680bdc` (본 기재 커밋 포함 head는 PR head로 확인)
 
 ### 착수 절차 실측 (R-17)
 ```bash
