@@ -100,7 +100,8 @@ WHERE i.id = t.id AND i.status <> 'PAID';
 INSERT INTO public.zen_invoice_history
   (invoice_id, prev_status, next_status, paid_amount, changed_by, notes)
 SELECT b.id, b.status, 'CANCELED', b.paid_amount, :approved_admin_id, 'B381_M4'
-FROM rollback_bak.b381_m4_invoice_bak b;
+FROM rollback_bak.b381_m4_invoice_bak b
+WHERE b.status <> 'PAID';
 COMMIT;
 ```
 
@@ -301,8 +302,7 @@ BEGIN;
 UPDATE public.zen_orders o
 SET cost_settlement_status = b.cost_settlement_status,
     cost_settled_at = b.cost_settled_at,
-    cost_settled_by = b.cost_settled_by,
-    updated_at = b.updated_at
+    cost_settled_by = b.cost_settled_by
 FROM rollback_bak.b381_m5_order_bak b
 WHERE o.id = b.id
   AND o.cost_settlement_status = 'NOT_SETTLED'
@@ -311,7 +311,7 @@ WHERE o.id = b.id
 COMMIT;
 ```
 
-- **복원 불가·부분 복원**: M5 이후 해당 오더에 새 정산 run·청구서 항목이 생기면 복원하지 않는다(충돌). 이 경우 해당 오더는 건너뛰고 건수를 보고한다. 오더 상태 이력(`order_status_history`)은 M5가 변경하지 않으므로 복원 대상이 아니다. `updated_at`은 백업 값으로 되돌리지만 다른 사유로 갱신된 경우 덮어쓸 수 있으므로, 실행 전후 값이 같은 행만 복원한다.
+- **복원 불가·부분 복원**: M5 이후 해당 오더에 새 정산 run·청구서 항목이 생기면 복원하지 않는다(충돌). 이 경우 해당 오더는 건너뛰고 건수를 보고한다. 오더 상태 이력(`order_status_history`)은 M5가 변경하지 않으므로 복원 대상이 아니다. `zen_orders.updated_at`은 `BEFORE UPDATE` 트리거(`tr_zen_orders_updated_at`)가 `now()`로 덮어쓰므로 **복원할 수 없다**(복원 후 실행 시각으로 남음, §4). 상태·시각·처리자 3개 컬럼만 복원한다.
 
 ### 3-5. 검증 질의
 
@@ -340,10 +340,12 @@ WHERE cost_settlement_status = 'SETTLED'
 |:--|:--|:--|:--|
 | M4 | M4 이후 상태가 바뀐 인보이스 | 실행 후 결제·상태 변경 | 해당 행 제외·보고(부분 복원) |
 | M4 | M4가 남긴 `zen_invoice_history` 행 | 복원 시 삭제(감사 이력 소실) | 롤백 사실을 승인 기록에 남김 |
+| M4 | `paid_at` 값 | `BEFORE UPDATE` 트리거(`fn_set_invoice_paid_at`)가 PAID가 아니면 `paid_at`을 NULL로 설정하므로, 상태 복원 후에도 `paid_at`은 복원되지 않는다(PARTIAL 행에 `paid_at`이 있었는지는 미확인) | 값 차이를 승인 기록에 남김 |
 | M4-b | CASCADE 자식(세금계산서·PDF 이력·파일·이력) | 삭제 시 함께 소멸 | **사전 0건 조건**으로 실행 차단 |
 | M4-b | 외부 저장소 파일·알림 발송 이력 | DB 밖 참조 | **미확인** — 실행 전 Aiden·Edward 확인 |
 | M4-b | 삭제 후 재사용된 `invoice_no` | UNIQUE 충돌 | 부분 복원·보고 |
 | M5 | M5 이후 run·청구서 항목이 생긴 오더 | 신규 데이터와 충돌 | 건너뛰기·보고 |
+| M5 | `zen_orders.updated_at` | `tr_zen_orders_updated_at` 트리거가 `now()`로 덮어씀 | 복원 불가(실행 시각으로 남음) |
 | 공통 | `rollback_bak` 밖 감사 로그·모니터링 | DB 외부 | 복원 대상 아님 |
 
 ---
@@ -396,3 +398,4 @@ WHERE cost_settlement_status = 'SETTLED'
 - **미확인**: `zen_invoices.id`를 컬럼으로 갖지 않는 참조(알림 본문·외부 저장소 파일 등)의 실제 존재 여부 — 실행 전 Aiden·Edward 확인 필요.
 - **미실행**: 모든 SQL(초안). 로컬 리허설·운영 실행은 후속 Task/Edward 승인.
 - **미확정**: M4-b 대상 건수·구성은 실행 직전 조회로 확정한다(문서에 값 미기재).
+- **후속 실측 Task 필요**: M4·M4-b·M5 실행 → 복원 왕복 리허설은 운영 실행 전 선행 조건이며, 이 Task는 절차만 정의했다(Aiden 검토 권고, Jaison 배정 예정).
