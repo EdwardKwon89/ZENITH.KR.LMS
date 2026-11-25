@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 
+const SCREENSHOT_DIR = evidenceDir('screenshots');
 const EMAIL = 'shipper@zenith.kr';
 const PASSWORD = 'password1234';
 const BASE = 'http://localhost:3000';
@@ -40,7 +42,7 @@ test('R10: corporate info persists to real columns and flows to order form', asy
   await page.fill('input[name="contact"]', MARKER.contact);
   await page.fill('input[name="email"]', MARKER.email);
   await page.fill('input[name="address"]', MARKER.address);
-  await page.screenshot({ path: 'tests/e2e/screenshots/r10-corporate-form-filled.png', fullPage: true });
+  await page.screenshot({ path: `${SCREENSHOT_DIR}/r10-corporate-form-filled.png`, fullPage: true });
 
   await page.click('button[type="submit"]:has-text("정보 저장")');
   await page.waitForSelector('[data-sonner-toast]', { timeout: 15000 });
@@ -58,7 +60,7 @@ test('R10: corporate info persists to real columns and flows to order form', asy
   expect(afterReload.contact).toBe(MARKER.contact);
   expect(afterReload.email).toBe(MARKER.email);
   expect(afterReload.address).toBe(MARKER.address);
-  await page.screenshot({ path: 'tests/e2e/screenshots/r10-corporate-after-reload.png', fullPage: true });
+  await page.screenshot({ path: `${SCREENSHOT_DIR}/r10-corporate-after-reload.png`, fullPage: true });
 
   await page.goto('/ko/orders/new');
   await page.waitForTimeout(3000);
@@ -67,7 +69,7 @@ test('R10: corporate info persists to real columns and flows to order form', asy
   expect(orderAddress).toBe(MARKER.address);
   const orderDetail = await page.inputValue('input[name="shipper_address_detail"]').catch(() => 'N/A');
   console.log('ORDER_SHIPPER_ADDRESS_DETAIL:', orderDetail);
-  await page.screenshot({ path: 'tests/e2e/screenshots/r10-order-shipper-auto-fill.png', fullPage: true });
+  await page.screenshot({ path: `${SCREENSHOT_DIR}/r10-order-shipper-auto-fill.png`, fullPage: true });
 
   await page.goto('/ko/mypage/corporate');
   await page.waitForSelector('input[name="representative"]', { timeout: 30000 });

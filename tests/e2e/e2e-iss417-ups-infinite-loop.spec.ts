@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_ISS417_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_ISS417_Result');
 
 test.describe('Issue #417 — UPS Direct 오더 등록 무한 루프 크래시 수정 검증', () => {
 

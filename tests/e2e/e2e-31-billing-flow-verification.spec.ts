@@ -7,6 +7,7 @@
 //  · 금액은 **정수 센트** 기준 비교, KST 날짜는 `date-kst.ts` 계열(로케일 `Asia/Seoul`)
 //  · 환경: **로컬 Supabase 한정 (R-14)**
 import { test, expect, type Page } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import fs from 'fs';
 import ExcelJS from 'exceljs';
 import {
@@ -15,7 +16,7 @@ import {
 } from './b371-fixture';
 import { loginAs } from './b371-login';
 
-const EVIDENCE_DIR = 'docs/99_Manual/E2E_B371_Result';
+const EVIDENCE_DIR = evidenceDir('E2E_B371_Result');
 
 // KST 기준 오늘/월초/년월 (인쇄·기간 입력에 사용)
 const kstToday = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' });

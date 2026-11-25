@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_ISS391_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_ISS391_Result');
 
 test.describe('Issue #391 — Agency SHIPPER_DISCOUNT 예약 등록/조회 검증', () => {
 

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import { getServiceClient } from './test-utils';
 import fs from 'fs';
 import path from 'path';
@@ -17,7 +18,7 @@ import path from 'path';
 // 자기완결형: SHIPPER 조직·PACKED UPS 오더·UPS 라벨 픽스처 생성 후 afterAll에서 정리.
 
 const BASE = process.env.PW_BASE_URL || 'http://localhost:3010';
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_288_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_288_Result');
 const ADMIN_EMAIL = 'admin@zenith.kr';
 const ADMIN_PASSWORD = 'password1234';
 const SHIPPER_ORG_NAME = 'R10-288 Shipper';

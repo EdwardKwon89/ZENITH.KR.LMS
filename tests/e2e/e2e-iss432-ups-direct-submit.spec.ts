@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
@@ -9,7 +10,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_ISS432_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_ISS432_Result');
 
 test.describe('Issue #432 — UPS Direct 1단계 직접 제출 검증', () => {
 
