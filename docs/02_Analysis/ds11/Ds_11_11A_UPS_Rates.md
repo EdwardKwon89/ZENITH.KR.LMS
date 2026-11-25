@@ -35,10 +35,14 @@
 
 **동작 분기 (서버가 세션으로 결정)**:
 - 관리자(ADMIN·MANAGER·ZENITH_SUPER_ADMIN): 입력 범위 그대로 계산, 원가 포함 전체 반환
-- 대리점(AGENCY): `agencyOrgId`는 세션 org로 고정, `shipperOrgId`는 **소속 검증 통과 시에만** 사용
-- 화주 계열: `shipperOrgId`는 세션 org로 고정, `agencyOrgId`는 서버가 소속 조회로 결정
-- 소속 화주: 플랫폼 판매가(1단계) 미전달, 자기 청구 단계만
+- 대리점(AGENCY): `agencyOrgId`는 세션 org로 고정, `shipperOrgId`는 **소속 검증 통과 시에만** 사용(미소속 지정은 거부)
+- 화주 계열(SHIPPER·CORPORATE·AGENCY_SHIPPER): `shipperOrgId`는 세션 org로 고정, `agencyOrgId`는 서버가 소속 조회로 결정
+- INDIVIDUAL(org 없음): 플랫폼 판매가만
+- OPERATOR: 입력 화주 기준으로 계산하되 원가 미포함
+- 소속 화주: 플랫폼 판매가(1단계) 미전달, 자기 청구 단계만. 부가항목 행은 화주 청구 단계와 동일 금액이라 포함
 - 비소속 화주: 플랫폼 판매가만 전달(대리점·화주 단계 없음)
+- 소속 조회 오류·다중 소속: **소속 미확정으로 거부(fail-closed)** — 비소속 폴백 없음
+- 견적 화면 경로가 없는 역할(SUB_ADMIN·CARRIER·CUSTOMS_BROKER·DELIVERY_AGENT·USER): `permission_denied`
 
 ### 11.2 Admin 요율 CRUD Actions
 

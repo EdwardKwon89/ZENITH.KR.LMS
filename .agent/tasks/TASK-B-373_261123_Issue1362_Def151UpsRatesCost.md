@@ -301,7 +301,7 @@
 | 항목 | 내용 |
 |:--|:--|
 | **브랜치** | `feature/teamb-task-b373-iss1362-pr2-guard-dto` |
-| **PR** | `Refs #1362` (별도 PR, `TeamB_Dev` 대상·Squash) |
+| **PR** | #1519 (`TeamB_Dev` 대상·Squash) |
 | **마이그레이션** | **없음** |
 
 ### 1. 요율 조회 6종 가드 (C안)
@@ -309,6 +309,7 @@
 - 나머지 5종(유류·부가·급증·구간·최소): ADMIN·MANAGER·ZENITH_SUPER_ADMIN
 - 거부 시 `permission_denied` + warn 로그
 - 공용 가드 `src/lib/auth/ups-rate-permissions.ts`로 통합(기존 mutation·schedule 로컬 함수 대체)
+- **`getAgencyPricingPolicies`**: `requireAdminManagerOrSubAdmin` 가드 적용 + 허용/거부 테스트 추가(설계 Low 2건)
 
 ### 2. 비관리자 화면 데이터 최소화
 - `/agency/other-charges`: 공개 판매가 조회로 전환
@@ -321,13 +322,64 @@
 - 내부 서버 호출자(오더 등록·스냅샷 갱신·실비 재계산)는 core 직접 사용
 - 원가 계열은 관리자에게만, 소속 화주에게는 플랫폼 판매가(1단계) 미전달
 
+**역할별 범위(구현 확정)**
+
+| 역할 | 범위 | 원가 |
+|:--|:--|:--:|
+| ADMIN·MANAGER·ZENITH_SUPER_ADMIN | 입력 범위 전체 | 포함 |
+| AGENCY | 자기 단계 + 소속 검증된 화주 단계 | 미포함 |
+| SHIPPER·CORPORATE·AGENCY_SHIPPER | 세션 org 기준(소속 화주면 자기 청구 단계만) | 미포함 |
+| INDIVIDUAL(org 없음) | 플랫폼 판매가만 | 미포함 |
+| OPERATOR | 입력 화주 기준(내부 운영), 소속 규칙 동일 | 미포함 |
+| SUB_ADMIN·CARRIER·CUSTOMS_BROKER·DELIVERY_AGENT·USER | 견적 화면 경로 없음 → `permission_denied` | — |
+
+- **fail-closed**: 소속 조회 오류·다중 소속은 소속 미확정으로 **예외**(비소속 폴백 없음). 대리점이 소속이 아닌 화주를 지정하면 `own_agency_only`로 거부(PR-1 패턴 정합).
+- 소속 화주의 **부가항목 행**은 화주 청구 단계와 동일 금액(할인 미적용)이라 표시 동일성을 위해 포함한다(설계 DTO 표의 "부가항목(판매) 포함" 충족).
+
 ### 4. Low
-- `getAgencyPricingPolicies` 관리자급 가드 추가(방어)
-- `getPublicWeightTierRates` 기준일 유효기간 필터 추가
+- `getAgencyPricingPolicies` 관리자급 가드 + 테스트
+- `getPublicWeightTierRates` 기준일 유효기간 필터 + 테스트
 
 ### 5. 테스트·검증
-- 신규 단위 3파일 **30/30 PASS**, 기존 회귀 PASS, `npm run build` SUCCESS
-- 되돌리기: 가드 제거 → 4 failed / DTO 판매가 허용 → 1 failed, 복구 후 30/30·5/5 PASS
-- `check:ds11`·`check:doc-links` 통과
+
+| 항목 | 결과 |
+|:--|:--|
+| 신규 단위 | **48/48 PASS** (가드 27 · 범위 12 · DTO 5 · 공개구간 2 · 표시 동일성 2) |
+| 전체 회귀 | **303 files / 2,330 tests PASS** |
+| `npm run build` | SUCCESS |
+| `check:ds11`·`check:doc-links`·`check:lrtm` | 통과 |
+| `/admin/error-logs` 신규 ERROR | **0건**(실세션 페이지 방문 후 1시간 내 0) |
+
+**mock 경로 분류 (설계 확정: 20개 전부 점검)**
+
+| 분류 | 파일 수 | 처리 |
+|:--|:--:|:--|
+| core mock으로 전환(실제 코어 호출 경로) | 4 | `inbound`·`task-b370`·`direct-shipper-ups-snapshot`·`ups-actual-cost` |
+| 불필요 mock 제거(스냅샷 갱신 자체를 mock하거나 경로 미도달) | 6 | `order-update-b339`·`task-b367`·`ups-product-guard`·`task-b352`·`task-b364`·`task-b366` — 제거 후 PASS 확인 |
+| 주입 함수로 대체(모듈 mock 제거) | 1 | `order-rate-snapshots` |
+| 세션 진입점 mock 유지(클라이언트 컴포넌트 테스트) | 9 | `order-registration-form-b301`·`defb058`·`edit-form-warehoused`·`iss1089/1091/1100/1102/1104`·`ups-product-code-select` |
+
+**R-10 표시 동일성·화면 확인**
+
+| 경로 | 결과 | 증적 |
+|:--|:--|:--|
+| 소속 화주(부가항목 행 포함) | 총액·항목 행·부피중량 동일 | 단위 표시 동일성 테스트 2건, 증적: 비공개 보관 |
+| 비소속 화주 | 총액·항목 행 동일 | 동일 |
+| 대리점·관리자 | DTO 값이 코어 계산값과 동일(원가 포함/미포함만 차이) | DTO 테스트 |
+| `/admin/ups-rates` 관리자 | 탭 9종 정상 | 실세션 스크린샷(비공개) |
+| `/admin/ups-rates` SUB_ADMIN | 탭 4종만 노출(원가 5종 미노출) | 실세션 스크린샷(비공개) |
+| `/agency/other-charges` | 페이지 정상 로드·pageerror 0 | 실세션 스크린샷(비공개) |
+| 오더 등록 화면 | 페이지 로드·pageerror 0 (견적 패널은 wizard 3단계에서 표시되어 자동 캡처 미수행) | 실세션 스크린샷(비공개) |
+| `estimated_cost` | 서버 경로가 코어를 직접 호출(로직 이동만, 16줄 차이) — 기존 오더 회귀 PASS | 코드 대조 |
+
+**되돌리기 검증**
+
+| RST | 되돌린 구현 | 결과 | 복구 |
+|:--|:--|:--|:--|
+| RST-4 | 원가 조회 가드 1종 제거 | 4 failed | 27/27 PASS |
+| RST-5 | 소속 화주 DTO에 플랫폼 판매가 허용 | 1 failed | 12/12 PASS |
+| RST-6 | 소속 조회 오류를 비소속으로 폴백 | 1 failed | 12/12 PASS |
+| RST-7 | `getAgencyPricingPolicies` 가드 제거 | 1 failed | 27/27 PASS |
+
 - 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-373_Issue1362_ups-rates-guard-dto.md`
-- **커밋 해시**: 코드 `f05f7658f2d01c15aea59a4ef82a03a6e414b5e8` / 문서 `d339ac410`
+- **커밋 해시**: `<HASHES>`

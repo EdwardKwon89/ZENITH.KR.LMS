@@ -21,7 +21,14 @@
 | TC-373-17 | 견적 DTO — 비소속 화주 | 플랫폼 판매가만 포함 | 동일 |
 | TC-373-18 | 범위 결정 — 대리점 미소속 화주 요청 | 계산 범위에서 제외 | `tests/unit/ups/freight-action-scope.test.ts` |
 | TC-373-19 | 범위 결정 — 화주 위장(타 org) 요청 | 세션 org로 고정 | 동일 |
-| TC-373-20 | 공개 구간요율 — 만료 행 미반환 | 기준일 필터 적용 | 구현 검증(코드) |
+| TC-373-20 | 공개 구간요율 — 만료 행 미반환 | 기준일(`valid_from`/`valid_until`) 필터 적용 | `tests/unit/ups/rates-public.test.ts` |
+| TC-373-21 | `getAgencyPricingPolicies` — 비관리자 | 관리자급 가드 거부 | `tests/unit/auth/ups-rate-permissions.test.ts` |
+| TC-373-22 | `getAgencyPricingPolicies` — ADMIN | 조회 성공(양성 대조) | 동일 |
+| TC-373-23 | 소속 조회 오류 | 비소속 폴백 없이 예외(fail-closed) | `tests/unit/ups/freight-action-scope.test.ts` |
+| TC-373-24 | 다중 소속 | 소속 미확정으로 예외 | 동일 |
+| TC-373-25 | 대리점이 미소속 화주 지정 | `own_agency_only` 거부 | 동일 |
+| TC-373-26 | OPERATOR | 입력 화주 기준·원가 미포함 | 동일 |
+| TC-373-27 | 표시 동일성(소속/비소속 화주) | 총액·항목 행 동일 | `tests/unit/orders/ups-estimate-panel-dto-parity.test.tsx` |
 
 **되돌리기 검증 (구현 유효성 — 테스트가 실제로 실패함을 증명)**:
 
@@ -29,5 +36,7 @@
 | :-- | :-- | :-- | :-- |
 | RST-4 | 원가 조회 가드 1종 제거 | **4 failed** (TC-373-12) | 30/30 PASS |
 | RST-5 | 소속 화주 DTO에 플랫폼 판매가 허용 | **1 failed** (TC-373-16) | 5/5 PASS |
+| RST-6 | 소속 조회 오류를 비소속으로 폴백 | **1 failed** (TC-373-23) | 12/12 PASS |
+| RST-7 | `getAgencyPricingPolicies` 가드 제거 | **1 failed** (TC-373-21) | 27/27 PASS |
 
-**회귀**: `npm run test:regression` PASS · `npm run build` SUCCESS · `check:ds11`/`check:doc-links` 통과.
+**회귀**: `npm run test:regression` PASS · `npm run build` SUCCESS · `check:ds11`/`check:doc-links`/`check:lrtm` 통과. mock 경로 20개 분류는 task file §5 참조.
