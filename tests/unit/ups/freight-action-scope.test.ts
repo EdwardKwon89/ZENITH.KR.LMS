@@ -117,20 +117,31 @@ describe('estimateUpsFreight 세션 범위 결정 (TASK-B-373 PR-2)', () => {
     expect(dto.shipper).not.toBeNull();
   });
 
-  it('대리점 — 소속이 아닌 화주 지정은 거부', async () => {
+  it('대리점 — 소속이 아닌 화주 지정도 거부하지 않고 화주 단계만 제외', async () => {
     sessionState.role = 'AGENCY';
     sessionState.orgId = 'ag-self';
     membershipRows = [];
-    await expect(estimateUpsFreight({ ...input, shipperOrgId: 'sh-other' })).rejects.toThrow();
-    expect(coreMock).not.toHaveBeenCalled();
+    const dto = await estimateUpsFreight({ ...input, shipperOrgId: 'sh-other' });
+    expect(coreMock).toHaveBeenCalledWith(expect.objectContaining({ agencyOrgId: 'ag-self', shipperOrgId: null }), expect.anything());
+    expect(dto.shipper).toBeNull();
   });
 
-  it('대리점 — 소속 조회 오류는 fail-closed(예외)', async () => {
+  it('대리점 — 본인 org를 화주로 넘겨도 거부하지 않는다(폼 입력 형태)', async () => {
+    sessionState.role = 'AGENCY';
+    sessionState.orgId = 'ag-self';
+    membershipRows = [];
+    const dto = await estimateUpsFreight({ ...input, shipperOrgId: 'ag-self' });
+    expect(coreMock).toHaveBeenCalledWith(expect.objectContaining({ agencyOrgId: 'ag-self', shipperOrgId: null }), expect.anything());
+    expect(dto.shipper).toBeNull();
+  });
+
+  it('대리점 — 소속 조회 오류는 화주 단계만 제외(거부 없음)', async () => {
     sessionState.role = 'AGENCY';
     sessionState.orgId = 'ag-self';
     membershipError = { message: 'db down' };
-    await expect(estimateUpsFreight({ ...input, shipperOrgId: 'sh-owned' })).rejects.toThrow();
-    expect(coreMock).not.toHaveBeenCalled();
+    const dto = await estimateUpsFreight({ ...input, shipperOrgId: 'sh-owned' });
+    expect(coreMock).toHaveBeenCalledWith(expect.objectContaining({ agencyOrgId: 'ag-self', shipperOrgId: null }), expect.anything());
+    expect(dto.shipper).toBeNull();
   });
 
   it('대리점 소속 화주 — 대리점은 서버가 조회, 플랫폼 판매가 미전달', async () => {

@@ -26,7 +26,10 @@
 | TC-373-22 | `getAgencyPricingPolicies` — ADMIN | 조회 성공(양성 대조) | 동일 |
 | TC-373-23 | 소속 조회 오류 | 비소속 폴백 없이 예외(fail-closed) | `tests/unit/ups/freight-action-scope.test.ts` |
 | TC-373-24 | 다중 소속 | 소속 미확정으로 예외 | 동일 |
-| TC-373-25 | 대리점이 미소속 화주 지정 | `own_agency_only` 거부 | 동일 |
+| TC-373-25 | 대리점이 미소속 화주 지정 | 거부 없이 화주 단계 제외 | 동일 |
+| TC-373-31 | 대리점이 본인 org를 화주로 입력(폼 형태) | 성공, 화주 단계 없음 | 동일 |
+| TC-373-32 | 대리점 소속 조회 오류 | 화주 단계만 제외(`logger.error`) | 동일 |
+| TC-373-33 | 실세션 폼 입력(관리자/OPERATOR/소속 화주/개인/비소속) | 역할별 결과표 일치 | `tests/integration/task-b373-estimate-scope-session.test.ts` |
 | TC-373-26 | OPERATOR | 입력 화주 기준·원가 미포함 | 동일 |
 | TC-373-27 | 표시 동일성(소속/비소속 화주) | 총액·항목 행 동일 | `tests/unit/orders/ups-estimate-panel-dto-parity.test.tsx` |
 | TC-373-28 | 실세션 역할별 범위·DTO(관리자/대리점/화주/개인/OPERATOR/SUB_ADMIN) | 포함·미포함 표 일치 | `tests/integration/task-b373-estimate-scope-session.test.ts` |
@@ -41,6 +44,7 @@
 | RST-5 | 소속 화주 DTO에 플랫폼 판매가 허용 | **1 failed** (TC-373-16) | 5/5 PASS |
 | RST-6 | 소속 조회 오류를 비소속으로 폴백 | **1 failed** (TC-373-23) | 12/12 PASS |
 | RST-7 | `getAgencyPricingPolicies` 가드 제거 | **1 failed** (TC-373-21) | 27/27 PASS |
-| RST-8 | OPERATOR 코어를 세션 클라이언트로 되돌림 | **2 failed** (TC-373-28·30) | 13/13 PASS |
+| RST-8 | OPERATOR 코어를 세션 클라이언트로 되돌림 | **2 failed** (TC-373-28·30) | 16/16 PASS |
+| RST-9 | AGENCY 미소속 지정을 예외로 되돌림 | 단위 **2 failed**·실세션 **1 failed** | 13/13·16/16 PASS |
 
 **회귀**: `npm run test:regression` PASS · `npm run build` SUCCESS · `check:ds11`/`check:doc-links`/`check:lrtm` 통과. mock 경로 20개 분류는 task file §5 참조.

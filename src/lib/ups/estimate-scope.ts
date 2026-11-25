@@ -53,24 +53,32 @@ async function resolveAgencyForShipper(shipperOrgId: string): Promise<string | n
   return rows[0]?.agency_org_id ?? null;
 }
 
-async function assertAgencyOwnsShipper(agencyOrgId: string, shipperOrgId: string): Promise<void> {
+/**
+ * 대리점 견적의 화주 단계 포함 여부를 결정한다.
+ * - 대리점 대리 등록은 화주를 임의 작성할 수 있으므로 **소속이 아니어도 거부하지 않는다**.
+ * - 본인 org와 같거나 빈 값은 '화주 지정'이 아니다.
+ * - 실제 소속으로 확인된 경우에만 화주 단계를 포함하고, 조회 실패는 화주 단계만 제외한다.
+ */
+async function resolveAgencyOwnedShipper(
+  agencyOrgId: string,
+  requestedShipperOrgId: string | null | undefined
+): Promise<string | null> {
+  if (!requestedShipperOrgId || requestedShipperOrgId === agencyOrgId) return null;
+
   const admin = await createAdminClient();
   const { data, error } = await admin
     .from('zen_agency_shippers')
     .select('shipper_org_id')
     .eq('agency_org_id', agencyOrgId)
-    .eq('shipper_org_id', shipperOrgId)
+    .eq('shipper_org_id', requestedShipperOrgId)
     .eq('is_active', true);
 
   if (error) {
     logger.error('[ESTIMATE_SCOPE] agency-owned shipper query failed', { error: error.message });
-    throw new Error('소속 화주 확인에 실패하여 견적을 계산할 수 없습니다.');
+    return null;
   }
   const rows = (data ?? []) as Array<{ shipper_org_id: string }>;
-  if (rows.length === 0) {
-    // 소유하지 않은 화주 지정은 거부한다(PR-1 `own_agency_only` 패턴 정합).
-    throw new Error(await trError('own_agency_only'));
-  }
+  return rows.length > 0 ? requestedShipperOrgId : null;
 }
 
 export async function resolveEstimateScope(
@@ -92,11 +100,8 @@ export async function resolveEstimateScope(
       logger.warn('[ESTIMATE_SCOPE] agency session without org');
       throw new Error(await trError('permission_denied'));
     }
-    if (!input.shipperOrgId) {
-      return { kind: 'agency', agencyOrgId, shipperOrgId: null };
-    }
-    await assertAgencyOwnsShipper(agencyOrgId, input.shipperOrgId);
-    return { kind: 'agency', agencyOrgId, shipperOrgId: input.shipperOrgId };
+    const shipperOrgId = await resolveAgencyOwnedShipper(agencyOrgId, input.shipperOrgId);
+    return { kind: 'agency', agencyOrgId, shipperOrgId };
   }
 
   // 내부 운영 역할: 입력 화주 기준으로 계산하되 원가 계열은 전달하지 않는다.

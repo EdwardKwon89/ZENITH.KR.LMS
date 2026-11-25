@@ -35,7 +35,7 @@
 
 **동작 분기 (서버가 세션으로 결정)**:
 - 관리자(ADMIN·MANAGER·ZENITH_SUPER_ADMIN): 입력 범위 그대로 계산, 원가 포함 전체 반환
-- 대리점(AGENCY): `agencyOrgId`는 세션 org로 고정, `shipperOrgId`는 **소속 검증 통과 시에만** 사용(미소속 지정은 거부)
+- 대리점(AGENCY): `agencyOrgId`는 세션 org로 고정. 본인 org·빈 값은 화주 지정이 아니며, **실제 소속 확인 시에만** 화주 단계를 포함한다. 미소속 지정·조회 오류는 **거부하지 않고 화주 단계만 제외**(조회 오류는 `logger.error`)
 - 화주 계열(SHIPPER·CORPORATE·AGENCY_SHIPPER): `shipperOrgId`는 세션 org로 고정, `agencyOrgId`는 서버가 소속 조회로 결정
 - INDIVIDUAL(org 없음): 플랫폼 판매가만
 - OPERATOR: 입력 화주 기준으로 계산하되 원가 미포함. 요율 조회 정책이 없어 **코어 계산만 서비스 롤** 사용(반환은 DTO로 최소화)
