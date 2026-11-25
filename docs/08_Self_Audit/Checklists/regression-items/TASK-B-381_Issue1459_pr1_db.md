@@ -42,4 +42,4 @@
 - `taskb359-billing-statement-db.test.ts` — 항목 컬럼 수 11→13
 - 위 3파일 외 폴백 의존 테스트 없음(전체 회귀 PASS)
 
-**회귀**: `npm run test:regression` — 306 passed · 2 skipped / 2,345 passed · 30 skipped. `npm run build` SUCCESS. `check:ds11`·`check:lrtm`·`check:doc-links` 통과.
+**회귀**: `npm run test:regression` — 307 passed · 1 skipped / **2,357 passed · 16 skipped**(신규 12건 CI 실행, skip은 B-373 세션 테스트 16건). `npm run build` SUCCESS. `check:ds11`·`check:lrtm`·`check:doc-links` 통과.
