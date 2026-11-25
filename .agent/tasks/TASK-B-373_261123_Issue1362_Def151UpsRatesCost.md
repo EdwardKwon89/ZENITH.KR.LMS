@@ -330,9 +330,10 @@
 | AGENCY | 자기 단계 + 소속 검증된 화주 단계 | 미포함 |
 | SHIPPER·CORPORATE·AGENCY_SHIPPER | 세션 org 기준(소속 화주면 자기 청구 단계만) | 미포함 |
 | INDIVIDUAL(org 없음) | 플랫폼 판매가만 | 미포함 |
-| OPERATOR | 입력 화주 기준(내부 운영), 소속 규칙 동일 | 미포함 |
+| OPERATOR | 입력 화주 기준(내부 운영), 소속 규칙 동일. 요율 조회 정책이 없어 **코어 계산만 서비스 롤** 사용 | 미포함 |
 | SUB_ADMIN·CARRIER·CUSTOMS_BROKER·DELIVERY_AGENT·USER | 견적 화면 경로 없음 → `permission_denied` | — |
 
+- **소속 확정**: 세션 RLS에 의존하지 않고 **서비스 롤로 소속 ID만 조회**(`src/lib/ups/estimate-scope.ts`).
 - **fail-closed**: 소속 조회 오류·다중 소속은 소속 미확정으로 **예외**(비소속 폴백 없음). 대리점이 소속이 아닌 화주를 지정하면 `own_agency_only`로 거부(PR-1 패턴 정합).
 - 소속 화주의 **부가항목 행**은 화주 청구 단계와 동일 금액(할인 미적용)이라 표시 동일성을 위해 포함한다(설계 DTO 표의 "부가항목(판매) 포함" 충족).
 
@@ -345,10 +346,22 @@
 | 항목 | 결과 |
 |:--|:--|
 | 신규 단위 | **48/48 PASS** (가드 27 · 범위 12 · DTO 5 · 공개구간 2 · 표시 동일성 2) |
-| 전체 회귀 | **303 files / 2,330 tests PASS** |
+| 실세션 통합(RLS) | **13/13 PASS** (역할별 범위·DTO·R-10 전후 금액) |
+| 전체 회귀 | **304 files / 2,343 tests PASS** |
 | `npm run build` | SUCCESS |
 | `check:ds11`·`check:doc-links`·`check:lrtm` | 통과 |
 | `/admin/error-logs` 신규 ERROR | **0건**(실세션 페이지 방문 후 1시간 내 0) |
+
+**실세션(로그인·RLS) 견적 범위 확인** — `tests/integration/task-b373-estimate-scope-session.test.ts`
+
+| 역할 | 반환 단계 | 원가 | 전후 금액 |
+|:--|:--|:--:|:--|
+| 관리자 | 플랫폼+대리점+화주 | 포함 | 동일 |
+| 대리점(자기 화주) | 플랫폼+대리점+화주 | 미포함 | 동일 |
+| 대리점 소속 화주 | 화주 단계만 | 미포함 | 동일 |
+| 개인(비소속) | 플랫폼 판매가만 | 미포함 | 동일 |
+| OPERATOR(소속 화주 지정) | 화주 단계 | 미포함 | 변경 전 조회 불가 → 변경 후 반환(개선) |
+| SUB_ADMIN | 거부 | — | — |
 
 **mock 경로 분류 (설계 확정: 20개 전부 점검)**
 
@@ -370,7 +383,7 @@
 | `/admin/ups-rates` SUB_ADMIN | 탭 4종만 노출(원가 5종 미노출) | 실세션 스크린샷(비공개) |
 | `/agency/other-charges` | 페이지 정상 로드·pageerror 0 | 실세션 스크린샷(비공개) |
 | 오더 등록 화면 | 페이지 로드·pageerror 0 (견적 패널은 wizard 3단계에서 표시되어 자동 캡처 미수행) | 실세션 스크린샷(비공개) |
-| `estimated_cost` | 서버 경로가 코어를 직접 호출(로직 이동만, 16줄 차이) — 기존 오더 회귀 PASS | 코드 대조 |
+| `estimated_cost` | 오더 등록 폼이 DTO 표시 금액을 제출 — 소속 화주·대리점·관리자·개인은 **변경 전후 동일**, OPERATOR는 변경 전 요율 조회 불가 → 변경 후 화주 단계 반환(개선, JSJung 확인 대상) | 실세션 통합 4건 |
 
 **되돌리기 검증**
 
@@ -380,6 +393,8 @@
 | RST-5 | 소속 화주 DTO에 플랫폼 판매가 허용 | 1 failed | 12/12 PASS |
 | RST-6 | 소속 조회 오류를 비소속으로 폴백 | 1 failed | 12/12 PASS |
 | RST-7 | `getAgencyPricingPolicies` 가드 제거 | 1 failed | 27/27 PASS |
+| RST-8 | OPERATOR 코어를 세션 클라이언트로 되돌림 | **2 failed**(실세션) | 13/13 PASS |
 
 - 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-373_Issue1362_ups-rates-guard-dto.md`
-- **커밋 해시**: 코드 `7e9c4905d` / 문서 `844d57310`
+- **비차단 이월**: 신규 오류 메시지 2종의 `trError` 키 통일(로케일 정합화), 다중 소속 실데이터 존재 여부는 Aiden·Edward 비공개 확인
+- **커밋 해시**: 코드 `5e6fb190c6efc224adbdccf5b95824b3929ec5f4` / 문서 `<DOCS>`

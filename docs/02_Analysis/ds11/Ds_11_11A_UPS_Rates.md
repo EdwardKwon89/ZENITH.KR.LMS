@@ -38,9 +38,10 @@
 - 대리점(AGENCY): `agencyOrgId`는 세션 org로 고정, `shipperOrgId`는 **소속 검증 통과 시에만** 사용(미소속 지정은 거부)
 - 화주 계열(SHIPPER·CORPORATE·AGENCY_SHIPPER): `shipperOrgId`는 세션 org로 고정, `agencyOrgId`는 서버가 소속 조회로 결정
 - INDIVIDUAL(org 없음): 플랫폼 판매가만
-- OPERATOR: 입력 화주 기준으로 계산하되 원가 미포함
+- OPERATOR: 입력 화주 기준으로 계산하되 원가 미포함. 요율 조회 정책이 없어 **코어 계산만 서비스 롤** 사용(반환은 DTO로 최소화)
 - 소속 화주: 플랫폼 판매가(1단계) 미전달, 자기 청구 단계만. 부가항목 행은 화주 청구 단계와 동일 금액이라 포함
 - 비소속 화주: 플랫폼 판매가만 전달(대리점·화주 단계 없음)
+- 소속 확정은 세션 RLS에 의존하지 않고 서비스 롤로 소속 ID만 조회
 - 소속 조회 오류·다중 소속: **소속 미확정으로 거부(fail-closed)** — 비소속 폴백 없음
 - 견적 화면 경로가 없는 역할(SUB_ADMIN·CARRIER·CUSTOMS_BROKER·DELIVERY_AGENT·USER): `permission_denied`
 
