@@ -5,8 +5,8 @@
 | **Issue** | [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) — DEF-151 (Aiden 발령, Jaison 배정: Dave) |
 | **담당(Worker)** | Dave (Team B) |
 | **검증(Auditor)** | Jaison / **확정: Aiden** |
-| **상태** | 📝 설계 의견 7차 — **JSJung ③ 확정 반영, 설계 확정 요청** (`status:draft`) — 구현 금지 |
-| **브랜치** | `feature/teamb-task-b373-iss1362-def151-ups-rates-cost` (base `origin/TeamB_Dev` a4a6d3101) |
+| **상태** | 🔔 PR-2 구현 완료 — 검토 대기 |
+| **브랜치** | PR-1 `feature/teamb-task-b373-iss1362-def151-ups-rates-cost`(병합) · PR-2 `feature/teamb-task-b373-iss1362-pr2-guard-dto` (base `origin/TeamB_Dev` 병합본) |
 | **공개 저장소 주의** | 노출 경위·재현 절차는 본문에 쓰지 않고 "도달 가능/불가 + 결과표 + 코드 위치"만 기재 |
 
 ## 0. 범위
@@ -294,3 +294,39 @@
 - 범위 확장 점검에서 별도 보안 Task 대상 1건 발견 — 상세는 비공개 보고(공개 문서 미기재).
 - PR: #1476 (draft, `Refs #1362`).
 - **커밋 해시**: `3183626b7` (8차 내용 커밋). 해시 갱신 커밋 별도.
+
+
+## 5. PR-2 구현 결과 (2026-11-25)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b373-iss1362-pr2-guard-dto` |
+| **PR** | `Refs #1362` (별도 PR, `TeamB_Dev` 대상·Squash) |
+| **마이그레이션** | **없음** |
+
+### 1. 요율 조회 6종 가드 (C안)
+- 기본요율: ADMIN·MANAGER·ZENITH_SUPER_ADMIN·**SUB_ADMIN**
+- 나머지 5종(유류·부가·급증·구간·최소): ADMIN·MANAGER·ZENITH_SUPER_ADMIN
+- 거부 시 `permission_denied` + warn 로그
+- 공용 가드 `src/lib/auth/ups-rate-permissions.ts`로 통합(기존 mutation·schedule 로컬 함수 대체)
+
+### 2. 비관리자 화면 데이터 최소화
+- `/agency/other-charges`: 공개 판매가 조회로 전환
+- `/admin/ups-rates`: SUB_ADMIN은 Zone·제품·기본요율·대리점 정책 탭만 노출, 나머지 원가 데이터는 서버에서 미전달
+- 기본요율 Matrix: 관리자 액션 직접 import 제거 → 서버 주입 `fetchRates` 사용
+
+### 3. 견적 응답 DTO (확정 B안)
+- 전체 계산을 `src/lib/ups/estimate-core.ts`(server-only)로 분리
+- 세션 진입점은 **역할·소속으로 범위 결정 후 DTO 반환**
+- 내부 서버 호출자(오더 등록·스냅샷 갱신·실비 재계산)는 core 직접 사용
+- 원가 계열은 관리자에게만, 소속 화주에게는 플랫폼 판매가(1단계) 미전달
+
+### 4. Low
+- `getAgencyPricingPolicies` 관리자급 가드 추가(방어)
+- `getPublicWeightTierRates` 기준일 유효기간 필터 추가
+
+### 5. 테스트·검증
+- 신규 단위 3파일 **30/30 PASS**, 기존 회귀 PASS, `npm run build` SUCCESS
+- 되돌리기: 가드 제거 → 4 failed / DTO 판매가 허용 → 1 failed, 복구 후 30/30·5/5 PASS
+- `check:ds11`·`check:doc-links` 통과
+- 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-373_Issue1362_ups-rates-guard-dto.md`
