@@ -382,4 +382,4 @@
 | RST-7 | `getAgencyPricingPolicies` 가드 제거 | 1 failed | 27/27 PASS |
 
 - 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-373_Issue1362_ups-rates-guard-dto.md`
-- **커밋 해시**: `<HASHES>`
+- **커밋 해시**: 코드 `7e9c4905d` / 문서 `844d57310`
