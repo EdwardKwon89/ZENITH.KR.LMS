@@ -52,7 +52,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#1518](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1518) | [Aiden 요청] E2E_324_Result payload 문서의 개인 메일 기재 정리 — Team B 소유 파일 (IS #1490 후속) | b | p3 | open | 미배정 | 2026-11-24 |
 | [#1516](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1516) | [Team B] TASK-B-386: E2E_B374_Result JSON 증적 R-21 점검·처리 (IS #1490 후속) | b | p3 | review | 미배정 | 2026-11-24 |
-| [#1513](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1513) | [Team B] TASK-B-385: E2E 증적 출력 경로를 저장소 밖으로 전환 (IS #1490 후속, R-13/R-21 정합, 설계 의견부터) | b | p2 | ready | jungjs | 2026-11-25 |
+| [#1513](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1513) | [Team B] TASK-B-385: E2E 증적 출력 경로를 저장소 밖으로 전환 (IS #1490 후속, R-13/R-21 정합, 설계 의견부터) | b | p2 | in-progress | jungjs | 2026-11-25 |
 | [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | review | jungjs | 2026-11-24 |
 | [#1463](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1463) | [Team B] TASK-B-382: MANAGER의 UPS 정산마감 관련 테이블 RLS 정책 정렬 (규칙 1 이행, 설계 의견부터) | b | p2 | review | jungjs | 2026-11-24 |
 | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | open | 미배정 | 2026-11-25 |
