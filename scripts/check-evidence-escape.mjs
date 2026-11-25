@@ -10,7 +10,7 @@
 import { execSync } from 'node:child_process';
 
 /** L3(.gitignore)와 동일한 대상 범위 + 원본 증적 확장자 */
-const EVIDENCE_EXT = /\.(png|json|xlsx|pdf|txt|webm)$/i;
+const EVIDENCE_EXT = /\.(png|json|xlsx|pdf|txt|webm|jpg|jpeg|mp4|csv)$/i;
 const TARGET_PATTERNS = [
   /^docs\/99_Manual\/[^/]+_Result\//, // 5종 폴더류(E2E·UAT·TASK-·AUDIT·FEAT ..._Result) 및 하위
   /^tests\/e2e\/screenshots\//, // screenshots 출력 (설계 확정 편입)
@@ -39,10 +39,12 @@ function git(args) {
 /** 변경 파일 수집: BASE_SHA 지정 시 CI 모드(기준 SHA 대비 diff), 아니면 작업트리 기준 */
 export function changedFiles({ baseSha, cwd } = {}) {
   if (baseSha) {
-    const out = git(`diff --name-only "${baseSha}"...HEAD`);
+    // 삭제(d)는 정리 행위이므로 제외 — --diff-filter=d (소문자 = 제외)
+    const out = git(`diff --name-only --diff-filter=d "${baseSha}"...HEAD`);
     return out.split('\n').map((l) => l.trim()).filter(Boolean);
   }
-  const out = git('status --porcelain');
+  // 미추적 폴더를 폴더 하나로만 표시하는 문제 방지 (-uall: 내부 파일 전부)
+  const out = git('status --porcelain --untracked-files=all');
   return out
     .split('\n')
     .map((l) => parsePorcelainLine(l))

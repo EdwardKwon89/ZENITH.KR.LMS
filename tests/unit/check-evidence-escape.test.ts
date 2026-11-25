@@ -13,6 +13,9 @@ describe('check-evidence-escape (L2) 필터', () => {
       'docs/99_Manual/AUDIT_S1_Result/finding.txt', // 통과
       'docs/99_Manual/FEAT_RATES_Result/demo.webm', // 통과
       'tests/e2e/screenshots/probe.png', // 편입 범위 → 통과
+      'docs/99_Manual/E2E_B380_Result/photo.jpg', // 신규 확장자(선제 포함) → 통과
+      'tests/e2e/screenshots/clip.mp4', // 통과
+      'docs/99_Manual/UAT_17_Result/table.csv', // 통과
       'docs/99_Manual/E2E_B371_Result/README.md', // 요약 .md → 제외
       'docs/99_Manual/assets/probe.png', // _Result 폴더류 밖(기타 폴더) → 제외
       'tests/e2e/e2e-33-b380-dashboard-dup-key.spec.ts', // 대상 밖 코드 → 제외
@@ -25,6 +28,9 @@ describe('check-evidence-escape (L2) 필터', () => {
       'docs/99_Manual/AUDIT_S1_Result/finding.txt',
       'docs/99_Manual/FEAT_RATES_Result/demo.webm',
       'tests/e2e/screenshots/probe.png',
+      'docs/99_Manual/E2E_B380_Result/photo.jpg',
+      'tests/e2e/screenshots/clip.mp4',
+      'docs/99_Manual/UAT_17_Result/table.csv',
     ]);
   });
 
@@ -49,9 +55,9 @@ describe('check-evidence-escape (L2) 필터', () => {
     );
   });
 
-  it('실제 작업트리 기준 changedFiles — 현재 PR 변경(비증적 .ts·스크립트)은 경고 대상 0건', () => {
-    const files = changedFiles({});
-    expect(Array.isArray(files)).toBe(true);
-    expect(filterEvidencePaths(files)).toEqual([]);
+  it('CI 모드 changedFiles(baseSha=HEAD) — 기준 SHA와 동일하면 빈 목록 (작업트리 상태 무관·결정적)', () => {
+    // 작업트리에 의존하던 구 테스트 제거 (변경 중 개발 환경 흔들림 방지 — Jaison 검토 반영)
+    expect(changedFiles({ baseSha: 'HEAD' })).toEqual([]);
+    expect(filterEvidencePaths(changedFiles({ baseSha: 'HEAD' }))).toEqual([]);
   });
 });

@@ -91,13 +91,20 @@ docs/99_Manual/*_Result/**/*.xlsx
 docs/99_Manual/*_Result/**/*.pdf
 docs/99_Manual/*_Result/**/*.txt
 docs/99_Manual/*_Result/**/*.webm
+docs/99_Manual/*_Result/**/*.jpg
+docs/99_Manual/*_Result/**/*.jpeg
+docs/99_Manual/*_Result/**/*.mp4
+docs/99_Manual/*_Result/**/*.csv
 tests/e2e/screenshots/**/*.png
 tests/e2e/screenshots/**/*.json
 tests/e2e/screenshots/**/*.xlsx
 tests/e2e/screenshots/**/*.pdf
 tests/e2e/screenshots/**/*.txt
 tests/e2e/screenshots/**/*.webm
-# 예외 패턴: 저장소에 두는 허용 파일이 생기면 여기에 (!) 로 명시한다 (요약 문서류)
+tests/e2e/screenshots/**/*.jpg
+tests/e2e/screenshots/**/*.jpeg
+tests/e2e/screenshots/**/*.mp4
+tests/e2e/screenshots/**/*.csv
+# 예외 패턴: 저장소에 두는 허용 파일이 **실제로 생기면** 확장자 한정으로만 추가한다
+# (이름만으로 허용하면 summary_x.png 같은 원본 증적이 우회 — Jaison 검토 반영)
 !docs/99_Manual/*_Result/**/*.md
-!docs/99_Manual/*_Result/**/summary*
-!docs/99_Manual/*_Result/**/README*
