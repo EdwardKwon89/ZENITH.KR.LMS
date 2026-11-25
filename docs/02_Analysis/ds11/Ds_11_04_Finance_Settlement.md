@@ -145,6 +145,7 @@
 - **Output**: `boolean` (포함 `true` / 미포함 `false`)
 - **오류**: `invalid_order_id`, `profile_not_found`, `statement_inclusion_not_allowed: role=%`
 - **호출부**: `unmarkOrderCostSettled`(§11B)가 포함 여부 확인에 사용하며, RPC 오류 시 오더정산 되돌리기를 차단합니다.
+- **B-381 변경**: `billing_items_amounts`는 최신 run만 사용하며 run이 없으면 `settlement_run_missing`을 반환합니다. 상세는 `Ds_11_11B §11.19`.
 
 ---
 

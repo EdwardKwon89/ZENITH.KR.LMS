@@ -22,13 +22,19 @@
 | TC-381-09 | RPC 원자성 — 잘못된 payload | `invalid_run_payload`, run 0·상태 불변 | 동일 |
 | TC-381-10 | 기존 청구서 회귀 — run 기반 금액·통화 가드 제거·Excel | 기존 단언 유지·통화 가드 제거 후 성공 | `tests/integration/task-b360-billing-statements.test.ts`, `task-b360-excel-export.test.ts` |
 | TC-381-11 | 항목 테이블 컬럼 증가 | 13컬럼 | `tests/unit/migrations/taskb359-billing-statement-db.test.ts` |
+| TC-381-12 | 재마감 멱등 — unmark 후 같은 입력 | SETTLED 복구, run/version 유지 / 다른 입력 version 2 | `task-b381-settlement-run-db.test.ts` |
+| TC-381-13 | RLS 음성 — 비소속 대리점·타 조직 화주 | 0건 | 동일 |
+| TC-381-14 | 오류 코드 — not_ups_order·already_settled·paid_invoice_exists | 각 오류 반환 | 동일 |
+| TC-381-15 | RPC 보안 카탈로그 — anon·DEFINER·search_path | anon/PUBLIC f, authenticated t, prosecdef t | 동일 |
+| TC-381-16 | GRANT 회수 되돌리기 | 호출 실패 후 원복 | 동일 |
 
 **되돌리기 검증**
 
 | RST | 되돌린 구현 | 결과 | 복구 |
 | :-- | :-- | :-- | :-- |
 | RST-1 | 불변 트리거 비활성화 | TC-381-03 **1 failed** | 트리거 재활성 후 9/9 PASS |
-| RST-2 | M1~M3 롤백 블록 실행 | 객체 0 확인(run 테이블·RPC) | 파일 재적용 후 9/9 PASS |
+| RST-2 | M1~M3 롤백 블록 실행 | 객체 0 확인 · M2 복원: amounts 7·items 11·두 함수 존재 | 재적용 후 10·13, 14/14 PASS |
+| RST-3 | authenticated EXECUTE 회수 | RPC 호출 실패 | GRANT 재적용 후 PASS |
 
 **영향 테스트 갱신 (M2 run 전용 전환)**
 - `task-b360-billing-statements.test.ts` — fixture에 run을 추가, 금액 원천을 run으로 전환(28/28 PASS)
@@ -36,4 +42,4 @@
 - `taskb359-billing-statement-db.test.ts` — 항목 컬럼 수 11→13
 - 위 3파일 외 폴백 의존 테스트 없음(전체 회귀 PASS)
 
-**회귀**: `npm run test:regression` — 306 passed · 2 skipped / 2,345 passed · 25 skipped. `npm run build` SUCCESS. `check:ds11`·`check:lrtm`·`check:doc-links` 통과.
+**회귀**: `npm run test:regression` — 306 passed · 2 skipped / 2,345 passed · 30 skipped. `npm run build` SUCCESS. `check:ds11`·`check:lrtm`·`check:doc-links` 통과.

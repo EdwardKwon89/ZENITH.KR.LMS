@@ -296,7 +296,7 @@ zen_ups_settlement_run_charges
 - Jaison 6차 보완 3건: M5 청구서 포함 제외, `recomputeRevenue` 목적 명시, §3 확정/근거 정리.
 - 7차 지시: PAID는 방어 가드로만, M5 제외 조건·테스트, 상태 표기·§5 갱신.
 - 코드·마이그레이션 변경 없음. PR은 draft 유지(`status:draft`).
-- **커밋 해시**: 코드 `71248eec8` / 문서 `da2bbf461` / 해시 기재 `ec9ae26c5` (M4-b 추가 커밋). 해시 갱신 커밋은 별도.
+- **커밋 해시**: 코드 `329c4f57e1e8eba358c15c42d1c67884e5995502` / 문서 `<DOCS>` / 해시 기재 `<SELF>` (M4-b 추가 커밋). 해시 갱신 커밋은 별도.
 - PR: #1462 (draft, `Refs #1459`, `Refs #1451`, `Refs #1453`, `Refs #1463`, `Refs #1369`).
 
 
@@ -305,7 +305,7 @@ zen_ups_settlement_run_charges
 - M1 `20261126090000` · M2 `20261126091000` · M3 `20261126092000` (10분 간격)
 - 기준: `origin/develop` `20261122100200` / `origin/TeamB_Dev` `20261124100000` 실측, 둘보다 늦은 시각으로 채번
 - 작성 직전 재확인·충돌 시 3개 일괄 조정. M4·M4-b·M5는 데이터 조치(운영 절차, #1364)
-- **커밋 해시**: 코드 `71248eec8` / 문서 `da2bbf461` / 해시 기재 `ec9ae26c5`
+- **커밋 해시**: 코드 `329c4f57e1e8eba358c15c42d1c67884e5995502` / 문서 `<DOCS>` / 해시 기재 `<SELF>`
 
 ## 8. [구현 작업 결과] PR-1 — DB M1~M3 (2026-11-26)
 
@@ -359,4 +359,19 @@ zen_ups_settlement_run_charges
 
 ### 8-6. 실패 관측성·금전 영향
 - RPC 실패는 오류 코드로 반환되어 앱에서 `logger.error`로 기록한다(PR-2). 금액·정산 영향이 있어 PR-2에서 핵심 지점 4기준 판정 후 필요 시 CRITICAL 알림을 구성한다.
-- **커밋 해시**: 코드 `71248eec8` / 문서 `da2bbf461` / 해시 기재 `ec9ae26c5`
+- **커밋 해시**: 코드 `329c4f57e1e8eba358c15c42d1c67884e5995502` / 문서 `<DOCS>` / 해시 기재 `<SELF>`
+
+### 8-7. 재검토 보완 반영 (Jaison 필수 4·권고 3)
+
+| # | 변경 | 파일·확인 |
+|:-:|:--|:--|
+| 1 | **멱등 재마감**: 같은 입력 분기에서 오더가 `NOT_SETTLED`면 인보이스 방어 후 **run 생성 없이 `SETTLED` 복구**. 다른 입력은 새 version | M3 §4~5. 테스트 `task-b381-settlement-run-db.test.ts` — unmark 후 재마감 시 run 1건·같은 run_id·`SETTLED`, 다른 입력은 version 2 |
+| 2 | **M2 ROLLBACK 실행 가능**: `billing_items_amounts` DROP → b360 두 함수 원문 재적용 → 컬럼 DROP → GRANT/reload. 주석 해제만으로 실행 | M2 하단 블록. 실행 검증: 롤백 후 `billing_items_amounts` OUT **7**·items 컬럼 **11**·두 함수 존재, 재적용 후 **10**·**13** |
+| 3 | **Ds-11 갱신**: run 3테이블·RPC·변경 RPC·컬럼 추가 기재, 인덱스 갱신 | `Ds_11_11B_UPS_Agency_Actuals.md §11.19`, `Ds_11_04_Finance_Settlement.md`, `Ds_11_API_상세_명세서.md` |
+| 4 | **보안 테스트 추가**: anon RPC 거부, `has_function_privilege`(anon/PUBLIC f·authenticated t), `prosecdef=true`·`search_path=public`, GRANT 회수 시 호출 실패(되돌리기) | 동일 테스트 파일 |
+| 5 | `settled_by` FK를 **ON DELETE RESTRICT**로 변경 + 오더 CASCADE·불변 트리거 주석 | M1 |
+| 6 | 인보이스 `source_order_id` 비교를 **text 비교**로 변경(비uuid 값 형변환 오류 방지) | M3 |
+| 7 | **RLS 음성 대조**(비소속 대리점·타 조직 화주 0건) + 오류 `not_ups_order`·`already_settled`(다른 입력)·`paid_invoice_exists` 테스트 | 동일 테스트 파일 |
+
+- 신규 DB 통합 **14/14 PASS**, 전체 **306 passed · 2 skipped / 2,345 passed · 30 skipped**, build SUCCESS.
+- 되돌리기: 불변 트리거 비활성 1 failed, GRANT 회수 시 호출 실패, M1~M3 롤백 블록 검증.
