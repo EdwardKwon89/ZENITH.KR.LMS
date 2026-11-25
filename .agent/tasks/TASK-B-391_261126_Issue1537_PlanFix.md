@@ -4,7 +4,7 @@
 |:-----|:-----|
 | 이슈 | [#1537](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1537) · Jaison 배정 Mike(원 담당 Dave → JSJung 지시 재배정) · 검증 Jaison · p2 · 단순 Task(문서 정정 + 로컬 SQL 구문 확인) |
 | 브랜치 | `feature/teamb-task-b391-iss1537-plan-fix` (base: `origin/TeamB_Dev` `2857de77f`) |
-| 상태 | 🔄 진행 중 |
+| 상태 | 🔔 검토 대기 (`status:review`) |
 | 대상 문서 | `.agent/tasks/TASK-B-389_261125_Issue1529_RollbackPlan.md` (Dave 소유 — **정정 7건 범위 한정 Jaison 승인**, 7건 밖 미변경) |
 | 원칙 | R-14 로컬 한정 · R-21(건수·true/false·exit만) · 임시 SQL은 scratch/(커밋 금지) · 저장소 파일 이동·리다이렉트 금지(B-387 사고 재발 방지) |
 
@@ -64,6 +64,10 @@ date                                     # Thu Nov 26 01:32:52 KST 2026
 ## [작업 결과]
 
 - 코드(문서 정정) 커밋: `acc528907f1406b159a1be42c7037a4e0d7ecdc3`
+
+### PR·보완 기록
+- **PR #1538** (`Refs #1529` · `Refs #1537`, base `TeamB_Dev`, 병합은 Jaison)
+- 보완 반영 커밋(상태 행·PR/해시 기재 + §3-1 설명 정정): `<PLACEHOLDER>`
 
 ### 착수 절차 실측 (R-17)
 ```bash

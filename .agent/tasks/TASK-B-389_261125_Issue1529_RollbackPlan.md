@@ -262,7 +262,7 @@ WHERE o.transport_mode = 'UPS'
   AND NOT EXISTS (SELECT 1 FROM public.zen_ups_settlement_runs r WHERE r.order_id = o.id)
   AND NOT EXISTS (SELECT 1 FROM public.zen_billing_statement_items i WHERE i.order_id = o.id);
 
--- 누출 확인: 대상 선정 조건(SETTLED + run 없음)과 같은 조건 안에서 청구서 항목이 포함된 오더
+-- 제외 건 확인: 대상 선정 조건(SETTLED + run 없음)에서 청구서 항목 보유로 제외되는 건
 -- (기존 질의는 run이 있는 정상 건까지 세어 정상 상태를 중단으로 오인 — 정정)
 SELECT count(*) FROM public.zen_orders o
 WHERE o.transport_mode = 'UPS'
@@ -271,7 +271,7 @@ WHERE o.transport_mode = 'UPS'
   AND EXISTS (SELECT 1 FROM public.zen_billing_statement_items i WHERE i.order_id = o.id);
 ```
 
-- **중단**: 위 **누출** 건수가 1건이라도 있으면 대상 선정 조건에 청구서 항목 포함 오더가 섞인 것이므로 실행하지 않고 보고한다(설계 §2-6). 정상 건(청구서 항목 보유·run 있음)은 대상이 아니므로 누출에 세지 않는다.
+- **중단·보고**: 위 질의는 **대상에서 제외되는 건(청구서 보유·run 없음)의 건수**이며, 1건 이상이면 이 건들은 초기화하지 않고 보고한다(실행 계속 여부는 Aiden·Edward 판단) — 설계 §2-6의 「중단·보고」와 같은 의미다. 정상 건(청구서 항목 보유·run 있음)은 대상이 아니므로 세지 않는다.
 - 실행 시점에 `zen_ups_settlement_runs`·`zen_billing_statement_items`가 존재해야 한다(M1·b359 적용 후).
 
 ### 3-2. 백업
