@@ -165,7 +165,7 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 ### Aiden 조건부 확정 반영 (2026-11-25, Jaison 조건 전달)
 - **실측 집계**: 47 spec 최초 작성자 태그 → **Team B 18 / 그 외 29 (Aiden 집계와 차이 0건)** · screenshots 2 spec 소유 = [Baker](Team B) / [B_Kai](Team A) · 폴더 5종 존재(E2E 54·UAT 5·TASK 3·AUDIT 2·FEAT 2폴더) · 추적 `.md` 16(일치) · 원본 증적 425건
 - **반영**: §1 표(행 12~15)·§2 소유 단계안·§3 영속 기본 위치+`realpath`·§4 L2 diff 기준·L3 확장자 범위·§8 Edward 대기 3건
-- 반영 커밋: `<PLACEHOLDER>`
+- 반영 커밋: `a5ea26ea2b63117a30cc23e271d8f744f8b78aea`
 
 ### 다음 절차
 draft PR(`Refs #1513`) → Jaison diff 검토 → **Aiden `[설계 확정]`**(R-13 문안 확정 포함) → 구현 착수.
