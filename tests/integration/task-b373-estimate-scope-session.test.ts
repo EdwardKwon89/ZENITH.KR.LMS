@@ -67,10 +67,12 @@ async function estimateFor(email: string, extra: Partial<EstimateUpsFreightInput
 }
 
 // 로컬 Supabase + 서비스 키가 준비된 환경에서만 실행한다(CI는 시크릿 미제공 시 skip).
+// 로컬 시드 계정이 있는 DB에서만 실행한다(CI는 계정이 없어 실패하므로 명시 플래그 필요).
 const HAS_LOCAL_ENV = !!(
   process.env.NEXT_PUBLIC_SUPABASE_URL &&
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY &&
+  process.env.RUN_B373_SESSION_TESTS === '1'
 );
 
 describe.skipIf(!HAS_LOCAL_ENV)('TASK-B-373 PR-2 — 실세션(RLS) 견적 범위·DTO', () => {

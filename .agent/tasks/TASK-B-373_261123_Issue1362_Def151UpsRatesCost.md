@@ -346,8 +346,8 @@
 | 항목 | 결과 |
 |:--|:--|
 | 신규 단위 | **48/48 PASS** (가드 27 · 범위 12 · DTO 5 · 공개구간 2 · 표시 동일성 2) |
-| 실세션 통합(RLS) | **13/13 PASS** (역할별 범위·DTO·R-10 전후 금액) |
-| 전체 회귀 | **304 files / 2,343 tests PASS** |
+| 실세션 통합(RLS) | **13/13 PASS** — 로컬 시드 DB에서 `RUN_B373_SESSION_TESTS=1`로 실행(CI는 계정 부재로 skip) |
+| 전체 회귀 | **303 passed · 1 skipped(304 files) / 2,330 passed · 13 skipped** |
 | `npm run build` | SUCCESS |
 | `check:ds11`·`check:doc-links`·`check:lrtm` | 통과 |
 | `/admin/error-logs` 신규 ERROR | **0건**(실세션 페이지 방문 후 1시간 내 0) |
