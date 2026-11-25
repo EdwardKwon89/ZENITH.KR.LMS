@@ -39,8 +39,8 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 | 11 | `scratch/` 출력 spec | `git grep -l "scratch/" ... -- tests \| wc -l` | 3 (R-13 허용 범위 — 대상 아님) |
 | 12 | **47 spec 최초 작성자 태그 집계** | `git log --diff-filter=A --format=%s -- <파일>` 후 태그별 `uniq -c` | **Team B 18 / 그 외 29** — Aiden 집계와 **일치(차이 0건)**. 세부: Dave 9·Mike 6·Baker 2·Jaison 1 / Gemini 12·B_Kai 5·D_Kai 4·Claude 4·OpenCode 2·그 외 2 |
 | 13 | **screenshots 출력 2 spec 소유** | 동일 `git log --diff-filter=A` | `r10-corporate-info-real-column` = **[Baker]**(Team B) · `e2e-20-order-service-selection` = **[B_Kai]**(Team A) — 47 목록 **외부**(별도 경로 출력) |
-| 14 | **대상 폴더류 존재·건수** | `git ls-files docs/99_Manual/ \| awk/uniq -c` | `E2E_*` **54폴더·증적 357** · `UAT_*` 5·44 · `TASK-*` 3·12 · `AUDIT_*` 2·7 · `FEAT_*` 2·3 → **5종 전부 존재** |
-| 15 | **요약 `.md`·원본 증적 건수** | `git ls-files ... \| grep -c` | 추적 `.md` **16**(Aiden 수치 일치 · `E2E_*` 내부 10 포함) · 원본 증적 확장자 **425** |
+| 14 | **대상 폴더류 존재·건수** | `git -c core.quotepath=false ls-files docs/99_Manual/ \| awk/uniq -c` (한글 파일명 인용 방지) | `E2E_*_Result` **54폴더·증적 397** · `UAT_*_Result` 5·44 · `TASK-*_Result` 3·12 · `AUDIT_*_Result` 2·7 · `FEAT_*_Result` 2·3 → **5종 전부 존재** |
+| 15 | **요약 `.md`·원본 증적 건수** | `git -c core.quotepath=false ls-files ... \| grep -c` (한글 파일명 인용 방지) | 추적 **481** = 요약 `.md` **16**(Aiden 수치 일치 · `E2E_*_Result` 내부 10 포함) + 원본 증적 확장자 **465** |
 
 **구조 요약**: 증적 출력은 **상수 1줄(`const DIR = 'docs/...') + `mkdirSync` + 템플릿 문자열** 구조다(45/47이 동일 패턴) → 공통 헬퍼로의 전환은 파일당 **상수 선언부 교체** 수준이다.
 
@@ -83,7 +83,7 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 |:-:|:--|:--|:--|
 | **L1** | 헬퍼 런타임 가드 | 해석 경로가 저장소 내부면 **throw** (실행 즉시 실패) | **차단** (전환 후 사실상 유일한 유입 경로를 봉쇄) |
 | **L2** | 신규 `scripts/check-evidence-escape.mjs` + `npm run check:evidence` + `pr-checks.yml`에 advisory 추가(기존 `node ... \|\| true` 패턴) | **기준 SHA 대비 diff**: CI와 동일한 `git diff --name-only "$BASE_SHA"...HEAD` 방식(`pr-checks.yml`이 `fetch-depth: 0`로 이미 쓰는 패턴 — 깨끗한 CI 체크아웃에서도 커밋된 변경을 본다)으로 대상 파일 탐지 → **명령 형태와 건수만** 보고. 로컬 실행은 작업트리 기준(`git status`)을 보조로 병용 | **경고** (수동·비-E2E 경로의 유입 탐지) |
-| **L3** | `.gitignore` 보완 | **확장자 단위**(원본 증적 형식: png·json·xlsx·pdf·txt·webm 등)로만 무시 — **폴더 전체 무시 금지**(요약 `.md` 추적 **16건** 보호). 대상 폴더류는 존재 실측 기준 **5종 전부 포함**: `E2E_*_Result`(54폴더·357) · `UAT_*`(5·44) · `TASK-*`(3·12) · `AUDIT_*`(2·7) · `FEAT_*`(2·3). 이미 추적 중인 파일에는 `.gitignore`가 영향 없음(추적 481건 불변) | **차단(안전망)** — 경고는 L2 담당 |
+| **L3** | `.gitignore` 보완 | **확장자 단위**(원본 증적 형식: png·json·xlsx·pdf·txt·webm 등)로만 무시 — **폴더 전체 무시 금지**(요약 `.md` 추적 **16건** 보호). 대상 범위는 L2와 동일하게 **`docs/99_Manual/`의 5종 폴더류 + `tests/e2e/screenshots/**`**: `E2E_*_Result`(54폴더·증적 397) · `UAT_*_Result`(5·44) · `TASK-*_Result`(3·12) · `AUDIT_*_Result`(2·7) · `FEAT_*_Result`(2·3). 이미 추적 중인 파일에는 `.gitignore`가 영향 없음(추적 481건 불변). **구현 단계 예외 검토**: 무시 패턴에 걸려도 저장소 추적이 허용된 요약성 파일이 있으면 예외 패턴(`!`)을 설계에 포함 | **차단(안전망)** — 경고는 L2 담당 |
 
 - **L2·L3 대상 범위(권장)**: `docs/99_Manual/`의 **5종 폴더류**(`E2E_*_Result`·`UAT_*_Result`·`TASK-*_Result`·`AUDIT_*Result`·`FEAT_*Result`) + `tests/e2e/screenshots/**` — 회귀 결과물(`docs/08_Self_Audit/Regression_Results/`)·`scratch/`는 R-13상 허용이므로 **범위 밖**. 그 밖의 요약문서 폴더는 범위 밖이며, 원본 증적 형식이 섞인 경우는 L2 경고로만 확인한다.
 - **단위 테스트(구현 단계)**: ① 헬퍼 — 저장소 내부 경로 지정 시 throw / 저장소 밖 통과 ② L2 스크립트 — 픽스처 디렉토리에 신규 파일을 만들어 경고/건수 보고, 깨끗하면 0건. (DoD의 "의도대로 경고·차단 단위 확인" 대응)
@@ -163,7 +163,7 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 3. `tests/e2e/screenshots/` 편입 제안 — 타당 확인(최종 판단은 Aiden), draft 유지
 
 ### Aiden 조건부 확정 반영 (2026-11-25, Jaison 조건 전달)
-- **실측 집계**: 47 spec 최초 작성자 태그 → **Team B 18 / 그 외 29 (Aiden 집계와 차이 0건)** · screenshots 2 spec 소유 = [Baker](Team B) / [B_Kai](Team A) · 폴더 5종 존재(E2E 54·UAT 5·TASK 3·AUDIT 2·FEAT 2폴더) · 추적 `.md` 16(일치) · 원본 증적 425건
+- **실측 집계**: 47 spec 최초 작성자 태그 → **Team B 18 / 그 외 29 (Aiden 집계와 차이 0건)** · screenshots 2 spec 소유 = [Baker](Team B) / [B_Kai](Team A) · 폴더 5종 존재(E2E 54·UAT 5·TASK 3·AUDIT 2·FEAT 2폴더) · 추적 481 = `.md` 16(일치) + 원본 증적 **465**(`core.quotepath=false` 재집계 — 한글 파일명 인용으로 425로 잡히던 오류 정정)
 - **반영**: §1 표(행 12~15)·§2 소유 단계안·§3 영속 기본 위치+`realpath`·§4 L2 diff 기준·L3 확장자 범위·§8 Edward 대기 3건
 - 반영 커밋: `a5ea26ea2b63117a30cc23e271d8f744f8b78aea`
 
