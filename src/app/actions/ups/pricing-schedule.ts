@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { validateUserAction } from '@/lib/auth/guards';
 import { USER_ROLES } from '@/lib/auth/rbac';
 import { createAdminClient } from '@/utils/supabase/server';
+import { requireAdminOrManager } from '@/lib/auth/ups-rate-permissions';
 import { logger } from '@/lib/logger';
 import { getKstToday } from '@/lib/utils/date-kst';
 import { applySchedule } from '@/lib/ups/pricing-schedule-apply';
@@ -25,12 +26,6 @@ interface UpdatePricingScheduleInput {
 }
 
 // ─── 검증 헬퍼 ──────────────────────────────────────
-
-function requireAdminOrManager(role: string | undefined) {
-  if (!role || (role !== USER_ROLES.ADMIN && role !== USER_ROLES.MANAGER && role !== USER_ROLES.ZENITH_SUPER_ADMIN)) {
-    throw new Error('UPS 요율 관리 권한이 없습니다.');
-  }
-}
 
 function requireSchedulePermission(role: string | undefined, settingType: SettingType, targetRef: Record<string, string>, profileOrgId?: string) {
   const isAdmin = role === USER_ROLES.ADMIN || role === USER_ROLES.MANAGER || role === USER_ROLES.ZENITH_SUPER_ADMIN;

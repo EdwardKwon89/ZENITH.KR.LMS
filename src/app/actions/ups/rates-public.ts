@@ -92,10 +92,13 @@ export interface PublicWeightTierRate {
 
 export async function getPublicWeightTierRates(): Promise<PublicWeightTierRate[]> {
   const { supabase } = await validateUserAction();
+  const refDate = new Date().toISOString().split('T')[0];
   const { data, error } = await supabase
     .from('zen_ups_weight_tier_rates')
     .select('id, product_id, zone_id, tier_min_kg, tier_max_kg, price_per_kg_selling, currency, valid_from, valid_until, product:product_id(product_code, product_name, cargo_type), zone:zone_id(zone_code, zone_name)')
     .eq('is_active', true)
+    .lte('valid_from', refDate)
+    .or(`valid_until.is.null,valid_until.gte.${refDate}`)
     .order('tier_min_kg');
   if (error) throw new Error(error.message);
   return (data ?? []) as unknown as PublicWeightTierRate[];

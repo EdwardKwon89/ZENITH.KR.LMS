@@ -81,7 +81,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('Agency 정보 없이 호출하면 Platform 견적만 반환한다', async () => {
-    (validateUserAction as any).mockResolvedValue({ supabase: buildMockSupabase() });
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' }, supabase: buildMockSupabase() });
 
     const result = await estimateUpsFreight({
       productId: 'p1', destCountryCode: 'USA', actualWeightKg: 5,
@@ -93,7 +93,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
   });
 
   it('agencyOrgId 전달 시 Agency 단계 견적을 포함한다', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase(),
     });
     (createAdminClient as any).mockResolvedValue(
@@ -112,7 +112,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
   });
 
   it('agencyOrgId + shipperOrgId 전달 시 Shipper 최종 운송비까지 계산한다', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({
         zen_agency_shipper_zone_discounts: createQueryMock({ data: [{ discount_rate: 0.05, cargo_type: 'NON_DOC' }] }),
       }),
@@ -134,7 +134,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
   });
 
   it('목적지 국가에 매핑된 Zone이 없으면 에러를 던진다', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({ zen_ups_zones: createQueryMock({ data: [] }) }),
     });
 
@@ -144,7 +144,7 @@ describe('TC-UPS-FREIGHT-01: estimateUpsFreight', () => {
   });
 
   it('해당 조건의 기준요금이 없으면 에러를 던진다', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({ zen_ups_base_rates: createQueryMock({ data: null }) }),
     });
 
@@ -159,7 +159,7 @@ describe('TC-UPS-FREIGHT-03: 할인율 cargo_type 축 (Issue #1018 + #1023/DEF-B
 
   it('Express/Saver(cargo_type=NON_DOC) 상품은 Admin→Agency 할인율 조회 시 cargo_type 후보 [NON_DOC, ALL]로 필터한다', async () => {
     const policyMock = createQueryMock({ data: [{ discount_rate: 0.1, cargo_type: 'NON_DOC' }] });
-    (validateUserAction as any).mockResolvedValue({ supabase: buildMockSupabase() });
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' }, supabase: buildMockSupabase() });
     (createAdminClient as any).mockResolvedValue(
       buildMockSupabase({ zen_agency_pricing_policies: policyMock })
     );
@@ -173,7 +173,7 @@ describe('TC-UPS-FREIGHT-03: 할인율 cargo_type 축 (Issue #1018 + #1023/DEF-B
 
   it('Expedited(cargo_type=BOTH) 상품은 cargo_type 후보 [NON_DOC, ALL]로 필터한다 — DOC 정책은 후보에서 제외', async () => {
     const policyMock = createQueryMock({ data: [{ discount_rate: 0.2, cargo_type: 'ALL' }] });
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({ zen_ups_products: createQueryMock({ data: EXPEDITED_PRODUCT }) }),
     });
     (createAdminClient as any).mockResolvedValue(
@@ -189,7 +189,7 @@ describe('TC-UPS-FREIGHT-03: 할인율 cargo_type 축 (Issue #1018 + #1023/DEF-B
 
   it('Agency→Shipper 할인율 조회에도 동일한 cargo_type 후보가 적용된다', async () => {
     const shipperPolicyMock = createQueryMock({ data: [{ discount_rate: 0.05, cargo_type: 'NON_DOC' }] });
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({ zen_agency_shipper_zone_discounts: shipperPolicyMock }),
     });
     (createAdminClient as any).mockResolvedValue(
@@ -224,7 +224,7 @@ describe('TC-UPS-FREIGHT-04: cargo_type ALL/NON_DOC 폴백 (Issue #1023 / DEF-B-
         ? { zen_agency_shipper_zone_discounts: createQueryMock({ data: opts.shipperDiscounts ?? [] }) }
         : {}),
     });
-    (validateUserAction as any).mockResolvedValue({ supabase: supabaseMock });
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' }, supabase: supabaseMock });
     (createAdminClient as any).mockResolvedValue(
       buildMockSupabase({
         zen_agency_pricing_policies: createQueryMock({ data: opts.agencyPolicies ?? [] }),
@@ -358,7 +358,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('Box 상품(FREIGHT family) + IMPORT 방향 Zone이 정확 매치된다', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({
         zen_ups_products: createQueryMock({ data: BOX_PRODUCT }),
         zen_ups_zones: createQueryMock({ data: [IMPORT_ZONE] }),
@@ -372,7 +372,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
   });
 
   it('IMPORT 방향 Zone이 direction=IMPORT로 정확 매치된다', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({
         zen_ups_products: createQueryMock({ data: BOX_PRODUCT }),
         zen_ups_zones: createQueryMock({ data: [IMPORT_ZONE] }),
@@ -388,7 +388,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
   });
 
   it('direction 미지정(EXPORT 기본값)으로 IMPORT 전용 Zone 조회 시 Zone 에러', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({
         zen_ups_products: createQueryMock({ data: BOX_PRODUCT }),
         zen_ups_zones: createQueryMock({ data: [IMPORT_ZONE] }),
@@ -401,7 +401,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
   });
 
   it('EXPRESS EXPORT 정확매치 시 fallbackApplied=false가 breakdown에 전달된다', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase(),
     });
 
@@ -413,7 +413,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
   });
 
   it('agencyOrgId 전달 시 zen_agency_pricing_policies를 adminClient로 조회한다', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase(),
     });
     (createAdminClient as any).mockResolvedValue(
@@ -432,7 +432,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
   });
 
   it('DDP incoterms 전달 시 otherCharges가 0으로 계산됨 (DEF-B-026)', async () => {
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({
         zen_ups_other_charges: createQueryMock({ data: [{ id: 'oc1', charge_code: 'DDP', charge_name: 'Delivery Duty Paid', selling_price: 30000, cost_price: 25000, is_active: true }] }),
       }),
@@ -448,7 +448,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
 
   it('OVERSIZE other_charge는 zen_ups_other_charges에서 조회됨 (회귀 확인)', async () => {
     const oversizeChargeData = { id: 'oc2', charge_code: 'OVERSIZE', charge_name: '대형포장물', selling_price: 20000, cost_price: 15000, is_active: true };
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({
         zen_ups_other_charges: createQueryMock({ data: [oversizeChargeData] }),
       }),
@@ -504,7 +504,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
 
     it('서류 상품 + 5kg 초과 중량 → 에러 대신 비서류(NONDOC) 요금으로 자동 계산됨', async () => {
       const { chain: baseRatesChain, calls: baseRatesCalls } = makeBaseRatesRecordingMock(NONDOC_RATE);
-      (validateUserAction as any).mockResolvedValue({
+      (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
         supabase: buildMockSupabase({
           zen_ups_products: makeProductsSwitchMock(),
           zen_ups_base_rates: baseRatesChain,
@@ -532,7 +532,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
         single: () => Promise.resolve({ data: DOC_PRODUCT, error: null }),
         maybeSingle: () => Promise.resolve({ data: null, error: null }),
       };
-      (validateUserAction as any).mockResolvedValue({
+      (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
         supabase: buildMockSupabase({ zen_ups_products: notFoundChain }),
       });
 
@@ -542,7 +542,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
     });
 
     it('서류 상품 + 정확히 5kg(상한) → DOC 요금 그대로 정상 계산됨(전환 아님)', async () => {
-      (validateUserAction as any).mockResolvedValue({
+      (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
         supabase: buildMockSupabase({
           zen_ups_products: createQueryMock({ data: DOC_PRODUCT }),
           zen_ups_base_rates: createQueryMock({ data: { ...BASE_RATE, product_id: 'p-doc' } }),
@@ -558,7 +558,7 @@ describe('TC-UPS-FREIGHT-02: resolveZoneByCountry 연동 (GH#202)', () => {
     });
 
     it('max_weight_kg이 없는 상품(NON_DOC 등)은 중량과 무관하게 차단되지 않음', async () => {
-      (validateUserAction as any).mockResolvedValue({ supabase: buildMockSupabase() });
+      (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' }, supabase: buildMockSupabase() });
 
       const result = await estimateUpsFreight({
         productId: 'p1', destCountryCode: 'USA', actualWeightKg: 20,
@@ -589,7 +589,7 @@ describe('TC-UPS-FREIGHT-SURGE-CN: 중국 급증 긴급 수수료 조회 (DEF-B-
 
   function runCnEstimate(destCountryCode: string, destStateProvince?: string) {
     const surgeMock = createQueryMock({ data: [SURGE] });
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({
         zen_ups_zones: createQueryMock({ data: [CN_ZONE, CN_SOUTH_ZONE] }),
         zen_ups_surge_fees: surgeMock,
@@ -624,7 +624,7 @@ describe('TC-UPS-FREIGHT-SURGE-CN: 중국 급증 긴급 수수료 조회 (DEF-B-
 
   it('CN 외 국가는 기존 동작 그대로 (회귀 방지)', async () => {
     const surgeMock = createQueryMock({ data: [SURGE] });
-    (validateUserAction as any).mockResolvedValue({
+    (validateUserAction as any).mockResolvedValue({ profile: { id: 'u1', role: 'ADMIN', org_id: 'org-1' },
       supabase: buildMockSupabase({ zen_ups_surge_fees: surgeMock }),
     });
     (createAdminClient as any).mockResolvedValue(buildMockSupabase());

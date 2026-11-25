@@ -11,12 +11,12 @@ import {
   deactivateAgencyOtherCharge,
 } from '@/app/actions/agency/other-charges';
 import type { AgencyOtherChargeRow } from '@/app/actions/agency/other-charges';
-import type { UpsOtherCharge } from '@/types/ups';
+import type { PublicOtherCharge } from '@/app/actions/ups/rates-public';
 import type { ColumnDef } from '@tanstack/react-table';
 
 interface Props {
   charges: AgencyOtherChargeRow[];
-  allOtherCharges: UpsOtherCharge[];
+  allOtherCharges: PublicOtherCharge[];
   agencyOrgId: string;
 }
 

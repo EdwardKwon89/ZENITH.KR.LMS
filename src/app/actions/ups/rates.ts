@@ -2,6 +2,9 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
+import { logger } from '@/lib/logger';
+import { trError } from '@/lib/i18n/action-error';
+import { hasAdminOrManagerRole, hasAdminManagerOrSubAdminRole } from '@/lib/auth/ups-rate-permissions';
 import { fetchAllRows } from '@/lib/ups/paginate-all';
 import type {
   UpsZoneWithCountries,
@@ -14,6 +17,18 @@ import type {
   UpsFreightMinimumWithRefs,
   UpsSurgeFee,
 } from '@/types/ups';
+
+/**
+ * TASK-B-373 PR-2 — 요율 조회 6종 역할 가드(C안).
+ * 기본요율(getUpsBaseRates)만 SUB_ADMIN 허용, 나머지 5종은 ADMIN·MANAGER·ZENITH_SUPER_ADMIN.
+ */
+async function assertRatesReadAccess(role: string | undefined, scope: 'base' | 'admin') {
+  const allowed = scope === 'base' ? hasAdminManagerOrSubAdminRole(role) : hasAdminOrManagerRole(role);
+  if (!allowed) {
+    logger.warn('[UPS_RATES] permission_denied', { role, scope });
+    throw new Error(await trError('permission_denied'));
+  }
+}
 
 export async function getUpsZones(): Promise<UpsZoneWithCountries[]> {
   const { supabase } = await validateUserAction();
@@ -43,7 +58,8 @@ export async function getUpsBaseRates(filters?: {
   zoneId?: string;
   referenceDate?: string;
 }): Promise<UpsBaseRateWithRefs[]> {
-  const { supabase } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
+  await assertRatesReadAccess(profile?.role, 'base');
   const refDate = filters?.referenceDate ?? new Date().toISOString().split('T')[0];
   // DEF-B-041: 상품 필터 없이 전체 조회 시 zen_ups_base_rates 1,000행 초과로 잘림 —
   // 페이지네이션으로 전체 병합. productId 필터가 있으면 결과가 1,000행 미만이라 1회 호출로 끝난다.
@@ -70,7 +86,8 @@ export async function getUpsFuelSurcharge(
   productId?: string | null,
   referenceDate?: string
 ): Promise<UpsFuelSurcharge | null> {
-  const { supabase } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
+  await assertRatesReadAccess(profile?.role, 'admin');
   const refDate = referenceDate ?? new Date().toISOString().split('T')[0];
   const base = supabase
     .from('zen_ups_fuel_surcharges')
@@ -85,7 +102,8 @@ export async function getUpsFuelSurcharge(
 }
 
 export async function getUpsOtherCharges(): Promise<UpsOtherCharge[]> {
-  const { supabase } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
+  await assertRatesReadAccess(profile?.role, 'admin');
   const { data, error } = await supabase
     .from('zen_ups_other_charges')
     .select('*')
@@ -97,7 +115,8 @@ export async function getUpsOtherCharges(): Promise<UpsOtherCharge[]> {
 
 // Issue #491: Admin 관리 화면용 — 도착국별 전체 이력(과거 기간 포함) 조회
 export async function getUpsSurgeFees(): Promise<UpsSurgeFee[]> {
-  const { supabase } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
+  await assertRatesReadAccess(profile?.role, 'admin');
   const { data, error } = await supabase
     .from('zen_ups_surge_fees')
     .select('*')
@@ -108,7 +127,8 @@ export async function getUpsSurgeFees(): Promise<UpsSurgeFee[]> {
 }
 
 export async function getUpsWeightTierRates(): Promise<UpsWeightTierRateWithRefs[]> {
-  const { supabase } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
+  await assertRatesReadAccess(profile?.role, 'admin');
   const { data, error } = await supabase
     .from('zen_ups_weight_tier_rates')
     .select('*, product:product_id(product_code, product_name), zone:zone_id(zone_code, zone_name)')
@@ -119,7 +139,8 @@ export async function getUpsWeightTierRates(): Promise<UpsWeightTierRateWithRefs
 }
 
 export async function getUpsFreightMinimums(): Promise<UpsFreightMinimumWithRefs[]> {
-  const { supabase } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
+  await assertRatesReadAccess(profile?.role, 'admin');
   const { data, error } = await supabase
     .from('zen_ups_freight_minimums')
     .select('*, product:product_id(product_code, product_name), zone:zone_id(zone_code, zone_name)')

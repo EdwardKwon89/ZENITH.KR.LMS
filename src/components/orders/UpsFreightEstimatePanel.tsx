@@ -20,11 +20,11 @@ export function UpsFreightEstimatePanel({ estimate, loading, error }: UpsFreight
   const volumetricWeight = platform.breakdown?.volumetricWeightKg ?? 0;
 
   // 기본운임: 화주 적용가가 있으면 사용, 없으면 플랫폼 기본운임
-  const baseFreight = shipper ? shipper.baseSellingPrice : platform.baseSellingPrice;
-  const fuelSurcharge = shipper ? shipper.fuelSurchargeSellingAmount : platform.fuelSurchargeSellingAmount;
-  const otherCharges = shipper ? shipper.otherChargesSellingTotal : platform.otherChargesSellingTotal;
-  const surgeFee = shipper ? shipper.surgeFeeSellingAmount : platform.surgeFeeSellingAmount;
-  const finalFreight = shipper ? shipper.finalFreight : platform.totalSellingPrice;
+  const baseFreight = (shipper ? shipper.baseSellingPrice : platform.baseSellingPrice) ?? 0;
+  const fuelSurcharge = (shipper ? shipper.fuelSurchargeSellingAmount : platform.fuelSurchargeSellingAmount) ?? 0;
+  const otherCharges = (shipper ? shipper.otherChargesSellingTotal : platform.otherChargesSellingTotal) ?? 0;
+  const surgeFee = (shipper ? shipper.surgeFeeSellingAmount : platform.surgeFeeSellingAmount) ?? 0;
+  const finalFreight = (shipper ? shipper.finalFreight : platform.totalSellingPrice) ?? 0;
   const otherChargeItems = platform.breakdown?.otherChargeItems ?? [];
 
   return (
