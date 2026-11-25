@@ -330,3 +330,4 @@
 - 되돌리기: 가드 제거 → 4 failed / DTO 판매가 허용 → 1 failed, 복구 후 30/30·5/5 PASS
 - `check:ds11`·`check:doc-links` 통과
 - 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-373_Issue1362_ups-rates-guard-dto.md`
+- **커밋 해시**: 코드 `eeac982c1` / 문서 `d339ac410`
