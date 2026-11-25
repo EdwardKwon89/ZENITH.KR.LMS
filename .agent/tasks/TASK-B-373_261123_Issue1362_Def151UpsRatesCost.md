@@ -346,7 +346,18 @@
 | 항목 | 결과 |
 |:--|:--|
 | 신규 단위 | **48/48 PASS** (가드 27 · 범위 12 · DTO 5 · 공개구간 2 · 표시 동일성 2) |
-| 실세션 통합(RLS) | **13/13 PASS** — 로컬 시드 DB에서 `RUN_B373_SESSION_TESTS=1`로 실행(CI는 계정 부재로 skip) |
+| 실세션 통합(RLS) | **13/13 PASS** — 로컬 시드 DB에서 `RUN_B373_SESSION_TESTS=1` + 계정 env로 실행(CI skip) |
+
+**R-21 §1 — 자격 증명·식별자 하드코딩 0건**
+
+| 항목 | 추가 줄 건수 | 방식 |
+|:--|:--:|:--|
+| 비밀번호 리터럴 | **0** | `B373_TEST_PASSWORD` 환경변수(저장소 밖) |
+| 계정 이메일 | **0** | `B373_*_EMAIL` 환경변수 |
+| 조직 UUID 리터럴 | **0** | 로그인 프로필·`zen_agency_shippers` 런타임 조회 |
+| 확인 명령 | `git diff --unified=0 -- tests/integration/task-b373-estimate-scope-session.test.ts \| grep '^+' \| grep -cE '<pattern>'` → 각 0 |
+
+- 실행: `source <비공개 env>; RUN_B373_SESSION_TESTS=1 npx vitest run tests/integration/task-b373-estimate-scope-session.test.ts`
 | 전체 회귀 | **303 passed · 1 skipped(304 files) / 2,330 passed · 13 skipped** |
 | `npm run build` | SUCCESS |
 | `check:ds11`·`check:doc-links`·`check:lrtm` | 통과 |
