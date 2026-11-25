@@ -79,6 +79,7 @@ describe('estimate DTO — 역할·소속별 전달 범위 (TASK-B-373 PR-2)', (
     expect(dto.platform.totalSellingPrice).toBe(118);
     expect(dto.platform.breakdown.otherChargeItems).toHaveLength(1);
     expect(dto.platform.breakdown.baseCostPrice).toBe(80);
+    expect(dto.platform.breakdown.otherChargeItems[0].costBase).toBe(4);
     expect(dto.agency).not.toBeNull();
     expect(dto.shipper).not.toBeNull();
   });

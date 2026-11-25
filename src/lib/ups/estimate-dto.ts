@@ -13,6 +13,9 @@ export interface EstimateOtherChargeItemDto {
   unit: string;
   sellingBase: number;
   fuelSurchargeSelling: number;
+  /** 원가 계열 — 관리자에게만 포함 */
+  costBase?: number;
+  fuelSurchargeCost?: number;
 }
 
 export interface EstimateBreakdownDto {
@@ -78,7 +81,7 @@ export interface EstimateAccess {
   includeShipper: boolean;
 }
 
-function sanitizeItems(items: UpsOtherChargeItem[] | undefined): EstimateOtherChargeItemDto[] {
+function sanitizeItems(items: UpsOtherChargeItem[] | undefined, includeCost: boolean): EstimateOtherChargeItemDto[] {
   return (items ?? []).map((item) => ({
     chargeId: item.chargeId,
     chargeCode: item.chargeCode,
@@ -86,6 +89,7 @@ function sanitizeItems(items: UpsOtherChargeItem[] | undefined): EstimateOtherCh
     unit: item.unit,
     sellingBase: item.sellingBase,
     fuelSurchargeSelling: item.fuelSurchargeSelling,
+    ...(includeCost ? { costBase: item.costBase, fuelSurchargeCost: item.fuelSurchargeCost } : {}),
   }));
 }
 
@@ -101,7 +105,7 @@ export function buildEstimateDto(full: UpsFreightEstimate, access: EstimateAcces
     chargeableWeightKg: b.chargeableWeightKg,
     volumetricDivisor: b.volumetricDivisor,
     billingWeightKg: b.billingWeightKg,
-    otherChargeItems: access.includePlatformSelling ? sanitizeItems(b.otherChargeItems) : [],
+    otherChargeItems: access.includePlatformSelling ? sanitizeItems(b.otherChargeItems, access.includeCost) : [],
     oversizeApplied: b.oversizeApplied,
     fallbackApplied: b.fallbackApplied,
     nonDocRateApplied: b.nonDocRateApplied,
