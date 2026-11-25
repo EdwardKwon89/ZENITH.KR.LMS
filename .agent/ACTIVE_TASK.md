@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1528](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1528) | [Team B] TASK-B-388: 롤백 통합본 미실측 항목 로컬 실측 (EPIC #1364, TASK-B-387 후속) | b | p2 | open | 미배정 | 2026-11-25 |
 | [#1524](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1524) | [Team B] TASK-B-387: 청구서관리 마이그레이션 적용 순서·롤백 로컬 왕복 리허설 (EPIC #1364) | b | p2 | review | 미배정 | 2026-11-25 |
 | [#1518](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1518) | [Aiden 요청] E2E_324_Result payload 문서의 개인 메일 기재 정리 — Team B 소유 파일 (IS #1490 후속) | b | p3 | open | 미배정 | 2026-11-24 |
 | [#1516](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1516) | [Team B] TASK-B-386: E2E_B374_Result JSON 증적 R-21 점검·처리 (IS #1490 후속) | b | p3 | review | 미배정 | 2026-11-24 |
