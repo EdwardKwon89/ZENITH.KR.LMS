@@ -67,6 +67,10 @@ test-results/
 # ─── Temporary Log Files ────────────────────────────────
 scratch/
 
+# ─── Local temporary workspace (never commit) ───────────
+# 증적 임시 보관·검토용 복사본 등 로컬 임시 폴더. 증적 원본은 저장소 밖에 둔다(R-13·R-21).
+/tmp/
+
 # ─── Local-only SaaS credential notes (never commit) ───────
 .logSaaS/
 
