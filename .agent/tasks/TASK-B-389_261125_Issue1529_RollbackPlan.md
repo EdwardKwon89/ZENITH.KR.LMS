@@ -21,7 +21,7 @@
   - `20260521000100_imp051_invoice_history.sql` + `20260721010000_add_invoice_history_notes.sql` — `zen_invoice_history(prev_status·next_status·paid_amount·changed_by·notes, ON DELETE CASCADE)`
   - `20260728100000_iss917_invoices_billed_org_id_tier.sql` — `billed_org_id`·`invoice_tier`, `metadata->>'source_order_id'` 사용
   - `20260721000000_add_invoice_finalization_columns.sql` — `is_finalized`·`finalized_at`·`finalized_by`·`finalized_reason`
-  - `20260424160000_zen_tax_invoices.sql`(`invoice_id` CASCADE), `20260424130000_zen_finance_pdf_history.sql`(CASCADE), `20260630000000_create_zen_invoice_files.sql`(CASCADE), `20260428100000_zen_claims.sql`(`invoice_id` FK)
+  - `20260424160000_zen_tax_invoices.sql`(`invoice_id` CASCADE), `20260424130000_zen_finance_pdf_history.sql`(테이블 `zen_invoice_pdf_history`, CASCADE), `20260630000000_create_zen_invoice_files.sql`(CASCADE), `20260428100000_zen_claims.sql`(테이블 `zen_incident_fees`의 `invoice_id` FK, ON DELETE 없음 = NO ACTION)
   - `20260516090000_prevent_cost_change_after_invoice.sql` — `zen_order_costs`에 `invoice_id`가 있으면 UPDATE/DELETE 차단 트리거
   - `20261118090000_task_b365_cost_settlement_columns.sql` — `zen_orders.cost_settlement_status`·`cost_settled_at`·`cost_settled_by`와 CHECK·인덱스
   - B-381 M1~M3: `zen_ups_settlement_runs`·`zen_ups_settlement_run_amounts`·`zen_ups_settlement_run_charges`, `zen_billing_statement_items`
@@ -123,7 +123,9 @@ DELETE FROM public.zen_invoice_history h
 USING rollback_bak.b381_m4_invoice_bak b
 WHERE h.invoice_id = b.id
   AND h.notes = 'B381_M4'
-  AND h.changed_by = :approved_admin_id;
+  AND h.changed_by = :approved_admin_id
+  AND EXISTS (SELECT 1 FROM public.zen_invoices i
+              WHERE i.id = b.id AND i.status = b.status);   -- 실제 복원된 행의 이력만 삭제
 COMMIT;
 ```
 
@@ -131,9 +133,11 @@ COMMIT;
 
 ```sql
 -- 1) 복원 후 대상 상태 분포가 백업과 동일한가(집계만)
-SELECT count(*) AS restored,
+SELECT count(*) FILTER (WHERE i.status = b.status
+                        AND i.paid_amount IS NOT DISTINCT FROM b.paid_amount
+                        AND i.updated_at IS NOT DISTINCT FROM b.updated_at) AS restored,
        count(*) FILTER (WHERE i.status = b.status) AS same_status
-FROM public.zen_invoices i JOIN rollback_bak.b381_m4_invoice_bak b ON b.id = i.id;
+FROM public.zen_invoices i JOIN rollback_bak.b381_m4_invoice_bak b ON b.id = i.id;   -- restored = 상태·값 일치(실제 복원)
 
 -- 2) M4가 남긴 이력이 0건인가
 SELECT count(*) FROM public.zen_invoice_history WHERE notes = 'B381_M4';
@@ -168,15 +172,16 @@ WITH target AS (
 )
 SELECT
   (SELECT count(*) FROM public.zen_order_costs c    WHERE c.invoice_id IN (SELECT id FROM target)) AS order_costs,
-  (SELECT count(*) FROM public.zen_claims c         WHERE c.invoice_id IN (SELECT id FROM target)) AS claims,
+  (SELECT count(*) FROM public.zen_incident_fees c  WHERE c.invoice_id IN (SELECT id FROM target)) AS incident_fees,
   (SELECT count(*) FROM public.zen_tax_invoices c   WHERE c.invoice_id IN (SELECT id FROM target)) AS tax_invoices,
-  (SELECT count(*) FROM public.zen_finance_pdf_history c WHERE c.invoice_id IN (SELECT id FROM target)) AS pdf_history,
+  (SELECT count(*) FROM public.zen_invoice_pdf_history c WHERE c.invoice_id IN (SELECT id FROM target)) AS pdf_history,
   (SELECT count(*) FROM public.zen_invoice_files c  WHERE c.invoice_id IN (SELECT id FROM target)) AS files,
   (SELECT count(*) FROM public.zen_invoice_history c WHERE c.invoice_id IN (SELECT id FROM target)) AS history;
 ```
 
 - **중단**: 위 자식 참조 중 하나라도 0이 아니면 실행하지 않는다(CASCADE 자식이 있으면 롤백 시 함께 복원해야 하므로 별도 계획 필요).
 - **중단**: 대상 건수가 설계에 기록된 목록과 다르면 실행하지 않고 보고한다.
+- **FK 6개 전수 확인**(`git grep "REFERENCES.*zen_invoices" origin/TeamB_Dev -- supabase/migrations`): `zen_order_costs`·`zen_invoice_pdf_history`·`zen_tax_invoices`·`zen_incident_fees`·`zen_invoice_history`·`zen_invoice_files` — 위 자식 참조 질의 6개와 **일치**(2026-11-26 직접 확인).
 - 컬럼으로 잡히지 않는 참조(알림 본문·외부 저장소 파일 등)는 **미확인**이다. 실행 전 Aiden·Edward가 확인한다.
 
 ### 2-2. 백업
@@ -223,8 +228,8 @@ COMMIT;
 ```
 
 - 컬럼 목록은 **실행 시점 스키마와 대조**한 뒤 사용한다(스키마 변경 시 초안을 갱신).
-- `invoice_no` UNIQUE 충돌(삭제 후 같은 번호가 재사용된 경우) 시 복원하지 않고 보고한다.
-- **복원 불가·부분 복원**: CASCADE 자식이 있었다면 이미 함께 삭제되어 복원되지 않는다(사전 0건 조건으로 차단). 외부 저장소의 인보이스 파일·알림 발송 이력은 복원 대상이 아니다. 삭제 후 새 인보이스가 같은 `invoice_no`를 쓰면 부분 복원만 가능하다.
+- `invoice_no` UNIQUE 충돌(삭제 후 같은 번호가 재사용된 경우) 시 INSERT가 단일 트랜잭션이므로 **전체 ROLLBACK되어 복원 0건**이다(부분 복원 아님). 충돌 원인 행을 확인·해소한 뒤 복원을 **재실행**한다.
+- **복원 불가·부분 복원**: CASCADE 자식이 있었다면 이미 함께 삭제되어 복원되지 않는다(사전 0건 조건으로 차단). 외부 저장소의 인보이스 파일·알림 발송 이력은 복원 대상이 아니다. 삭제 후 새 인보이스가 같은 `invoice_no`를 쓰면 위와 같이 복원 전체가 실패하므로 충돌 해소 후 재실행한다.
 
 ### 2-5. 검증 질의
 
@@ -257,14 +262,16 @@ WHERE o.transport_mode = 'UPS'
   AND NOT EXISTS (SELECT 1 FROM public.zen_ups_settlement_runs r WHERE r.order_id = o.id)
   AND NOT EXISTS (SELECT 1 FROM public.zen_billing_statement_items i WHERE i.order_id = o.id);
 
--- 중단 조건: 청구서 항목 포함 오더가 대상에 섞였는지
+-- 누출 확인: 대상 선정 조건(SETTLED + run 없음)과 같은 조건 안에서 청구서 항목이 포함된 오더
+-- (기존 질의는 run이 있는 정상 건까지 세어 정상 상태를 중단으로 오인 — 정정)
 SELECT count(*) FROM public.zen_orders o
 WHERE o.transport_mode = 'UPS'
   AND o.cost_settlement_status = 'SETTLED'
+  AND NOT EXISTS (SELECT 1 FROM public.zen_ups_settlement_runs r WHERE r.order_id = o.id)
   AND EXISTS (SELECT 1 FROM public.zen_billing_statement_items i WHERE i.order_id = o.id);
 ```
 
-- **중단**: 청구서 항목 포함 오더가 1건이라도 있으면 대상 선정이 잘못된 것이므로 실행하지 않고 보고한다(설계 §2-6).
+- **중단**: 위 **누출** 건수가 1건이라도 있으면 대상 선정 조건에 청구서 항목 포함 오더가 섞인 것이므로 실행하지 않고 보고한다(설계 §2-6). 정상 건(청구서 항목 보유·run 있음)은 대상이 아니므로 누출에 세지 않는다.
 - 실행 시점에 `zen_ups_settlement_runs`·`zen_billing_statement_items`가 존재해야 한다(M1·b359 적용 후).
 
 ### 3-2. 백업
@@ -317,7 +324,10 @@ COMMIT;
 
 ```sql
 SELECT count(*) AS restored FROM public.zen_orders o
-JOIN rollback_bak.b381_m5_order_bak b ON b.id = o.id;
+JOIN rollback_bak.b381_m5_order_bak b ON b.id = o.id
+WHERE o.cost_settlement_status = b.cost_settlement_status
+  AND o.cost_settled_at IS NOT DISTINCT FROM b.cost_settled_at
+  AND o.cost_settled_by IS NOT DISTINCT FROM b.cost_settled_by;   -- 백업과 일치 = 실제 복원(건너뜬 행 제외)
 
 SELECT NOT EXISTS (
   SELECT 1 FROM public.zen_orders o
