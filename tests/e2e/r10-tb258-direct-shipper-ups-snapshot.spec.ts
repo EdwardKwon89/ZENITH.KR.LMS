@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -13,7 +14,7 @@ import path from 'path';
 
 dotenv.config({ path: '.env.local' });
 
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_258_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_258_Result');
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 
 // 비대리점 직접 화주 신규 생성 계정 (zen_agency_shippers에 링크 없음) — role=CORPORATE

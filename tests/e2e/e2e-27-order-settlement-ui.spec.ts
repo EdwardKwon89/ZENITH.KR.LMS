@@ -1,13 +1,14 @@
 // TASK-B-369 (Issue #1425) — R-10 실구동: Admin 로그인 → S1 목록 → S2 정산/되돌리기.
 // 서버 액션 mock 없이 실제 Next dev 서버 + 로컬 Supabase로 동작을 확인한다.
 import { test, expect, type Page } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import fs from 'fs';
 import { getServiceClient } from './test-utils';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_27_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_27_Result');
 // 전용 계정 — 공용 admin@zenith.kr(다른 E2E/개발) 삭제를 피한다.
 const ADMIN_EMAIL = 'e2e27_admin@zenith.kr';
 const ADMIN_PASSWORD = 'password1234';

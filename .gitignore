@@ -82,3 +82,22 @@ orchestration/
 
 # ─── 폐지된 자체보고 파일(IMP-135, 2026-11-14): 에이전트 문서·구 훅이 재생성해도 커밋되지 않도록 무시 ───
 .agent/LAST_REGRESSION_RESULT
+
+# ─── TASK-B-385 (Issue #1513, 설계 PR #1515 §4 L3): 원본 증적 형식은 저장소 밖 출력 ───
+# 확장자 단위 무시 — 폴더 전체 무시 아님 (요약 .md는 보호, 대상: ..._Result 폴더류 + screenshots)
+docs/99_Manual/*_Result/**/*.png
+docs/99_Manual/*_Result/**/*.json
+docs/99_Manual/*_Result/**/*.xlsx
+docs/99_Manual/*_Result/**/*.pdf
+docs/99_Manual/*_Result/**/*.txt
+docs/99_Manual/*_Result/**/*.webm
+tests/e2e/screenshots/**/*.png
+tests/e2e/screenshots/**/*.json
+tests/e2e/screenshots/**/*.xlsx
+tests/e2e/screenshots/**/*.pdf
+tests/e2e/screenshots/**/*.txt
+tests/e2e/screenshots/**/*.webm
+# 예외 패턴: 저장소에 두는 허용 파일이 생기면 여기에 (!) 로 명시한다 (요약 문서류)
+!docs/99_Manual/*_Result/**/*.md
+!docs/99_Manual/*_Result/**/summary*
+!docs/99_Manual/*_Result/**/README*

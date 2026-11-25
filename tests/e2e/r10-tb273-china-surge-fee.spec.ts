@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -10,7 +11,7 @@ import path from 'path';
 
 dotenv.config({ path: '.env.local' });
 
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_273_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_273_Result');
 const SHIPPER_EMAIL = 'r10_shipper_272@zenith.kr';
 const SHIPPER_PASSWORD = 'password1234';
 
