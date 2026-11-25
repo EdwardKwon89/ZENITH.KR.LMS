@@ -19,6 +19,11 @@ vi.mock('@/lib/auth/guards', () => ({
   })),
 }));
 
+// 소속 판정은 서비스 롤 클라이언트로 수행한다(세션 RLS 비의존).
+vi.mock('@/utils/supabase/server', () => ({
+  createAdminClient: vi.fn(async () => ({ from: vi.fn(() => queryChain) })),
+}));
+
 vi.mock('@/lib/ups/estimate-core', () => ({
   estimateUpsFreightCore: (...args: unknown[]) => coreMock(...args),
 }));

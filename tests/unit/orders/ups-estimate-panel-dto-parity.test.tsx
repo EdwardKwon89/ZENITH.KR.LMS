@@ -69,8 +69,7 @@ describe('R-10 표시 금액 동일성 — 변경 전(전체 payload) vs 변경 
 
     const beforeText = textOf(before);
     const afterText = textOf(after);
-    expect(afterText).toContain('112');
-    expect(beforeText).toContain('112');
+    expect(afterText).toBe(beforeText);
     expect(afterText).toContain('Oversize');
     expect(beforeText).toContain('Oversize');
     expect(afterText).toContain('부피중량: 2.0kg');
@@ -85,8 +84,7 @@ describe('R-10 표시 금액 동일성 — 변경 전(전체 payload) vs 변경 
     const dto = buildEstimateDto(full, DIRECT);
     const { container: after } = render(<UpsFreightEstimatePanel estimate={dto as any} loading={false} />);
 
-    expect(textOf(after)).toContain('116');
-    expect(textOf(before)).toContain('116');
+    expect(textOf(after)).toBe(textOf(before));
     expect(textOf(after)).toContain('Oversize');
     expect(textOf(before)).toContain('Oversize');
   });
