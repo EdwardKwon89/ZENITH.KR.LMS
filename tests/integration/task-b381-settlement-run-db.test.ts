@@ -14,6 +14,8 @@ const EMAILS = {
   manager: process.env.B381_MANAGER_EMAIL,
   agency: process.env.B381_AGENCY_EMAIL,
   shipper: process.env.B381_SHIPPER_EMAIL,
+  otherAgency: process.env.B381_OTHER_AGENCY_EMAIL,
+  otherShipper: process.env.B381_OTHER_SHIPPER_EMAIL,
 };
 
 const HAS_ENV = !!(URL && ANON && SERVICE && PASSWORD && Object.values(EMAILS).every(Boolean) && process.env.RUN_B381_DB_TESTS === '1');
@@ -47,6 +49,8 @@ let admin: Awaited<ReturnType<typeof session>>;
 let manager: Awaited<ReturnType<typeof session>>;
 let agency: Awaited<ReturnType<typeof session>>;
 let shipper: Awaited<ReturnType<typeof session>>;
+let otherAgency: Awaited<ReturnType<typeof session>>;
+let otherShipper: Awaited<ReturnType<typeof session>>;
 let agencyOrgId: string;
 let shipperOrgId: string;
 const orderIds: string[] = [];
@@ -60,6 +64,20 @@ async function createOrder(suffix: string) {
     transport_mode: 'UPS',
     shipper_id: shipperOrgId,
     agency_org_id: agencyOrgId,
+    cost_settlement_status: 'NOT_SETTLED',
+  }).select('id').single();
+  if (error || !data) throw new Error(`order create failed: ${error?.message}`);
+  orderIds.push(data.id);
+  return data.id as string;
+}
+
+async function createOrderNoTransport(suffix: string) {
+  const { data, error } = await service.from('zen_orders').insert({
+    order_no: `B381-TEST-${Date.now()}-${suffix}`,
+    cargo_details: {},
+    status: 'DELIVERED',
+    transport_mode: 'AIR',
+    shipper_id: shipperOrgId,
     cost_settlement_status: 'NOT_SETTLED',
   }).select('id').single();
   if (error || !data) throw new Error(`order create failed: ${error?.message}`);
@@ -83,6 +101,8 @@ describe.skipIf(!HAS_ENV)('TASK-B-381 PR-1 — run 저장소·RPC·RLS 실DB', (
     manager = await session(EMAILS.manager);
     agency = await session(EMAILS.agency);
     shipper = await session(EMAILS.shipper);
+    otherAgency = await session(EMAILS.otherAgency);
+    otherShipper = await session(EMAILS.otherShipper);
     if (!agency.orgId || !shipper.orgId) throw new Error('org fixture missing');
     agencyOrgId = agency.orgId;
     shipperOrgId = shipper.orgId;
@@ -211,6 +231,99 @@ describe.skipIf(!HAS_ENV)('TASK-B-381 PR-1 — run 저장소·RPC·RLS 실DB', (
     const noRunOrder = await createOrder('norun');
     const missing = await admin.client.rpc('billing_items_amounts', { p_order_ids: [noRunOrder], p_tier: 'SHIPPER' });
     expect(missing.error?.message ?? '').toContain('settlement_run_missing');
+  }, 60000);
+
+  it('재마감 멱등 — unmark 후 같은 입력이면 SETTLED만 복구, run/version 유지', async () => {
+    const orderId = await createOrder('reset');
+    const first = await finalize(admin.client, orderId);
+    const runId = first.data?.[0]?.run_id;
+    expect(runId).toBeTruthy();
+
+    // unmark와 동일한 최종 상태(NOT_SETTLED)로 되돌린 뒤 같은 입력으로 재마감
+    await service.from('zen_orders').update({
+      cost_settlement_status: 'NOT_SETTLED', cost_settled_at: null, cost_settled_by: null,
+    }).eq('id', orderId);
+    const again = await finalize(admin.client, orderId);
+    expect(again.error).toBeNull();
+    expect(again.data?.[0]?.run_id).toBe(runId);
+    expect(again.data?.[0]?.version).toBe(1);
+    const status = psql(`SELECT cost_settlement_status FROM public.zen_orders WHERE id='${orderId}';`);
+    expect(status).toBe('SETTLED');
+    expect(Number(psql(`SELECT count(*) FROM public.zen_ups_settlement_runs WHERE order_id='${orderId}';`))).toBe(1);
+
+    // 다른 입력으로 재마감 → 새 version 2
+    await service.from('zen_orders').update({
+      cost_settlement_status: 'NOT_SETTLED', cost_settled_at: null, cost_settled_by: null,
+    }).eq('id', orderId);
+    const changed = AMOUNTS.map((a) => ({ ...a, line_total: a.line_total + 1, base_freight: a.base_freight + 1 }));
+    const v2 = await finalize(admin.client, orderId, changed);
+    expect(v2.error).toBeNull();
+    expect(v2.data?.[0]?.version).toBe(2);
+  }, 60000);
+
+  it('RLS 음성 — 비소속 대리점·타 조직 화주는 0건', async () => {
+    const orderId = await createOrder('rls-neg');
+    const { data } = await finalize(admin.client, orderId);
+    const runId = data?.[0]?.run_id;
+    const oa = await otherAgency.client.from('zen_ups_settlement_runs').select('id').eq('id', runId);
+    expect((oa.data ?? []).length).toBe(0);
+    const os = await otherShipper.client.from('zen_ups_settlement_runs').select('id').eq('id', runId);
+    expect((os.data ?? []).length).toBe(0);
+    const osa = await otherShipper.client.from('zen_ups_settlement_run_amounts').select('tier').eq('run_id', runId);
+    expect((osa.data ?? []).length).toBe(0);
+  }, 60000);
+
+  it('오류 코드 — not_ups_order·already_settled(다른 입력)·paid_invoice_exists', async () => {
+    const airOrderId = await createOrderNoTransport('air');
+    const air = await finalize(admin.client, airOrderId);
+    expect(air.error?.message ?? '').toContain('not_ups_order');
+
+    const settledOrder = await createOrder('already');
+    await finalize(admin.client, settledOrder);
+    const changed = AMOUNTS.map((a) => ({ ...a, line_total: a.line_total + 1, base_freight: a.base_freight + 1 }));
+    const again = await finalize(admin.client, settledOrder, changed);
+    expect(again.error?.message ?? '').toContain('already_settled');
+
+    const paidOrder = await createOrder('paid');
+    const { data: inv } = await service.from('zen_invoices').insert({
+      invoice_no: `INV-B381P-${Date.now()}`,
+      shipper_id: shipperOrgId,
+      total_amount: 1,
+      currency: 'KRW',
+      due_date: '2026-12-31',
+      status: 'PAID',
+      paid_amount: 1,
+      metadata: { source_order_id: paidOrder },
+    }).select('id').single();
+    invoiceIds.push(inv!.id);
+    const paid = await finalize(admin.client, paidOrder);
+    expect(paid.error?.message ?? '').toContain('paid_invoice_exists');
+  }, 60000);
+
+  it('RPC 보안 카탈로그 — anon 차단·DEFINER·search_path', async () => {
+    const anon = createClient(URL, ANON, { auth: { persistSession: false, autoRefreshToken: false } });
+    const anonCall = await finalize(anon, '00000000-0000-4000-8000-000000000000');
+    expect(anonCall.error).not.toBeNull();
+
+    const anonExec = psql(`SELECT has_function_privilege('anon', 'public.finalize_ups_settlement_run(uuid,numeric,jsonb,jsonb)', 'EXECUTE');`);
+    expect(anonExec).toBe('f');
+    const authExec = psql(`SELECT has_function_privilege('authenticated', 'public.finalize_ups_settlement_run(uuid,numeric,jsonb,jsonb)', 'EXECUTE');`);
+    expect(authExec).toBe('t');
+    const secdef = psql(`SELECT prosecdef FROM pg_proc WHERE proname='finalize_ups_settlement_run';`);
+    expect(secdef).toBe('t');
+    const cfg = psql(`SELECT coalesce(array_to_string(proconfig,','),'') FROM pg_proc WHERE proname='finalize_ups_settlement_run';`);
+    expect(cfg).toContain('search_path=public');
+  }, 60000);
+
+  it('GRANT 되돌리기 — authenticated EXECUTE를 회수하면 호출이 실패한다', async () => {
+    const orderId = await createOrder('grant-revert');
+    psql(`REVOKE EXECUTE ON FUNCTION public.finalize_ups_settlement_run(uuid,numeric,jsonb,jsonb) FROM authenticated;`);
+    try {
+      const res = await finalize(admin.client, orderId);
+      expect(res.error).not.toBeNull();
+    } finally {
+      psql(`GRANT EXECUTE ON FUNCTION public.finalize_ups_settlement_run(uuid,numeric,jsonb,jsonb) TO authenticated;`);
+    }
   }, 60000);
 
   it('RPC 원자성 — 잘못된 payload면 run/상태 변경 없음', async () => {

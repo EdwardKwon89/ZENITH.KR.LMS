@@ -150,6 +150,30 @@ BEGIN
          WHERE c.tier IN ('ADMIN_TO_AGENCY','SHIPPER')
        )
     THEN
+      -- 같은 입력 재호출: run은 불변이므로 새 version을 만들지 않는다.
+      -- 단, unmark 등으로 오더가 NOT_SETTLED로 돌아간 경우에는 SETTLED를 복구한다(인보이스 방어 재적용).
+      IF v_order.cost_settlement_status = 'NOT_SETTLED' THEN
+        IF EXISTS (
+          SELECT 1 FROM public.zen_invoices i
+          WHERE i.status = 'PAID'
+            AND i.metadata->>'source_order_id' = p_order_id::text
+        ) THEN
+          RAISE EXCEPTION 'paid_invoice_exists';
+        END IF;
+        IF EXISTS (
+          SELECT 1 FROM public.zen_invoices i
+          WHERE i.status <> 'CANCELED'
+            AND i.metadata->>'source_order_id' = p_order_id::text
+        ) THEN
+          RAISE EXCEPTION 'ups_invoice_exists';
+        END IF;
+        UPDATE public.zen_orders o
+        SET cost_settlement_status = 'SETTLED',
+            cost_settled_at = now(),
+            cost_settled_by = auth.uid()
+        WHERE o.id = p_order_id
+          AND o.cost_settlement_status = 'NOT_SETTLED';
+      END IF;
       RETURN QUERY SELECT v_prev_id, v_prev_version;
       RETURN;
     END IF;
@@ -162,14 +186,14 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM public.zen_invoices i
     WHERE i.status = 'PAID'
-      AND (i.metadata->>'source_order_id')::uuid = p_order_id
+      AND i.metadata->>'source_order_id' = p_order_id::text
   ) THEN
     RAISE EXCEPTION 'paid_invoice_exists';
   END IF;
   IF EXISTS (
     SELECT 1 FROM public.zen_invoices i
     WHERE i.status <> 'CANCELED'
-      AND (i.metadata->>'source_order_id')::uuid = p_order_id
+      AND i.metadata->>'source_order_id' = p_order_id::text
   ) THEN
     RAISE EXCEPTION 'ups_invoice_exists';
   END IF;

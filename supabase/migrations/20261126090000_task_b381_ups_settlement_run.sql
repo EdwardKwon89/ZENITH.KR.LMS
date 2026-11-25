@@ -16,10 +16,13 @@ CREATE TABLE IF NOT EXISTS public.zen_ups_settlement_runs (
   currency         text NOT NULL DEFAULT 'KRW' CHECK (currency = 'KRW'),
   source           text NOT NULL DEFAULT 'UPS_SETTLEMENT',
   settled_at       timestamptz NOT NULL DEFAULT now(),
-  settled_by       uuid REFERENCES public.zen_profiles(id) ON DELETE SET NULL,
+  settled_by       uuid REFERENCES public.zen_profiles(id) ON DELETE RESTRICT,
   created_at       timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT zen_ups_settlement_runs_order_version_uq UNIQUE (order_id, version)
 );
+-- 주의: append-only 트리거 때문에 order_id ON DELETE CASCADE 는 오더 삭제 시 트리거 오류로 막힌다.
+--       (오더 삭제 경로는 앱에서 미확정 — 삭제가 필요하면 데이터 작업으로 별도 처리)
+--       settled_by 는 감사 목적상 ON DELETE RESTRICT(b365 DEF-B-158과 동일) — 프로필 삭제 시 명확한 FK 오류.
 
 CREATE INDEX IF NOT EXISTS idx_zen_ups_settlement_runs_order
   ON public.zen_ups_settlement_runs (order_id, version DESC);
