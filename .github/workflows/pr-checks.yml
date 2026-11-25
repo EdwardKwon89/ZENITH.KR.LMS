@@ -124,6 +124,26 @@ jobs:
       - name: 회귀 테스트 맵 정합성 점검 (R-09)
         run: node scripts/check-lrtm-sync.mjs || true
 
+  evidence-escape-advisory:
+    name: Evidence Escape Check (advisory, non-blocking)
+    # TASK-B-385 (Issue #1513, 설계 PR #1515 §4 L2): 저장소 내 증적 재유입 경고.
+    # 기준 SHA 대비 diff(pr-checks 동일 fetch-depth: 0 패턴)로 신규·변경 증적을 건수 보고 — advisory(경고만).
+    runs-on: ubuntu-latest
+    if: github.head_ref != 'bot/sync-active-task'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: 저장소 내 증적 재유입 점검 (경고)
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          BASE_SHA="$BASE_SHA" node scripts/check-evidence-escape.mjs || true
+
   regression:
     name: Regression Tests
     runs-on: ubuntu-latest

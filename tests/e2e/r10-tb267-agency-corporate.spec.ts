@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -10,7 +11,7 @@ import path from 'path';
 
 dotenv.config({ path: '.env.local' });
 
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_267_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_267_Result');
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 
 const AGENCY_EMAIL = 'r10_agency_1028@zenith.kr';

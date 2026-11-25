@@ -27,7 +27,7 @@ $ gh issue list --state all --search "TASK-B-361 in:title"
 
 ## 1. 선행 조건·착수 환경 확인
 - #1366 CLOSED, PR #1404/#1405/#1411 모두 MERGED. `origin/TeamB_Dev` @ `19403fdec`에서 분기.
-- `./scripts/agent-worktree-init.sh baker` → 전용 워크트리 `/Users/am/Documents/workspace/SNTL_LMS/ZENITH_LMS-worktrees/baker` 재사용, `.env.local` 복사.
+- `./scripts/agent-worktree-init.sh baker` → 전용 워크트리 `<로컬 워크트리>` 재사용, `.env.local` 복사.
 - `export PATH="$PWD/node_modules/.bin:$PATH" && ./scripts/check-db-freshness.sh` → **pending 마이그레이션 0건, OK**.
 
 ## 2. 실측·설계 분석
@@ -226,7 +226,7 @@ _실제 IP 주소·계정·경로를 프로덕션 빌드 브라우저에서 확�
 | 3 | `INSERT INTO zen_orders (order_no, cargo_details, status, transport_mode, agency_org_id, shipper_id, shipper_name, shipper_biz_no, cost_settlement_status, cost_settled_at, cost_settled_by, order_date, created_at, updated_at) VALUES ('B361-R10-SETTLED-001', …, 'DELIVERED', 'UPS', '80e10b0c-…', 'e7ee09d9-…', …, 'SETTLED', '2026-10-16 09:00+09', '827dd41a-…', …), ('B361-R10-NOTSETTLED-001', …, 'NOT_SETTLED', NULL, NULL, …);` | SETTLED 1건=후보 행, NOT_SETTLED 1건=「미정산 1건 제외」안내 문구 생성. `cost_settlement_status='SETTLED'`는 CHECK 제약상 `cost_settled_at`·`cost_settled_by` 필수 |
 | 4 | `INSERT INTO order_status_history (order_id, prev_status, next_status, reason, created_at) SELECT id, 'IN_TRANSIT', 'DELIVERED', 'TASK-B-361 R10 seed', '2026-10-15 10:00+09' FROM zen_orders WHERE order_no LIKE 'B361-R10-%';` | 기준일(`dateBasis='DELIVERED'`) — 조회 기간 2026-10-01~10-31 KST 안에 들어오도록 2026-10-15 10:00 KST로 설정 |
 
-> 시드 원문: `/private/var/folders/q0/sjq5239j66b86fpl4xfbl_b40000gn/T/opencode/b361-r10-seed.sql`(로컬 임시 파일, 저장소 미포함). 위 표와 동일한 SQL을 문장별로 실행하면 재현 가능.
+> 시드 원문: `<로컬 임시 경로>/b361-r10-seed.sql`(로컬 임시 파일, 저장소 미포함). 위 표와 동일한 SQL을 문장별로 실행하면 재현 가능.
 
 ### 6-2. 실구동 결과
 

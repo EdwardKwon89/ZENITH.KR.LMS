@@ -55,7 +55,7 @@ ls .agent/tasks | grep -i "TASK-B-378"   # → 없음 (신규 생성)
 ### 착수 절차 실측 (R-17)
 
 ```bash
-① pwd                                  → /Users/am/Documents/workspace/SNTL_LMS/ZENITH_LMS-worktrees/mike
+① pwd                                  → <로컬 워크트리>
 ② git branch --show-current            → feature/teamb-task-b378-iss1452-billing-seq-grant
    (origin/TeamB_Dev `ebd2afa3d` = PR #1469 병합본에서 생성)
 ③ ls .agent/tasks | grep -i TASK-B-378 → 없음 (신규 생성 · TASK-B-378 확정)

@@ -6,11 +6,12 @@
 //  · PHASE(before/after)는 env로 구분 — before는 "중복 컬럼 상태"(되돌리기 실측 포함)의 증적
 //  · R-10: /admin/error-logs 원천인 zen_error_logs 신규 0건까지 함께 단언
 import { test, expect, type Page } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import fs from 'fs';
 import { seedFixture, cleanupFixture, ACCOUNTS, PASSWORD, psql } from './b371-fixture';
 import { loginAs } from './b371-login';
 
-const DIR = 'docs/99_Manual/E2E_B380_Result';
+const DIR = evidenceDir('E2E_B380_Result');
 const PHASE = process.env.B380_PHASE ?? 'after';
 
 // 역할별 **실제 대시보드** (프록시 `ORG_ROUTE_MAP`: AGENCY→/agency, SHIPPER→/orders —
