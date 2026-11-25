@@ -408,4 +408,4 @@
 
 - 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-373_Issue1362_ups-rates-guard-dto.md`
 - **비차단 이월**: 신규 오류 메시지 2종의 `trError` 키 통일(로케일 정합화), 다중 소속 실데이터 존재 여부는 Aiden·Edward 비공개 확인
-- **커밋 해시**: 코드 `2cb284c1f` / 문서 `2cb284c1f`
+- **커밋 해시**: 코드 `ce758e85f755895aedd763fabf3d6579a3e66b6b` / 문서 `ce758e85f755895aedd763fabf3d6579a3e66b6b`
