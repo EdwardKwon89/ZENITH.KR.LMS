@@ -4,9 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { validateUserAction } from '@/lib/auth/guards';
 import { getMaxAllowedZoneDiscount } from '@/lib/ups/discount-guard';
 import { createAdminClient } from '@/utils/supabase/server';
+import { requireAdminOrManager, requireAdminManagerOrSubAdmin } from '@/lib/auth/ups-rate-permissions';
+
 // Issue #605: Master Agency(SUB_ADMIN)는 본인 관리 Sub-Agency의 원가 할인율만 다룰 수 있음
 // (실제 범위 제한은 RLS agency_pricing_policies_sub_admin_scoped가 담당 — 여기서는 역할만 통과시킴)
-import { requireAdminOrManager, requireAdminManagerOrSubAdmin } from '@/lib/auth/ups-rate-permissions';
 
 // ─── Zone ──────────────────────────────────────────
 
@@ -241,7 +242,8 @@ export async function deleteUpsSurgeFee(id: string) {
 // ─── Agency Pricing Policy ─────────────────────────
 
 export async function getAgencyPricingPolicies(agencyOrgId?: string) {
-  const { supabase } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
+  requireAdminManagerOrSubAdmin(profile?.role);
   let query = supabase
     .from('zen_agency_pricing_policies')
     .select('*, agency:agency_org_id(name), zone:zone_id(zone_code, zone_name)')

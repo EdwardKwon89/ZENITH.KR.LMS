@@ -358,6 +358,8 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
   const [showAddressBookInput, setShowAddressBookInput] = React.useState(false);
   const [addressBookDisplayName, setAddressBookDisplayName] = React.useState('');
   const [upsEstimate, setUpsEstimate] = React.useState<UpsFreightEstimate | null>(null);
+  // DTO는 허용 역할에 대해 shipper.finalFreight 또는 platform.totalSellingPrice 중 하나를 보장한다.
+  const upsEstimateAmount = upsEstimate?.shipper?.finalFreight ?? upsEstimate?.platform.totalSellingPrice ?? null;
   const [upsProductId, setUpsProductId] = React.useState<string | undefined>();
   const [hsLookupLoadingMap, setHsLookupLoadingMap] = React.useState<Record<string, boolean>>({});
   const [hsLookupResultMap, setHsLookupResultMap] = React.useState<Record<string, { hs_code: string; confidence: 'high' | 'medium' | 'low' } | null>>({});
@@ -1618,10 +1620,10 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                         <p className="text-[9px] text-slate-500 font-bold tracking-tight mb-0.5">TOTAL VOLUME</p>
                         <p className="text-xl font-black">{totals.volume.toFixed(4)}<span className="text-[10px] text-slate-500 ml-1">CBM</span></p>
                       </div>
-                      {transportMode === 'UPS' && upsEstimate && (
+                      {transportMode === 'UPS' && upsEstimate && upsEstimateAmount != null && (
                         <div className="text-right">
                           <p className="text-[9px] text-blue-400 font-bold tracking-tight mb-0.5">UPS 예상운임</p>
-                          <p className="text-xl font-black text-blue-300">{new Intl.NumberFormat('ko-KR', { style: 'currency', currency: upsEstimate.platform.currency || 'USD' }).format(upsEstimate.shipper?.finalFreight ?? upsEstimate.platform.totalSellingPrice ?? 0)}</p>
+                          <p className="text-xl font-black text-blue-300">{new Intl.NumberFormat('ko-KR', { style: 'currency', currency: upsEstimate.platform.currency || 'USD' }).format(upsEstimateAmount)}</p>
                         </div>
                       )}
                       {transportMode === 'UPS' && <ItemsTotalSummary packages={watchedPackages || []} className="text-right" />}

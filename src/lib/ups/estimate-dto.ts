@@ -79,6 +79,8 @@ export interface EstimateAccess {
   includePlatformSelling: boolean;
   includeAgency: boolean;
   includeShipper: boolean;
+  /** 부가항목 행(판매 금액) 포함 — 소속 화주도 화주 청구 단계 금액으로 표시 동일성 유지 */
+  includeChargeItems: boolean;
 }
 
 function sanitizeItems(items: UpsOtherChargeItem[] | undefined, includeCost: boolean): EstimateOtherChargeItemDto[] {
@@ -105,7 +107,7 @@ export function buildEstimateDto(full: UpsFreightEstimate, access: EstimateAcces
     chargeableWeightKg: b.chargeableWeightKg,
     volumetricDivisor: b.volumetricDivisor,
     billingWeightKg: b.billingWeightKg,
-    otherChargeItems: access.includePlatformSelling ? sanitizeItems(b.otherChargeItems, access.includeCost) : [],
+    otherChargeItems: access.includeChargeItems ? sanitizeItems(b.otherChargeItems, access.includeCost) : [],
     oversizeApplied: b.oversizeApplied,
     fallbackApplied: b.fallbackApplied,
     nonDocRateApplied: b.nonDocRateApplied,

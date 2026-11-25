@@ -46,6 +46,7 @@ describe('ups-rate-permissions (TASK-B-373 PR-2)', () => {
 describe('rates 조회 6종 역할 가드 (C안)', () => {
   beforeEach(() => {
     vi.resetModules();
+    vi.doMock('@/lib/i18n/action-error', () => ({ trError: vi.fn(async (key: string) => key) }));
   });
 
   async function setup(role: string) {
@@ -57,6 +58,7 @@ describe('rates 조회 6종 역할 가드 (C안)', () => {
       or: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
       range: vi.fn().mockResolvedValue({ data: [], error: null }),
       then: (cb: any) => Promise.resolve({ data: [], error: null }).then(cb),
     };
@@ -83,7 +85,7 @@ describe('rates 조회 6종 역할 가드 (C안)', () => {
         rates.getUpsWeightTierRates,
         rates.getUpsFreightMinimums,
       ]) {
-        await expect((fn as any)()).rejects.toThrow();
+        await expect((fn as any)()).rejects.toThrow('permission_denied');
       }
     }
   );
@@ -92,12 +94,33 @@ describe('rates 조회 6종 역할 가드 (C안)', () => {
     await setup('SUB_ADMIN');
     const rates = await import('@/app/actions/ups/rates');
     await expect(rates.getUpsBaseRates()).resolves.toEqual([]);
-    await expect(rates.getUpsOtherCharges()).rejects.toThrow();
+    await expect(rates.getUpsOtherCharges()).rejects.toThrow('permission_denied');
   });
 
-  it.each(['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'])('%s — 기본요율 허용', async (role) => {
+  it.each(['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'])('%s — 기본요율·원가 5종 모두 허용(양성 대조)', async (role) => {
     await setup(role);
     const rates = await import('@/app/actions/ups/rates');
     await expect(rates.getUpsBaseRates()).resolves.toEqual([]);
+    for (const fn of [
+      rates.getUpsFuelSurcharge,
+      rates.getUpsOtherCharges,
+      rates.getUpsSurgeFees,
+      rates.getUpsWeightTierRates,
+      rates.getUpsFreightMinimums,
+    ]) {
+      await expect((fn as any)()).resolves.toBeDefined();
+    }
+  });
+
+  it('getAgencyPricingPolicies — 관리자급 가드(비관리자 거부)', async () => {
+    await setup('AGENCY');
+    const mutation = await import('@/app/actions/ups/rates-mutation');
+    await expect(mutation.getAgencyPricingPolicies()).rejects.toThrow('Agency 원가 할인율 관리 권한이 없습니다.');
+  });
+
+  it('getAgencyPricingPolicies — ADMIN 허용(양성 대조)', async () => {
+    await setup('ADMIN');
+    const mutation = await import('@/app/actions/ups/rates-mutation');
+    await expect(mutation.getAgencyPricingPolicies()).resolves.toEqual([]);
   });
 });

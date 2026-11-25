@@ -66,10 +66,10 @@ const full: UpsFreightEstimate = {
   },
 };
 
-const ADMIN: EstimateAccess = { includeCost: true, includePlatformSelling: true, includeAgency: true, includeShipper: true };
-const AGENCY: EstimateAccess = { includeCost: false, includePlatformSelling: true, includeAgency: true, includeShipper: true };
-const AFFILIATED_SHIPPER: EstimateAccess = { includeCost: false, includePlatformSelling: false, includeAgency: false, includeShipper: true };
-const DIRECT_SHIPPER: EstimateAccess = { includeCost: false, includePlatformSelling: true, includeAgency: false, includeShipper: false };
+const ADMIN: EstimateAccess = { includeCost: true, includePlatformSelling: true, includeAgency: true, includeShipper: true, includeChargeItems: true };
+const AGENCY: EstimateAccess = { includeCost: false, includePlatformSelling: true, includeAgency: true, includeShipper: true, includeChargeItems: true };
+const AFFILIATED_SHIPPER: EstimateAccess = { includeCost: false, includePlatformSelling: false, includeAgency: false, includeShipper: true, includeChargeItems: true };
+const DIRECT_SHIPPER: EstimateAccess = { includeCost: false, includePlatformSelling: true, includeAgency: false, includeShipper: false, includeChargeItems: true };
 
 describe('estimate DTO — 역할·소속별 전달 범위 (TASK-B-373 PR-2)', () => {
   it('관리자 — 원가 계열·판매가·단계·항목 전체 포함', () => {
@@ -98,7 +98,8 @@ describe('estimate DTO — 역할·소속별 전달 범위 (TASK-B-373 PR-2)', (
     const dto = buildEstimateDto(full, AFFILIATED_SHIPPER);
     expect(dto.platform.totalSellingPrice).toBeNull();
     expect(dto.platform.baseSellingPrice).toBeNull();
-    expect(dto.platform.breakdown.otherChargeItems).toHaveLength(0);
+    // 부가항목 행은 화주 청구 단계와 동일 금액(할인 미적용) → 표시 동일성 유지
+    expect(dto.platform.breakdown.otherChargeItems).toHaveLength(1);
     expect(dto.platform.breakdown.baseSellingPrice).toBeUndefined();
     expect(dto.agency).toBeNull();
     expect(dto.shipper?.finalFreight).toBe(115);

@@ -41,7 +41,6 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: any
 vi.mock('@/lib/finance/exchange-rate', () => ({
   getExchangeRate: vi.fn(async (from: string) => (from === 'HKD' ? 150 : 1350)),
 }));
-vi.mock('@/app/actions/ups/freight', () => ({ estimateUpsFreight: vi.fn() }));
 vi.mock('@/app/actions/finance/settlement', () => ({
   finalizeInvoice: vi.fn().mockResolvedValue({ success: true }),
 }));

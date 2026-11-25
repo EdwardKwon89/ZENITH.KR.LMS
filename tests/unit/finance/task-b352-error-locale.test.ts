@@ -31,7 +31,6 @@ vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: any) => fn }));
 vi.mock('@/utils/supabase/server', () => ({ createAdminClient: vi.fn(async () => mockSupabase) }));
 vi.mock('@/lib/finance/exchange-rate', () => ({ getExchangeRate: vi.fn() }));
-vi.mock('@/app/actions/ups/freight', () => ({ estimateUpsFreight: vi.fn() }));
 vi.mock('@/app/actions/finance/settlement', () => ({ createPostFinalizationAdjustment: vi.fn() }));
 vi.mock('@/lib/logistics/status-machine', () => ({ canChangeStatus: vi.fn() }));
 vi.mock('@/app/actions/misc/notifications', () => ({ triggerStatusChangeNotification: vi.fn() }));
