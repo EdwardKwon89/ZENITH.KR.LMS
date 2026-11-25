@@ -28,7 +28,7 @@ ls .agent/tasks | grep -i "B-387"   # → 없음 (신규)
 
 ## [작업 결과]
 
-- 문서 커밋: `<PLACEHOLDER>`
+- 문서 커밋: `74a1e142a071d80ca68cf623137080df858e7d37`
 
 ### 착수 절차 실측 (R-17)
 ```bash
