@@ -206,6 +206,52 @@ describe('TASK-B-383 플랫폼 발행 청구서 역할 조건 (목표 상태 단
     expect(await see(subA.jwt, [A1]), '복원 후 SUB_ADMIN').toContain(NOS.A1);
     expect(await see(manager.jwt, [P1]), '복원 후 MANAGER 발행자 경로').toBe('(0건)'); // 정책 조건은 그대로 — 복원은 조회 가시성만
   }, 120000);
+
+  it('4. TC-383-06 교차 확인: B-382 존재 확인 함수는 B-383 정책에 막히지 않는다 — 허용 3역할 성공·비허용 예외(오류 내용 단언) + 정책 대조', async () => {
+    const superU = platform[0], manager = platform[1];
+    const subA = agencyAExtra[0];
+    const includedOrder = ORDERS[0]; // P1 항목 보유 오더
+    const plainOrder = ORDERS[3]; // 항목 없는 오더
+
+    const callFn = async (jwt: string, orderId: string) => {
+      const sb = getUserClient(jwt);
+      return sb.rpc('zen_billing_statement_order_included', { p_order_id: orderId });
+    };
+
+    // ① 허용 3역할(ADMIN·MANAGER·ZENITH_SUPER_ADMIN) — 실제 세션으로 함수 호출 성공
+    //    (MANAGER는 B-383으로 청구서 조회가 차단돼도 정산 해제 경로는 계속 동작해야 한다)
+    const allowed: Array<[string, string]> = [
+      ['ADMIN', admin.jwt],
+      ['MANAGER', manager.jwt],
+      ['ZENITH_SUPER_ADMIN', superU.jwt],
+    ];
+    for (const [label, jwt] of allowed) {
+      const hit = await callFn(jwt, includedOrder);
+      expect(hit.error, `${label} 포함 오더 호출`).toBeNull();
+      expect(hit.data, `${label} 포함 반환`).toBe(true);
+      const miss = await callFn(jwt, plainOrder);
+      expect(miss.error, `${label} 미포함 오더 호출`).toBeNull();
+      expect(miss.data, `${label} 미포함 반환`).toBe(false);
+    }
+
+    // ② 비허용 역할 — 예외로 거부 (오류 내용까지 단언, fail-closed)
+    const denied = [
+      ['AGENCY', await callFn(agencyA.jwt, includedOrder), 'role=AGENCY'],
+      ['SUB_ADMIN', await callFn(subA.jwt, includedOrder), 'role=SUB_ADMIN'],
+      ['INDIVIDUAL', await callFn(shipperS.jwt, includedOrder), 'role=INDIVIDUAL'],
+    ] as const;
+    for (const [label, res, needle] of denied) {
+      expect(res.data, `${label} 반환 없음`).toBeNull();
+      expect(res.error?.message ?? '', `${label} 오류 내용`).toContain('statement_inclusion_not_allowed');
+      expect(res.error?.message ?? '', `${label} 역할 포함`).toContain(needle);
+    }
+
+    // ③ 정책 대조 (한 줄): 같은 MANAGER 세션 — 헤더·항목 SELECT는 목표 표대로 차단(0건)인데 함수는 성공
+    expect(await see(manager.jwt, [P1, A1]), 'MANAGER 헤더 차단 유지').toBe('(0건)');
+    expect(await seeItems(manager.jwt, [P1]), 'MANAGER 항목 차단 유지').toBe('(0건)');
+    expect((await callFn(manager.jwt, includedOrder)).data, 'MANAGER 함수 경로 성공').toBe(true);
+    // 헤더·항목 정책 전체가 목표 표와 일치함은 TC-01·02(동일 파일 재실행)로 대조
+  }, 120000);
 });
 
 function operatorJwt(): string {
