@@ -104,6 +104,30 @@ function seedOrder(id: string, opts: {
           (gen_random_uuid(), '${id}', 'SURGE_FEE', ${opts.decimal ? '0' : '5000'}, 1, 'KRW', true, now()),
           (gen_random_uuid(), '${id}', 'OTHER_CHARGE', ${opts.decimal ? '0' : '1000'}, 1, 'KRW', true, now())
     ON CONFLICT DO NOTHING;
+    ALTER TABLE public.zen_ups_settlement_runs DISABLE TRIGGER USER;
+    DELETE FROM public.zen_ups_settlement_runs WHERE order_id = '${id}';
+    ALTER TABLE public.zen_ups_settlement_runs ENABLE TRIGGER USER;
+    WITH r AS (
+      INSERT INTO public.zen_ups_settlement_runs (order_id, version, charge_weight_kg, settled_at, settled_by)
+      VALUES ('${id}', 1, ${opts.weight ?? 5}, now(), '${admin.userId}')
+      RETURNING id
+    )
+    INSERT INTO public.zen_ups_settlement_run_amounts
+      (run_id, tier, base_freight, fuel_surcharge, surge_fee, other_charges,
+       freight_adjustment, settlement_charges_total, line_total)
+    SELECT r.id, v.tier, v.b, v.f, v.s, v.o, 0, 0, v.b + v.f + v.s + v.o
+    FROM r, (VALUES
+      ('ADMIN_TO_AGENCY',
+        ${opts.decimal === 'base' ? '10.10' : opts.decimal ? '0' : '80000'}::numeric,
+        ${opts.decimal === 'fuel' ? '20.20' : opts.decimal ? '0' : '16000'}::numeric,
+        ${opts.decimal ? '0' : '4000'}::numeric,
+        ${opts.decimal ? '0' : '800'}::numeric),
+      ('SHIPPER',
+        ${opts.decimal === 'base' ? '10.10' : opts.decimal ? '0' : '100000'}::numeric,
+        ${opts.decimal === 'fuel' ? '20.20' : opts.decimal ? '0' : '20000'}::numeric,
+        ${opts.decimal ? '0' : '5000'}::numeric,
+        ${opts.decimal ? '0' : '1000'}::numeric)
+    ) AS v(tier, b, f, s, o);
   `);
   if (opts.tracking) {
     psql(`
@@ -198,6 +222,13 @@ function purgeLeftover() {
   psql(`DELETE FROM public.zen_ups_labels WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.zen_order_packages WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.zen_order_costs WHERE order_id IN (${ids});`);
+  psql(`ALTER TABLE public.zen_ups_settlement_runs DISABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_amounts DISABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_charges DISABLE TRIGGER USER;`);
+  psql(`DELETE FROM public.zen_ups_settlement_runs WHERE order_id IN (${ids});`);
+  psql(`ALTER TABLE public.zen_ups_settlement_runs ENABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_amounts ENABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_charges ENABLE TRIGGER USER;`);
   psql(`DELETE FROM public.zen_order_rate_snapshots WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.order_status_history WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.zen_orders WHERE id IN (${ids});`);

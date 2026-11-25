@@ -180,9 +180,9 @@ describe('TASK-B-359 (Issue #1365): 청구서 DB — 헤더·항목·채번 RPC�
 
   // ========== 스키마 (결과 상태 조회 — 마이그레이션 재실행 없음) ==========
   describe('TC-359-S: 스키마·제약·IMMUTABLE (pg_catalog 조회)', () => {
-    it('TC-359-S1: 헤더 25컬럼·항목 11컬럼·카운터 테이블 + RLS 3테이블 활성', () => {
+    it('TC-359-S1: 헤더 25컬럼·항목 13컬럼(B-381 M2 추가 2)·카운터 테이블 + RLS 3테이블 활성', () => {
       expect(psql(`SELECT count(*) FROM information_schema.columns WHERE table_name='zen_billing_statements'`)).toBe('25');
-      expect(psql(`SELECT count(*) FROM information_schema.columns WHERE table_name='zen_billing_statement_items'`)).toBe('11');
+      expect(psql(`SELECT count(*) FROM information_schema.columns WHERE table_name='zen_billing_statement_items'`)).toBe('13');
       expect(psql(`SELECT count(*) FROM pg_tables WHERE tablename='zen_billing_statement_seq' AND rowsecurity`)).toBe('1');
       expect(psql(`SELECT count(*) FROM pg_tables WHERE tablename IN ('zen_billing_statements','zen_billing_statement_items') AND rowsecurity`)).toBe('2');
     });
