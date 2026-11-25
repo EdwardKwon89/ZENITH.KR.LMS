@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { DollarSign, EyeOff, Eye, RefreshCw, Calendar } from 'lucide-react';
 import type { UpsZoneWithCountries, UpsProduct, UpsBaseRateWithRefs } from '@/types/ups';
 import type { PublicBaseRate } from '@/app/actions/ups/rates-public';
-import { getUpsBaseRates } from '@/app/actions/ups/rates';
 import { ZenBadge } from '@/components/ui/ZenUI';
 import { candidateCargoTypes, resolveDiscountRate } from '@/lib/ups/cargo-type-utils';
 
@@ -21,6 +20,8 @@ interface Props {
   canEditCostOnly?: boolean;
   readOnly?: boolean;
   rates?: MatrixRate[];
+  /** 관리자 화면 전용 조회 주입 — 클라이언트 번들에서 admin 액션 직접 import를 제거한다. */
+  fetchRates?: (filters: { productId?: string; zoneId?: string; referenceDate?: string }) => Promise<MatrixRate[]>;
   priceMode?: 'full' | 'agency' | 'shipper';
   // Issue #1027: discountRateMap을 중첩 구조로 변경 (zoneId -> cargoType -> rate)
   discountRateMap?: Record<string, Record<string, number>>;
@@ -50,7 +51,7 @@ const PRICE_LABEL: Record<string, string> = {
 
 export default function UpsBaseRateMatrix({
   products, zones, agencies = [], onCellClick, onCostCellClick, onNewClick, canEdit,
-  canEditCostOnly = false, readOnly = false, rates: propRates, priceMode = 'full', discountRateMap = {},
+  canEditCostOnly = false, readOnly = false, rates: propRates, fetchRates, priceMode = 'full', discountRateMap = {},
 }: Props) {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [previewAgencyId, setPreviewAgencyId] = useState<string>('');
@@ -84,13 +85,13 @@ export default function UpsBaseRateMatrix({
       setMatrixRates(propRates);
       return;
     }
-    if (!selectedProductId) { setMatrixRates([]); return; }
+    if (!selectedProductId || !fetchRates) { setMatrixRates([]); return; }
     setLoading(true);
-    getUpsBaseRates({ productId: selectedProductId, referenceDate: effectiveDate })
+    fetchRates({ productId: selectedProductId, referenceDate: effectiveDate })
       .then(setMatrixRates)
       .catch(() => setMatrixRates([]))
       .finally(() => setLoading(false));
-  }, [selectedProductId, effectiveDate, isReadOnly, propRates]);
+  }, [selectedProductId, effectiveDate, isReadOnly, propRates, fetchRates]);
 
   const filteredRates = useMemo(() => {
     if (selectedProductId) {

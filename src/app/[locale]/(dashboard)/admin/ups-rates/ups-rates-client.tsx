@@ -43,6 +43,10 @@ interface Props {
   freightMinimums: UpsFreightMinimumWithRefs[];
   surgeFees: UpsSurgeFee[];
   userRole: string;
+  /** SUB_ADMIN: 기본요율 Matrix 중심 탭만 노출 (나머지 원가 탭 비노출) */
+  restrictToBaseRates?: boolean;
+  /** 관리자 화면 기준요금 조회 주입 — 클라이언트 번들에서 admin 액션 직접 import 제거 */
+  fetchRates: (filters?: { productId?: string; zoneId?: string; referenceDate?: string }) => Promise<UpsBaseRateWithRefs[]>;
 }
 
 type TabKey = 'zones' | 'products' | 'baseRates' | 'fuelSurcharges' | 'otherCharges' | 'agencyPolicies' | 'weightTierRates' | 'freightMinimums' | 'surgeFees';
@@ -59,9 +63,13 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: 'freightMinimums', label: 'Freight 최소운임', icon: Scale },
 ];
 
-export default function UpsRatesClient({ zones, products, baseRates, fuelSurcharges, otherCharges, agencyPolicies, agencies, weightTierRates, freightMinimums, surgeFees, userRole }: Props) {
+export default function UpsRatesClient({ zones, products, baseRates, fuelSurcharges, otherCharges, agencyPolicies, agencies, weightTierRates, freightMinimums, surgeFees, userRole, restrictToBaseRates = false, fetchRates }: Props) {
   const te = useTranslations('Errors');
-  const [activeTab, setActiveTab] = useState<TabKey>('zones');
+  const allowedTabKeys: TabKey[] = restrictToBaseRates
+    ? ['zones', 'products', 'baseRates', 'agencyPolicies']
+    : TABS.map((t) => t.key);
+  const visibleTabs = TABS.filter((t) => allowedTabKeys.includes(t.key));
+  const [activeTab, setActiveTab] = useState<TabKey>(restrictToBaseRates ? 'baseRates' : 'zones');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [form, setForm] = useState<any>({});
@@ -285,6 +293,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
           onCellClick={handleBaseRateCellClick}
           onCostCellClick={handleCostCellClick}
           onNewClick={openNew}
+          fetchRates={fetchRates}
         />
       );
       case 'fuelSurcharges': return <FuelSurchargeTable rows={fuelSurcharges} />;
@@ -300,7 +309,7 @@ export default function UpsRatesClient({ zones, products, baseRates, fuelSurchar
   return (
     <div className="space-y-4">
       <div className="flex border-b border-slate-200 overflow-x-auto">
-        {TABS.map((tab) => {
+        {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <button key={tab.key} onClick={() => { setActiveTab(tab.key); setIsModalOpen(false); }}

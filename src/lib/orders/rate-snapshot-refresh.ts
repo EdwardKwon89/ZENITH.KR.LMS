@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logger';
 import { createAdminClient } from '@/utils/supabase/server';
 import { USER_ROLES } from '@/lib/auth/rbac';
-import type { EstimateUpsFreightInput, UpsFreightEstimate } from '@/app/actions/ups/freight';
+import type { EstimateUpsFreightInput, UpsFreightEstimate } from '@/lib/ups/estimate-core';
 
 /**
  * TASK-B-339 (Issue #1254 / 결함 ③): UPS 오더 수정 후 운임 스냅샷 갱신.

@@ -2,23 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { validateUserAction } from '@/lib/auth/guards';
-import { USER_ROLES } from '@/lib/auth/rbac';
 import { getMaxAllowedZoneDiscount } from '@/lib/ups/discount-guard';
 import { createAdminClient } from '@/utils/supabase/server';
-
-function requireAdminOrManager(role: string | undefined) {
-  if (!role || (role !== USER_ROLES.ADMIN && role !== USER_ROLES.MANAGER && role !== USER_ROLES.ZENITH_SUPER_ADMIN)) {
-    throw new Error('UPS 요율 관리 권한이 없습니다.');
-  }
-}
-
 // Issue #605: Master Agency(SUB_ADMIN)는 본인 관리 Sub-Agency의 원가 할인율만 다룰 수 있음
 // (실제 범위 제한은 RLS agency_pricing_policies_sub_admin_scoped가 담당 — 여기서는 역할만 통과시킴)
-function requireAdminManagerOrSubAdmin(role: string | undefined) {
-  if (!role || (role !== USER_ROLES.ADMIN && role !== USER_ROLES.MANAGER && role !== USER_ROLES.ZENITH_SUPER_ADMIN && role !== USER_ROLES.SUB_ADMIN)) {
-    throw new Error('Agency 원가 할인율 관리 권한이 없습니다.');
-  }
-}
+import { requireAdminOrManager, requireAdminManagerOrSubAdmin } from '@/lib/auth/ups-rate-permissions';
 
 // ─── Zone ──────────────────────────────────────────
 

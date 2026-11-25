@@ -30,8 +30,8 @@ vi.mock('@/lib/finance/exchange-rate', () => ({
   getExchangeRate: vi.fn(),
 }));
 
-vi.mock('@/app/actions/ups/freight', () => ({
-  estimateUpsFreight: vi.fn(),
+vi.mock('@/lib/ups/estimate-core', () => ({
+  estimateUpsFreightCore: vi.fn(),
 }));
 
 vi.mock('@/app/actions/finance/settlement', () => ({
@@ -40,7 +40,7 @@ vi.mock('@/app/actions/finance/settlement', () => ({
 
 import { validateUserAction } from '@/lib/auth/guards';
 import { getExchangeRate } from '@/lib/finance/exchange-rate';
-import { estimateUpsFreight } from '@/app/actions/ups/freight';
+import { estimateUpsFreightCore } from '@/lib/ups/estimate-core';
 import { createPostFinalizationAdjustment } from '@/app/actions/finance/settlement';
 import {
   recordUpsActualCost,
@@ -146,7 +146,7 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
   it('TC-1009-05: 부피/중량 변경 → 매출 재계산 + 미마감 agency/shipper 인보이스 반영', async () => {
     mockValidateUser(USER_ROLES.ADMIN);
 
-    (estimateUpsFreight as any).mockResolvedValue({
+    (estimateUpsFreightCore as any).mockResolvedValue({
       platform: { baseSellingPrice: 500, fuelSurchargeSellingAmount: 100, surgeFeeSellingAmount: 50, otherChargesSellingTotal: 0 },
       agency: { agencyCostPrice: 1200, baseSellingPrice: 550, fuelSurchargeSellingAmount: 110, surgeFeeSellingAmount: 55, otherChargesSellingTotal: 0 },
       shipper: { finalFreight: 1600 },
@@ -186,7 +186,7 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
     expect(result.recalc!.newAgencyTotal).toBe(1200);
     expect(result.recalc!.newShipperTotal).toBe(1600);
     // 매출 재계산 트리거 검증: 실측 부피/중량이 estimateUpsFreight에 실제 전달되어야 함 (되돌리기 검증 — 트리거 제거 시 FAIL)
-    expect(estimateUpsFreight).toHaveBeenCalledWith(
+    expect(estimateUpsFreightCore).toHaveBeenCalledWith(
       expect.objectContaining({
         productId: 'prod-1',
         destCountryCode: 'US',
@@ -194,7 +194,8 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
         dimL: 60,
         dimW: 50,
         dimH: 40,
-      })
+      }),
+      expect.anything()
     );
     // unfinalized agency invoice → total_amount 직접 갱신
     const invUpdate = (mockSupabase.from as any).mock.calls.some(
@@ -208,7 +209,7 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
 
   it('TC-1009-06: 마감된 agency 인보이스 → createPostFinalizationAdjustment 호출', async () => {
     mockValidateUser(USER_ROLES.ADMIN);
-    (estimateUpsFreight as any).mockResolvedValue({
+    (estimateUpsFreightCore as any).mockResolvedValue({
       platform: { baseSellingPrice: 500, fuelSurchargeSellingAmount: 100, surgeFeeSellingAmount: 50, otherChargesSellingTotal: 0 },
       agency: { agencyCostPrice: 1200 },
       shipper: { finalFreight: 1600 },
@@ -245,7 +246,7 @@ describe('Issue #1009: UPS 사후 원가 확정 (zen_ups_actual_cost)', () => {
 
   it('TC-1009-07: previewUpsActualCost → 저장 없이 환율/원가/재계산 반환', async () => {
     mockValidateUser(USER_ROLES.ADMIN);
-    (estimateUpsFreight as any).mockResolvedValue({
+    (estimateUpsFreightCore as any).mockResolvedValue({
       platform: { baseSellingPrice: 500, fuelSurchargeSellingAmount: 100, surgeFeeSellingAmount: 50, otherChargesSellingTotal: 0 },
       agency: { agencyCostPrice: 1200 },
       shipper: { finalFreight: 1600 },

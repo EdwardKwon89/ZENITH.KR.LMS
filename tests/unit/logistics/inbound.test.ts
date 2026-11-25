@@ -13,8 +13,8 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
-vi.mock('@/app/actions/ups/freight', () => ({
-  estimateUpsFreight: vi.fn().mockResolvedValue({
+vi.mock('@/lib/ups/estimate-core', () => ({
+  estimateUpsFreightCore: vi.fn().mockResolvedValue({
     platform: { totalSellingPrice: 150, currency: 'USD', baseSellingPrice: 100, fuelSurchargeSellingAmount: 20, otherChargesSellingTotal: 10, surgeFeeSellingAmount: 20 },
     agency: null,
     shipper: null,
@@ -314,8 +314,8 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
 
   describe('DEF-B-016: applyPackageMeasurements agencyOrgId 전달 검증', () => {
     it('TC-DEF-B-016: UPS 오더 측정값 저장 시 estimateUpsFreightFn에 agencyOrgId가 전달되어야 함', async () => {
-      const { estimateUpsFreight } = await import('@/app/actions/ups/freight');
-      const mockEstimate = vi.mocked(estimateUpsFreight);
+      const { estimateUpsFreightCore } = await import('@/lib/ups/estimate-core');
+      const mockEstimate = vi.mocked(estimateUpsFreightCore);
       mockEstimate.mockClear();
       mockEstimate.mockResolvedValue({
         platform: { totalSellingPrice: 150, currency: 'USD', baseSellingPrice: 100, fuelSurchargeSellingAmount: 20, otherChargesSellingTotal: 10, surgeFeeSellingAmount: 20 } as any,
@@ -386,7 +386,8 @@ describe('ZENITH Logistics: Inbound Process Unit Tests', () => {
       expect(mockEstimate).toHaveBeenCalledWith(
         expect.objectContaining({
           agencyOrgId: agencyOrgId,
-        })
+        }),
+        expect.anything()
       );
     });
   });

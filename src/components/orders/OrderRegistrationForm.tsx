@@ -1621,7 +1621,7 @@ export const OrderRegistrationForm: React.FC<OrderRegistrationFormProps> = ({
                       {transportMode === 'UPS' && upsEstimate && (
                         <div className="text-right">
                           <p className="text-[9px] text-blue-400 font-bold tracking-tight mb-0.5">UPS 예상운임</p>
-                          <p className="text-xl font-black text-blue-300">{new Intl.NumberFormat('ko-KR', { style: 'currency', currency: upsEstimate.platform.currency || 'USD' }).format(upsEstimate.shipper?.finalFreight ?? upsEstimate.platform.totalSellingPrice)}</p>
+                          <p className="text-xl font-black text-blue-300">{new Intl.NumberFormat('ko-KR', { style: 'currency', currency: upsEstimate.platform.currency || 'USD' }).format(upsEstimate.shipper?.finalFreight ?? upsEstimate.platform.totalSellingPrice ?? 0)}</p>
                         </div>
                       )}
                       {transportMode === 'UPS' && <ItemsTotalSummary packages={watchedPackages || []} className="text-right" />}

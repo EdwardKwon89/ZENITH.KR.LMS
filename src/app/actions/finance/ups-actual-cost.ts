@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { validateUserAction } from '@/lib/auth/guards';
 import { logger } from '@/lib/logger';
 import { getExchangeRate } from '@/lib/finance/exchange-rate';
-import { estimateUpsFreight } from '@/app/actions/ups/freight';
+import { estimateUpsFreightCore } from '@/lib/ups/estimate-core';
 import { trError } from '@/lib/i18n/action-error';
 import { computeUpsActualCostKrw, type UpsActualCostAmounts } from '@/lib/ups/actual-cost';
 import { getOrderReleasedDate } from '@/lib/orders/order-released-date';
@@ -166,7 +166,7 @@ async function recomputeRevenue(
     return { newAgencyTotal: platformBase, newShipperTotal: platformBase, estimate: null, hasSnapshot };
   }
 
-  const estimate = await estimateUpsFreight({
+  const estimate = await estimateUpsFreightCore({
     productId: resolvedProductId,
     destCountryCode: order.recipient_country_code,
     actualWeightKg: actual.actualWeightKg ?? toNum((order.snapshot?.platform as any)?.chargeableWeightKg),
@@ -176,7 +176,7 @@ async function recomputeRevenue(
     incoterms: order.incoterms,
     agencyOrgId: order.agency_org_id ?? undefined,
     shipperOrgId: order.shipper_id,
-  });
+  }, supabase);
 
   const platform = estimate.platform || {};
   const newPlatformTotal =

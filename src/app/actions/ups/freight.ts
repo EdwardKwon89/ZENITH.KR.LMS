@@ -1,305 +1,90 @@
 'use server';
 
-// UPS 요금 견적 조회 API — Phase 7.1 TASK-174 IMP-145 · An-14 §4·§11
-//
-// Team A가 노출하는 "요금 계산" API 계약. 오더 등록 화면 연동·agency_org_id 저장·
-// zen_order_rate_snapshots 기록은 Team B 인계 범위(GH #181, An-14 §11) — 이 파일은
-// 계산 결과를 반환하는 조회 전용 Action이며 오더 생성 로직을 포함하지 않는다.
+// UPS 요금 견적 조회 API — 세션 진입점.
+// 전체 계산은 src/lib/ups/estimate-core.ts(server-only)에서 수행하고,
+// 이 파일은 세션 역할·소속으로 범위를 정한 뒤 허용된 단계만 DTO로 반환한다. (TASK-B-373 PR-2)
 
-import { createClient, createAdminClient } from '@/utils/supabase/server';
 import { validateUserAction } from '@/lib/auth/guards';
-import {
-  resolveBillingWeight,
-  calcChargeableWeight,
-  applyOversizeRule,
-  computeUpsFreight,
-  resolveZoneByCountry,
-  resolveChinaSubCode,
-  productFamilyFromCode,
-} from '@/lib/ups/pricing-engine';
-import { computeAgencyFreight } from '@/lib/ups/agency-pricing';
-import { computeShipperFreight } from '@/lib/ups/shipper-pricing';
-import type {
-  UpsFreightResult,
-  UpsAgencyFreightResult,
-  UpsShipperFreightResult,
-  UpsZoneWithCountries,
-  UpsOtherCharge,
-} from '@/types/ups';
+import { USER_ROLES } from '@/lib/auth/rbac';
+import { hasAdminOrManagerRole } from '@/lib/auth/ups-rate-permissions';
+import { estimateUpsFreightCore } from '@/lib/ups/estimate-core';
+import { buildEstimateDto, type EstimateAccess } from '@/lib/ups/estimate-dto';
+import type { EstimateUpsFreightInput } from '@/lib/ups/estimate-core';
+import type { UpsFreightEstimateDto } from '@/lib/ups/estimate-dto';
 
-export interface EstimateUpsFreightInput {
-  productId: string;
-  destCountryCode: string;
-  actualWeightKg: number;
-  dimL?: number;
-  dimW?: number;
-  dimH?: number;
-  incoterms?: 'DDU' | 'DDP';
-  volumetricDivisor?: 5000 | 5500 | 6000;
-  otherChargeIds?: string[];
-  /** 화주가 대리점 소속인 경우 대리점 org id. 미전달 시 Agency/Shipper 단계는 계산하지 않는다. */
-  agencyOrgId?: string | null;
-  /** 화주 본인 org id. discount_rate 조회용(zen_agency_shippers). */
-  shipperOrgId?: string | null;
-  referenceDate?: string;
-  /** Zone 조회 방향 (EXPORT | IMPORT). 기본값 EXPORT. */
-  direction?: string;
-  /** DEF-B-044: 목적지 성/직할시 ISO 코드 — 중국(CN) 목적지 Zone(CNS/CNN) 판정용. */
-  destStateProvince?: string;
-}
+export type { EstimateUpsFreightInput } from '@/lib/ups/estimate-core';
+export type { UpsFreightEstimateDto as UpsFreightEstimate } from '@/lib/ups/estimate-dto';
 
-export interface UpsFreightEstimate {
-  platform: UpsFreightResult;
-  agency: UpsAgencyFreightResult | null;
-  shipper: UpsShipperFreightResult | null;
-}
-
-/**
- * Issue #1023 (DEF-B-038): 상품 cargo_type에 대한 할인율 정책 후보 순서(구체적 값 우선 → ALL 폴백).
- * JSJung 확정 규칙:
- *   - DOC 상품     → ['DOC', 'ALL']
- *   - NON_DOC 상품 → ['NON_DOC', 'ALL']
- *   - BOTH(Expedited/Flight) → ['NON_DOC', 'ALL'] (DOC 정책은 적용 대상 아님)
- * 반환 배열 앞쪽일수록 우선순위가 높으며, 배열 순서로 "구체적 값 우선, 없으면 ALL" 폴백을 보장한다.
- */
-function candidateCargoTypes(productCargoType: string): string[] {
-  if (productCargoType === 'DOC') return ['DOC', 'ALL'];
-  if (productCargoType === 'NON_DOC') return ['NON_DOC', 'ALL'];
-  return ['NON_DOC', 'ALL']; // BOTH (Expedited/Flight) — DOC는 후보에 없음
-}
-
-export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promise<UpsFreightEstimate> {
-  const { supabase } = await validateUserAction();
-  const refDate = input.referenceDate ?? new Date().toISOString().split('T')[0];
-
-  const { data: product, error: productError } = await supabase
-    .from('zen_ups_products')
-    .select('*')
-    .eq('id', input.productId)
-    .single();
-  if (productError || !product) throw new Error(`UPS 제품을 찾을 수 없습니다: ${productError?.message}`);
-
-  const { data: zonesRaw, error: zonesError } = await supabase
-    .from('zen_ups_zones')
-    .select('*, countries:zen_ups_zone_countries(*)')
-    .eq('is_active', true);
-  if (zonesError) throw new Error(`Zone 조회 실패: ${zonesError.message}`);
-  const productFamily = productFamilyFromCode(product.product_code);
-  const direction = input.direction ?? 'EXPORT';
-  const { zone, fallbackApplied } = resolveZoneByCountry(
-    input.destCountryCode,
-    zonesRaw as UpsZoneWithCountries[],
-    productFamily,
-    direction,
-    input.destStateProvince
-  );
-  if (!zone) throw new Error(`목적지 국가(${input.destCountryCode})에 매핑된 Zone이 없습니다.`);
-
-  // Issue #312: Agency org의 volumetric_divisor 조회
-  let effectiveDivisor = input.volumetricDivisor;
-  if (input.agencyOrgId && !input.volumetricDivisor) {
-    const { data: org } = await supabase
-      .from('zen_organizations')
-      .select('volumetric_divisor')
-      .eq('id', input.agencyOrgId)
-      .maybeSingle();
-    if (org?.volumetric_divisor) {
-      effectiveDivisor = org.volumetric_divisor as 5000 | 5500 | 6000;
-    }
+async function resolveEstimateScope(
+  supabase: Awaited<ReturnType<typeof validateUserAction>>['supabase'],
+  role: string | undefined,
+  orgId: string | null | undefined,
+  input: EstimateUpsFreightInput
+): Promise<{ agencyOrgId: string | null; shipperOrgId: string | null; isAgency: boolean }> {
+  if (hasAdminOrManagerRole(role)) {
+    return {
+      agencyOrgId: input.agencyOrgId ?? null,
+      shipperOrgId: input.shipperOrgId ?? null,
+      isAgency: false,
+    };
   }
 
-  const dims = (input.dimL && input.dimW && input.dimH)
-    ? { l: input.dimL, w: input.dimW, h: input.dimH }
-    : undefined;
-  const { chargeableKg } = calcChargeableWeight(input.actualWeightKg, dims, effectiveDivisor);
-  const { billingKg } = applyOversizeRule(resolveBillingWeight(chargeableKg, product.product_code), dims);
+  if (role === USER_ROLES.AGENCY) {
+    const agencyOrgId = orgId ?? null;
+    let shipperOrgId: string | null = null;
+    // 대리점은 자기 소속 화주만 계산할 수 있다.
+    if (agencyOrgId && input.shipperOrgId) {
+      const { data } = await supabase
+        .from('zen_agency_shippers')
+        .select('shipper_org_id')
+        .eq('agency_org_id', agencyOrgId)
+        .eq('shipper_org_id', input.shipperOrgId)
+        .eq('is_active', true)
+        .maybeSingle();
+      shipperOrgId = data ? input.shipperOrgId : null;
+    }
+    return { agencyOrgId, shipperOrgId, isAgency: true };
+  }
 
-  // Issue #(UPS 서류 5kg 초과) product.max_weight_kg 초과 시 비서류(NONDOC) 요금으로 자동 전환 —
-  // 서류(DOC) 상품은 UPS 공식 요율표상 5kg까지만 존재("5.0 kg을 초과하는 서류에 대해서는 비서류
-  // 요금표를 참조"). 통관상 서류 여부(product/cargo_type)는 그대로 유지하되, 요금 조회에 쓰이는
-  // product_id만 짝지어진 NONDOC 상품으로 바꿔치기한다 — 근거 없는 더미값이 조용히 반환되거나
-  // 조회 자체가 실패하는 대신, UPS 가이드대로 실제 계산이 이뤄지도록 함(2026-08-09, JSJung 확정).
-  let rateProductId = input.productId;
-  let nonDocRateApplied = false;
-  if (product.max_weight_kg && billingKg > product.max_weight_kg) {
-    const nonDocCode = product.product_code.replace(/_DOC$/, '_NONDOC');
-    const { data: nonDocProduct, error: nonDocError } = await supabase
-      .from('zen_ups_products')
-      .select('id')
-      .eq('product_code', nonDocCode)
+  // 화주 계열: 소속은 세션 org로 고정, 대리점 소속은 서버에서 조회한다.
+  const shipperOrgId = orgId ?? null;
+  let agencyOrgId: string | null = null;
+  if (shipperOrgId) {
+    const { data } = await supabase
+      .from('zen_agency_shippers')
+      .select('agency_org_id')
+      .eq('shipper_org_id', shipperOrgId)
       .eq('is_active', true)
       .maybeSingle();
-    if (nonDocError || !nonDocProduct) {
-      throw new Error(
-        `${product.product_name}은(는) 최대 ${product.max_weight_kg}kg까지만 가능하며(청구중량 ${billingKg}kg), ` +
-        `비서류 요금(${nonDocCode})으로 자동 전환을 시도했으나 해당 상품을 찾을 수 없습니다.`
-      );
-    }
-    rateProductId = nonDocProduct.id;
-    nonDocRateApplied = true;
+    agencyOrgId = data?.agency_org_id ?? null;
   }
+  return { agencyOrgId, shipperOrgId, isAgency: false };
+}
 
-  // 2. 기준 요금 조회 (Express/Saver/Expedited) — ≤20kg 정확매치, >20kg는 20kg 기준요금
-  let baseRate = null;
-  if (productFamily !== 'FREIGHT') {
-    const queryWeight = billingKg <= 20.0 ? billingKg : 20;
-    const { data: rRow, error: baseRateError } = await supabase
-      .from('zen_ups_base_rates')
-      .select('*')
-      .eq('product_id', rateProductId)
-      .eq('zone_id', zone.id)
-      .eq('weight_kg', queryWeight)
-      .eq('is_active', true)
-      .lte('valid_from', refDate)
-      .or(`valid_until.is.null,valid_until.gte.${refDate}`)
-      .maybeSingle();
-    if (baseRateError) throw new Error(`기준요금 조회 실패: ${baseRateError.message}`);
-    if (!rRow) throw new Error(`해당 조건(제품·Zone·중량 ${queryWeight}kg)의 기준요금이 등록되어 있지 않습니다.`);
-    baseRate = rRow;
-  }
+export async function estimateUpsFreight(input: EstimateUpsFreightInput): Promise<UpsFreightEstimateDto> {
+  const { profile, supabase } = await validateUserAction();
+  const scope = await resolveEstimateScope(supabase, profile?.role, profile?.org_id, input);
 
-  // 3. per-kg 요율 구간 조회 (Express/Saver/Expedited >20kg, Freight >70kg)
-  const { data: weightTierRates, error: tierError } = await supabase
-    .from('zen_ups_weight_tier_rates')
-    .select('*')
-    .eq('product_id', rateProductId)
-    .eq('zone_id', zone.id)
-    .eq('is_active', true)
-    .lte('valid_from', refDate)
-    .or(`valid_until.is.null,valid_until.gte.${refDate}`);
-  if (tierError) throw new Error(`20kg 초과 구간요금 조회 실패: ${tierError.message}`);
-
-  // 4. Freight 최소운임 조회
-  const { data: freightMinimum, error: minError } = await supabase
-    .from('zen_ups_freight_minimums')
-    .select('*')
-    .eq('product_id', rateProductId)
-    .eq('zone_id', zone.id)
-    .eq('is_active', true)
-    .maybeSingle();
-  if (minError) throw new Error(`최소운임 조회 실패: ${minError.message}`);
-
-  const { data: fuelRows } = await supabase
-    .from('zen_ups_fuel_surcharges')
-    .select('*')
-    .or(`product_id.eq.${rateProductId},product_id.is.null`)
-    .lte('effective_week', refDate)
-    .order('effective_week', { ascending: false })
-    .limit(1);
-  const fuelSurcharge = fuelRows?.[0] ?? null;
-
-  const { data: allOtherCharges } = await supabase
-    .from('zen_ups_other_charges')
-    .select('*')
-    .eq('is_active', true);
-  const oversizeCharge = (allOtherCharges ?? []).find((c) => c.charge_code === 'OVERSIZE') as UpsOtherCharge | undefined;
-
-  // Issue #491: 급증 긴급 수수료(Surge Emergency Fee) — 도착국·기준일 기준 유효 단가 1건 조회
-  // DEF-B-045: zen_ups_surge_fees도 중국을 CNN/CNS로 분리 관리 — CN이면 resolveChinaSubCode로 정규화
-  const surgeFeeCountryCode = input.destCountryCode.toUpperCase() === 'CN'
-    ? resolveChinaSubCode(input.destStateProvince)
-    : input.destCountryCode;
-  const { data: surgeFeeRows } = await supabase
-    .from('zen_ups_surge_fees')
-    .select('*')
-    .eq('destination_country_code', surgeFeeCountryCode)
-    .eq('is_active', true)
-    .lte('effective_from', refDate)
-    .or(`effective_until.is.null,effective_until.gte.${refDate}`)
-    .order('effective_from', { ascending: false })
-    .limit(1);
-  const surgeFee = surgeFeeRows?.[0] ?? null;
-
-  const platform = computeUpsFreight(
+  const full = await estimateUpsFreightCore(
     {
-      productId: input.productId,
-      destCountryCode: input.destCountryCode,
-      actualWeightKg: input.actualWeightKg,
-      dimL: input.dimL,
-      dimW: input.dimW,
-      dimH: input.dimH,
-      volumetricDivisor: effectiveDivisor,
-      incoterms: input.incoterms,
+      ...input,
+      agencyOrgId: scope.agencyOrgId,
+      shipperOrgId: scope.shipperOrgId,
     },
-    {
-      zone: zone as unknown as UpsZoneWithCountries,
-      product,
-      baseRate: baseRate as any,
-      weightTierRates: weightTierRates as any,
-      freightMinimum: freightMinimum as any,
-      fuelSurcharge,
-      otherCharges: [],
-      surgeFee,
-      oversizeCharge,
-      fallbackApplied,
-      nonDocRateApplied,
-    }
+    supabase
   );
 
-  if (!input.agencyOrgId) {
-    return { platform, agency: null, shipper: null };
-  }
+  const isAdmin = hasAdminOrManagerRole(profile?.role);
+  const affiliatedShipper = !scope.isAgency && !!scope.agencyOrgId;
 
-  // Issue #617: 내부 원가 계산 목적 조회는 서비스 롤(admin) 클라이언트 사용 — RLS 우회
-  const admin = await createAdminClient();
+  const access: EstimateAccess = isAdmin
+    ? { includeCost: true, includePlatformSelling: true, includeAgency: true, includeShipper: true }
+    : scope.isAgency
+      ? { includeCost: false, includePlatformSelling: true, includeAgency: true, includeShipper: !!scope.shipperOrgId }
+      : affiliatedShipper
+        // 대리점 소속 화주: 플랫폼 판매가(1단계)를 전달하지 않고 자기 청구 단계만 전달
+        ? { includeCost: false, includePlatformSelling: false, includeAgency: false, includeShipper: true }
+        : { includeCost: false, includePlatformSelling: true, includeAgency: false, includeShipper: false };
 
-  // Issue #1023 (DEF-B-038): cargo_type 폴백 — JSJung 확정 규칙
-  //   - DOC 상품  : ['DOC', 'ALL']  → DOC 없으면 ALL로 폴백
-  //   - NON_DOC 상품: ['NON_DOC', 'ALL'] → NON_DOC 없으면 ALL로 폴백
-  //   - BOTH(Expedited/Flight): ['NON_DOC', 'ALL'] → NON_DOC 우선, ALL 폴백 (DOC는 후보 아님)
-  const candidates = candidateCargoTypes(product.cargo_type);
-
-  const { data: policies } = await admin
-    .from('zen_agency_pricing_policies')
-    .select('discount_rate, cargo_type')
-    .eq('agency_org_id', input.agencyOrgId)
-    .eq('zone_id', zone.id)
-    .in('cargo_type', candidates)
-    .eq('is_active', true);
-  const policy = candidates
-    .map((ct) => (policies as Array<{ discount_rate: string | number; cargo_type: string }> | null)?.find((p) => p.cargo_type === ct))
-    .find(Boolean);
-  const discountRate = Number(policy?.discount_rate ?? 0);
-
-  const agencyCharges: any[] = [];
-
-  const agency = computeAgencyFreight({
-    baseSellingPrice: platform.baseSellingPrice,
-    fuelSurchargeSellingAmount: platform.fuelSurchargeSellingAmount,
-    otherChargesSellingTotal: platform.otherChargesSellingTotal,
-    surgeFeeSellingAmount: platform.surgeFeeSellingAmount,
-    discountRate,
-    agencyOtherCharges: (agencyCharges ?? []).map((c) => ({
-      sellingPrice: Number(c.selling_price),
-      costPrice: Number(c.cost_price),
-    })),
-    currency: platform.currency,
-  });
-
-  if (!input.shipperOrgId) {
-    return { platform, agency, shipper: null };
-  }
-
-  const { data: shipperZoneDiscounts } = await supabase
-    .from('zen_agency_shipper_zone_discounts')
-    .select('discount_rate, cargo_type')
-    .eq('agency_org_id', input.agencyOrgId)
-    .eq('shipper_org_id', input.shipperOrgId)
-    .eq('zone_id', zone.id)
-    .in('cargo_type', candidates)
-    .eq('is_active', true);
-  const shipperPolicy = candidates
-    .map((ct) => (shipperZoneDiscounts as Array<{ discount_rate: string | number; cargo_type: string }> | null)?.find((p) => p.cargo_type === ct))
-    .find(Boolean);
-  const shipperDiscountRate = Number(shipperPolicy?.discount_rate ?? 0);
-  const shipper = computeShipperFreight(
-    platform.baseSellingPrice,
-    platform.fuelSurchargeSellingAmount,
-    platform.otherChargesSellingTotal,
-    shipperDiscountRate,
-    platform.surgeFeeSellingAmount,
-    platform.currency
-  );
-
-  return { platform, agency, shipper };
+  return buildEstimateDto(full, access);
 }
