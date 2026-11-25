@@ -37,30 +37,43 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 | 9 | CI 점검 탑재 지점 | `grep -n "check" .github/workflows/pr-checks.yml` | `check-{ds11,doc-links,audit,vendor,lrtm}.mjs` 5종을 `node ... \|\| true`(advisory)로 실행 — **신규 점검 추가 지점 확보** |
 | 10 | env 로드 선례 | `grep -rn "dotenv" tests/e2e/*.ts` | 일부 spec이 `.env.local` 로드 — 환경변수 방식과 정합 |
 | 11 | `scratch/` 출력 spec | `git grep -l "scratch/" ... -- tests \| wc -l` | 3 (R-13 허용 범위 — 대상 아님) |
+| 12 | **47 spec 최초 작성자 태그 집계** | `git log --diff-filter=A --format=%s -- <파일>` 후 태그별 `uniq -c` | **Team B 18 / 그 외 29** — Aiden 집계와 **일치(차이 0건)**. 세부: Dave 9·Mike 6·Baker 2·Jaison 1 / Gemini 12·B_Kai 5·D_Kai 4·Claude 4·OpenCode 2·그 외 2 |
+| 13 | **screenshots 출력 2 spec 소유** | 동일 `git log --diff-filter=A` | `r10-corporate-info-real-column` = **[Baker]**(Team B) · `e2e-20-order-service-selection` = **[B_Kai]**(Team A) — 47 목록 **외부**(별도 경로 출력) |
+| 14 | **대상 폴더류 존재·건수** | `git ls-files docs/99_Manual/ \| awk/uniq -c` | `E2E_*` **54폴더·증적 357** · `UAT_*` 5·44 · `TASK-*` 3·12 · `AUDIT_*` 2·7 · `FEAT_*` 2·3 → **5종 전부 존재** |
+| 15 | **요약 `.md`·원본 증적 건수** | `git ls-files ... \| grep -c` | 추적 `.md` **16**(Aiden 수치 일치 · `E2E_*` 내부 10 포함) · 원본 증적 확장자 **425** |
 
 **구조 요약**: 증적 출력은 **상수 1줄(`const DIR = 'docs/...') + `mkdirSync` + 템플릿 문자열** 구조다(45/47이 동일 패턴) → 공통 헬퍼로의 전환은 파일당 **상수 선언부 교체** 수준이다.
 
-### 2. 범위 확정 — **(나) 47개 전체 전환**을 제안
+### 2. 범위 확정 — 방향 승인, **소유 단계안으로 조정** (Aiden 조건 1 반영)
 
-**제안: (나)** — `tests/e2e`의 저장소 내 증적 출력 spec **47개 전체**를 공통 헬퍼로 전환한다(부수로 `tests/e2e/screenshots/` 출력 2개도 동일 헬퍼에 편입 — 아래 범위 질문).
+**방향**: (나) 전체 전환은 승인. 단, **R-19 파일 소유**상 Team B가 47개 전부를 수정할 수 없으므로 **소유 단계안**으로 실행한다.
 
-**근거**:
-1. **재유입 가드의 유효성**: L1 런타임 가드는 헬퍼를 쓰는 spec에만 작동한다. (가)로 부분 전환하면 미전환 spec이 저장소에 계속 쓰므로 가드가 **경고 모드에 머물거나** 미전환 spec 실행이 깨진다 → "재유입 0"이라는 이슈 목표를 부분으로만 달성한다.
-2. **전환 공수가 패턴으로 흡수**: 45/47이 동일 상수 패턴(위 표 1·2·3번) → 파일당 선언부 1줄 + import. 인라인 소수(5)만 추가 처리.
-3. **R-13 개정 문안 단일화**: 부분 예외("보안 계열 spec만 저장소 밖")는 예외 범위를 spec 분류 기준으로 지속 관리해야 해 개정 문안이 복잡해진다. 전체 전환은 "E2E 원본 증적은 저장소 밖" 한 문안으로 끝난다.
-4. **레거시 spec 리스크 낮음**: 실행 여부와 무관하게 문자열 1줄만 바뀌는 변경이고 `tsc`·전체 회귀로 커버된다.
-5. **기존 증적 불변(이연 준수)**: 커밋된 481건은 건드리지 않고, "이후 새로 생기는 출력"만 저장소 밖으로 보낸다.
+**소유 구분 표 (실측 — 최초 작성자 태그, Aiden 집계와 차이 0)**:
 
-**(가)를 채택하지 않는 이유**: 당장의 리스크 큰 계열만 막는 즉효성은 있으나, 가드 구조가 전환/미전환 이중으로 남아 관리 비용이 크다. 만약 Aiden·Jaison이 리뷰 부담을 이유로 단계안을 원하면: **1차 (가) + L2를 경고 모드로 시작 → 2차 잔여 전환**의 단계안으로 조정 가능하나, 권장은 (나) 일괄이다.
+| 구분 | 건수 | 태그 세부 |
+|:--|:-:|:--|
+| **Team B 소유** (Dave·Mike·Baker·Jaison) | **18** | Dave 9 · Mike 6 · Baker 2 · Jaison 1 |
+| 그 외 (Team A·구 에이전트) | **29** | Gemini 12 · B_Kai 5 · D_Kai 4 · Claude 4 · OpenCode 2 · TASK-1140 1 · BP 1 |
+| **합계** | **47** | Aiden 집계(Team B 18 / 그 외 29)와 **일치 — 차이 0건** |
 
-**범위 질문(설계 확정 시 확인)**: `tests/e2e/screenshots/`(추적 PNG 23) 출력 2 spec도 동일 헬퍼로 편입할지 — 이슈 본문의 `docs/99_Manual` 표기에는 없으나 성격상 같은 증적이라 **편입 제안**.
+`screenshots/` 출력 2 spec(47 외부, 편입 승인): `r10-corporate-info-real-column` = **[Baker](Team B)** · `e2e-20-order-service-selection` = **[B_Kai](Team A)** → 위 표에 반영.
+
+**단계안 (Edward 결정 ① 대기)**:
+- **1차(이 Task)**: 헬퍼(L1) + L2 + L3 + **Team B 소유 18개** 전환 (+ `screenshots` 출력 중 Team B 소유 1건)
+- **2차(별도 PR)**: 나머지 29개(+ Team A 소유 1건)는 **Aiden 소유 예외 승인 후** 기계적 일괄 변환 — **Edward 결정 대기, 승인 전 수정 금지**
+
+**한계 명시**: L1 가드는 헬퍼를 쓰는 spec에만 작동하므로 **2차 완료 전에는 미전환 spec이 남는다**. 그 공백은 **L2(CI 경고)·L3(.gitignore 안전망)** 가 보완하는 구조로, 전환이 진행될수록 L1의 적용 비중이 커진다.
+
+**(가)를 채택하지 않는 이유**: 당장의 리스크 큰 계열만 막는 즉효성은 있으나, 가드 구조가 전환/미전환 이중으로 남아 관리 비용이 크다. 단계안은 (나)의 방향을 **소유 경계**로 분할한 것으로, (가)의 "보안 계열 우선" 분류 기준과는 다르다(소유 기준은 재배정·리뷰 범위가 명확).
+
+**범위 질문 → Aiden 승인 완료**: `tests/e2e/screenshots/` 출력 2 spec **편입 승인**(추적 PNG 23은 이연) — 소유는 위에 반영.
 
 ### 3. 공통 출력 경로 방식 — 헬퍼 1종
 
 - **신규 `tests/e2e/evidence-dir.ts`**: `evidenceDir(name: string): string` 반환.
-  - 해석 순서: ① `process.env.E2E_EVIDENCE_DIR`(설정 시 이 경로 아래에 `name` 부착) → ② **미설정 시 저장소 밖 기본 위치**(OS 임시 디렉토리 기반으로 동적 계산 — **절대경로 하드코딩 금지**, R-21).
+  - 해석 순서: ① `process.env.E2E_EVIDENCE_DIR`(설정 시 이 경로 아래에 `name` 부착) → ② **미설정 시 영속 기본 위치**: **사용자 홈 하위의 고정 이름 디렉토리**(OS 임시 디렉토리 방식은 재부팅·정리로 사라져 "검토·재현 기간 보관"과 맞지 않으므로 **철회**). 위치는 **동적 계산**으로만 정한다 — **절대경로 하드코딩 금지**, 실제 경로 문자열은 문서에 쓰지 않는다(R-21).
   - `mkdirSync(..., { recursive: true })` 내장 → spec의 mkdir 호출은 헬퍼가 흡수(불변으로 둬도 무방).
-  - **저장소 내부 경로 검증**: 해석된 최종 경로가 저장소 안이면 **throw**(재유입 L1 가드). 저장소 루트 판정은 하드코딩 없이 실행 위치 기준으로 계산.
+  - **저장소 내부 경로 검증**: 최종 경로를 **`realpath`로 해석한 뒤** 저장소 안이면 **throw**(재유입 L1) — 심볼릭 링크로 우회한 저장소 내부 기록을 막는다. 저장소 루트는 실행 위치 기준으로 동적 계산하며, **워크트리마다 루트가 다르다**는 점을 반영한다(하드코딩 금지).
   - `.env.local` 자동 로드(기존 dotenv 선례 정합) — 설정 수단: 로컬 `.env.local` / CI secret / 셸 환경변수.
 - **spec 전환 형태**: `const DIR = 'docs/99_Manual/E2E_B371_Result';` → `const DIR = evidenceDir('E2E_B371_Result');` (상수명·파일명·하위경로 유지 → 문서의 기존 인용과 파일명은 불변).
 
@@ -69,10 +82,10 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 | 층 | 장치 | 동작 | 성격 |
 |:-:|:--|:--|:--|
 | **L1** | 헬퍼 런타임 가드 | 해석 경로가 저장소 내부면 **throw** (실행 즉시 실패) | **차단** (전환 후 사실상 유일한 유입 경로를 봉쇄) |
-| **L2** | 신규 `scripts/check-evidence-escape.mjs` + `npm run check:evidence` + `pr-checks.yml`에 advisory 추가(기존 `node ... \|\| true` 패턴) | `git status --porcelain` 기준 **신규·변경** 파일을 대상 범위에서 탐지 → **명령 형태와 건수만** 보고 | **경고** (수동·비-E2E 경로의 유입 탐지) |
-| **L3** | `.gitignore` 보완 | 대상 범위의 **미추적 신규 파일**이 커밋 오판으로 유입되는 것을 차단 (기존 추적 481건에는 영향 없음) | **차단(안전망)** — 경고는 L2 담당 |
+| **L2** | 신규 `scripts/check-evidence-escape.mjs` + `npm run check:evidence` + `pr-checks.yml`에 advisory 추가(기존 `node ... \|\| true` 패턴) | **기준 SHA 대비 diff**: CI와 동일한 `git diff --name-only "$BASE_SHA"...HEAD` 방식(`pr-checks.yml`이 `fetch-depth: 0`로 이미 쓰는 패턴 — 깨끗한 CI 체크아웃에서도 커밋된 변경을 본다)으로 대상 파일 탐지 → **명령 형태와 건수만** 보고. 로컬 실행은 작업트리 기준(`git status`)을 보조로 병용 | **경고** (수동·비-E2E 경로의 유입 탐지) |
+| **L3** | `.gitignore` 보완 | **확장자 단위**(원본 증적 형식: png·json·xlsx·pdf·txt·webm 등)로만 무시 — **폴더 전체 무시 금지**(요약 `.md` 추적 **16건** 보호). 대상 폴더류는 존재 실측 기준 **5종 전부 포함**: `E2E_*_Result`(54폴더·357) · `UAT_*`(5·44) · `TASK-*`(3·12) · `AUDIT_*`(2·7) · `FEAT_*`(2·3). 이미 추적 중인 파일에는 `.gitignore`가 영향 없음(추적 481건 불변) | **차단(안전망)** — 경고는 L2 담당 |
 
-- **L2·L3 대상 범위(권장)**: `docs/99_Manual/E2E*_Result/**`, `docs/99_Manual/UAT*_Result/**`, `tests/e2e/screenshots/**` — 회귀 결과물(`docs/08_Self_Audit/Regression_Results/`)·`scratch/`는 R-13상 허용이므로 **범위 밖**.
+- **L2·L3 대상 범위(권장)**: `docs/99_Manual/`의 **5종 폴더류**(`E2E_*_Result`·`UAT_*_Result`·`TASK-*_Result`·`AUDIT_*Result`·`FEAT_*Result`) + `tests/e2e/screenshots/**` — 회귀 결과물(`docs/08_Self_Audit/Regression_Results/`)·`scratch/`는 R-13상 허용이므로 **범위 밖**. 그 밖의 요약문서 폴더는 범위 밖이며, 원본 증적 형식이 섞인 경우는 L2 경고로만 확인한다.
 - **단위 테스트(구현 단계)**: ① 헬퍼 — 저장소 내부 경로 지정 시 throw / 저장소 밖 통과 ② L2 스크립트 — 픽스처 디렉토리에 신규 파일을 만들어 경고/건수 보고, 깨끗하면 0건. (DoD의 "의도대로 경고·차단 단위 확인" 대응)
 
 ### 5. R-13 처리 — Aiden 질의안 (GOV 개정은 Aiden 전속)
@@ -102,6 +115,16 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 5. R-09 회귀 항목 등재 + 전체 회귀 PASS(R-08) + R-10 error-logs 無
 6. PR: `Refs #1513`, base `TeamB_Dev`, Squash
 
+### 8. Edward 결정 대기 (Mike 조치 불요 — 결정 전 `[설계 확정]` 미기록)
+
+| # | 결정 항목 | 상태 |
+|:-:|:--|:-:|
+| ① | **범위 단계안** — 1차 Team B 소유 18개(+screenshots Team B 1건) 전환 / 2차 29개(+Team A 1건)는 Aiden 소유 예외 승인 후 일괄 | **대기** |
+| ② | **R-13 개정(안 A 권장)** — 문안은 Aiden이 GOV 개정으로 작성, 승인·시행 | **대기** |
+| ③ | **R-10 증적 전달 방식**(질의 2: 기존 비공개 채널 재사용) 승인 + **보관 기간 파기 시점** | **대기** |
+
+> 결정 전달은 JSJung 경유. 본 Task는 문서 수정 한정이며 `tests/e2e/` 헬퍼·spec·`.gitignore`·`pr-checks.yml`은 `status:ready` 전에 수정하지 않는다.
+
 ## [DoD] (설계 의견 단계)
 
 - [x] 착수 절차 (worktree·rebase·채번·`status:draft`)
@@ -112,6 +135,7 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 - [x] R-13 질의안(안 A/B 문안 초안) 기재 — Aiden 확정 요청
 - [x] R-10 증적 전달 방식 질의 추가(지정 방식·전달 경로·보관 기간 — 제안 한 단락) · §1 표 번호·띄어쓰기 정정 (Jaison 검토 반영)
 - [x] 기존 증적 인용 규칙("증적: 비공개 보관") 제안(범위 밖 선언)
+- [x] **Aiden 조건부 확정 조건 1~4 반영**: ① 소유 단계안(18/29 표·차이 0·screenshots 소유·한계 서술) ② L2 diff 기준(`BASE_SHA...HEAD`) ③ L3 확장자 단위 범위(폴더 5종 실측 표) ④ 영속 기본 위치+`realpath` 판정 — Edward 결정 3건 "대기" 표기 포함
 - [x] task file 커밋 → `[작업 결과]` 해시(별도 커밋) → draft PR(`Refs #1513`) → `gh pr checks`
 
 ## [작업 결과]
@@ -137,6 +161,11 @@ E2E spec이 증적을 저장소 안 `docs/99_Manual/...`로 출력해 같은 실
 1. **R-10 증적 전달 방식**을 §5 Aiden 질의에 추가(보관 위치 지정 방식·전달 경로·보관 기간 — 제안 한 단락, 실제 경로 미기재)
 2. §1 표 번호 참조를 실제 표 번호(1·2·3번)로 정정 · 본문 띄어쓰기 오류 1건 정정
 3. `tests/e2e/screenshots/` 편입 제안 — 타당 확인(최종 판단은 Aiden), draft 유지
+
+### Aiden 조건부 확정 반영 (2026-11-25, Jaison 조건 전달)
+- **실측 집계**: 47 spec 최초 작성자 태그 → **Team B 18 / 그 외 29 (Aiden 집계와 차이 0건)** · screenshots 2 spec 소유 = [Baker](Team B) / [B_Kai](Team A) · 폴더 5종 존재(E2E 54·UAT 5·TASK 3·AUDIT 2·FEAT 2폴더) · 추적 `.md` 16(일치) · 원본 증적 425건
+- **반영**: §1 표(행 12~15)·§2 소유 단계안·§3 영속 기본 위치+`realpath`·§4 L2 diff 기준·L3 확장자 범위·§8 Edward 대기 3건
+- 반영 커밋: `<PLACEHOLDER>`
 
 ### 다음 절차
 draft PR(`Refs #1513`) → Jaison diff 검토 → **Aiden `[설계 확정]`**(R-13 문안 확정 포함) → 구현 착수.
