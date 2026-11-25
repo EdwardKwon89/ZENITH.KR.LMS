@@ -68,7 +68,8 @@ let invoicesCreated = 0;
 async function createActor(role: string, orgId: string | null): Promise<Actor> {
   const suffix = randomUUID().slice(0, 8);
   const email = `381-${suffix}@test.kr`;
-  const password = randomUUID();
+  // CI Supabase 비밀번호 정책(소문자·대문자·숫자 각 1자 이상) 충족 — 런타임 생성, 저장소 미기재
+  const password = `Aa1-${randomUUID()}`;
   const { data, error } = await service.auth.admin.createUser({
     email, password, email_confirm: true,
     app_metadata: { role, org_id: orgId },
