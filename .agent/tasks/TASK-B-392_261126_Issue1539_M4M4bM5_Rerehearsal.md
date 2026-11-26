@@ -55,7 +55,7 @@
 | §2-1 사전 조회 | 대상 **2** · order_costs **0** · incident_fees **0** · tax_invoices **0** · pdf_history **0** · files **0** · history **0** → 실행 가능 |
 | §2-2 백업 | `b381_m4b_target` **2** · `b381_m4b_invoice_bak` **2** — 행 수 대조 **true** |
 | §2-3 실행 | `DELETE 2`, exit 0 |
-| 실행 직후 §2-5 | `restored` **0** · `content_matches` **true** · `dup_invoice_no` **0** |
+| 실행 직후 §2-5 | `restored` **0** · `content_matches` **true(공허 — 조인 0건)** · `dup_invoice_no` **0** — PASS 근거로 사용하지 않음 |
 
 ### 실측 4 — M5 사전 조회·백업·실행(실제 run 테이블) — PASS
 
@@ -84,8 +84,8 @@
 |:--|:--|
 | M5 §3-4 | `UPDATE 1` — 충돌 2건 건너뜀, exit 0 |
 | M5 §3-5(정정본) | `restored` **1** · `content_matches` **false** · `settled_without_required_fields` **0** — 구 join 집계는 **3**(과다 집계 재현) |
-| M4-b §2-4 1차 | `invoice_no` UNIQUE 충돌 → **전체 ROLLBACK**, `restored` **0** · `content_matches` **true** · `dup_invoice_no` **0** |
-| M4-b §2-4 2차 | 충돌 행 제거 후 `INSERT 0 2` → `restored` **2** · `content_matches` **true** · `dup_invoice_no` **0** |
+| M4-b §2-4 1차 | `invoice_no` UNIQUE 충돌 → **전체 ROLLBACK**, `restored` **0** · `content_matches` **true(공허 — 조인 0건)** · `dup_invoice_no` **0** — PASS 근거로 사용하지 않음 |
+| M4-b §2-4 2차 | 충돌 행 제거 후 `INSERT 0 2` → `restored` **2** · `content_matches` **true** · `dup_invoice_no` **0** — PASS 근거는 `restored` **2**(=백업 2) / 실측 7 내용 일치 **2** |
 | M4 §1-4 | `UPDATE 14` + 이력 `DELETE 14`, exit 0 — `:approved_admin_id`는 로컬 승인 프로필 주입 |
 | M4 §1-5(정정본) | `restored` **14** · `same_status` **14** · `B381_M4` 이력 **1잔존** · `status_matches` **false** — 구 join 집계는 **15**(과다 집계 재현) |
 
@@ -113,7 +113,25 @@
 | 6 | §1-4 실제 복원 행의 이력만 삭제 | 삭제 **14** · 잔존 **1** | PASS |
 | 7 | §1-5 상태·값 일치 집계 | **14**(same_status **14**) / 구 join **15** | PASS |
 
-### 실측 9 — 계획서 §4 항목 대조·추가 수정 목록
+### 실측 9 — B-381 M1~M3 역순 롤백 왕복 — PASS
+
+M4·M4-b·M5 왕복과 복원을 모두 마친 뒤 수행. ROLLBACK 블록은 3개 마이그레이션의 주석을 `scratch/b392/`에 복사해 해제했고, 저장소 마이그레이션은 수정하지 않음.
+
+| 단계 | 결과 |
+|:--|:--|
+| 실행 전 | run 테이블 **3** · `finalize_ups_settlement_run` **1** · `billing_items_amounts` 반환 컬럼 **10** · M2 추가 컬럼 **2** |
+| M3 ROLLBACK | exit **0** (`REVOKE` · `DROP FUNCTION` · `NOTIFY`) |
+| M2 ROLLBACK | exit **0** (`BEGIN` · `DROP FUNCTION` · `CREATE FUNCTION` · `ALTER TABLE` · `CREATE FUNCTION` · `REVOKE` · `GRANT` · `REVOKE` · `GRANT` · `COMMIT`) |
+| M1 ROLLBACK | exit **0** (`DROP TABLE` 3 · `DROP FUNCTION` · `COMMIT` · `NOTIFY`) |
+| 롤백 후 | run 테이블 **0** · `finalize_ups_settlement_run` **0** · `billing_items_amounts` 반환 컬럼 **7** · M2 추가 컬럼 **0** |
+| b360 정의 대조 | `billing_items_amounts(uuid[],text)` 본문 일치 **true** · `create_billing_statement_with_items(uuid,text,text,integer,integer,date,date,uuid[])` 본문 일치 **true** (공백 정규화 후; 정규화 전 전체 정의 일치는 false — 카노니컬 헤더 차이) |
+| M1 재적용 | exit **0** |
+| M2 재적용 | exit **0** |
+| M3 재적용 | exit **0** |
+| 재적용 후 | run 테이블 **3** · `finalize_ups_settlement_run` **1** · 반환 컬럼 **10** · M2 추가 컬럼 **2** |
+| `db reset` 후 | run 테이블 **3** · `finalize_ups_settlement_run` **1** · 반환 컬럼 **10** · M2 추가 컬럼 **2** — `check-db-freshness` **OK(pending 0)** |
+
+### 계획서 §4 대조·추가 수정 목록
 
 - §4의 M4 상태변경·이력 소실·`paid_at` 미복원, M4-b CASCADE 사전 0건, M5 충돌 건너뜀·`updated_at` 덮어쓰기는 실측과 일치.
 - 외부 저장소 파일·알림 발송 이력·DB 밖 감사 로그는 로컬 범위 밖 **미확인**(계획서와 동일).
@@ -144,15 +162,17 @@
 ## [DoD]
 
 - [x] 최신 `origin/TeamB_Dev` 반영 + `check-db-freshness` OK(착수·완료 2회)
-- [x] 실측 1~7(대상/중단/백업/실행/검증/충돌/역순 복원/최종 대조) 건수·true/false 기재
+- [x] 실측 1~10(대상/중단/백업/실행/검증/충돌/역순 복원/최종 대조/M1~M3 역순 롤백 왕복/원상 복구) 건수·true/false 기재
 - [x] M5를 **실제 run 테이블**로 실측(대체 구조 0)
 - [x] 정정 7건 전건 왕복 검증 + 구 질의 대조값 기재
 - [x] B-390 비교 표 기재
 - [x] 추가 수정 목록 기재(§4 M4-b 문구 **1건**, 계획서는 미수정)
+- [x] M1~M3 역순 롤백 왕복 결과(9번) 기재 — 건수·본문 일치 true/false·exit 코드
 - [x] reset + `git status` 0건, scratch 커밋 0
 - [x] R-21 준수 — 추가된 줄에 계정·값·절대경로·운영 식별자 0
 - [x] 완료 절차 R-17 준수(문서 PR만 · `gh pr checks` 출력 인용 · ✅ 전환/병합은 Jaison)
 - [x] `check-R17-DoD`는 저장소의 OpenCode 커맨드 템플릿(`opencode.json`)으로 정의되어 셸 실행 불가 → R-17 v3.0 7단계 수동 자가 점검(코드 변경 0건이므로 코드 커밋 해시 삽입 대상 없음)
+- [x] R-17 수동 점검 1줄: issue 배정/plan·task file/코드·테스트 0/reset+freshness OK/PR 본문+`gh pr checks` 인용/`status:review` 유지/병합·승인은 Jaison·Aiden
 
 ## [후속]
 
