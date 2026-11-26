@@ -240,3 +240,13 @@
 - **Input**: `name: string` / **Output**: `string` (순수 함수, DB 접근 없음)
 - **분리 사유**: `'use server'` 파일은 **async 함수만 export** 가능 — 이 함수를 그대로 export하면 클라이언트 컴포넌트가 파일을 import하는 순간 `npm run build`가 실패(DEF-B-162). **규칙·시그니처 무변경**, 호출 코드 3곳은 import로 전환.
 
+### 4.4 UPS 정산마감 — `src/app/actions/finance/ups-settlement.ts` (TASK-B-381 PR-2 / Issue #1459)
+
+`previewUpsSettlement`·`saveUpsSettlementDraft`·`finalizeUpsSettlement` 3개 액션은 **관리자 3역할 전용**이며, run 저장·tier 금액·부가항목 payload·환율 기준일·오류 코드 상세는 [Ds_11_11B §11.20](./Ds_11_11B_UPS_Agency_Actuals.md)에 기재했습니다. 이 장에서는 재무 정산 관점의 계약만 요약합니다.
+
+- **금액 원천**: `estimateUpsFreightCore`의 대리점·화주 tier 금액(없으면 플랫폼 폴백) + 부가항목(항목별 2자리 반올림). `zen_order_costs`·`UPS_ACTUAL_COST_ADJ`는 생성하지 않습니다.
+- **환율**: `getOrderReleasedDate`가 반환한 출고확정일 기준. 유효 환율이 없으면 fallback 없이 `currency_conversion_failed`로 실패합니다.
+- **정산마감**: `finalize_ups_settlement_run` RPC 1회로 run+amounts+charges+오더 `SETTLED`를 원자 처리합니다. 같은 입력 재호출은 기존 run을 멱등 반환하고, 다른 입력은 `already_settled`입니다.
+- **청구서 연계**: `billing_items_amounts`는 최신 run만 사용하므로, run이 없는 UPS 오더 청구는 `settlement_run_missing`으로 차단됩니다.
+
+
