@@ -389,7 +389,7 @@ zen_ups_settlement_run_charges
 | 항목 | 내용 |
 |:--|:--|
 | **브랜치** | `feature/teamb-task-b381-iss1459-pr2-actions` |
-| **PR** | #PR2 (`TeamB_Dev`, `Refs #1459`) |
+| **PR** | #1544 (`TeamB_Dev`, `Refs #1459`) |
 | **범위** | `ups-settlement.ts`(preview/draft/finalize) · `src/lib/ups/settlement/*` · finance index export · Ds-11 액션 항목 · 회귀 항목 PR2 |
 | **범위 밖** | `zen_ups_actual_charges` DROP, `unmarkOrderCostSettled` 변경, M4/M4-b/M5 실행, 운영 DB 접근, 옛 액션·UI 제거(PR-4) |
 
