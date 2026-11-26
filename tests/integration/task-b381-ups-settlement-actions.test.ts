@@ -12,7 +12,12 @@ vi.mock('@/lib/auth/guards', () => ({ validateUserAction: mockValidate }));
 vi.mock('@/app/actions/misc/notifications', () => ({ sendInAppNotification: notifyMock }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: unknown) => fn }));
 // 화면 문구 대신 오류 키를 반환시켜 거부 사유를 정확히 단언한다.
-vi.mock('@/lib/i18n/action-error', () => ({ trError: async (key: string) => key, actionLocale: async () => 'ko' }));
+vi.mock('@/lib/i18n/action-error', () => ({
+  trError: async (key: string) => key,
+  actionLocale: async () => 'ko',
+  trNotification: async (key: string, params?: Record<string, unknown>) =>
+    params?.orderNo ? `${key}:${params.orderNo}` : key,
+}));
 
 import { getUpsActualCost } from '@/app/actions/finance/ups-actual-cost';
 import {
@@ -41,6 +46,7 @@ const O = {
   preview: `${P}21`, draft: `${P}22`, final: `${P}23`, idem: `${P}24`,
   lock: `${P}25`, invoice: `${P}26`, deny: `${P}27`, curr: `${P}28`, nochange: `${P}29`,
   nocountry: `${P}2a`, invErr: `${P}2b`, rt: `${P}2c`, notify: `${P}2d`, notifyFail: `${P}2e`,
+  notifyLookup: `${P}2f`,
 } as const;
 const ORDER_IDS = Object.values(O);
 const ORG_IDS = [PLATFORM_ORG, AGENCY_ORG, SHIPPER_ORG];
@@ -55,6 +61,8 @@ interface Actor {
 let service: SupabaseClient;
 let admin: Actor;
 let shipperActor: Actor;
+let managerActor: Actor;
+let superActor: Actor;
 
 async function createActor(role: string, orgId: string): Promise<Actor> {
   const suffix = randomUUID().slice(0, 8);
@@ -91,6 +99,26 @@ function clientWithInvoiceLookupError(client: SupabaseClient): SupabaseClient {
             return {
               select: () => ({
                 filter: async () => ({ data: null, error: { message: 'forced invoice lookup failure' } }),
+              }),
+            };
+          }
+          return (target as any).from(table);
+        };
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  }) as SupabaseClient;
+}
+
+function clientWithProfilesLookupError(client: SupabaseClient): SupabaseClient {
+  return new Proxy(client, {
+    get(target, prop, receiver) {
+      if (prop === 'from') {
+        return (table: string) => {
+          if (table === 'zen_profiles') {
+            return {
+              select: () => ({
+                in: async () => ({ data: null, error: { message: 'forced profiles lookup failure' } }),
               }),
             };
           }
@@ -171,6 +199,8 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
 
     admin = await createActor('ADMIN', PLATFORM_ORG);
     shipperActor = await createActor('SHIPPER', SHIPPER_ORG);
+    managerActor = await createActor('MANAGER', PLATFORM_ORG);
+    superActor = await createActor('ZENITH_SUPER_ADMIN', PLATFORM_ORG);
 
     for (const id of ORDER_IDS) { if (id === O.nochange || id === O.nocountry) continue; await createOrder(id); }
     await createOrder(O.nocountry, { countryCode: null });
@@ -256,18 +286,33 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     expect(otherChargeCount(O.rt)).toBe(1);
   }, 60000);
 
-  it('finalize 알림 — 성공 시 1회, 알림 실패해도 정산 유지(best-effort)', async () => {
+  it('finalize 알림 — 관리자 3역할 전원에게 발송, 실패해도 정산 유지(best-effort)', async () => {
     asActor(admin);
     notifyMock.mockClear();
     const ok = await finalizeUpsSettlement({ orderId: O.notify, ...INPUT });
     expect(ok.success).toBe(true);
-    expect(notifyMock).toHaveBeenCalledTimes(1);
-    expect(notifyMock).toHaveBeenCalledWith(expect.objectContaining({ orderId: O.notify, type: 'UPS_SETTLEMENT' }));
+
+    const notifiedIds = notifyMock.mock.calls.map((call) => call[0].userId);
+    expect(notifiedIds).toEqual(expect.arrayContaining([admin.userId, managerActor.userId, superActor.userId]));
+    expect(notifiedIds).not.toContain(shipperActor.userId);
+    expect(notifyMock).toHaveBeenCalledWith(expect.objectContaining({
+      orderId: O.notify,
+      type: 'UPS_SETTLEMENT',
+      title: 'title',
+      message: expect.stringContaining('body:ZEN-381A-'),
+    }));
 
     notifyMock.mockRejectedValueOnce(new Error('notify failure'));
     const res = await finalizeUpsSettlement({ orderId: O.notifyFail, ...INPUT });
     expect(res.success).toBe(true);
     expect(status(O.notifyFail)).toBe('SETTLED');
+  }, 60000);
+
+  it('알림 수신자 조회 실패에도 정산은 유지한다(best-effort)', async () => {
+    asActor(admin, clientWithProfilesLookupError(admin.client));
+    const res = await finalizeUpsSettlement({ orderId: O.notifyLookup, ...INPUT });
+    expect(res.success).toBe(true);
+    expect(status(O.notifyLookup)).toBe('SETTLED');
   }, 60000);
 
   it('finalize — run 2 tier·charges·SETTLED, 원장/ADJ 미변경', async () => {

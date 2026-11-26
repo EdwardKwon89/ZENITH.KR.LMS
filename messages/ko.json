@@ -84,6 +84,10 @@
     "noCandidates": "조회된 후보 오더가 없습니다.",
     "excel": "Excel 저장"
   },
+  "UpsSettlementNotify": {
+    "title": "UPS 정산마감 완료",
+    "body": "오더 {orderNo}의 정산마감이 완료되었습니다."
+  },
   "OrderSettlement": {
     "title": "오더정산",
     "unsettledBadge": "조회 결과 중 미정산 {count}건",

@@ -84,6 +84,10 @@
     "noCandidates": "No candidate orders found.",
     "excel": "Save Excel"
   },
+  "UpsSettlementNotify": {
+    "title": "UPS settlement finalized",
+    "body": "Settlement for order {orderNo} has been finalized."
+  },
   "OrderSettlement": {
     "title": "Order settlement",
     "unsettledBadge": "Unsettled in results: {count}",

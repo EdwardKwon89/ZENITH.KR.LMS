@@ -84,6 +84,10 @@
     "noCandidates": "未查询到候选订单。",
     "excel": "导出 Excel"
   },
+  "UpsSettlementNotify": {
+    "title": "UPS 结算已完成",
+    "body": "订单 {orderNo} 的结算已完成。"
+  },
   "OrderSettlement": {
     "title": "订单结算",
     "unsettledBadge": "查询结果中未结算 {count} 件",

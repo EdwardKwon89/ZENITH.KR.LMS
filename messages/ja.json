@@ -84,6 +84,10 @@
     "noCandidates": "候補オーダーがありません。",
     "excel": "Excel保存"
   },
+  "UpsSettlementNotify": {
+    "title": "UPS 精算確定完了",
+    "body": "注文 {orderNo} の精算確定が完了しました。"
+  },
   "OrderSettlement": {
     "title": "オーダー精算",
     "unsettledBadge": "検索結果の未精算 {count}件",

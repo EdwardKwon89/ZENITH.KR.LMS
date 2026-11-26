@@ -22,9 +22,9 @@
 | TC-381C-10 | 초안 라운드트립 | 원금액 복원·재저장 total 불변·부가항목 유지 | `tests/integration/task-b381-ups-settlement-actions.test.ts` |
 | TC-381C-11 | 새 화면 동작 | 초안 복원(calc 3/2)·미리보기·항목별 부가운임·저장/정산/되돌리기 | `tests/unit/components/order-settlement/order-settlement-detail.test.tsx` |
 | TC-381C-12 | 보존 함수 회귀 | 목록 필터·조회 실패·대사/검색 | `tests/unit/finance/task-b381-pr4a-get-orders-list.test.ts`, `tests/unit/finance/task-b381-pr4a-ups-charge-readers.test.ts` |
-| TC-381C-13 | 알림 best-effort | 성공 시 1회, 실패해도 정산 유지 | `tests/integration/task-b381-ups-settlement-actions.test.ts` |
+| TC-381C-13 | 알림 확정 사양 | 관리자 3역할 전원·4개 로케일 키·수신자 조회/발송 실패에도 SETTLED 유지 | `tests/integration/task-b381-ups-settlement-actions.test.ts`, `tests/unit/i18n/ups-settlement-notify-keys.test.ts` |
 | TC-381C-09 | 전체 회귀·build | `npm run test:regression`·`npm run build` PASS | CI |
 
 **되돌리기**: PR 단위 revert(코드·문구). DB 변경 없음.
 
-**회귀**: `npm run test:regression` — **307 files passed · 1 skipped / 2,335 passed · 16 skipped**(skip은 B-373 세션 16건), `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+**회귀**: `npm run test:regression` — **309 files passed · 1 skipped / 2,349 passed · 16 skipped**(skip은 B-373 세션 16건), `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.

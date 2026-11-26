@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { validateUserAction } from '@/lib/auth/guards';
 import { hasAdminOrManagerRole } from '@/lib/auth/ups-rate-permissions';
 import { logger } from '@/lib/logger';
-import { trError } from '@/lib/i18n/action-error';
+import { trError, trNotification } from '@/lib/i18n/action-error';
 import { sendInAppNotification } from '@/app/actions/misc/notifications';
 import { computeSettlementCost, buildSettlementPreview } from '@/lib/ups/settlement/build';
 import { SettlementCurrencyError, SettlementEstimateError, type UpsSettlementActionResult, type UpsSettlementInput } from '@/lib/ups/settlement/types';
@@ -198,17 +198,38 @@ async function runAction(
       return { success: false, error: await trError(mapRpcError(error.message) as any) };
     }
     const row = Array.isArray(data) ? data[0] : data;
-    // §2-1 7단계: 알림은 best-effort — 실패해도 정산 결과를 되돌리지 않는다.
-    try {
-      await sendInAppNotification({
-        userId: user.id,
-        title: 'UPS 정산마감 완료',
-        message: `${order.order_no} 정산마감이 완료되었습니다.`,
-        type: 'UPS_SETTLEMENT',
-        orderId: input.orderId,
-      });
-    } catch (notifyError) {
-      logger.warn('ups-settlement: notification failed (best-effort)', notifyError);
+
+    // §2-1 7단계: 관리자 3역할 전원에게 알림(best-effort). 수신자 조회·발송 실패는 정산 결과를 되돌리지 않는다.
+    const recipientRoles = ['ADMIN', 'MANAGER', 'ZENITH_SUPER_ADMIN'] as const;
+    const { data: recipients, error: recipientError } = await supabase
+      .from('zen_profiles')
+      .select('id')
+      .in('role', recipientRoles);
+    if (recipientError) {
+      logger.warn('ups-settlement: notification recipients lookup failed (best-effort)', recipientError);
+    } else {
+      const recipientIds = [...new Set(((recipients ?? []) as Array<{ id: string }>).map((r) => r.id))];
+      let title = 'UPS settlement finalized';
+      let message = order.order_no;
+      try {
+        title = await trNotification('title');
+        message = await trNotification('body', { orderNo: order.order_no });
+      } catch (copyError) {
+        logger.warn('ups-settlement: notification copy failed (best-effort)', copyError);
+      }
+      for (const recipientId of recipientIds) {
+        try {
+          await sendInAppNotification({
+            userId: recipientId,
+            title,
+            message,
+            type: 'UPS_SETTLEMENT',
+            orderId: input.orderId,
+          });
+        } catch (notifyError) {
+          logger.warn('ups-settlement: notification send failed (best-effort)', notifyError);
+        }
+      }
     }
     revalidatePath(`/(dashboard)/orders/${input.orderId}`, 'page');
     revalidatePath('/(dashboard)/finance/daily-billing', 'page');
