@@ -27,4 +27,4 @@
 
 **되돌리기**: PR 단위 revert(코드·문구). DB 변경 없음.
 
-**회귀**: `npm run test:regression` — **304 files passed · 1 skipped / 2,318 passed · 16 skipped**(skip은 B-373 세션 16건), `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+**회귀**: `npm run test:regression` — **307 files passed · 1 skipped / 2,335 passed · 16 skipped**(skip은 B-373 세션 16건), `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.

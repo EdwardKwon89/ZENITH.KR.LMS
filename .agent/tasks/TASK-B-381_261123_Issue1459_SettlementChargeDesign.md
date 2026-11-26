@@ -602,7 +602,7 @@ zen_ups_settlement_run_charges
 - PR-2 통합에 초안 라운드트립·알림 best-effort 2건 추가(총 13건)
 - 기존 `daily-billing-aggregation` fixture를 비UPS(AIR)로 전환해 집계·상세 로직 회귀 유지
 - 옛 액션·모달·폼 전용 테스트 제거: `ups-actual-cost`·`ups-actual-charges`(2)·`task-b364`·`task-b366`(unit/integration)·`BillingConfirmModal`·`UpsActualAdjustmentForm`·`order-settlement-detail`·E2E `r11`
-- 전체 회귀: `npm run test:regression` — **304 files passed · 1 skipped / 2,318 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+- 전체 회귀: `npm run test:regression` — **307 files passed · 1 skipped / 2,335 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
 
 ### 11-4. 후속 인계 (PR-4a 본문 기재 항목)
 - `createPostFinalizationAdjustment`→`createAdjustmentInvoice` 직접 insert 경로: 옛 후청구 액션 제거 여부·PR-3~4a 사이 UPS 도달 가능성
@@ -624,3 +624,4 @@ zen_ups_settlement_run_charges
 | N1 | head 해시 오기 | `gh pr view` 기준 head로 보고 |
 | N2 | i18n 제목 117 vs 실제 116 | 제목을 116으로 정정 |
 | N3 | 동일 삼항 | `previewing` 상태 제거, 단일 문구 |
+| M1 | PR-3 선반영 | `origin/TeamB_Dev`·PR-3 가드 브랜치를 병합 커밋으로 반영, task file·i18n 충돌 해소(Errors 117키). 병합 후 전체 회귀 PASS |
