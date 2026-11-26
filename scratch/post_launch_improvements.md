@@ -2180,6 +2180,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `src/app/actions/finance/ups-actual-charges.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
 - **예상 공수**: 0.3~0.5 MD (연동 지점 선정 + 중복/노이즈 정책 + 알림 확인 테스트)
 - **우선순위**: Medium — 기능 장애는 아니나 금전 정합성 영역의 침묵 실패 방지
+- **범위 보강(2026-11-26, Aiden)**: TASK-B-381 PR-2(PR #1544)가 추가한 `src/app/actions/finance/ups-settlement.ts`(정산마감 RPC 실패·통화 변환 실패·예외 경로)도 같은 금전 지점이며 4기준 중 ①금전·④사고 이력 2개 해당(핵심 지점)이다. PR-2는 `logger.error`까지만 구현하고 알림은 이 항목에서 함께 처리한다. 알림 수신자·문구는 새 정산마감 화면(PR-4a) 확정 후 설계.
 
 
 ---
