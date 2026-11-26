@@ -41,6 +41,7 @@
 | claims/statements 이외 statistics | 거부 | 허용(항목) | 표시 범위 확인 필요 |
 
 - 오더 상세의 현재 구현: `orders/[orderId]/page.tsx`가 `zen_order_costs`를 조회해 `OrderFinanceSummary`에 `initialCosts`로 전달(`cost_type` 항목 라벨은 `getCostTypeLabel`) — **run을 읽지 않는 구조**이며 PR-4a 이후 변화는 §7 잠정 기재. (2026-11-26 직접 확인)
+- **청구서 스냅샷 컬럼 표시(확정 필요)**: B-381 M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷 컬럼을 추가했으나(M2 12~13행), 현재 `src`·`messages`의 화면 표시 코드는 **0건**(2026-11-26 확인) — 화주·대리점 표시 목표·라벨은 §5의 선택지에서 **Aiden·JSJung 확정 필요**.
 
 ## 3. 부가운임 항목별 표시안 비교
 
@@ -57,8 +58,9 @@
 ### 3-1. 갱신 결정 — 단일 원천 run(B-381), 환산 제거, 가드 조회 함수 유지 (항목1)
 
 - **단일 원천: run** 으로 확정. 부가운임 항목은 `zen_ups_settlement_run_charges`(`line_no`·`name`·`amount`·`currency`)에 tier별로 보존된다(M1 `20261126090000_task_b381_ups_settlement_run.sql` 44~52행 직접 확인).
-- **인보이스 통화 환산은 불필요** — `zen_ups_settlement_runs.currency`(16행)·`zen_ups_settlement_run_charges.currency`(52행)가 `CHECK (currency = 'KRW')` **고정**이고, 청구 스냅샷도 KRW 헤더 전제(M2 `20261126091000_task_b381_billing_items_amounts.sql`의 통화 가드 주석)다. 따라서 A안·C안에 있던 "인보이스 통화 환산" 단계는 이갱신에서 **제거**한다.
+- **인보이스 통화 환산은 불필요** — `zen_ups_settlement_runs.currency`(16행)·`zen_ups_settlement_run_charges.currency`(52행)가 `CHECK (currency = 'KRW')` **고정**이고, 청구 스냅샷도 KRW 헤더 전제(M2 `20261126091000_task_b381_billing_items_amounts.sql`의 통화 가드 주석)다. 따라서 A안·C안에 있던 "인보이스 통화 환산" 단계는 이 갱신에서 **제거**한다.
 - **가드 조회 함수는 필요하다** — 근거: ① `src/`의 run 직접 조회는 **0건**(`git grep zen_ups_settlement_run origin/TeamB_Dev -- src/`, `finalize_ups_settlement_run` RPC 호출만)이라 표시 DTO를 만들 경로가 없다. ② `zen_ups_settlement_run_amounts`에는 **원가 컬럼(`base_freight`·`fuel_surcharge`·`surge_fee`)이 포함**되므로(M1 31~41행), 표시 경로가 amounts를 읽으면 규칙 4 위반 위험이 있다 — **표시는 `run_charges`만으로 한정**한다(항목만, 원가 없음). ③ M1의 tier RLS(106·134·167행)는 행·tier 접근만 통제하고 **반환 DTO(어떤 컬럼을 내주는지)는 통제하지 않는다**. → 서버 액션 `getOrderAdditionalCharges(orderId)`에서 소유·admin 검증 후 `run_charges`의 `{line_no, name, amount, currency}`만 select·반환하는 구조로 확정(원가 미반환이 구조적 보장).
+- **읽는 run 버전**: 해당 오더의 **최신 `version`** run을 읽는다 — 정산 재마감은 새 `version`을 만들고 같은 입력 재호출은 멱등으로 `version`을 만들지 않는다(M3 `20261126092000_task_b381_finalize_ups_settlement_run.sql` 119~123·153행 직접 확인). `run_charges`는 `run_id`·`tier` 기준이므로 최신 run의 자기 tier 항목만 반환한다.
 
 ## 4. 기존 부가운임 aggregate 행 처리
 
@@ -72,7 +74,8 @@
 - 적용: `OrderFinanceSummary`(isAdmin prop), `ShipperDailyBillingClient` breakdown, `pdf.ts`(발행 audience 전달), 인보이스 PDF 라인.
 - i18n: `ko/en/zh/ja` 4로케일 `Finance.additionalCharge`(가칭) 추가. 관리자 화면 라벨 불변.
 - **갱신 — 라벨 범위 재정의(항목4)**: 적용 대상은 §2 표의 "허용" 행 전체로 확정한다 — 화주·대리점 경로(오더 상세 `OrderFinanceSummary`, 일별 청구 `ShipperDailyBillingClient`, **청구서 화면 `finance/statements`, 청구서 Excel `statement-excel(-data)`**)는 전부 "부가운임", 관리자 경로(오더정산 상세·실비 조정 폼)는 원문 유지. **남는 경로** = 기존 행(비UPS `zen_order_costs`)과 §2의 "표시 범위 확인 필요" 행.
-- **`freight_adjustment` 라벨 확인(근거, 한 줄)**: `src/lib/finance/settlement/cost-type-labels.ts`의 `COST_TYPE_LABELS`에 `FREIGHT_ADJUSTMENT`는 **미등재**라 fallback(`cost_type.replace(/_/g, ' ')`) 영문으로 노출되며, src·messages에 "운임 조정" 표기는 **0건**(2026-11-26 `git grep` 직접 확인) — 화주·대리점 경로에서는 §2의 원가 거부 대상이라 **규칙 5와충돌하지 않는다**. 단, 관리자 경로의 영문 fallback도 "남는 경로"에 포함해 원문 라벨(가칭 "운임 조정") 처리를 §5에서 확정한다.
+- **`freight_adjustment` 라벨 확인(근거, 한 줄)**: `src/lib/finance/settlement/cost-type-labels.ts`의 `COST_TYPE_LABELS`에 `FREIGHT_ADJUSTMENT`는 **미등재**라 fallback(`cost_type.replace(/_/g, ' ')`) 영문으로 노출되며, src·messages에 "운임 조정" 표기는 **0건**(2026-11-26 `git grep` 직접 확인) — 화주·대리점 경로에서는 §2의 원가 거부 대상이라 **규칙 5와 충돌하지 않는다**. 단, 관리자 경로의 영문 fallback도 "남는 경로"에 포함해 원문 라벨(가칭 "운임 조정") 처리를 §5에서 확정한다.
+- **`freight_adjustment` 청구서 스냅샷 표시(항목4 보완 — Aiden·JSJung 확정 필요)**: M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷을 추가했으나(M2 12~13·92·258행) 현재 화면 표시 코드는 **0건**. 화주·대리점 표시 목표·라벨은 **택일 미정**: **(a) 숨김** — 청구서 스냅샷은 관리자 집계용으로 표시하지 않음 / **(b) "부가운임" 합산** — `charge_details` 항목과 함께 부가운임으로 합산 표시 / **(c) 별도 라벨**(가칭 "운임 조정") — 규칙 5와의 관계 재검토. **확정 전까지 §2 청구서 행의 "허용"은 `charge_details` 항목명·금액 한정으로 읽는다.**
 
 ## 6. 이슈 #1449 A 구현 계획 (설계 확정 후)
 
@@ -98,7 +101,8 @@
 | 순서 | 마이그레이션 | 대상 | 상태 | 롤백 | 비고 |
 |:--:|:--|:--|:--|:--|:--|
 | — | `20261123100000_task_b375_drop_shipper_agency_select_rls.sql` | `zen_ups_actual_charges`의 shipper·agency SELECT 정책 제거 | **완료**(2026-11-23 `TeamB_Dev` 병합, 파일 직접 확인) | `20260720000000_iss589_ups_actual_charges.sql`의 `shipper_agency_select` 재생성(파일 주석) | 대체 정책 없음·admin 정책 유지 |
-| 2 | B-377 정책 마이그레이션 — **미작성**(설계 단계) | `zen_ups_actual_cost`의 화주·대리점 SELECT 정책 제거 | 설계 확정 후 작성 | **정책 재생성 SQL을 마이그레이션 파일에 포함**(§6 3번) | **"앱 배포 뒤 마지막" 원칙의 본체** |
+| 2 | B-377 정책 마이그레이션 ① — **미작성**(설계 단계) | `zen_ups_actual_cost`의 화주·대리점 SELECT 정책 제거 | 설계 확정 후 작성 | **정책 재생성 SQL을 마이그레이션 파일에 포함**(§6 3번) | **"앱 배포 뒤 마지막" 원칙의 본체** |
+| 2 | B-377 정책 마이그레이션 ② — **미작성**(설계 단계) | `zen_ups_actual_other_charges`의 `shipper_agency_select_other_charges` 정책 제거(§6 4번 항목3 admin 전용화) | 설계 확정 후 작성 | 정책 재생성 SQL 포함(예정) | **정책 변경 필요(근거): 현재 shipper·agency SELECT 정책이 존재함을 직접 확인**(`20260817100000_task_b317_actual_cost_schema.sql` 56행) |
 | 3 | B-379 2/2 스냅샷 정책 교체 — **미작성** | 입고 실측 스냅샷 정책 | [#1453](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1453) `status:open`(설계 미확정) | 마이그레이션 포함(예정 — 미확인) | 설계 확정 후 확정 |
 
 - **적용 순서 원칙**: (1) 앱 배포 → (2) B-377 정책 제거 → (3) B-379 2/2. b375(완료)는 참조선이며 남은 두 건은 각각 "앱 배포 뒤 마지막" 원칙을 따른다.

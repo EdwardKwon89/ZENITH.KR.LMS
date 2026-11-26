@@ -56,6 +56,14 @@ date                              # Thu Nov 26 23:12:04 KST 2026
 - 원본(PR-1454 브랜치) 대비 diff = **8 hunk 전부 위 7개 항목 위치**(30·32~39·40·52·63·70~71·76·81행) — 헤더·**확정 규칙(JSJung)**·§1·§4·§9는 원본과 **md5 동일**.
 - PR #1454 브랜치 **미접촉**(새 브랜치에서 원본 복사 후 갱신) · `src/`·마이그레이션 변경 **0건** · 이슈 라벨 `status:draft` **유지**.
 
+## [보완 반영] Jaison 비차단 3건 (2026-11-26 23:36 검토)
+
+| # | 요청 | 반영 위치 |
+|:-:|:--|:--|
+| 1 | `freight_adjustment` **표시 라벨** 확인 대상 정정 — 청구서 스냅샷(`zen_billing_statement_items`의 `freight_adjustment`·`charge_details`, M2)의 화주·대리점 표시 목표·라벨 택일 | **§2 1줄**(청구서 스냅샷 컬럼 표시 — 확정 필요) + **§5 선택지 1줄**(a 숨김 / b "부가운임" 합산 / c 별도 라벨 — **Aiden·JSJung 확정 필요**, 확정 전 `charge_details` 항목 한정 해석) · 근거: M2 12~13·92·258행, 화면 표시 코드 0건 직접 확인 |
+| 2 | `zen_ups_actual_other_charges` admin 전용화의 적용 마이그레이션 표 누락 | **§8-1 행 추가**(B-377 정책 마이그레이션 ②) — **정책 변경 필요(근거): `shipper_agency_select_other_charges` 정책 존재 확인**(`20260817100000_task_b317_actual_cost_schema.sql` 56행 직접 확인) |
+| 3 | 오타 2곳 + `getOrderAdditionalCharges`의 run 버전 한 줄 | §3-1 `이 갱신`·§5 `규칙 5와 충돌` 정정 + **§3-1 "읽는 run 버전" 한 줄**(최신 `version` — M3 119~123·153행 멱등 근거, `run_id`·`tier` 기준) |
+
 ## [DoD]
 
 - [x] 요청 1·2·3·4·6·7 반영 + 5 잠정 표기 (위 대응표 — 절·줄 대응)
