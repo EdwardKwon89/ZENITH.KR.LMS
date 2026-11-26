@@ -18,10 +18,12 @@
 | TC-395-05 | resolveCountryCode DB 오류 흡수 | `logger.error`(문자 + **오류 객체 동일성**), 호출부 `warn`, 반환 불변 | 동일 | CI (vitest) |
 | TC-395-06 | resolveShxkCode DB 오류 흡수 | `logger.error`(문자 + 오류 객체), 호출부 `warn`, 반환 불변 | 동일 | CI (vitest) |
 | TC-395-07 | fetchActiveLabelByOrder DB 오류 흡수 | `logger.error`(문자 + 오류 객체), voidUpsLabel `warn`, 반환 = `trError('label_not_found')` | 동일 | CI (vitest) |
+| TC-395-11 | resolveCountryCode `PGRST116`(행 없음) → 정상 업무 실패 | `logger.error` **미호출**, 호출부 `warn` 단독, 반환 불변 | 동일 | CI (vitest) |
+| TC-395-12 | resolveShxkCode `PGRST116`(행 없음) → 정상 업무 실패 | `logger.error` **미호출**, 호출부 `warn` 단독, 반환 불변 | 동일 | CI (vitest) |
 | TC-395-08 | SHXK createorder 실패(외부 API) | `logger.error` 인자에 함수명 + **원문 포함 문자열**, 반환은 로케일 문장에 원문 미포함 | 동일 | CI (vitest) |
 | TC-395-09 | catch 예상밖 예외 | `logger.error('registerUpsOrder error:', 원본 Error 동일성)`, 반환에 원문 미노출 | 동일 | CI (vitest) |
 | TC-395-10 | zen_ups_labels 쓰기 실패(DB) | `logger.error`(문자 + 오류 메시지 인자), 반환 = `trError('generic',{code:'LABEL_RECORD_SAVE'})` | 동일 | CI (vitest) |
 
 **반환값 불변**: 10개 케이스 전부 `expect(result).toEqual({success:false, error: <동일 키의 trError 결과>})` 단언 — 메시지 키·구조 변경 시 실패합니다. **diff 검증**: 소스 추가/변경은 `logger.*` 호출 7개 + `error` 디스스트럭처링 3줄 + 블록 전환뿐이며, 반환 표현식의 문자열은 변경 전과 동일합니다(`git diff`로 확인).
 
-**회귀**: `npx vitest run tests/unit/ups/task-b395-ups-labels-logging.test.ts` — **10/10 PASS**.
+**회귀**: `npx vitest run tests/unit/ups/task-b395-ups-labels-logging.test.ts` — **12/12 PASS**(TC-395-01~12).

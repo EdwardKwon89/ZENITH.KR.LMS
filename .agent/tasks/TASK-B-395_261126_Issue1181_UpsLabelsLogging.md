@@ -31,7 +31,7 @@ date                              # Thu Nov 26 17:46:00 KST 2026
 | 실패 반환 지점 | **66** |
 | throw 지점 | **3** |
 | (별도) 헬퍼 null 반환 — DB 오류 흡수 | **3** |
-| catch 블록 | **11** |
+| catch 블록 | **11**(`catch (err)` — `catch` 구문 전체는 13개, 나머지 2개는 `describeStorageError` 속성 읽기 실패 `[unreadable]`·`resolveUploadErrorDetail`의 `JSON.stringify` 실패 폴백 = 진단 문자열 보조 코드의 benign 폴백이라 로깅 불필요, Jaison 판정) |
 | **판정: 자체(인접) 로깅** | **46** (반환 44 + throw 2) |
 | **판정: 타 지점 로깅 커버** | **16** — 권한 헬퍼 내부 7 · lookup 상위 3 · SHXK 상위 2 · 래퍼 상위 2 · error-문자열 반환의 호출부 1 · throw의 상위 catch 1 |
 | **판정: catch 로깅** | **11/11** (로깅 없는 catch **0**) |
@@ -39,12 +39,16 @@ date                              # Thu Nov 26 17:46:00 KST 2026
 | **판정: 무로깅 → 이번 처리** | **7** |
 
 - Jaison 추정(무로깅 21·catch 무로깅 2)과의 차이: 8줄 lookback 휴리스틱이 **헬퍼 내부/상위 함수 로깅**을 잡지 못함(커버 16건) + catch 무로깅 실측 **0건**.
-- **지점군 목록(처리 7)**: ① `previewShxkPayload` 도착국 미확인(warn) ② `previewShxkPayload` 운송방법 미매핑(warn) ③ `triggerCreateOrderTest` 도착국 미확인(warn) ④ `triggerCreateOrderTest` 운송방법 미매핑(warn) ⑤ `resolveCountryCode` DB 오류 흡수(error) ⑥ `resolveShxkCode` DB 오류 흡수(error) ⑦ `fetchActiveLabelByOrder` DB 오류 흡수(error).
+- **지점군 목록(처리 7)**: ① `previewShxkPayload` 도착국 미확인(warn) ② `previewShxkPayload` 운송방법 미매핑(warn) ③ `triggerCreateOrderTest` 도착국 미확인(warn) ④ `triggerCreateOrderTest` 운송방법 미매핑(warn) ⑤ `resolveCountryCode` DB 오류 흡수(error, **`PGRST116` 행 없음 제외**) ⑥ `resolveShxkCode` DB 오류 흡수(error, **`PGRST116` 제외**) ⑦ `fetchActiveLabelByOrder` DB 오류 흡수(error, `maybeSingle`이라 행 없음은 오류 아님 — 현행 유지).
+
+## 최종 기준 건수 (불일치 정리 — 이 표가 최종)
+
+> **83건**(실패 반환 66 + throw 3 + 헬퍼 null 3 + catch 11) = 자체 로깅 **46** + 타 지점 커버 **16** + catch 로깅 **11** + 방어(도달 불가) **3** + **처리 7**. (구현 커밋 메시지의 "72지점"은 집계 도중의 중간 수치이며, 이 표와 보고의 83건이 최종 기준이다.)
 
 ## 처리 결과 (분모와 함께)
 
 - **7/7 처리** (무로깅 지점 전량) · 미처리는 방어 3건(사유 위) + 커버 62건(자체 46 + 타 지점 16 + catch 11은 처리 불필요).
-- 레벨: 사용자·데이터 매핑 누락 4 = `logger.warn`(기존 `registerUpsOrder` 442·448행의 선행 판례와 동일), 외부 DB 오류 3 = `logger.error` + **원본 오류 객체 전달**.
+- 레벨: 사용자·데이터 매핑 누락 4 = `logger.warn`(기존 `registerUpsOrder` 442·448행의 선행 판례와 동일), 외부 DB 오류 3 = `logger.error` + **원본 오류 객체 전달**. **보완 반영(Aiden 보완 1·Jaison 필수 1)**: `resolveCountryCode`·`resolveShxkCode`는 `error.code !== 'PGRST116'`(행 없음 = 정상 업무 실패)일 때만 `logger.error` — 정상 매핑 누락의 error 이중 기록(헬퍼 error + 호출부 warn)과 `/admin/error-logs`·Sentry 노이즈 제거(`src/lib/params/service.ts` 40행의 기존 `PGRST116` 구분과 동일 기준). `fetchActiveLabelByOrder`는 `maybeSingle`이라 현행 유지.
 - `catch (err)`는 전부 원본 `err`를 로거에 전달(기존 유지, 실측 11/11).
 
 ## diff 검증 (반환값 불변 + 로깅만)
@@ -55,9 +59,9 @@ date                              # Thu Nov 26 17:46:00 KST 2026
 
 ## 테스트 (레벨·인자 단언 — 호출 여부 단언으로 갈음하지 않음)
 
-- 신규 `tests/unit/ups/task-b395-ups-labels-logging.test.ts` — **10/10 PASS**.
-- 단언 내용: ① **레벨**(`logger.warn`/`logger.error` 구분·`error` 미호출 단언 포함) ② **인자**(오류 객체 동일성 `toHaveBeenCalledWith(문자, 객체)`, 원문 포함 문자열, product·incoterms·order 포함) ③ **반환값 불변**(10케이스 전부 `toEqual({success:false, error: <동일 키 trError>})` + 원문 미노출).
-- 지점군 커버: 매핑 누락 4 · 헬퍼 DB 오류 3 · SHXK 외부 API 1 · catch 원본 err 1 · DB 쓰기 1.
+- 신규 `tests/unit/ups/task-b395-ups-labels-logging.test.ts` — **12/12 PASS**(보완 반영: `PGRST116` 행 없음 2케이스 추가).
+- 단언 내용: ① **레벨**(`logger.warn`/`logger.error` 구분·`error` 미호출 단언 포함) ② **인자**(오류 객체 동일성 `toHaveBeenCalledWith(문자, 객체)`, 원문 포함 문자열, product·incoterms·order 포함) ③ **반환값 불변**(12케이스 전부 `toEqual({success:false, error: <동일 키 trError>})` + 원문 미노출).
+- 지점군 커버: 매핑 누락 4 · 헬퍼 DB 오류 3(그 외 코드 = 오류 객체 동일성 단언) · **`PGRST116` 행 없음 2(`error` 미호출 + 호출부 `warn` 단독 단언 — 실제 `.single()` 동작과 일치하도록 모킹)** · SHXK 외부 API 1 · catch 원본 err 1 · DB 쓰기 1.
 - 회귀 항목: `regression-items/TASK-B-395_Issue1181_ups-labels-logging.md` (TC-395-01~10) · `npm run check:lrtm` **OK**(유령 0·신규 미등재 0, exit 0) · LRTM 본문은 R-09 규칙대로 **미수정**.
 
 ## 핵심 지점 4기준 판정표 (지점군별 — 알림 `logClientError(CRITICAL)` 연동은 미구현, 범위 밖)
@@ -84,7 +88,7 @@ date                              # Thu Nov 26 17:46:00 KST 2026
 - [x] 재측정 결과(실패 반환·로깅 없는 지점·catch 건수와 지점군 목록) 기재 (위 표)
 - [x] 잔여 지점 처리 7/7 · 미처리(방어 3) 사유 기재
 - [x] 반환값 불변 단언 + "추가 줄은 로깅뿐" diff 건수 확인
-- [x] 로거 레벨·오류 객체 전달 단언 테스트 10건 · 회귀 항목 파일 · `check:lrtm` OK
+- [x] 로거 레벨·오류 객체 전달 단언 테스트 12건(PGRST116 2 포함) · 회귀 항목 파일 · `check:lrtm` OK
 - [x] 핵심 지점 4기준 판정표(알림 미구현 명시)
 - [x] `npm run build` · `npm run test:regression` 전체 PASS
 - [x] `gh pr checks <PR>` 출력 그대로 인용 + 완료 절차 R-17 (문서·코드 PR만, `Refs #1181`, 병합 Jaison·종결 Aiden)
