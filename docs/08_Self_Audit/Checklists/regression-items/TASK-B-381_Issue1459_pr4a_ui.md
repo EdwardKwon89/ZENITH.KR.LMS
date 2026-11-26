@@ -13,7 +13,7 @@
 | :-- | :-- | :-- | :-- |
 | TC-381C-01 | 새 화면 미리보기 | `previewUpsSettlement` 결과의 원가·2 tier 금액 표시 | 수동 확인(PR-4a 화면) |
 | TC-381C-02 | 새 화면 임시저장·정산마감 | `saveUpsSettlementDraft`/`finalizeUpsSettlement` 호출, SETTLED 반영 | 수동 확인 |
-| TC-381C-03 | 옛 액션 제거 | `recordUpsActualCost`·`previewUpsActualCost`·`recordActualCostAndFinalize`·`markOrderCostSettled`·`recordUpsActualCharges` export 0건 | `git grep`/`tsc` |
+| TC-381C-03 | 옛 액션 제거 | `recordUpsActualCost`·`previewUpsActualCost`·`recordActualCostAndFinalize`·`markOrderCostSettled`·`recordUpsActualCharges`·`createPostFinalizationAdjustment` export 0건 | `git grep`/`tsc` |
 | TC-381C-04 | 옛 UI 제거 | `BillingConfirmModal`·`UpsActualAdjustmentForm` 참조 0건 | `git grep` |
 | TC-381C-05 | 관리자 인보이스 생성 버튼 | UPS 오더에서 버튼 미노출(서버 거부는 PR-3 공통 진입점) | 수동 확인 |
 | TC-381C-06 | 일별 청구 UPS 숨김 | UPS 인보이스는 집계·상세에서 제외, 비UPS는 유지 | `tests/unit/finance/task-b381-pr4a-daily-billing-exclusion.test.ts` |
@@ -23,4 +23,4 @@
 
 **되돌리기**: PR 단위 revert(코드·문구). DB 변경 없음.
 
-**회귀**: `npm run test:regression` — **301 files passed · 1 skipped / 2,299 passed · 16 skipped**(skip은 B-373 세션 16건), `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+**회귀**: `npm run test:regression` — **301 files passed · 1 skipped / 2,297 passed · 16 skipped**(skip은 B-373 세션 16건), `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.

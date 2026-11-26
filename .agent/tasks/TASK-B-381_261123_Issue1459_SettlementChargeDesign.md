@@ -517,6 +517,7 @@ zen_ups_settlement_run_charges
 - `ups-actual-cost.ts` — `recordUpsActualCost`·`previewUpsActualCost`·`recordActualCostAndFinalize`·`markOrderCostSettled` 제거(잔존: `getUpsActualCost`·`getOrdersForCostSettlement`·`unmarkOrderCostSettled`)
 - `ups-actual-charges.ts` — `recordUpsActualCharges` 제거(잔존: 조회·검색·대사)
 - `BillingConfirmModal.tsx`·`UpsActualAdjustmentForm.tsx` 삭제, `orders/[orderId]`·`admin/ups-actual-charges`는 새 정산 화면 링크로 대체
+- `createPostFinalizationAdjustment`·`createAdjustmentInvoice` 제거 — 옛 후청구 경로(직접 `zen_invoices` insert) 폐쇄. `rejectInvoice`의 비UPS 재발행만 생성기 경유로 유지
 - `OrderFinanceSummary` — UPS에서 인보이스 생성 버튼 미노출
 - `daily-billing.ts` — UPS 인보이스 집계·상세 제외, `ShipperDailyBillingClient` 개별 청구확정 버튼 제거
 - 오류 키 `legacy_invoiced_order` 제거(4개 로케일), i18n 기준 117키
@@ -532,7 +533,7 @@ zen_ups_settlement_run_charges
 - 신규 `task-b381-pr4a-daily-billing-exclusion.test.ts` 2건 — UPS 제외·비UPS 양성
 - 기존 `daily-billing-aggregation` fixture를 비UPS(AIR)로 전환해 집계·상세 로직 회귀 유지
 - 옛 액션·모달·폼 전용 테스트 제거: `ups-actual-cost`·`ups-actual-charges`(2)·`task-b364`·`task-b366`(unit/integration)·`BillingConfirmModal`·`UpsActualAdjustmentForm`·`order-settlement-detail`·E2E `r11`
-- 전체 회귀: `npm run test:regression` — **301 files passed · 1 skipped / 2,299 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+- 전체 회귀: `npm run test:regression` — **301 files passed · 1 skipped / 2,297 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
 
 ### 11-4. 후속 인계 (PR-4a 본문 기재 항목)
 - `createPostFinalizationAdjustment`→`createAdjustmentInvoice` 직접 insert 경로: 옛 후청구 액션 제거 여부·PR-3~4a 사이 UPS 도달 가능성
