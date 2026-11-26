@@ -21,7 +21,7 @@
 | TC-381C-08 | 오류 키 정리 | `legacy_invoiced_order` 제거 후 4개 로케일 동기화(116키) | `tests/unit/i18n/errors-key-sync.test.ts` |
 | TC-381C-10 | 초안 라운드트립 | 원금액 복원·재저장 total 불변·부가항목 유지 | `tests/integration/task-b381-ups-settlement-actions.test.ts` |
 | TC-381C-11 | 새 화면 동작 | 초안 복원(calc 3/2)·미리보기·항목별 부가운임·저장/정산/되돌리기 | `tests/unit/components/order-settlement/order-settlement-detail.test.tsx` |
-| TC-381C-12 | 보존 함수 회귀 | 목록 필터·조회 실패·대사/검색 | `tests/unit/finance/task-b381-pr4a-get-orders-list.test.ts`, `task-b381-pr4a-ups-charge-readers.test.ts` |
+| TC-381C-12 | 보존 함수 회귀 | 목록 필터·조회 실패·대사/검색 | `tests/unit/finance/task-b381-pr4a-get-orders-list.test.ts`, `tests/unit/finance/task-b381-pr4a-ups-charge-readers.test.ts` |
 | TC-381C-13 | 알림 best-effort | 성공 시 1회, 실패해도 정산 유지 | `tests/integration/task-b381-ups-settlement-actions.test.ts` |
 | TC-381C-09 | 전체 회귀·build | `npm run test:regression`·`npm run build` PASS | CI |
 
