@@ -36,7 +36,8 @@ const AGENCY_ORG = `${P}02`;
 const SHIPPER_ORG = `${P}03`;
 const O = {
   preview: `${P}21`, draft: `${P}22`, final: `${P}23`, idem: `${P}24`,
-  lock: `${P}25`, invoice: `${P}26`, deny: `${P}27`, curr: `${P}28`, nochange: `${P}29`, noprod: `${P}2a`,
+  lock: `${P}25`, invoice: `${P}26`, deny: `${P}27`, curr: `${P}28`, nochange: `${P}29`,
+  nocountry: `${P}2a`, invErr: `${P}2b`,
 } as const;
 const ORDER_IDS = Object.values(O);
 const ORG_IDS = [PLATFORM_ORG, AGENCY_ORG, SHIPPER_ORG];
@@ -70,12 +71,32 @@ async function createActor(role: string, orgId: string): Promise<Actor> {
   return { client, userId: data.user.id, role, orgId };
 }
 
-function asActor(actor: Actor) {
+function asActor(actor: Actor, client: SupabaseClient = actor.client) {
   mockValidate.mockResolvedValue({
-    supabase: actor.client,
+    supabase: client,
     user: { id: actor.userId },
     profile: { id: actor.userId, role: actor.role, org_id: actor.orgId, status: 'ACTIVE' },
   });
+}
+
+function clientWithInvoiceLookupError(client: SupabaseClient): SupabaseClient {
+  return new Proxy(client, {
+    get(target, prop, receiver) {
+      if (prop === 'from') {
+        return (table: string) => {
+          if (table === 'zen_invoices') {
+            return {
+              select: () => ({
+                filter: async () => ({ data: null, error: { message: 'forced invoice lookup failure' } }),
+              }),
+            };
+          }
+          return (target as any).from(table);
+        };
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  }) as SupabaseClient;
 }
 
 async function createOrder(id: string, opts: { transport?: 'UPS' | 'AIR'; productCode?: string; countryCode?: string | null } = {}) {
@@ -147,8 +168,8 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     admin = await createActor('ADMIN', PLATFORM_ORG);
     shipperActor = await createActor('SHIPPER', SHIPPER_ORG);
 
-    for (const id of ORDER_IDS) { if (id === O.nochange || id === O.noprod) continue; await createOrder(id); }
-    await createOrder(O.noprod, { countryCode: null });
+    for (const id of ORDER_IDS) { if (id === O.nochange || id === O.nocountry) continue; await createOrder(id); }
+    await createOrder(O.nocountry, { countryCode: null });
     await psql(`GRANT EXECUTE ON FUNCTION public.finalize_ups_settlement_run(uuid,numeric,jsonb,jsonb) TO authenticated;`);
   }, 60000);
 
@@ -295,9 +316,19 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
 
   it('도착국 미확인 — ups_estimate_unavailable', async () => {
     asActor(admin);
-    const res = await previewUpsSettlement({ orderId: O.noprod, ...INPUT });
+    const res = await previewUpsSettlement({ orderId: O.nocountry, ...INPUT });
     expect(res.success).toBe(false);
     expect(res.error).toBe('ups_estimate_unavailable');
+  }, 60000);
+
+  it('인보이스 조회 오류 — fail-closed(rpc_failed), 원가/run 미저장', async () => {
+    asActor(admin, clientWithInvoiceLookupError(admin.client));
+    const res = await finalizeUpsSettlement({ orderId: O.invErr, ...INPUT });
+    expect(res.success).toBe(false);
+    expect(res.error).toBe('rpc_failed');
+    expect(costCount(O.invErr)).toBe(0);
+    expect(runCount(O.invErr)).toBe(0);
+    expect(status(O.invErr)).toBe('NOT_SETTLED');
   }, 60000);
 });
 

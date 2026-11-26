@@ -163,6 +163,10 @@ async function runAction(
     const isAlreadySettled = order.cost_settlement_status === 'SETTLED';
     if (!isAlreadySettled) {
       const invoiceBlock = await hasBlockingInvoice(supabase, input.orderId);
+      if (invoiceBlock === 'rpc_failed') {
+        // hasBlockingInvoice가 원인을 logger.error로 이미 기록했다 — 여기서는 원가 저장 없이 반환만 한다.
+        return { success: false, error: await trError('rpc_failed') };
+      }
       if (invoiceBlock) {
         logger.warn('ups-settlement: invoice exists', { orderId: input.orderId, reason: invoiceBlock });
         return { success: false, error: await trError(invoiceBlock as any) };
