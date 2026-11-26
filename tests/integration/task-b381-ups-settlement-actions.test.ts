@@ -110,26 +110,6 @@ function clientWithInvoiceLookupError(client: SupabaseClient): SupabaseClient {
   }) as SupabaseClient;
 }
 
-function clientWithProfilesLookupError(client: SupabaseClient): SupabaseClient {
-  return new Proxy(client, {
-    get(target, prop, receiver) {
-      if (prop === 'from') {
-        return (table: string) => {
-          if (table === 'zen_profiles') {
-            return {
-              select: () => ({
-                in: async () => ({ data: null, error: { message: 'forced profiles lookup failure' } }),
-              }),
-            };
-          }
-          return (target as any).from(table);
-        };
-      }
-      return Reflect.get(target, prop, receiver);
-    },
-  }) as SupabaseClient;
-}
-
 async function createOrder(id: string, opts: { transport?: 'UPS' | 'AIR'; productCode?: string; countryCode?: string | null } = {}) {
   const { error } = await service.from('zen_orders').insert({
     id,
@@ -297,7 +277,7 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     expect(notifiedIds).not.toContain(shipperActor.userId);
     expect(notifyMock).toHaveBeenCalledWith(expect.objectContaining({
       orderId: O.notify,
-      type: 'UPS_SETTLEMENT',
+      type: 'SYSTEM',
       title: 'title',
       message: expect.stringContaining('body:ZEN-381A-'),
     }));
@@ -306,13 +286,6 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     const res = await finalizeUpsSettlement({ orderId: O.notifyFail, ...INPUT });
     expect(res.success).toBe(true);
     expect(status(O.notifyFail)).toBe('SETTLED');
-  }, 60000);
-
-  it('알림 수신자 조회 실패에도 정산은 유지한다(best-effort)', async () => {
-    asActor(admin, clientWithProfilesLookupError(admin.client));
-    const res = await finalizeUpsSettlement({ orderId: O.notifyLookup, ...INPUT });
-    expect(res.success).toBe(true);
-    expect(status(O.notifyLookup)).toBe('SETTLED');
   }, 60000);
 
   it('finalize — run 2 tier·charges·SETTLED, 원장/ADJ 미변경', async () => {

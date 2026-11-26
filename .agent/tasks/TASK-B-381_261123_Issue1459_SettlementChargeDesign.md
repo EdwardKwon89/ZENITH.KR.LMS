@@ -411,7 +411,7 @@ zen_ups_settlement_run_charges
 - 통합 finalize는 **미리보기 금액 = run 저장 금액 = `billing_items_amounts` 반환 금액**을 값으로 비교하고, `charge_details` 항목 값·`charge_weight_kg`도 함께 확인한다.
 - `npm run build` SUCCESS.
 - **회귀 1차**: 오류 키 5개 추가로 `tests/unit/i18n/errors-key-sync.test.ts`의 기준 키 수(111→116)·목록을 갱신했다. 같은 실행에서 DB 테스트 3파일이 로컬 DB 재생성 중 스키마 소실(`relation does not exist`·프로필 org_id 공백)로 실패했으나, 재실행에서 **3파일 83/83 PASS**로 코드와 무관함을 확인했다.
-- **최종 회귀**: `npm run test:regression` — **309 files passed · 1 skipped / 2,377 passed · 16 skipped**(skip은 B-373 세션 테스트 16건), `npm run build` SUCCESS.
+- **최종 회귀**: `npm run test:regression` — **310 files passed · 1 skipped / 2,377 passed · 16 skipped**(skip은 B-373 세션 테스트 16건), `npm run build` SUCCESS.
 
 ### 9-3. 환율·통화 실패 처리 (§B)
 
@@ -597,12 +597,13 @@ zen_ups_settlement_run_charges
 
 ### 11-3. 테스트
 - 신규 `task-b381-pr4a-daily-billing-exclusion.test.ts` 2건 — UPS 제외·비UPS 양성
+- 신규 `task-b381-pr4a-notification-db.test.ts` 1건 — 알림 **실DB**(모킹 없음), 실행자 3역할 × 수신자 3명 행 생성·SHIPPER 0건
 - 신규 `order-settlement-detail.test.tsx` 7건 — 초안 복원(calc 3/2), 디바운스 미리보기·항목별 부가운임 전달, 행 추가/삭제, 임시저장 인자, 정산마감, 되돌리기 실패
 - 복원 `task-b381-pr4a-get-orders-list.test.ts` 6건 · `task-b381-pr4a-ups-charge-readers.test.ts` 6건 — 보존 함수 회귀
 - PR-2 통합에 초안 라운드트립·알림 best-effort 2건 추가(총 13건)
 - 기존 `daily-billing-aggregation` fixture를 비UPS(AIR)로 전환해 집계·상세 로직 회귀 유지
 - 옛 액션·모달·폼 전용 테스트 제거: `ups-actual-cost`·`ups-actual-charges`(2)·`task-b364`·`task-b366`(unit/integration)·`BillingConfirmModal`·`UpsActualAdjustmentForm`·`order-settlement-detail`·E2E `r11`
-- 전체 회귀: `npm run test:regression` — **309 files passed · 1 skipped / 2,349 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+- 전체 회귀: `npm run test:regression` — **310 files passed · 1 skipped / 2,349 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
 
 ### 11-4. 후속 인계 (PR-4a 본문 기재 항목)
 - `createPostFinalizationAdjustment`→`createAdjustmentInvoice` 직접 insert 경로: 옛 후청구 액션 제거 여부·PR-3~4a 사이 UPS 도달 가능성
@@ -643,3 +644,13 @@ zen_ups_settlement_run_charges
 **other_charges_hkd**
 - 읽는 곳: `src`에서는 위 `page.tsx` 1곳. 의도는 **참고용 합계**이며, 항목별 원금액·통화는 `zen_ups_actual_other_charges` 자식 행이 단일 원천이다.
 - 통화가 다른 항목이 섞이면 서로 다른 통화의 원금액을 단순 합산한 값이므로 **금액 계산에는 사용하지 않는다**(화면 표시·복원도 자식 행 사용). 컬럼 주석도 이 정의로 갱신.
+
+### 11-7. 알림 실발송 경로 검증 (2026-11-26, Aiden 요청)
+
+- **실DB 검증**: `tests/integration/task-b381-pr4a-notification-db.test.ts` — `sendInAppNotification`을 모킹하지 않고, ADMIN·MANAGER·ZENITH_SUPER_ADMIN이 각각 정산마감한 뒤 service 클라이언트로 `zen_notifications`의 `(order_id,user_id)` 행을 건수 단언. 3역할 전원 1건, SHIPPER 0건. 자기완결 fixture(런타임 계정·정리), skip 게이트 없음.
+- **발견 1 — CHECK 위반**: `zen_notifications_type_check` 허용값에 `UPS_SETTLEMENT`가 없어 insert 실패. 타입을 **`SYSTEM`**으로 수정.
+- **발견 2 — MANAGER 수신자 조회**: `zen_profiles` SELECT 정책이 본인/ADMIN·SUPER만이라 MANAGER 실행 시 수신자가 자기 자신으로 좁혀짐. 수신자 ID 조회만 **관리자 클라이언트**로 수행(권한은 이미 3역할로 제한).
+- **발견 3 — 타 사용자 알림 insert**: `sendInAppNotification`의 세션 `insert...select('id').single()`은 타 사용자 행 RETURNING에 SELECT 정책이 적용돼 실패할 수 있음. 공용 함수에 **`asAdmin?: boolean` 옵션**을 추가(기본 세션, 기존 3개 호출처 영향 없음)하고 정산 알림만 `asAdmin: true`.
+- **best-effort**: 수신자 조회/문구/발송을 outer try로 감싸 실패 시 `logger.warn` 후 `SETTLED` 유지.
+- **컬럼 주석 마이그레이션**: `20261126120000_task_b381_pr4a_cost_amount_comments.sql` — 적용 순서는 M3 `20261126092000` 뒤(전체 마이그레이션 순서대로 적용). 롤백은 이전 COMMENT 문구 복원(스키마 변경 없음).
+

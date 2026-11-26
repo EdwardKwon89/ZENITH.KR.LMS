@@ -2,7 +2,7 @@
 
 import { logger } from '@/lib/logger';
 
-import { createClient as createServerClient } from "@/utils/supabase/server";
+import { createClient as createServerClient, createAdminClient } from "@/utils/supabase/server";
 import { OrderStatus } from "@/types/orders";
 import { sendStatusChangeEmail } from "@/lib/notifications/email";
 import { revalidatePath } from "next/cache";
@@ -197,8 +197,10 @@ export async function sendInAppNotification(params: {
   type: string;
   orderId?: string;
   link?: string;
+  /** 다른 사용자에게 발송할 때 RLS RETURNING 제약을 피하기 위한 관리자 클라이언트 사용(기본: 세션) */
+  asAdmin?: boolean;
 }) {
-  const supabase = await createServerClient();
+  const supabase = params.asAdmin ? await createAdminClient() : await createServerClient();
   
   const { data, error } = await supabase
     .from("zen_notifications")
