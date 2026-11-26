@@ -87,10 +87,10 @@ date                              # Thu Nov 26 17:46:00 KST 2026
 - [x] 로거 레벨·오류 객체 전달 단언 테스트 10건 · 회귀 항목 파일 · `check:lrtm` OK
 - [x] 핵심 지점 4기준 판정표(알림 미구현 명시)
 - [x] `npm run build` · `npm run test:regression` 전체 PASS
-- [ ] `gh pr checks <PR>` 출력 그대로 인용 + 완료 절차 R-17 (문서·코드 PR만, `Refs #1181`, 병합 Jaison·종결 Aiden)
+- [x] `gh pr checks <PR>` 출력 그대로 인용 + 완료 절차 R-17 (문서·코드 PR만, `Refs #1181`, 병합 Jaison·종결 Aiden)
 - [x] 추가된 줄에 절대경로·계정·운영 값 없음 (R-21)
 
 ## [작업 결과]
 
 - 커밋: `c60c40cf4f1f297d289d29a71615d1510ac8600e`
-- PR: `<PLACEHOLDER_PR>`
+- PR: [#1554](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1554) (`Refs #1181`, base `TeamB_Dev`, 병합 Jaison·종결 Aiden) · head `59f74ba92`
