@@ -509,7 +509,7 @@ zen_ups_settlement_run_charges
 | 항목 | 내용 |
 |:--|:--|
 | **브랜치** | `feature/teamb-task-b381-iss1459-pr3-guards` |
-| **PR** | #PR3 (`TeamB_Dev`, `Refs #1459`) |
+| **PR** | #1549 (`TeamB_Dev`, `Refs #1459`) |
 | **범위** | 서버 방어만 — ① RELEASED 분기 UPS 미호출 ② `generateInvoicesForOrder` 내부 UPS 거부 ③ `finalizeDailyShipperInvoices` UPS 제외 |
 | **범위 밖** | 옛 액션·UI 제거(PR-4a), `zen_ups_actual_charges` DROP, `unmarkOrderCostSettled` 변경, M4/M4-b/M5, 운영 DB |
 
