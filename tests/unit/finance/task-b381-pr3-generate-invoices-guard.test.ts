@@ -53,11 +53,15 @@ function guardClient(result: { transport?: string | null; guardError?: unknown; 
 }
 
 function rejectClient(orderId: string) {
-  return {
+  const update = vi.fn();
+  const client = {
     from(table: string) {
       const node: any = {
         select: () => node,
-        update: () => node,
+        update: (payload: unknown) => {
+          update(table, payload);
+          return node;
+        },
         eq: () => node,
         insert: async () => ({ error: null }),
         single: async () =>
@@ -69,6 +73,7 @@ function rejectClient(orderId: string) {
       return node;
     },
   };
+  return { client, update };
 }
 
 const ADMIN = { id: 'user-1', role: 'ADMIN', org_id: 'org-1' };
@@ -143,9 +148,10 @@ describe('TASK-B-381 PR-3 — 관리자 직접 생성·재발행 경로', () => 
     expect(res).toEqual({ success: true, invoice: { id: 'inv-1' } });
   });
 
-  it('rejectInvoice: UPS는 취소만 하고 재발행하지 않는다(newInvoiceId 없음)', async () => {
+  it('rejectInvoice: UPS는 취소(CANCELED)만 하고 재발행하지 않는다(newInvoiceId 없음)', async () => {
+    const { client, update } = rejectClient('order-ups');
     (validateUserAction as any).mockResolvedValue({
-      supabase: rejectClient('order-ups'),
+      supabase: client,
       profile: ADMIN,
       user: { id: 'user-1' },
     });
@@ -154,12 +160,14 @@ describe('TASK-B-381 PR-3 — 관리자 직접 생성·재발행 경로', () => 
     const res = await rejectInvoice('inv-old');
 
     expect(res).toEqual({ success: true, newInvoiceId: undefined });
+    expect(update).toHaveBeenCalledWith('zen_invoices', expect.objectContaining({ status: 'CANCELED' }));
     expect(generatorMock.generateInvoice).toHaveBeenCalledWith('order-ups');
   });
 
-  it('rejectInvoice: 비UPS는 취소 후 재발행한다(양성 대조)', async () => {
+  it('rejectInvoice: 비UPS는 취소(CANCELED) 후 재발행한다(양성 대조)', async () => {
+    const { client, update } = rejectClient('order-air');
     (validateUserAction as any).mockResolvedValue({
-      supabase: rejectClient('order-air'),
+      supabase: client,
       profile: ADMIN,
       user: { id: 'user-1' },
     });
@@ -168,6 +176,7 @@ describe('TASK-B-381 PR-3 — 관리자 직접 생성·재발행 경로', () => 
     const res = await rejectInvoice('inv-old');
 
     expect(res).toEqual({ success: true, newInvoiceId: 'inv-new' });
+    expect(update).toHaveBeenCalledWith('zen_invoices', expect.objectContaining({ status: 'CANCELED' }));
     expect(generatorMock.generateInvoice).toHaveBeenCalledWith('order-air');
   });
 });

@@ -77,7 +77,7 @@ describe('TASK-B-381 PR-3 — InvoiceGenerator 공통 진입점 UPS 거부', () 
     expect(loggerMock.error).toHaveBeenCalledWith('InvoiceGenerator Error:', expect.any(Error));
   });
 
-  it('비UPS 오더는 가드에서 막히지 않는다(양성 대조)', async () => {
+  it('비UPS 오더는 가드에서 막히지 않는다(가드 통과만 검증 — 생성 성공은 아님)', async () => {
     adminClientMock.current = adminClient({ transport: 'AIR' });
     const generator = new InvoiceGenerator();
 
