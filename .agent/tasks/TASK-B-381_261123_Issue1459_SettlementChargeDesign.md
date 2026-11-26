@@ -398,18 +398,20 @@ zen_ups_settlement_run_charges
 - `src/lib/ups/settlement/types.ts` — `UpsSettlementInput`·`UpsSettlementPreview`·`SettlementCurrencyError`
 - `src/lib/ups/settlement/build.ts` — `computeSettlementCost`(출고확정일 환율·원가), `buildSettlementPreview`(2 tier run payload)
 - `src/app/actions/finance/index.ts` — 3개 액션 export
-- `messages/{ko,en,zh,ja}.json` — 신규 오류 키 5개(`ups_invoice_exists`·`paid_invoice_exists`·`settlement_run_missing`·`currency_conversion_failed`·`rpc_failed`)
-- 테스트: `tests/integration/task-b381-ups-settlement-actions.test.ts` (**9건, 자기완결형 — CI 실행**)
+- `messages/{ko,en,zh,ja}.json` — 신규 오류 키 6개(`ups_invoice_exists`·`paid_invoice_exists`·`settlement_run_missing`·`currency_conversion_failed`·`ups_estimate_unavailable`·`rpc_failed`)
+- 테스트: `tests/integration/task-b381-ups-settlement-actions.test.ts` (**10건, 자기완결형 — CI 실행**), `tests/unit/ups/settlement-build.test.ts` (**8건, 고정 fixture**)
 - 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-381_Issue1459_pr2_actions.md`
 - Ds-11: `Ds_11_11B_UPS_Agency_Actuals.md §11.20`, `Ds_11_04_Finance_Settlement.md §4.4`, 인덱스 갱신
 
 ### 9-2. 테스트 결과
 
 - 자기완결형: `beforeAll`에서 조직·GoTrue 계정(런타임 난수, 비밀번호는 대/소문자·숫자 포함)·오더·스냅샷을 만들고 `afterAll`에서 `session_replication_role=replica`로 정리한다. 게이트/전용 환경변수 없이 CI에서 실행된다.
-- 신규 통합 **9/9 PASS** — 미리보기 무쓰기·임시저장 원가만·정산마감 run/charges/SETTLED·멱등 재호출·SETTLED 다른 입력 거부+원가 불변·인보이스 방어·SHIPPER 거부·환율 실패·비UPS 가드
+- 신규 통합 **10/10 PASS** — 미리보기 무쓰기·임시저장 원가만·정산마감 run/charges/SETTLED·멱등 재호출·SETTLED 다른 입력 거부+원가 불변·인보이스 방어·SHIPPER 거부·환율 실패·비UPS 가드·도착국 미확인. 거부 사유는 `trError`를 키 반환으로 mock해 **오류 키로 단언**(`already_settled`·`ups_invoice_exists`·`permission_denied`·`not_ups_order`·`currency_conversion_failed`·`ups_estimate_unavailable`).
+- 신규 단위 **8/8 PASS** (`settlement-build.test.ts`) — 고정 estimate·환율(3자리 소수)·스냅샷으로 두 tier의 7개 금액(구성요소·음수 조정·부가항목 2자리 합·`line_total`)과 부가항목 payload를 **값으로** 단언하고, 대리점 `agencyCostPrice <= 0` 폴백·`agency/shipper 없음` 조정 0·상품/도착국 실패를 고정했다.
+- 통합 finalize는 **미리보기 금액 = run 저장 금액 = `billing_items_amounts` 반환 금액**을 값으로 비교하고, `charge_details` 항목 값·`charge_weight_kg`도 함께 확인한다.
 - `npm run build` SUCCESS.
 - **회귀 1차**: 오류 키 5개 추가로 `tests/unit/i18n/errors-key-sync.test.ts`의 기준 키 수(111→116)·목록을 갱신했다. 같은 실행에서 DB 테스트 3파일이 로컬 DB 재생성 중 스키마 소실(`relation does not exist`·프로필 org_id 공백)로 실패했으나, 재실행에서 **3파일 83/83 PASS**로 코드와 무관함을 확인했다.
-- **최종 회귀**: `npm run test:regression` — **308 files passed · 1 skipped / 2,367 passed · 16 skipped**(skip은 B-373 세션 테스트 16건), `npm run build` SUCCESS.
+- **최종 회귀**: `npm run test:regression` — **309 files passed · 1 skipped / 2,376 passed · 16 skipped**(skip은 B-373 세션 테스트 16건), `npm run build` SUCCESS.
 
 ### 9-3. 환율·통화 실패 처리 (§B)
 
@@ -427,6 +429,7 @@ zen_ups_settlement_run_charges
 | 미리보기·임시저장 + `SETTLED` | `already_settled` 거부(쓰기 금지) |
 
 - 같은 `baseFreight`만 바꾼 재호출은 run payload(매출 tier 금액)가 동일하므로 멱등 반환된다. run payload를 바꾸는 입력(부가항목 금액·중량)으로 잠금을 검증했다(TC-381A-05).
+- **멱등 재호출의 재계산 한계**: SETTLED 이후 요율·할인·환율 데이터가 바뀌면 같은 입력도 다른 payload로 계산되어 멱등 반환 대신 `already_settled`로 거부될 수 있다. 안전한 방향(중복 run 미생성·원가 불변)의 실패이며, 같은 데이터 구간에서는 멱등이 성립한다.
 
 ### 9-5. 핵심 지점 4기준 판정 (§B)
 
@@ -438,16 +441,17 @@ zen_ups_settlement_run_charges
 | ④ 과거 사고 이력 | **해당** | UPS 원가·정산 경로는 이미 핵심 지점으로 지정(#1183, ①③) |
 
 - **2개 해당 → 핵심 지점**. 조치: RPC 실패·통화 실패·예외 3경로 모두 `logger.error`를 **반환 이전에** 호출한다. 서버 `logger.error`는 `zen_error_logs`에 ERROR로 자동 적재되어 `/admin/error-logs`에서 즉시 확인할 수 있다(DEF-145/IMP-183 계열 기존 경로).
-- CRITICAL 승격(이메일·인앱)은 #1183 계열 공통 알림 구성 과제로, 이 PR 범위(승인된 3파일) 밖이라 새 인프라를 추가하지 않았다.
+- CRITICAL 승격(이메일·인앱)은 #1183 계열 공통 알림 구성 과제로, 이 PR 범위(승인된 3파일) 밖이라 새 인프라를 추가하지 않았다. **후속 위치: #1183(핵심 지점 CRITICAL 승격 공통 과제)**.
 
 ### 9-6. `logger.error` 반환 이전 위치 (증거)
 
 | 경로 | 위치 | 순서 |
 |:--|:--|:--|
-| `finalize_ups_settlement_run` 실패 | `src/app/actions/finance/ups-settlement.ts:182-186` | `logger.error` → `return` |
-| 통화 변환 실패 | 동일 `:195-196` | `logger.error` → `return` |
-| 그 외 예외 | 동일 `:198-199` | `logger.error` → `return` |
-| 인보이스 조회 실패(보조) | 동일 `:62`, RPC가 최종 방어 | warn/return 분기와 분리 |
+| `finalize_ups_settlement_run` 실패 | `src/app/actions/finance/ups-settlement.ts:183-187` | `logger.error` → `return` |
+| 통화 변환 실패 | 동일 `:196-197` | `logger.error` → `return` |
+| estimate 불가 | 동일 `:200-201` | `logger.error` → `return` |
+| 그 외 예외 | 동일 `:203-204` | `logger.error` → `return` |
+| 인보이스 조회 실패(보조) | 동일 `:63`, **fail-closed**(`rpc_failed`) | `logger.error` → 반환(원가 선저장 안 함) |
 | 오더 조회 실패 | 동일 `:40` | `logger.error` 후 `order_not_found` 반환 |
 
 - RPC 실패 로그에는 오더 id·오류 코드·원가 KRW 합계·부가항목 건수만 남기고 인보이스 번호·계좌·거래처 값은 남기지 않는다(R-21).
@@ -456,8 +460,8 @@ zen_ups_settlement_run_charges
 
 | # | 항목 | PR/테스트 |
 |:-:|:--|:--|
-| 1 | run 양 tier·charge weight·billing_items_amounts 일치 | PR-1 TC-381-01·08 + **PR-2 TC-381A-03** |
-| 2 | ADJ 분리·항목명·반올림 합=총액 | **PR-2 TC-381A-01·03·05**(payload 불변식) + PR-1 TC-381-08 |
+| 1 | run 양 tier·charge weight·billing_items_amounts 일치 | PR-1 TC-381-01·08 + **PR-2 TC-381A-03**(미리보기·run·`billing_items_amounts` 값 비교)·TC-381A-11 |
+| 2 | ADJ 분리·항목명·반올림 합=총액 | **PR-2 TC-381A-11**(7개 금액 값 단언)·TC-381A-01·03·05 + PR-1 TC-381-08 |
 | 3 | 같은 입력 2회 → 새 version 없음 | PR-1 TC-381-02·12 + **PR-2 TC-381A-04** |
 | 4 | run RLS 매트릭스 | PR-1 TC-381-04·13 |
 | 5 | RPC 보안·원자성·MANAGER 양성 | PR-1 TC-381-03·05·06·09·15·16 |
@@ -471,7 +475,29 @@ zen_ups_settlement_run_charges
 | 13 | R-10 화면·ERROR 0 | PR-4 |
 | 14 | 전체 회귀·build | 각 PR CI |
 
-### 9-8. 후속 인계
+### 9-8. 확인 요청 답변 (Jaison a~d)
+
+| # | 질문 | 답변 |
+|:-:|:--|:--|
+| a | 설계 §2-1 7단계 "알림(best-effort)" 미구현 | **의도적 보류**. PR-2에는 새 정산마감 화면이 없어(PR-4a) 알림 수신자·문구·동선이 확정되지 않았다. `revalidatePath`는 3곳 구현했다. 알림은 새 화면과 함께 **PR-4a**에서 붙인다. |
+| b | draft·preview도 `DELIVERED`만 허용 | **의도**. 설계 §2-1 1단계 가드가 `DELIVERED`이고, `getOrdersForCostSettlement`도 `DELIVERED`만 노출한다. 옛 `recordUpsActualCost`의 `IN_TRANSIT` 임시저장 경로는 PR-4a에서 옛 액션과 함께 제거된다. |
+| c | 제품 미해결 시 기존 스냅샷 폴백 → 신규 실패 | **실패가 안전하다고 판단**해 유지하되 전용 키 `ups_estimate_unavailable`를 추가했다(기존 `rpc_failed` 오해 소지 제거). 사유는 `SettlementEstimateError`(PRODUCT_NOT_FOUND/DEST_COUNTRY_MISSING)로 구분해 로그에 남기고, 스냅샷으로 조용히 폴백하지 않는다. TC-381A-10으로 고정. |
+| d | 실중량 폴백 순서 차이 | **기존과 동일하게 수정**했다. `actualWeightKg ?? snapshot.platform.chargeableWeightKg`(기존 `recomputeRevenue`와 동일). 이전의 `billingWeightKg` 우선은 제거. |
+
+### 9-9. 재검토 보완 반영 (Jaison 필수 3건·Aiden 비차단)
+
+| # | 지적 | 반영 |
+|:-:|:--|:--|
+| J1 | 대리점 target `> 0` 폴백 누락 | `agencyCostPrice <= 0`이면 플랫폼 합계 target. `settlement-build.test.ts`에서 조정 24(플랫폼 120 − 구성 96)로 고정 |
+| J2 | 금액 값 단언 없음·§9-7 매핑 과대 | 단위 8건(고정 fixture, 7개 금액·음수 조정·3자리 환율 반올림) + 통합에서 미리보기=run=`billing_items_amounts` 값 비교. §9-7을 실제 단언 범위로 수정 |
+| J3 | 거부 사유 미단언 | `trError`를 키 반환으로 mock하고 6개 오류 키를 정확히 단언 |
+| A1 | 인보이스 조회 오류 시 원가 선저장 | 조회 오류를 **fail-closed**(`rpc_failed`)로 변경 — 원가 저장 전에 반환 |
+| A2 | 핵심 지점 후속 Issue | #1183(공통 CRITICAL 승격)으로 명시 |
+| A3 | 멱등 재계산 한계 | §9-4에 명시(안전한 방향의 실패) |
+
+- 참고(비차단, 후속 검토): `saveCostDraft`의 부가항목 delete→insert는 트랜잭션이 아니다(기존 `recordUpsActualCost` 패턴과 동일). 중간 실패 시 부가항목이 빈 상태로 남을 수 있어 `logger.error`만 남긴다. PR-4a에서 옛 경로 제거 시 RPC/단일 트랜잭션 편입을 검토한다.
+
+### 9-10. 후속 인계
 
 - **PR-3**: PR-2 병합 후 착수(착수 전 이슈에 한 줄 보고). 범위는 서버 방어만(RELEASED UPS 미호출·`generateInvoicesForOrder` UPS 거부·`finalizeDailyShipperInvoices` UPS 제외, 비UPS 양성 대조). **PR-3과 PR-4a는 같은 날 연달아 병합**, 그 사이 `TeamB_Dev` 수동 테스트·UAT·배포 제외(시작·종료 시각 `date` 기록).
 - **PR-4**: 새 정산마감 화면 + 옛 액션·UI 제거를 같은 PR(4a), Ds-11 마무리·R-10 증적(4b).
