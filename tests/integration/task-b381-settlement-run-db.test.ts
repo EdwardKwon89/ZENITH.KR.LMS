@@ -124,8 +124,8 @@ async function cleanup() {
       DELETE FROM public.zen_invoices WHERE metadata->>'source_order_id' IN ('${ORDER_IDS.join("','")}');
       DELETE FROM public.zen_ups_settlement_runs WHERE order_id IN ('${ORDER_IDS.join("','")}');
       DELETE FROM public.zen_orders WHERE id IN ('${ORDER_IDS.join("','")}');
-      DELETE FROM public.zen_profiles WHERE id IN ('${actors.map((a) => a.userId).join("','")}') OR email LIKE '381-%@test.kr';
-      DELETE FROM auth.users WHERE id IN ('${actors.map((a) => a.userId).join("','")}') OR email LIKE '381-%@test.kr';
+      DELETE FROM public.zen_profiles WHERE email LIKE '381-%@test.kr';
+      DELETE FROM auth.users WHERE email LIKE '381-%@test.kr';
       DELETE FROM public.zen_organizations WHERE id IN ('${ORG_IDS.join("','")}');
       RESET session_replication_role;
     `);
@@ -188,6 +188,25 @@ describe('TASK-B-381 PR-1 — run 저장소·RPC·RLS 실DB (자기완결형)', 
     expect(first.error).toBeNull();
     expect(second.error).toBeNull();
     expect(second.data?.[0]?.run_id).toBe(first.data?.[0]?.run_id);
+    expect(runCount(O.idem)).toBe(1);
+  }, 60000);
+
+  it('멱등 정규화 — 공백 이름·소수 3자리 입력도 같은 입력으로 처리', async () => {
+    const first = await finalize(admin, O.idem);
+    expect(first.error).toBeNull();
+    const variantAmounts = [
+      { ...AMOUNTS[0], base_freight: 100.001, fuel_surcharge: 10.001, surge_fee: 5.001, other_charges: 7.001, freight_adjustment: -2.001 },
+      { ...AMOUNTS[1], base_freight: 100.001, fuel_surcharge: 10.001, surge_fee: 5.001, other_charges: 7.001, freight_adjustment: -2.001 },
+    ];
+    const variantCharges = [
+      { ...CHARGES[0], name: '  주소정정  ', amount: 6.001 },
+      { ...CHARGES[1], name: '  주소정정  ', amount: 3.001 },
+      { ...CHARGES[2], name: '  주소정정  ', amount: 3.001 },
+    ];
+    const second = await finalize(admin, O.idem, variantAmounts, variantCharges);
+    expect(second.error).toBeNull();
+    expect(second.data?.[0]?.run_id).toBe(first.data?.[0]?.run_id);
+    expect(second.data?.[0]?.version).toBe(1);
     expect(runCount(O.idem)).toBe(1);
   }, 60000);
 

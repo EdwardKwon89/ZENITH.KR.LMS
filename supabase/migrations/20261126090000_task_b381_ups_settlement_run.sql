@@ -88,7 +88,8 @@ CREATE TRIGGER trg_zen_ups_settlement_run_charges_immutable
   BEFORE UPDATE OR DELETE ON public.zen_ups_settlement_run_charges
   FOR EACH ROW EXECUTE FUNCTION public.zen_ups_settlement_run_immutable();
 
--- 5) RLS: SELECT 정책만, 쓰기는 DEFINER RPC
+-- 5) RLS: SELECT 정책만. authenticated 기준 쓰기 권한은 부여하지 않는다(쓰기는 DEFINER RPC).
+--    service_role은 Supabase 기본 권한으로 INSERT 가능(카탈로그 확인 true) — authenticated 기준 제한이다.
 ALTER TABLE public.zen_ups_settlement_runs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.zen_ups_settlement_run_amounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.zen_ups_settlement_run_charges ENABLE ROW LEVEL SECURITY;

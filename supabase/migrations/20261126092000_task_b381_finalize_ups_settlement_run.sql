@@ -133,19 +133,19 @@ BEGIN
          FROM public.zen_ups_settlement_run_amounts a WHERE a.run_id = v_prev_id
        ) IS NOT DISTINCT FROM (
          SELECT jsonb_agg(jsonb_build_array(
-                  x.tier, coalesce(x.base_freight,0), coalesce(x.fuel_surcharge,0), coalesce(x.surge_fee,0),
-                  coalesce(x.other_charges,0), coalesce(x.freight_adjustment,0),
-                  coalesce(x.settlement_charges_total,0), coalesce(x.line_total,0)) ORDER BY x.tier)
+                  x.tier, round(coalesce(x.base_freight,0),2), round(coalesce(x.fuel_surcharge,0),2), round(coalesce(x.surge_fee,0),2),
+                  round(coalesce(x.other_charges,0),2), round(coalesce(x.freight_adjustment,0),2),
+                  round(coalesce(x.settlement_charges_total,0),2), round(coalesce(x.line_total,0),2)) ORDER BY x.tier)
          FROM jsonb_to_recordset(p_amounts) AS x(
            tier text, base_freight numeric, fuel_surcharge numeric, surge_fee numeric,
            other_charges numeric, freight_adjustment numeric, settlement_charges_total numeric, line_total numeric)
          WHERE x.tier IN ('ADMIN_TO_AGENCY','SHIPPER')
        )
        AND (
-         SELECT jsonb_agg(jsonb_build_array(c.tier, c.line_no, c.name, c.amount) ORDER BY c.tier, c.line_no)
+         SELECT jsonb_agg(jsonb_build_array(c.tier, c.line_no, btrim(c.name), round(c.amount,2)) ORDER BY c.tier, c.line_no)
          FROM public.zen_ups_settlement_run_charges c WHERE c.run_id = v_prev_id
        ) IS NOT DISTINCT FROM (
-         SELECT jsonb_agg(jsonb_build_array(c.tier, c.line_no, c.name, c.amount) ORDER BY c.tier, c.line_no)
+         SELECT jsonb_agg(jsonb_build_array(c.tier, c.line_no, btrim(c.name), round(coalesce(c.amount,0),2)) ORDER BY c.tier, c.line_no)
          FROM jsonb_to_recordset(p_charges) AS c(tier text, line_no integer, name text, amount numeric)
          WHERE c.tier IN ('ADMIN_TO_AGENCY','SHIPPER')
        )

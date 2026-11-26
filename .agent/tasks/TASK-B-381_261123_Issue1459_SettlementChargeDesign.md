@@ -365,6 +365,12 @@ zen_ups_settlement_run_charges
 
 ### 8-7. 재검토 보완 반영 (Jaison 필수 4·권고 3)
 
+**2차 비차단 보완 (2026-11-26)**
+- M3 멱등 비교 정규화: 입력 금액 `round(...,2)`·항목명 `btrim`을 비교 양쪽에 적용. 공백 이름·소수 3자리 입력으로 재마감해도 새 version이 생기지 않는 테스트 추가(CI 실행).
+- M1 문구: "쓰기는 DEFINER RPC만" → **authenticated 기준**으로 정정. `service_role` INSERT 권한 카탈로그 확인 결과 **true**(Supabase 기본 권한), SELECT true.
+- M2 헤더: "추가형" → **함수 교체(동작 변경)** — run 없는 오더는 `settlement_run_missing`으로 차단.
+- 후속 설계 항목: `settled_by`의 화면/응답 노출 여부는 이 PR 범위 밖(후속 검토 1건).
+
 | # | 변경 | 파일·확인 |
 |:-:|:--|:--|
 | 1 | **멱등 재마감**: 같은 입력 분기에서 오더가 `NOT_SETTLED`면 인보이스 방어 후 **run 생성 없이 `SETTLED` 복구**. 다른 입력은 새 version | M3 §4~5. 테스트 `task-b381-settlement-run-db.test.ts` — unmark 후 재마감 시 run 1건·같은 run_id·`SETTLED`, 다른 입력은 version 2 |
