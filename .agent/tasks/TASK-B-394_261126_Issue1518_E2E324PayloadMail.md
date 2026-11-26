@@ -54,4 +54,4 @@ date                              # Thu Nov 26 15:56:42 KST 2026
 ## [작업 결과]
 
 - 문서 커밋: `dd1cd48127a4f5c0f86741bb732c2fdb0bfef2c6`
-- PR: `<PLACEHOLDER_PR>`
+- PR: [#1551](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1551) (`Refs #1490` · `Refs #1518`, base `TeamB_Dev`, 병합 Jaison·종결 Aiden) · head `77a50d833`
