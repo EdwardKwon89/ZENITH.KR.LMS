@@ -210,3 +210,43 @@
 #### 컬럼 추가
 - `zen_billing_statement_items.freight_adjustment numeric(14,2) NOT NULL DEFAULT 0`
 - `zen_billing_statement_items.charge_details jsonb NOT NULL DEFAULT '[]'::jsonb`
+
+### 11.20 UPS 정산마감 서버 액션 (TASK-B-381 PR-2 / Issue #1459)
+
+- **Path**: `src/app/actions/finance/ups-settlement.ts` (`'use server'`), 계산·payload 헬퍼 `src/lib/ups/settlement/{types,build}.ts` (`server-only`, 액션 아님)
+- **공통 계약**: `UpsSettlementInput` — `orderId`, 실측 중량/치수, `baseFreight`·`fuelSurcharge`·`surgeFee`(금액+통화), `otherCharges[]`(이름·금액·통화), `upsInvoiceNo`·`upsInvoiceDate`, `notes`. 반환 `UpsSettlementActionResult` — `{ success, error?, preview?, runId?, version? }`
+- **공통 권한**: `validateUserAction()` + `hasAdminOrManagerRole(profile.role)` — **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**만. 그 외 `permission_denied`. DB 접근은 세션 클라이언트만 사용한다(user-session RLS 유지).
+- **공통 오류 문구**: `messages/{ko,en,zh,ja}.json`의 `Errors` 키로 반환한다(`ups_invoice_exists`·`paid_invoice_exists`·`settlement_run_missing`·`currency_conversion_failed`·`ups_estimate_unavailable`·`rpc_failed` 신규).
+
+#### previewUpsSettlement(input)
+- **설명**: DB 쓰기 없이 정산마감 결과를 미리 계산합니다. 출고확정일(`getOrderReleasedDate`) 기준 환율로 원가를 산출하고, `estimateUpsFreightCore`로 대리점·화주 2 tier의 run 금액·부가항목 payload를 만듭니다. `zen_order_costs`는 갱신하지 않으며 `UPS_ACTUAL_COST_ADJ` 델타도 만들지 않습니다(§2-1 4단계).
+- **Input**: `UpsSettlementInput`
+- **Output**: `Promise<UpsSettlementActionResult>` — `preview.releasedDate`·`chargeWeightKg`·`cost`(원가 요약)·`amounts[2]`·`charges[]`
+- **오류**: `permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`(SETTLED 오더의 미리보기 거부)·`currency_conversion_failed`·`ups_estimate_unavailable`·`rpc_failed`
+- **부수효과**: 조회만 (DB 변경 없음)
+
+#### saveUpsSettlementDraft(input)
+- **설명**: 임시저장 — `zen_ups_actual_cost` upsert + `zen_ups_actual_other_charges` 기존 행 삭제 후 재삽입만 수행합니다. run 생성·오더 `SETTLED` 전환은 하지 않습니다.
+- **Input**: `UpsSettlementInput`
+- **Output**: `Promise<UpsSettlementActionResult>` — `{ success: true }`
+- **오류**: `permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`·`currency_conversion_failed`·`rpc_failed`
+- **부수효과**: `zen_ups_actual_cost`/`zen_ups_actual_other_charges` 쓰기, `revalidatePath`(오더 상세·`/finance/daily-billing`)
+
+#### finalizeUpsSettlement(input)
+- **설명**: 정산마감 — 비취소/PAID 인보이스 선확인(보조) → 원가 저장 → run payload 계산 → `finalize_ups_settlement_run` RPC 1회로 run+amounts+charges+오더 `SETTLED`를 한 트랜잭션에서 처리합니다. **이미 `SETTLED`인 오더는 원가를 덮어쓰지 않고 RPC에 위임**하며, 같은 입력이면 기존 run을 멱등 반환하고 다른 입력이면 RPC가 `already_settled`로 거부합니다(§2-9).
+- **Input**: `UpsSettlementInput`
+- **Output**: `Promise<UpsSettlementActionResult>` — `{ success: true, runId, version }`
+- **오류**: `permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`·`ups_invoice_exists`·`paid_invoice_exists`·`currency_conversion_failed`·`ups_estimate_unavailable`·`rpc_failed`(RPC 원문 오류 미노출, 코드만 매핑). 인보이스 선확인 조회 자체가 실패하면 **fail-closed**(`rpc_failed`)로 원가 선저장을 하지 않습니다.
+- **관측성**: RPC 실패 시 `logger.error`를 **반환 이전에** 호출하고 오더·오류코드·원가 KRW 합계·부가항목 건수만 기록합니다(청구서 번호·거래처 값 비노출, R-21).
+- **부수효과**: 원가 저장(미정산 오더만), RPC 호출, `revalidatePath` 3곳(오더 상세·`/finance/daily-billing`·`/finance/statements`)
+
+#### 내부 헬퍼 (서버 액션 아님)
+- `computeSettlementCost(supabase, order, input)` — `src/lib/ups/settlement/build.ts`
+  - 출고확정일 기준 **통화별 환율을 `zen_exchange_rates`에서 직접 조회**하고, 유효 환율이 없으면 `getExchangeRate`의 최후 fallback(1350)을 쓰지 않고 `SettlementCurrencyError`를 던집니다(→ `currency_conversion_failed`). `computeUpsActualCostKrw`(기본운임 +7%)로 원가·계산 스냅샷을 만듭니다.
+  - **Input**: 세션 client, `{ id, created_at }`, `UpsSettlementInput` / **Output**: `{ summary, amounts }`
+- `buildSettlementPreview(supabase, order, input, cost)` — 동일 파일
+  - `estimateUpsFreightCore`로 대리점·화주 tier 금액을 만들고, `freight_adjustment = target − (base+fuel+surge+other)`, `settlement_charges_total` = 항목별 2자리 반올림 합, `line_total = 4개 합 + 조정 + 부가항목 합`을 계산합니다(같은 부가항목을 양 tier에 적용).
+  - **target 폴백**: 기존 `recomputeRevenue`와 동일하게 대리점 `agencyCostPrice <= 0`이면 플랫폼 합계를 target으로 씁니다(0원 target·과대 음수 조정 방지). 화주는 `finalFreight`, 없으면 플랫폼 합계입니다.
+  - **중량 폴백**: 기존 경로와 동일하게 `actualWeightKg ?? snapshot.platform.chargeableWeightKg`.
+  - **오류**: 상품을 찾을 수 없거나 도착국이 없으면 `SettlementEstimateError`(→ `ups_estimate_unavailable`). 스냅샷 합계로 조용히 폴백하지 않습니다.
+

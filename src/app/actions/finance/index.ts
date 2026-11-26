@@ -38,6 +38,12 @@ export {
 } from './ups-actual-cost';
 
 export {
+  previewUpsSettlement,
+  saveUpsSettlementDraft,
+  finalizeUpsSettlement,
+} from './ups-settlement';
+
+export {
   recordUpsActualCharges,
   getUpsActualCharges,
   getUpsChargeReconciliation,

@@ -35,7 +35,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
   const baseline = errorsOf(loadMessages(BASELINE));
   const baselineKeys = Object.keys(baseline).sort();
 
-  it('ko 기준 키가 111개이고 모두 비어 있지 않은 문자열이다', () => {
+  it('ko 기준 키가 117개이고 모두 비어 있지 않은 문자열이다', () => {
     expect(baselineKeys).toEqual([
       'adhoc_name_required',
       'adhoc_requires_agency',
@@ -59,6 +59,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'cost_name_required',
       'cost_not_entered',
       'cost_settled_locked',
+      'currency_conversion_failed',
       'current_password_incorrect',
       'destination_country_not_found',
       'document_fetch_failed',
@@ -108,6 +109,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'own_shipper_only',
       'own_shipper_outbound',
       'packages_not_found',
+      'paid_invoice_exists',
       'password_change_failed',
       'password_reset_failed',
       'payment_amount_mismatch',
@@ -118,9 +120,11 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'rate_carrier_from_required',
       'rate_slabs_required',
       'route_required_for_scheduled',
+      'rpc_failed',
       'settlement_items_locked',
       'settlement_order_already_finalized',
       'settlement_recalc_locked',
+      'settlement_run_missing',
       'shipper_scope_denied',
       'shipping_method_not_found',
       'shxk_generic',
@@ -145,6 +149,8 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'ups_actual_cost_status_invalid',
       'ups_edit_registered_locked',
       'ups_edit_status_locked',
+      'ups_estimate_unavailable',
+      'ups_invoice_exists',
       'voc_closed_not_revertable',
       'withdraw_confirm_input',
       'zone_date_required',
