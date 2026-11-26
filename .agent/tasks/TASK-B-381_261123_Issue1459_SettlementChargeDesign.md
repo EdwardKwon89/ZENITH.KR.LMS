@@ -296,7 +296,7 @@ zen_ups_settlement_run_charges
 - Jaison 6차 보완 3건: M5 청구서 포함 제외, `recomputeRevenue` 목적 명시, §3 확정/근거 정리.
 - 7차 지시: PAID는 방어 가드로만, M5 제외 조건·테스트, 상태 표기·§5 갱신.
 - 코드·마이그레이션 변경 없음. PR은 draft 유지(`status:draft`).
-- **커밋 해시**: `9a8f77e58` (M4-b 추가 커밋). 해시 갱신 커밋은 별도.
+- **커밋 해시**: 코드 `7981bdc5b165774177e0d53e973cd34387f57b9a` / 문서 `7981bdc5b165774177e0d53e973cd34387f57b9a` (M4-b 추가 커밋). 해시 갱신 커밋은 별도.
 - PR: #1462 (draft, `Refs #1459`, `Refs #1451`, `Refs #1453`, `Refs #1463`, `Refs #1369`).
 
 
@@ -305,4 +305,81 @@ zen_ups_settlement_run_charges
 - M1 `20261126090000` · M2 `20261126091000` · M3 `20261126092000` (10분 간격)
 - 기준: `origin/develop` `20261122100200` / `origin/TeamB_Dev` `20261124100000` 실측, 둘보다 늦은 시각으로 채번
 - 작성 직전 재확인·충돌 시 3개 일괄 조정. M4·M4-b·M5는 데이터 조치(운영 절차, #1364)
-- **커밋 해시**: `49744cd7040c683170783c7ff5a9a1f916f26f11`
+- **커밋 해시**: 코드 `7981bdc5b165774177e0d53e973cd34387f57b9a` / 문서 `7981bdc5b165774177e0d53e973cd34387f57b9a`
+
+## 8. [구현 작업 결과] PR-1 — DB M1~M3 (2026-11-26)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr1-db` |
+| **PR** | #1536 (`TeamB_Dev`, `Refs #1459`) |
+| **마이그레이션 시각** | M1 `20261126090000` · M2 `20261126091000` · M3 `20261126092000` (작성 직전 재확인: develop `20261122100200`·TeamB_Dev `20261124100000`보다 늦음) |
+| **범위** | DB만. 앱 액션·화면·자동 인보이스 중단은 PR-2~4 |
+
+### 8-1. 산출물
+- M1: `zen_ups_settlement_runs`·`_run_amounts`·`_run_charges` + tier RLS + append-only 트리거 + ROLLBACK 블록
+- M2: `billing_items_amounts` run 전용(레거시 폴백 제거) + `zen_billing_statement_items.freight_adjustment`·`charge_details` + 통화 가드 제거 + ROLLBACK 블록
+- M3: `finalize_ups_settlement_run`(DEFINER·search_path·GRANT, admin 3역할, 멱등, 인보이스 방어, 원자 처리) + ROLLBACK 블록
+- 테스트: `tests/integration/task-b381-settlement-run-db.test.ts` (**12건, 자기완결형 — CI 실행**)
+- 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-381_Issue1459_pr1_db.md`
+
+### 8-2. 테스트 결과
+
+- **자기완결형**: `beforeAll`에서 조직·GoTrue 계정(런타임 난수)·오더를 만들고 `afterAll`에서 정리한다. `skipIf`/전용 환경변수 없이 **CI에서 실행**된다(12/12).
+- 신규 DB 통합 **9/9 PASS** — RPC 성공·멱등·불변 트리거·RLS tier·MANAGER 양성·비관리자 거부·인보이스 방어·run 전용 금액·원자성
+- 되돌리기: 불변 트리거 비활성 → 1 failed(복구 PASS), M1~M3 롤백 블록 실행 → 객체 0 확인 후 재적용 PASS
+- 기존 회귀 갱신: b360 청구서 28/28, b360 Excel 19/19, b359 스키마 36/36
+- 전체: **306 passed · 2 skipped / 2,345 passed · 25 skipped**, build SUCCESS
+
+### 8-3. M2 영향 확인 (레거시 폴백 제거)
+- run 없는 UPS 오더 청구는 `settlement_run_missing`으로 차단된다.
+- 폴백 의존 fixture 3파일을 run 기반으로 갱신했다: `task-b360-billing-statements.test.ts`, `task-b360-excel-export.test.ts`, `taskb359-billing-statement-db.test.ts`.
+- 그 외 폴백 의존 테스트는 전체 회귀에서 발견되지 않았다.
+
+### 8-4. 배포·로컬 영향
+- 이 PR 병합 후 Mike·Baker 로컬 DB는 `./scripts/check-db-freshness.sh --fix`가 필요하다.
+- M5 로컬 리허설(#1532)은 M1 이후 재실측 대상이다.
+- 운영 적용은 Aiden(Edward 승인, R-14). M4·M4-b·M5는 이 PR 범위 밖.
+
+### 8-5. 설계 §2-11 14항목 매핑
+| # | 항목 | PR/테스트 |
+|:-:|:--|:--|
+| 1 | run 양 tier·charge weight·billing_items_amounts 일치 | **PR-1** TC-381-01·08 |
+| 2 | ADJ 분리·항목명·반올림 합=총액 | PR-2(액션) + PR-1 TC-381-08 |
+| 3 | 같은 입력 2회 → 새 version 없음 | PR-1 TC-381-02 + PR-2 |
+| 4 | run RLS 매트릭스 | **PR-1** TC-381-04 |
+| 5 | RPC 보안·원자성·MANAGER 양성 | **PR-1** TC-381-03·05·06·09 |
+| 6 | UPS 출고확정 인보이스 미생성 (비UPS 회귀) | PR-3 |
+| 7 | 기존 UPS 인보이스 일괄 취소 | 범위 밖(#1532·운영) |
+| 8 | SETTLED·run 없음 초기화 | 범위 밖(#1532·운영) |
+| 9 | MANAGER 비취소 인보이스 → `ups_invoice_exists` | **PR-1** TC-381-07 |
+| 10 | `generateInvoicesForOrder` 직접 호출 UPS 거부 | PR-3 |
+| 11 | M4-b 삭제·참조 무결성 | 범위 밖(#1532·운영) |
+| 12 | 옛 UPS 화면·액션 제거 후 비UPS 무회귀 | PR-4 |
+| 13 | R-10 화면·ERROR 0 | PR-4 |
+| 14 | 전체 회귀·build | **PR-1** + 각 PR |
+
+### 8-6. 실패 관측성·금전 영향
+- RPC 실패는 오류 코드로 반환되어 앱에서 `logger.error`로 기록한다(PR-2). 금액·정산 영향이 있어 PR-2에서 핵심 지점 4기준 판정 후 필요 시 CRITICAL 알림을 구성한다.
+- **커밋 해시**: 코드 `7981bdc5b165774177e0d53e973cd34387f57b9a` / 문서 `7981bdc5b165774177e0d53e973cd34387f57b9a`
+
+### 8-7. 재검토 보완 반영 (Jaison 필수 4·권고 3)
+
+**2차 비차단 보완 (2026-11-26)**
+- M3 멱등 비교 정규화: 입력 금액 `round(...,2)`·항목명 `btrim`을 비교 양쪽에 적용. 공백 이름·소수 3자리 입력으로 재마감해도 새 version이 생기지 않는 테스트 추가(CI 실행).
+- M1 문구: "쓰기는 DEFINER RPC만" → **authenticated 기준**으로 정정. `service_role` INSERT 권한 카탈로그 확인 결과 **true**(Supabase 기본 권한), SELECT true.
+- M2 헤더: "추가형" → **함수 교체(동작 변경)** — run 없는 오더는 `settlement_run_missing`으로 차단.
+- 후속 설계 항목: `settled_by`의 화면/응답 노출 여부는 이 PR 범위 밖(후속 검토 1건).
+
+| # | 변경 | 파일·확인 |
+|:-:|:--|:--|
+| 1 | **멱등 재마감**: 같은 입력 분기에서 오더가 `NOT_SETTLED`면 인보이스 방어 후 **run 생성 없이 `SETTLED` 복구**. 다른 입력은 새 version | M3 §4~5. 테스트 `task-b381-settlement-run-db.test.ts` — unmark 후 재마감 시 run 1건·같은 run_id·`SETTLED`, 다른 입력은 version 2 |
+| 2 | **M2 ROLLBACK 실행 가능**: `billing_items_amounts` DROP → b360 두 함수 원문 재적용 → 컬럼 DROP → GRANT/reload. 주석 해제만으로 실행 | M2 하단 블록. 실행 검증: 롤백 후 `billing_items_amounts` OUT **7**·items 컬럼 **11**·두 함수 존재, 재적용 후 **10**·**13** |
+| 3 | **Ds-11 갱신**: run 3테이블·RPC·변경 RPC·컬럼 추가 기재, 인덱스 갱신 | `Ds_11_11B_UPS_Agency_Actuals.md §11.19`, `Ds_11_04_Finance_Settlement.md`, `Ds_11_API_상세_명세서.md` |
+| 4 | **보안 테스트 추가**: anon RPC 거부, `has_function_privilege`(**anon** f·authenticated t — PUBLIC 직접 검사 아님), `prosecdef=true`·`search_path=public`, GRANT 회수 시 호출 실패(되돌리기) | 동일 테스트 파일 |
+| 5 | `settled_by` FK를 **ON DELETE RESTRICT**로 변경 + 오더 CASCADE·불변 트리거 주석 | M1 |
+| 6 | 인보이스 `source_order_id` 비교를 **text 비교**로 변경(비uuid 값 형변환 오류 방지) | M3 |
+| 7 | **RLS 음성 대조**(비소속 대리점·타 조직 화주 0건) + 오류 `not_ups_order`·`already_settled`(다른 입력)·`paid_invoice_exists` 테스트 | 동일 테스트 파일 |
+
+- 신규 DB 통합 **12/12 PASS**(자기완결형, CI 실행), 전체 **307 passed · 1 skipped / 2,357 passed · 16 skipped**, build SUCCESS.
+- 되돌리기: 불변 트리거 비활성 1 failed, GRANT 회수 시 호출 실패, M1~M3 롤백 블록 검증.

@@ -176,3 +176,37 @@
 
 ---
 
+
+### 11.19 UPS 정산 run 저장소·정산마감 RPC (TASK-B-381 / Issue #1459)
+
+#### 테이블 3종 (append-only)
+- **Path**: `supabase/migrations/20261126090000_task_b381_ups_settlement_run.sql`
+- `zen_ups_settlement_runs` — `order_id`(FK, CASCADE) · `version` · `charge_weight_kg` · `currency='KRW'` · `source='UPS_SETTLEMENT'` · `settled_at` · `settled_by`(FK, **RESTRICT**) · `created_at`, `UNIQUE(order_id, version)`
+- `zen_ups_settlement_run_amounts` — `run_id`(FK) · `tier`(`ADMIN_TO_AGENCY`|`SHIPPER`) · `base_freight` · `fuel_surcharge` · `surge_fee` · `other_charges` · `freight_adjustment` · `settlement_charges_total` · `line_total`, `PK(run_id, tier)`
+- `zen_ups_settlement_run_charges` — `run_id` · `tier` · `line_no` · `name`(같은 이름 중복 허용) · `amount` · `currency`, `UNIQUE(run_id, tier, line_no)`
+- **권한**: `REVOKE ALL` 후 `authenticated`·`service_role`에 **SELECT만**. 쓰기는 RPC만. RLS SELECT: 관리자 3역할 전체 · AGENCY 자기 `ADMIN_TO_AGENCY`+소속 화주 `SHIPPER` · 화주 계열 자기 `SHIPPER`만 · anon 차단.
+- **불변성**: 3테이블 `BEFORE UPDATE/DELETE` 트리거(`zen_ups_settlement_run_immutable`) — append-only(재정산은 새 version).
+- **주의**: 오더 삭제 CASCADE는 불변 트리거로 차단된다. `settled_by`는 감사 목적 `ON DELETE RESTRICT`.
+
+#### RPC `finalize_ups_settlement_run(p_order_id uuid, p_charge_weight_kg numeric, p_amounts jsonb, p_charges jsonb)`
+- **Path**: `supabase/migrations/20261126092000_task_b381_finalize_ups_settlement_run.sql`
+- **권한**: `SECURITY DEFINER`, `SET search_path = public`, `REVOKE PUBLIC/anon` → `GRANT authenticated`. 함수 내부 `auth.uid()` 기준 **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**만, actor 파라미터 없음.
+- **동작**: 오더 `FOR UPDATE` 잠금 → UPS·`DELIVERED`·미정산 확인 → 비취소/PAID 인보이스 방어(`ups_invoice_exists`·`paid_invoice_exists`) → payload 불변식(`line_total`=4개 합+조정+부가항목 합, 부가항목 합=항목 합, tier 2개) → **같은 입력은 새 version 없이 반환**(오더가 `NOT_SETTLED`면 인보이스 방어 후 `SETTLED` 복구) → 새 version이면 run+amounts+charges 저장 + 오더 `SETTLED`를 한 트랜잭션으로 수행.
+- **Input**: `p_amounts` 배열 2건(`tier`·4개 금액·`freight_adjustment`·`settlement_charges_total`·`line_total`), `p_charges` 배열(`tier`·`line_no`·`name`·`amount`)
+- **Output**: `TABLE(run_id uuid, version integer)`
+- **오류**: `profile_not_found`·`permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`·`ups_invoice_exists`·`paid_invoice_exists`·`invalid_run_payload`
+- **부수효과**: `zen_ups_settlement_runs`/`_amounts`/`_charges` INSERT, `zen_orders.cost_settlement_*` UPDATE
+
+#### 변경 RPC `billing_items_amounts(p_order_ids uuid[], p_tier text)`
+- **Path**: `supabase/migrations/20261126091000_task_b381_billing_items_amounts.sql`
+- **변경**: **최신 run만** 사용(레거시 `zen_order_costs`/스냅샷 폴백 제거). 반환 컬럼 7→**10**(`freight_adjustment`·`settlement_charges_total`·`charge_details` 추가). tier 매핑: `ADMIN_TO_AGENCY`→`ADMIN_TO_AGENCY`, 그 외→`SHIPPER`.
+- **오류**: `settlement_run_missing`(run 없음)·`settlement_run_incomplete`(tier 금액 행 없음)
+- **출력**: `order_id`·`charge_weight_kg`·4개 금액·`freight_adjustment`·`settlement_charges_total`·`line_total`·`charge_details`(jsonb)
+
+#### 변경 RPC `create_billing_statement_with_items(...)`
+- **Path**: 동일 M2 파일
+- **변경**: `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 컬럼 반영, **비KRW 원장 통화 가드 제거**(run은 KRW 고정·원장 미사용). 그 외 로직 불변.
+
+#### 컬럼 추가
+- `zen_billing_statement_items.freight_adjustment numeric(14,2) NOT NULL DEFAULT 0`
+- `zen_billing_statement_items.charge_details jsonb NOT NULL DEFAULT '[]'::jsonb`
