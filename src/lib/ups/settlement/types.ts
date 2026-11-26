@@ -80,3 +80,14 @@ export class SettlementCurrencyError extends Error {
     this.name = 'SettlementCurrencyError';
   }
 }
+
+/** 상품/도착국 등 매출 estimate에 필요한 입력을 확정할 수 없을 때. */
+export class SettlementEstimateError extends Error {
+  readonly reason: 'PRODUCT_NOT_FOUND' | 'DEST_COUNTRY_MISSING';
+
+  constructor(reason: 'PRODUCT_NOT_FOUND' | 'DEST_COUNTRY_MISSING') {
+    super(reason);
+    this.name = 'SettlementEstimateError';
+    this.reason = reason;
+  }
+}

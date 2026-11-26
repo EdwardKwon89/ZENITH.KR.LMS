@@ -9,6 +9,8 @@ dotenv.config({ path: '.env.local' });
 const mockValidate = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/auth/guards', () => ({ validateUserAction: mockValidate }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: unknown) => fn }));
+// 화면 문구 대신 오류 키를 반환시켜 거부 사유를 정확히 단언한다.
+vi.mock('@/lib/i18n/action-error', () => ({ trError: async (key: string) => key, actionLocale: async () => 'ko' }));
 
 import {
   previewUpsSettlement,
@@ -34,7 +36,7 @@ const AGENCY_ORG = `${P}02`;
 const SHIPPER_ORG = `${P}03`;
 const O = {
   preview: `${P}21`, draft: `${P}22`, final: `${P}23`, idem: `${P}24`,
-  lock: `${P}25`, invoice: `${P}26`, deny: `${P}27`, curr: `${P}28`, nochange: `${P}29`,
+  lock: `${P}25`, invoice: `${P}26`, deny: `${P}27`, curr: `${P}28`, nochange: `${P}29`, noprod: `${P}2a`,
 } as const;
 const ORDER_IDS = Object.values(O);
 const ORG_IDS = [PLATFORM_ORG, AGENCY_ORG, SHIPPER_ORG];
@@ -76,7 +78,7 @@ function asActor(actor: Actor) {
   });
 }
 
-async function createOrder(id: string, opts: { transport?: 'UPS' | 'AIR' } = {}) {
+async function createOrder(id: string, opts: { transport?: 'UPS' | 'AIR'; productCode?: string; countryCode?: string | null } = {}) {
   const { error } = await service.from('zen_orders').insert({
     id,
     order_no: `ZEN-381A-${id.slice(-4)}`,
@@ -85,8 +87,8 @@ async function createOrder(id: string, opts: { transport?: 'UPS' | 'AIR' } = {})
     status: 'DELIVERED',
     shipper_id: SHIPPER_ORG,
     agency_org_id: AGENCY_ORG,
-    recipient_country_code: 'US',
-    ups_product_code: 'WW_SAVER_NONDOC',
+    recipient_country_code: opts.countryCode === undefined ? 'US' : opts.countryCode,
+    ups_product_code: opts.productCode ?? 'WW_SAVER_NONDOC',
     incoterms: 'DDP',
     cost_settlement_status: 'NOT_SETTLED',
   });
@@ -145,7 +147,8 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     admin = await createActor('ADMIN', PLATFORM_ORG);
     shipperActor = await createActor('SHIPPER', SHIPPER_ORG);
 
-    for (const id of ORDER_IDS) { if (id === O.nochange) continue; await createOrder(id); }
+    for (const id of ORDER_IDS) { if (id === O.nochange || id === O.noprod) continue; await createOrder(id); }
+    await createOrder(O.noprod, { countryCode: null });
     await psql(`GRANT EXECUTE ON FUNCTION public.finalize_ups_settlement_run(uuid,numeric,jsonb,jsonb) TO authenticated;`);
   }, 60000);
 
@@ -160,6 +163,20 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     expect(res.success).toBe(true);
     expect(res.preview?.amounts).toHaveLength(2);
     expect(res.preview?.charges.length).toBe(2);
+    // 부가항목은 KRW 고정 fixture — 값으로 단언한다.
+    expect(res.preview?.charges.map((c) => [c.tier, c.line_no, c.name, c.amount])).toEqual([
+      ['ADMIN_TO_AGENCY', 1, '주소정정', 30],
+      ['SHIPPER', 1, '주소정정', 30],
+    ]);
+    for (const amount of res.preview!.amounts) {
+      expect(amount.settlement_charges_total).toBe(30);
+      expect(amount.line_total).toBe(
+        round2(
+          amount.base_freight + amount.fuel_surcharge + amount.surge_fee + amount.other_charges +
+          amount.freight_adjustment + amount.settlement_charges_total,
+        ),
+      );
+    }
     expect(runCount(O.preview)).toBe(0);
     expect(costCount(O.preview)).toBe(0);
   }, 60000);
@@ -177,6 +194,8 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
   it('finalize — run 2 tier·charges·SETTLED, 원장/ADJ 미변경', async () => {
     asActor(admin);
     const beforeCosts = Number(psql(`SELECT count(*) FROM public.zen_order_costs WHERE order_id='${O.final}'`));
+    const preview = await previewUpsSettlement({ orderId: O.final, ...INPUT });
+    expect(preview.success).toBe(true);
     const res = await finalizeUpsSettlement({ orderId: O.final, ...INPUT });
     expect(res.success).toBe(true);
     expect(res.version).toBe(1);
@@ -186,6 +205,31 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     expect(Number(psql(`SELECT count(*) FROM public.zen_ups_settlement_run_charges c JOIN public.zen_ups_settlement_runs r ON r.id=c.run_id WHERE r.order_id='${O.final}'`))).toBe(2);
     expect(Number(psql(`SELECT count(*) FROM public.zen_order_costs WHERE order_id='${O.final}'`))).toBe(beforeCosts);
     expect(Number(psql(`SELECT count(*) FROM public.zen_order_costs WHERE order_id='${O.final}' AND cost_type='UPS_ACTUAL_COST_ADJ'`))).toBe(0);
+
+    // 저장된 run 금액이 미리보기 값과 일치하는지 값으로 단언한다.
+    const stored = await latestRun(O.final);
+    expect(stored.amounts).toHaveLength(2);
+    for (const expected of preview.preview!.amounts) {
+      const row = stored.amounts.find((a) => a.tier === expected.tier)!;
+      for (const key of AMOUNT_KEYS) expect(Number(row[key])).toBe(expected[key]);
+      const tierCharges = stored.charges.filter((c) => c.tier === expected.tier);
+      expect(tierCharges).toHaveLength(1);
+      expect(Number(tierCharges[0].amount)).toBe(30);
+      expect(round2(tierCharges.reduce((sum, c) => sum + Number(c.amount), 0))).toBe(expected.settlement_charges_total);
+    }
+
+    // 청구 항목 금액의 단일 원천(billing_items_amounts)이 같은 값을 반환한다.
+    const { data: billRows, error: billError } = await service.rpc('billing_items_amounts', {
+      p_order_ids: [O.final],
+      p_tier: 'ADMIN_TO_AGENCY',
+    });
+    expect(billError).toBeNull();
+    const billRow = (billRows as any[])[0];
+    const agencyRow = stored.amounts.find((a) => a.tier === 'ADMIN_TO_AGENCY')!;
+    for (const key of AMOUNT_KEYS) expect(Number(billRow[key])).toBe(Number(agencyRow[key]));
+    expect(Number(billRow.charge_weight_kg)).toBe(preview.preview!.chargeWeightKg);
+    expect((billRow.charge_details as any[])).toHaveLength(1);
+    expect(Number((billRow.charge_details as any[])[0].amount)).toBe(30);
   }, 60000);
 
   it('finalize 멱등 — 같은 입력 재호출은 새 version 없음', async () => {
@@ -207,6 +251,7 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
       otherCharges: [{ name: '주소정정', amount: 999, currency: 'KRW' }],
     });
     expect(res.success).toBe(false);
+    expect(res.error).toBe('already_settled');
     expect(runCount(O.lock)).toBe(1);
     expect(psql(`SELECT total_cost_krw FROM public.zen_ups_actual_cost WHERE order_id='${O.lock}'`)).toBe(costBefore);
   }, 60000);
@@ -220,6 +265,7 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     asActor(admin);
     const res = await finalizeUpsSettlement({ orderId: O.invoice, ...INPUT });
     expect(res.success).toBe(false);
+    expect(res.error).toBe('ups_invoice_exists');
     expect(runCount(O.invoice)).toBe(0);
   }, 60000);
 
@@ -227,13 +273,14 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     asActor(shipperActor);
     const res = await finalizeUpsSettlement({ orderId: O.deny, ...INPUT });
     expect(res.success).toBe(false);
+    expect(res.error).toBe('permission_denied');
   }, 60000);
 
   it('환율 실패 — 알 수 없는 통화는 currency_conversion_failed', async () => {
     asActor(admin);
     const res = await previewUpsSettlement({ orderId: O.curr, ...INPUT, otherCharges: [{ name: 'X', amount: 1, currency: 'ZZZ' }] });
     expect(res.success).toBe(false);
-    expect(res.error).toBeTruthy();
+    expect(res.error).toBe('currency_conversion_failed');
     expect(runCount(O.curr)).toBe(0);
     expect(costCount(O.curr)).toBe(0);
   }, 60000);
@@ -243,8 +290,39 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     asActor(admin);
     const res = await previewUpsSettlement({ orderId: O.nochange, ...INPUT });
     expect(res.success).toBe(false);
+    expect(res.error).toBe('not_ups_order');
+  }, 60000);
+
+  it('도착국 미확인 — ups_estimate_unavailable', async () => {
+    asActor(admin);
+    const res = await previewUpsSettlement({ orderId: O.noprod, ...INPUT });
+    expect(res.success).toBe(false);
+    expect(res.error).toBe('ups_estimate_unavailable');
   }, 60000);
 });
+
+const AMOUNT_KEYS = [
+  'base_freight', 'fuel_surcharge', 'surge_fee', 'other_charges',
+  'freight_adjustment', 'settlement_charges_total', 'line_total',
+] as const;
+
+function round2(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+async function latestRun(orderId: string) {
+  const { data: run } = await service
+    .from('zen_ups_settlement_runs')
+    .select('id')
+    .eq('order_id', orderId)
+    .order('version', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!run) return { run: null, amounts: [] as any[], charges: [] as any[] };
+  const { data: amounts } = await service.from('zen_ups_settlement_run_amounts').select('*').eq('run_id', (run as any).id);
+  const { data: charges } = await service.from('zen_ups_settlement_run_charges').select('*').eq('run_id', (run as any).id);
+  return { run, amounts: (amounts ?? []) as any[], charges: (charges ?? []) as any[] };
+}
 
 function runCount(orderId: string): number {
   return Number(psql(`SELECT count(*) FROM public.zen_ups_settlement_runs WHERE order_id='${orderId}'`));

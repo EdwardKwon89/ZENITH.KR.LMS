@@ -261,6 +261,7 @@
     "cost_not_entered": "Enter the actual cost first.",
     "already_settled": "This order has already been cost-settled.",
     "cost_settled_locked": "Cost or weight cannot be changed after settlement. Unmark the settlement first.",
+    "ups_estimate_unavailable": "The product or destination country is unavailable, so the settlement amount cannot be calculated.",
     "ups_invoice_exists": "This UPS order has a non-canceled invoice and cannot be settled.",
     "paid_invoice_exists": "This UPS order has a paid invoice and cannot be settled.",
     "settlement_run_missing": "No settlement run exists. Complete the settlement first.",

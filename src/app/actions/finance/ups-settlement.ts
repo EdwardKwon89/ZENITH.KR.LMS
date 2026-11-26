@@ -6,7 +6,7 @@ import { hasAdminOrManagerRole } from '@/lib/auth/ups-rate-permissions';
 import { logger } from '@/lib/logger';
 import { trError } from '@/lib/i18n/action-error';
 import { computeSettlementCost, buildSettlementPreview } from '@/lib/ups/settlement/build';
-import { SettlementCurrencyError, type UpsSettlementActionResult, type UpsSettlementInput } from '@/lib/ups/settlement/types';
+import { SettlementCurrencyError, SettlementEstimateError, type UpsSettlementActionResult, type UpsSettlementInput } from '@/lib/ups/settlement/types';
 
 const ORDER_SELECT = `
   id, order_no, status, cost_settlement_status, transport_mode,
@@ -53,14 +53,15 @@ function guardOrder(order: OrderRow, mode: 'draft' | 'finalize'): string | null 
   return null;
 }
 
-async function hasBlockingInvoice(supabase: any, orderId: string): Promise<'paid_invoice_exists' | 'ups_invoice_exists' | null> {
+async function hasBlockingInvoice(supabase: any, orderId: string): Promise<'paid_invoice_exists' | 'ups_invoice_exists' | 'rpc_failed' | null> {
   const { data, error } = await supabase
     .from('zen_invoices')
     .select('id, status')
     .filter('metadata->>source_order_id', 'eq', orderId);
   if (error) {
+    // 조회 실패는 fail-closed — 원가를 먼저 저장한 뒤 RPC에서 거부되어 원가만 바뀌는 상태를 만들지 않는다.
     logger.error('ups-settlement: invoice lookup failed', { orderId, error: error.message });
-    return null; // RPC가 최종 방어선
+    return 'rpc_failed';
   }
   const rows = (data ?? []) as Array<{ status: string }>;
   if (rows.some((r) => r.status === 'PAID')) return 'paid_invoice_exists';
@@ -194,6 +195,10 @@ async function runAction(
     if (err instanceof SettlementCurrencyError) {
       logger.error('ups-settlement: currency conversion failed', { orderId: input.orderId, currency: err.message });
       return { success: false, error: await trError('currency_conversion_failed') };
+    }
+    if (err instanceof SettlementEstimateError) {
+      logger.error('ups-settlement: estimate unavailable', { orderId: input.orderId, reason: err.reason });
+      return { success: false, error: await trError('ups_estimate_unavailable') };
     }
     logger.error('ups-settlement: action failed', { orderId: input.orderId, mode, message: err?.message });
     return { success: false, error: await trError('rpc_failed') };

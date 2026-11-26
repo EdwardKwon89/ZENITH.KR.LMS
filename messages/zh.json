@@ -261,6 +261,7 @@
     "cost_not_entered": "请先输入实际成本。",
     "already_settled": "该订单已完成成本结算。",
     "cost_settled_locked": "已结算的订单无法修改成本或重量，请先取消结算。",
+    "ups_estimate_unavailable": "无法确认商品信息或目的国家，无法计算结算金额。",
     "ups_invoice_exists": "该 UPS 订单存在未取消的发票，无法完成结算。",
     "paid_invoice_exists": "该 UPS 订单存在已付款发票，无法完成结算。",
     "settlement_run_missing": "不存在结算记录，请先完成结算。",

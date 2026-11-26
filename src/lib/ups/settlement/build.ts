@@ -5,6 +5,7 @@ import { computeUpsActualCostKrw, type UpsActualCostAmounts } from '@/lib/ups/ac
 import { estimateUpsFreightCore } from '@/lib/ups/estimate-core';
 import {
   SettlementCurrencyError,
+  SettlementEstimateError,
   type SettlementCostSummary,
   type SettlementRunCharge,
   type SettlementRunTierAmount,
@@ -120,10 +121,13 @@ export async function buildSettlementPreview(
     productId = data?.id ?? null;
   }
 
-  const platformWeight = toNum(snapshot?.platform?.billingWeightKg) || toNum(snapshot?.platform?.chargeableWeightKg) || 0;
-  const actualWeight = input.actualWeightKg ?? platformWeight;
-  if (!productId || !order.recipient_country_code) {
-    throw new Error('estimate_unavailable');
+  // 기존 recomputeRevenue와 동일한 중량 폴백 순서: 실측 → 스냅샷 chargeableWeightKg.
+  const actualWeight = input.actualWeightKg ?? toNum(snapshot?.platform?.chargeableWeightKg);
+  if (!productId) {
+    throw new SettlementEstimateError('PRODUCT_NOT_FOUND');
+  }
+  if (!order.recipient_country_code) {
+    throw new SettlementEstimateError('DEST_COUNTRY_MISSING');
   }
 
   const estimate = await estimateUpsFreightCore(
@@ -158,7 +162,12 @@ export async function buildSettlementPreview(
   const shipperComponents = shipper
     ? { base: toNum(shipper.baseSellingPrice), fuel: toNum(shipper.fuelSurchargeSellingAmount), surge: toNum(shipper.surgeFeeSellingAmount), other: toNum(shipper.otherChargesSellingTotal) }
     : platformComponents;
-  const agencyTarget = agency ? toNum(agency.agencyCostPrice) : platformTotal;
+  // 기존 recomputeRevenue와 동일: agency 원가가 0 이하이면 플랫폼 합계로 폴백(0원 target 금지).
+  const agencyTarget = agency
+    ? toNum(agency.agencyCostPrice) > 0
+      ? toNum(agency.agencyCostPrice)
+      : platformTotal
+    : platformTotal;
   const shipperTarget = shipper ? toNum(shipper.finalFreight) : platformTotal;
 
   const chargesKrw = (input.otherCharges ?? []).map((c, idx) => ({
