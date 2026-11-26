@@ -5,6 +5,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { hasAdminOrManagerRole } from '@/lib/auth/ups-rate-permissions';
 import { logger } from '@/lib/logger';
 import { trError } from '@/lib/i18n/action-error';
+import { sendInAppNotification } from '@/app/actions/misc/notifications';
 import { computeSettlementCost, buildSettlementPreview } from '@/lib/ups/settlement/build';
 import { SettlementCurrencyError, SettlementEstimateError, type UpsSettlementActionResult, type UpsSettlementInput } from '@/lib/ups/settlement/types';
 
@@ -191,6 +192,18 @@ async function runAction(
       return { success: false, error: await trError(mapRpcError(error.message) as any) };
     }
     const row = Array.isArray(data) ? data[0] : data;
+    // §2-1 7단계: 알림은 best-effort — 실패해도 정산 결과를 되돌리지 않는다.
+    try {
+      await sendInAppNotification({
+        userId: user.id,
+        title: 'UPS 정산마감 완료',
+        message: `${order.order_no} 정산마감이 완료되었습니다.`,
+        type: 'UPS_SETTLEMENT',
+        orderId: input.orderId,
+      });
+    } catch (notifyError) {
+      logger.warn('ups-settlement: notification failed (best-effort)', notifyError);
+    }
     revalidatePath(`/(dashboard)/orders/${input.orderId}`, 'page');
     revalidatePath('/(dashboard)/finance/daily-billing', 'page');
     revalidatePath('/(dashboard)/finance/statements', 'page');

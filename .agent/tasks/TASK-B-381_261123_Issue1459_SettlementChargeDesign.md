@@ -519,6 +519,7 @@ zen_ups_settlement_run_charges
 - `BillingConfirmModal.tsx`·`UpsActualAdjustmentForm.tsx` 삭제, `orders/[orderId]`·`admin/ups-actual-charges`는 새 정산 화면 링크로 대체
 - `createPostFinalizationAdjustment`·`createAdjustmentInvoice` 제거 — 옛 후청구 경로(직접 `zen_invoices` insert) 폐쇄. `rejectInvoice`의 비UPS 재발행만 생성기 경유로 유지
 - `OrderFinanceSummary` — UPS에서 인보이스 생성 버튼 미노출
+- `finalizeUpsSettlement` — 성공 후 관리자 인앱 알림 1건(best-effort, 실패는 `logger.warn` 후 정산 유지) — §2-1 7단계
 - `daily-billing.ts` — UPS 인보이스 집계·상세 제외, `ShipperDailyBillingClient` 개별 청구확정 버튼 제거
 - 오류 키 `legacy_invoiced_order` 제거(4개 로케일), i18n 기준 117키
 - Ds-11 11B §11.14 잔존 액션 정리, 회귀 항목 `TASK-B-381_Issue1459_pr4a_ui.md`
