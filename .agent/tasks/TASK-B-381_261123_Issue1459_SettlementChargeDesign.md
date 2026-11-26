@@ -509,7 +509,7 @@ zen_ups_settlement_run_charges
 | 항목 | 내용 |
 |:--|:--|
 | **브랜치** | `feature/teamb-task-b381-iss1459-pr4a-ui` (`TeamB_Dev` 분기) |
-| **PR** | #PR4a (`TeamB_Dev`, `Refs #1459`) |
+| **PR** | #1553 (`TeamB_Dev`, `Refs #1459`) |
 | **범위** | 새 정산마감 화면 전환 + 옛 액션·UI 제거를 같은 PR에서 수행. 4b(Ds-11 마무리·R-10)는 분리 |
 
 ### 11-1. 산출물
