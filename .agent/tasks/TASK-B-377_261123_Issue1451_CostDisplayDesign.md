@@ -77,7 +77,7 @@
 - 적용: `OrderFinanceSummary`(isAdmin prop), `ShipperDailyBillingClient` breakdown, `pdf.ts`(발행 audience 전달), 인보이스 PDF 라인.
 - i18n: `ko/en/zh/ja` 4로케일 `Finance.additionalCharge`(가칭) 추가. 관리자 화면 라벨 불변.
 - **갱신 — 라벨 범위 재정의(항목4)**: 적용 대상은 §2 표의 "허용" 행 전체로 확정한다 — 화주·대리점 경로(오더 상세 `OrderFinanceSummary`, 일별 청구 `ShipperDailyBillingClient`, **청구서 화면 `finance/statements`, 청구서 Excel `statement-excel(-data)`**)는 전부 "부가운임", 관리자 경로(오더정산 상세·실비 조정 폼)는 원문 유지. **남는 경로** = 기존 행(비UPS `zen_order_costs`)과 §2의 "표시 범위 확인 필요" 행.
-- **`freight_adjustment` 라벨 확인(근거, 한 줄)**: `src/lib/finance/settlement/cost-type-labels.ts`의 `COST_TYPE_LABELS`에 `FREIGHT_ADJUSTMENT`는 **미등재**라 fallback(`cost_type.replace(/_/g, ' ')`) 영문으로 노출되며, src·messages에 "운임 조정" 표기는 **0건**(2026-11-26 `git grep` 직접 확인) — 화주·대리점 경로에서는 §2의 원가 거부 대상이라 **규칙 5와 충돌하지 않는다**. 단, 관리자 경로의 영문 fallback도 "남는 경로"에 포함해 원문 라벨(가칭 "운임 조정") 처리를 §5에서 확정한다.
+- **`freight_adjustment` 라벨 확인(근거, 한 줄 — `cost_type` 경로에 한정)**: `src/lib/finance/settlement/cost-type-labels.ts`의 `COST_TYPE_LABELS`에 `FREIGHT_ADJUSTMENT`는 **미등재**라 fallback(`cost_type.replace(/_/g, ' ')`) 영문으로 노출되며, src·messages에 "운임 조정" 표기는 **0건**(2026-11-26 `git grep` 직접 확인). **이 확인이 가리키는 대상은 오더 상세의 `cost_type` 라벨 경로(`zen_order_costs` 항목)이며**, 그 경로는 §2의 원가 거부 대상이라 **규칙 5와 충돌하지 않는 결론도 이 `cost_type` 경로에 한정한다**. **청구서 스냅샷 컬럼(`freight_adjustment`·`charge_details`) 경로는 다른 대상**이라 — 아래 "값의 성격"과 §2 청구서 행 선택지의 **확정 대기 항목(Edward·JSJung)으로 위임**한다. 단, 관리자 경로의 영문 fallback도 "남는 경로"에 포함해 원문 라벨(가칭 "운임 조정") 처리를 §5에서 확정한다.
 - **`freight_adjustment` 청구서 스냅샷 표시(항목4 보완 — Aiden·JSJung 확정 필요)**: M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷을 추가했으나(M2 12~13·92·258행) 현재 화면 표시 코드는 **0건**. 화주·대리점 표시 목표·라벨은 **택일 미정**: **(a) 숨김** — 청구서 스냅샷은 관리자 집계용으로 표시하지 않음 / **(b) "부가운임" 합산** — `charge_details` 항목과 함께 부가운임으로 합산 표시 / **(c) 별도 라벨**(가칭 "운임 조정") — 규칙 5와의 관계 재검토. **확정 전까지 §2 청구서 행의 "허용"은 `charge_details` 항목명·금액 한정으로 읽는다.**
 - **값의 성격(참고, 결정 아님)**: 이 `freight_adjustment`는 **원가가 아니라 판매가 구성의 잔차**다 — `build.ts` 193행 `freight_adjustment = round2(target − (base+fuel+surge+other))`로, **음수일 수 있다**(Edward·JSJung 결정 대기).
 
@@ -118,7 +118,7 @@
 | ZENITH_SUPER_ADMIN | 허용 | 허용 |
 | ADMIN | 허용 | 허용 |
 | MANAGER | 허용 | 허용 |
-| AGENCY · SHIPPER · SUB_ADMIN · INDIVIDUAL 등 그 외 인증 역할 | **거부** | **거부** |
+| **위 3역할 외 모든 인증 역할** (예: AGENCY·SHIPPER·SUB_ADMIN·INDIVIDUAL) | **거부** | **거부** |
 
 - 두 원가 테이블의 허용 역할 집합은 확정 규칙 1(SUPER_ADMIN·ADMIN·MANAGER)과 **정확히 같은 3역할**만 허용한다. 달성 수단은 §8-1의 B-377 마이그레이션 ①·②이며 롤백은 §8-1 표를 따른다.
 
