@@ -18,12 +18,20 @@
 | TC-381B-05 | `generateInvoicesForOrder` 비UPS (양성 대조) | 생성기 호출·기존 결과 반환 | 동일 |
 | TC-381B-06 | 오더 가드 조회 실패 | `generic` 거부, 생성기 미호출 | 동일 |
 | TC-381B-07 | AGENCY 역할의 UPS 직접 호출 | `ups_invoice_blocked` | 동일 |
+| TC-381B-11 | `InvoiceGenerator.generateInvoice` 공통 진입점 — UPS | `ups_invoice_blocked`, `logger.warn`, 생성 로직 미실행 | `tests/unit/finance/task-b381-pr3-invoice-generator-guard.test.ts` |
+| TC-381B-12 | 공통 진입점 가드 조회 실패 | `generic:ORDER_LOOKUP`, `logger.error` | 동일 |
+| TC-381B-13 | `generateInvoiceAction` — UPS/비UPS | UPS는 인보이스 없이 거부, 비UPS 성공 | `tests/unit/finance/task-b381-pr3-generate-invoices-guard.test.ts` |
+| TC-381B-14 | `rejectInvoice` — UPS/비UPS | UPS는 취소만(`newInvoiceId` 없음), 비UPS는 재발행 | 동일 |
 | TC-381B-08 | 일괄 마감 — UPS/비UPS 혼재 | UPS `skippedCount` 1, 비UPS만 `finalizeInvoice` 호출 | `tests/unit/finance/task-b381-pr3-ups-invoice-guards.test.ts` |
-| TC-381B-09 | 일괄 마감 — 인보이스 조회 실패 | fail-closed(`success:false`), 마감 0건 | 동일 |
+| TC-381B-09 | 일괄 마감 — 인보이스/오더 조회 실패 | fail-closed(`INVOICE_LOOKUP`·`ORDER_LOOKUP`), 마감 0건, `logger.error` | 동일 |
 | TC-381B-10 | 오류 키 동기화 — `ups_invoice_blocked` | 4개 로케일 동일 키 집합(118키) | `tests/unit/i18n/errors-key-sync.test.ts` |
 
-**비UPS 양성 대조**: 출고확정 자동 인보이스(TC-381B-02)와 일괄 마감(TC-381B-08) 모두 비UPS 경로가 그대로 동작함을 함께 단언합니다.
+**비UPS 양성 대조**: 출고확정 자동 인보이스(TC-381B-02)·일괄 마감(TC-381B-08)·`generateInvoiceAction`(TC-381B-13)·`rejectInvoice`(TC-381B-14) 모두 비UPS 경로가 그대로 동작함을 함께 단언합니다.
+
+**로그 레벨**: UPS 거부 `warn`, 가드/조회 실패 `error`, 일괄 제외 `warn`, fail-closed `error`를 logger mock으로 단언합니다(TC-381B-06·09·11·12).
+
+**신규 테스트 17건**: 위 표의 TC-381B-01~14(일부 TC가 여러 케이스 포함) — 3개 파일.
 
 **연속 병합**: PR-3과 PR-4a는 같은 날 연달아 병합하며, 그 사이 `TeamB_Dev`는 수동 테스트·UAT·배포 대상에서 제외합니다(시작·종료 시각은 병합 때 `date`로 기재).
 
-**회귀**: `npm run test:regression` — **311 files passed · 1 skipped / 2,386 passed · 16 skipped**(skip은 B-373 세션 16건), `npm run build` SUCCESS.
+**회귀**: `npm run test:regression` — **312 files passed · 1 skipped / 2,394 passed · 16 skipped**(skip은 B-373 세션 16건), `npm run build` SUCCESS.
