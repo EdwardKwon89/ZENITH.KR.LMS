@@ -262,6 +262,7 @@
     "already_settled": "この注文はすでに原価確定済みです。",
     "cost_settled_locked": "原価確定済みの注文は原価・重量を変更できません。先に確定を解除してください。",
     "ups_estimate_unavailable": "商品情報または到着国を確認できないため、精算金額を計算できません。",
+    "ups_invoice_blocked": "UPS 注文は自動請求の対象ではありません。精算確定フローから請求してください。",
     "ups_invoice_exists": "この UPS 注文には未取消の請求書があるため、精算を完了できません。",
     "paid_invoice_exists": "この UPS 注文には支払済みの請求書があるため、精算を完了できません。",
     "settlement_run_missing": "精算記録がないため処理できません。先に精算を完了してください。",

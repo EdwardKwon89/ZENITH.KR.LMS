@@ -35,7 +35,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
   const baseline = errorsOf(loadMessages(BASELINE));
   const baselineKeys = Object.keys(baseline).sort();
 
-  it('ko 기준 키가 117개이고 모두 비어 있지 않은 문자열이다', () => {
+  it('ko 기준 키가 118개이고 모두 비어 있지 않은 문자열이다', () => {
     expect(baselineKeys).toEqual([
       'adhoc_name_required',
       'adhoc_requires_agency',
@@ -150,6 +150,7 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'ups_edit_registered_locked',
       'ups_edit_status_locked',
       'ups_estimate_unavailable',
+      'ups_invoice_blocked',
       'ups_invoice_exists',
       'voc_closed_not_revertable',
       'withdraw_confirm_input',
