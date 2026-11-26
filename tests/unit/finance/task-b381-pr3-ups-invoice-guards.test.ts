@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const trErrorMock = vi.hoisted(() => vi.fn(async (key: string) => key));
+const trErrorMock = vi.hoisted(() =>
+  vi.fn(async (key: string, params?: Record<string, unknown>) =>
+    params?.code ? `${key}:${params.code}` : key,
+  ),
+);
+const loggerMock = vi.hoisted(() => ({ warn: vi.fn(), error: vi.fn(), info: vi.fn() }));
+vi.mock('@/lib/logger', () => ({ logger: loggerMock }));
 vi.mock('@/lib/i18n/action-error', () => ({
   trError: trErrorMock,
   actionLocale: async () => 'ko',
@@ -104,27 +110,34 @@ describe('TASK-B-381 PR-3 — 출고확정 시 UPS 자동 인보이스 미생성
 });
 
 describe('TASK-B-381 PR-3 — 일괄 마감에서 UPS 인보이스 제외', () => {
-  function supabaseForSummary(invoices: unknown[], orders: unknown[]) {
+  interface SummaryFixture {
+    invoices?: unknown[];
+    orders?: unknown[];
+    invoicesError?: { message: string } | null;
+    ordersError?: { message: string } | null;
+  }
+
+  function supabaseForSummary({ invoices, orders, invoicesError = null, ordersError = null }: SummaryFixture) {
     return {
       from: vi.fn((table: string) => {
-        if (table === 'zen_invoices') return chain(invoices);
-        if (table === 'zen_orders') return chain(orders);
+        if (table === 'zen_invoices') return chain(invoices ?? null, invoicesError);
+        if (table === 'zen_orders') return chain(orders ?? null, ordersError);
         return chain(null);
       }),
     };
   }
 
   it('UPS 인보이스는 건너뛰고 비UPS만 마감한다(skippedCount 1)', async () => {
-    const supabase = supabaseForSummary(
-      [
+    const supabase = supabaseForSummary({
+      invoices: [
         { id: 'inv-ups', metadata: { source_order_id: 'order-ups' } },
         { id: 'inv-air', metadata: { source_order_id: 'order-air' } },
       ],
-      [
+      orders: [
         { id: 'order-ups', transport_mode: 'UPS' },
         { id: 'order-air', transport_mode: 'AIR' },
       ],
-    );
+    });
     (validateUserAction as any).mockResolvedValue({ supabase, profile: PROFILE });
 
     const res = await finalizeDailyShipperInvoices(['inv-ups', 'inv-air']);
@@ -133,17 +146,42 @@ describe('TASK-B-381 PR-3 — 일괄 마감에서 UPS 인보이스 제외', () =
     expect(financeMock.finalizeInvoice).toHaveBeenCalledWith('inv-air', expect.any(String));
     expect(res).toMatchObject({ success: true, finalizedCount: 1, failedCount: 0, skippedCount: 1 });
     expect(res.errors).toEqual([]);
+    expect(loggerMock.warn).toHaveBeenCalledWith(
+      'daily-billing: UPS invoice excluded from bulk finalize',
+      { invoiceId: 'inv-ups' },
+    );
   });
 
-  it('인보이스 조회 실패는 fail-closed — 아무것도 마감하지 않고 실패 반환', async () => {
-    const supabase = {
-      from: vi.fn(() => chain(null, { message: 'forced lookup failure' })),
-    };
+  it('인보이스 조회 실패는 fail-closed — INVOICE_LOOKUP, 아무것도 마감하지 않음', async () => {
+    const supabase = supabaseForSummary({ invoicesError: { message: 'forced invoice lookup failure' } });
     (validateUserAction as any).mockResolvedValue({ supabase, profile: PROFILE });
 
     const res = await finalizeDailyShipperInvoices(['inv-1']);
 
     expect(res.success).toBe(false);
+    expect(res.errors?.[0]).toContain('INVOICE_LOOKUP');
     expect(financeMock.finalizeInvoice).not.toHaveBeenCalled();
+    expect(loggerMock.error).toHaveBeenCalledWith(
+      'daily-billing: invoice lookup for UPS exclusion failed:',
+      'forced invoice lookup failure',
+    );
+  });
+
+  it('오더 조회 실패는 fail-closed — ORDER_LOOKUP, 아무것도 마감하지 않음', async () => {
+    const supabase = supabaseForSummary({
+      invoices: [{ id: 'inv-1', metadata: { source_order_id: 'order-1' } }],
+      ordersError: { message: 'forced order lookup failure' },
+    });
+    (validateUserAction as any).mockResolvedValue({ supabase, profile: PROFILE });
+
+    const res = await finalizeDailyShipperInvoices(['inv-1']);
+
+    expect(res.success).toBe(false);
+    expect(res.errors?.[0]).toContain('ORDER_LOOKUP');
+    expect(financeMock.finalizeInvoice).not.toHaveBeenCalled();
+    expect(loggerMock.error).toHaveBeenCalledWith(
+      'daily-billing: order lookup for UPS exclusion failed:',
+      'forced order lookup failure',
+    );
   });
 });
