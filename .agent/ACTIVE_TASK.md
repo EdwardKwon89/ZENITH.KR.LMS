@@ -59,7 +59,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1529](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1529) | [Team B] TASK-B-389: B-381 데이터 작업(M4·M4-b·M5) 롤백 계획 작성 (EPIC #1364, 문서) | b | p2 | review | 미배정 | 2026-11-25 |
 | [#1528](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1528) | [Team B] TASK-B-388: 롤백 통합본 미실측 항목 로컬 실측 (EPIC #1364, TASK-B-387 후속) | b | p2 | review | jungjs | 2026-11-25 |
 | [#1524](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1524) | [Team B] TASK-B-387: 청구서관리 마이그레이션 적용 순서·롤백 로컬 왕복 리허설 (EPIC #1364) | b | p2 | review | 미배정 | 2026-11-25 |
-| [#1518](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1518) | [Aiden 요청] E2E_324_Result payload 문서의 개인 메일 기재 정리 — Team B 소유 파일 (IS #1490 후속) | b | p3 | review | 미배정 | 2026-11-26 |
 | [#1516](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1516) | [Team B] TASK-B-386: E2E_B374_Result JSON 증적 R-21 점검·처리 (IS #1490 후속) | b | p3 | review | 미배정 | 2026-11-24 |
 | [#1513](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1513) | [Team B] TASK-B-385: E2E 증적 출력 경로를 저장소 밖으로 전환 (IS #1490 후속, R-13/R-21 정합, 설계 의견부터) | b | p2 | review | jungjs | 2026-11-25 |
 | [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | review | jungjs | 2026-11-25 |
@@ -84,7 +83,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-13 |
-| [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-11-26 |
 | [#1181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1181) | [Team B] TASK-B-319: 로그 커버리지 개선 ①— ups-labels.ts 실패 반환값 무기록 해소 (~40건) | b | p2 | review | 미배정 | 2026-11-26 |
 | [#1177](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1177) | [Team A] TASK-1137: 동일 계정 동시 로그인 감지 및 처리(알림 + 기존유지/강제로그아웃 선택) | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1176](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1176) | [Team A] TASK-1136: Session Idle Timeout 관리자 설정 + 다음 로그인부터 적용 | a | p2 | - | 미배정 | 2026-08-20 |
