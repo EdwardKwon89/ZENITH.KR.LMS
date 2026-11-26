@@ -513,7 +513,7 @@ zen_ups_settlement_run_charges
 | **범위** | 새 정산마감 화면 전환 + 옛 액션·UI 제거를 같은 PR에서 수행. 4b(Ds-11 마무리·R-10)는 분리 |
 
 ### 11-1. 산출물
-- `OrderSettlementDetail.tsx` — `previewUpsSettlement`·`saveUpsSettlementDraft`·`finalizeUpsSettlement` 사용, tier별 금액·조정·부가항목 표시, 기본운임 통화 선택
+- `OrderSettlementDetail.tsx` — `previewUpsSettlement`·`saveUpsSettlementDraft`·`finalizeUpsSettlement` 사용, tier별 금액·조정·부가항목 표시, 기본운임·유류·급증·부가항목별 통화 선택, 항목 행 추가/삭제
 - `ups-actual-cost.ts` — `recordUpsActualCost`·`previewUpsActualCost`·`recordActualCostAndFinalize`·`markOrderCostSettled` 제거(잔존: `getUpsActualCost`·`getOrdersForCostSettlement`·`unmarkOrderCostSettled`)
 - `ups-actual-charges.ts` — `recordUpsActualCharges` 제거(잔존: 조회·검색·대사)
 - `BillingConfirmModal.tsx`·`UpsActualAdjustmentForm.tsx` 삭제, `orders/[orderId]`·`admin/ups-actual-charges`는 새 정산 화면 링크로 대체
@@ -521,7 +521,8 @@ zen_ups_settlement_run_charges
 - `OrderFinanceSummary` — UPS에서 인보이스 생성 버튼 미노출
 - `finalizeUpsSettlement` — 성공 후 관리자 인앱 알림 1건(best-effort, 실패는 `logger.warn` 후 정산 유지) — §2-1 7단계
 - `daily-billing.ts` — UPS 인보이스 집계·상세 제외, `ShipperDailyBillingClient` 개별 청구확정 버튼 제거
-- 오류 키 `legacy_invoiced_order` 제거(4개 로케일), i18n 기준 117키
+- 오류 키 `legacy_invoiced_order` 제거(4개 로케일), i18n 기준 116키
+- **초안 저장값**: `zen_ups_actual_cost`의 금액 컬럼에 **원금액·입력 통화**를 저장하고, 환산·+7% 가산 결과는 `total_cost_krw`·`cost_surcharge_*`·`applied_exchange_rates`에만 기록(`calc_version=3`). 재오픈 시 원금액을 복원해 이중 가산을 방지. `calc_version<3` 초안은 금액 미복원·재입력 안내
 - Ds-11 11B §11.14 잔존 액션 정리, 회귀 항목 `TASK-B-381_Issue1459_pr4a_ui.md`
 
 ### 11-2. 제거·유지 결정
@@ -532,9 +533,12 @@ zen_ups_settlement_run_charges
 
 ### 11-3. 테스트
 - 신규 `task-b381-pr4a-daily-billing-exclusion.test.ts` 2건 — UPS 제외·비UPS 양성
+- 신규 `order-settlement-detail.test.tsx` 7건 — 초안 복원(calc 3/2), 디바운스 미리보기·항목별 부가운임 전달, 행 추가/삭제, 임시저장 인자, 정산마감, 되돌리기 실패
+- 복원 `task-b381-pr4a-get-orders-list.test.ts` 6건 · `task-b381-pr4a-ups-charge-readers.test.ts` 6건 — 보존 함수 회귀
+- PR-2 통합에 초안 라운드트립·알림 best-effort 2건 추가(총 13건)
 - 기존 `daily-billing-aggregation` fixture를 비UPS(AIR)로 전환해 집계·상세 로직 회귀 유지
 - 옛 액션·모달·폼 전용 테스트 제거: `ups-actual-cost`·`ups-actual-charges`(2)·`task-b364`·`task-b366`(unit/integration)·`BillingConfirmModal`·`UpsActualAdjustmentForm`·`order-settlement-detail`·E2E `r11`
-- 전체 회귀: `npm run test:regression` — **301 files passed · 1 skipped / 2,297 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+- 전체 회귀: `npm run test:regression` — **304 files passed · 1 skipped / 2,318 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
 
 ### 11-4. 후속 인계 (PR-4a 본문 기재 항목)
 - `createPostFinalizationAdjustment`→`createAdjustmentInvoice` 직접 insert 경로: 옛 후청구 액션 제거 여부·PR-3~4a 사이 UPS 도달 가능성
@@ -543,3 +547,16 @@ zen_ups_settlement_run_charges
 - RLS 하 AGENCY 조회 통합 검증 → 4b R-10
 - `settled_by` 노출 → Aiden 판단 전 미노출
 - IMP-192(CRITICAL 승격) 범위
+
+### 11-5. PR-4a 재검토 반영 (2026-11-26)
+
+| # | 지적 | 반영 |
+|:-:|:--|:--|
+| J1 | 초안 재오픈 시 원가 이중 가산·부가운임 소실 | 금액 컬럼에 원금액·통화 저장(`calc_version=3`), 페이지가 자식 부가항목까지 복원, `calc_version<3`은 금액 미복원·재입력 안내. 통합 라운드트립 테스트(저장→복원 preview 동일→재저장 total 불변→부가항목 유지) |
+| J2 | 보존 코드 테스트 소실 | `getOrdersForCostSettlement` 6건, `getUpsChargeReconciliation`/`searchDeliveredUpsOrders` 6건 복원. 새 화면 7건. 알림 best-effort 통합 1건. 삭제 파일은 "대상 함수 삭제"로 한정 |
+| J3 | 부가운임 항목별 입력 불가 | 항목명·금액·통화 행 추가/삭제 UI, `otherCharges[]`로 전달. 유류·급증도 통화 선택 |
+| a | 알림 수신자·문구 | **본인 1명·한국어 최소 구현**임을 명시(수신자·4개 로케일 확정은 후속). 실패는 `logger.warn` 후 정산 유지 |
+| b | `legacyInvoiced` 표시 | M4(옛 UPS 인보이스 취소) 전까지 목록·상세에 정보로 유지. 최종 차단은 새 RPC `ups_invoice_exists` |
+| N1 | head 해시 오기 | `gh pr view` 기준 head로 보고 |
+| N2 | i18n 제목 117 vs 실제 116 | 제목을 116으로 정정 |
+| N3 | 동일 삼항 | `previewing` 상태 제거, 단일 문구 |

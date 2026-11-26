@@ -78,6 +78,12 @@ async function saveCostDraft(
   computed?: Awaited<ReturnType<typeof computeSettlementCost>>
 ) {
   const { summary, amounts } = computed ?? (await computeSettlementCost(supabase, order, input));
+  // 원금액을 그대로 저장한다(환산·+7% 가산은 total_cost_krw·스냅샷에만). 초안 재오픈 시 이중 가산 방지.
+  const rawAmount = (value: unknown) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const rawOtherTotal = amounts.otherCharges.reduce((sum, charge) => sum + rawAmount(charge.amount), 0);
   const { error: upsertError } = await supabase.from('zen_ups_actual_cost').upsert(
     {
       order_id: order.id,
@@ -87,13 +93,13 @@ async function saveCostDraft(
       actual_length_cm: input.actualLengthCm ?? null,
       actual_width_cm: input.actualWidthCm ?? null,
       actual_height_cm: input.actualHeightCm ?? null,
-      base_freight_hkd: summary.baseCostKrw,
+      base_freight_hkd: rawAmount(input.baseFreight?.amount),
       base_freight_currency: summary.baseCurrency,
-      fuel_surcharge_hkd: summary.fuelCostKrw,
-      fuel_surcharge_currency: 'KRW',
-      surge_fee_hkd: summary.surgeCostKrw,
-      surge_fee_currency: 'KRW',
-      other_charges_hkd: summary.otherChargesCostKrw,
+      fuel_surcharge_hkd: rawAmount(input.fuelSurcharge?.amount),
+      fuel_surcharge_currency: (input.fuelSurcharge?.currency || 'KRW').toUpperCase(),
+      surge_fee_hkd: rawAmount(input.surgeFee?.amount),
+      surge_fee_currency: (input.surgeFee?.currency || 'KRW').toUpperCase(),
+      other_charges_hkd: rawOtherTotal,
       entered_by: userId,
       notes: input.notes || null,
       applied_exchange_rate: summary.exchangeRates[summary.baseCurrency] ?? 1,
@@ -101,7 +107,7 @@ async function saveCostDraft(
       cost_surcharge_rate: summary.surchargeRate,
       cost_surcharge_amount_krw: summary.surchargeAmountKrw,
       applied_exchange_rates: summary.appliedExchangeRates,
-      calc_version: 2,
+      calc_version: 3,
     },
     { onConflict: 'order_id' }
   );

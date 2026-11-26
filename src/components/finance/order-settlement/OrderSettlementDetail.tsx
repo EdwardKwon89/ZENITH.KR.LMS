@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { ArrowLeft, Lock, RotateCcw, Save, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Lock, Plus, RotateCcw, Save, ShieldCheck, Trash2 } from 'lucide-react';
 import { ZenCard, ZenButton, ZenInput, ZenTextarea, ZenBadge, ZenSelect } from '@/components/ui/ZenUI';
 import {
   previewUpsSettlement,
@@ -28,6 +28,12 @@ type ConfirmKind = 'settle' | 'unmark' | null;
 
 const CURRENCY_OPTIONS = ['KRW', 'HKD', 'USD'].map((value) => ({ value, label: value }));
 
+interface ChargeRow {
+  name: string;
+  amount: string;
+  currency: string;
+}
+
 interface FormState {
   invoiceNo: string;
   invoiceDate: string;
@@ -38,12 +44,18 @@ interface FormState {
   baseFreight: string;
   baseCurrency: string;
   fuelSurcharge: string;
+  fuelCurrency: string;
   surgeFee: string;
-  otherCharges: string;
+  surgeCurrency: string;
+  otherCharges: ChargeRow[];
   notes: string;
 }
 
+const EMPTY_CHARGE: ChargeRow = { name: '', amount: '', currency: 'KRW' };
+
 function buildFormState(saved: SavedActualCost | null): FormState {
+  // PR-4a 이전(calc_version<3) 초안은 원금액 복원이 불가능하다 — 금액은 비우고 재입력을 요구한다.
+  const restoreMoney = saved != null && saved.calcVersion >= 3;
   return {
     invoiceNo: saved?.upsInvoiceNo ?? '',
     invoiceDate: saved?.upsInvoiceDate ?? '',
@@ -51,11 +63,19 @@ function buildFormState(saved: SavedActualCost | null): FormState {
     lengthCm: saved?.actualLengthCm != null ? String(saved.actualLengthCm) : '',
     widthCm: saved?.actualWidthCm != null ? String(saved.actualWidthCm) : '',
     heightCm: saved?.actualHeightCm != null ? String(saved.actualHeightCm) : '',
-    baseFreight: saved?.baseFreightHkd != null ? String(saved.baseFreightHkd) : '',
+    baseFreight: restoreMoney && saved?.baseFreightHkd != null ? String(saved.baseFreightHkd) : '',
     baseCurrency: saved?.baseFreightCurrency ?? 'KRW',
-    fuelSurcharge: saved?.fuelSurchargeHkd != null ? String(saved.fuelSurchargeHkd) : '',
-    surgeFee: saved?.surgeFeeHkd != null ? String(saved.surgeFeeHkd) : '',
-    otherCharges: saved?.otherChargesHkd != null ? String(saved.otherChargesHkd) : '',
+    fuelSurcharge: restoreMoney && saved?.fuelSurchargeHkd != null ? String(saved.fuelSurchargeHkd) : '',
+    fuelCurrency: saved?.fuelSurchargeCurrency ?? 'KRW',
+    surgeFee: restoreMoney && saved?.surgeFeeHkd != null ? String(saved.surgeFeeHkd) : '',
+    surgeCurrency: saved?.surgeFeeCurrency ?? 'KRW',
+    otherCharges: restoreMoney
+      ? (saved?.otherCharges ?? []).map((charge) => ({
+        name: charge.name,
+        amount: String(charge.amount),
+        currency: charge.currency || 'KRW',
+      }))
+      : [],
     notes: saved?.notes ?? '',
   };
 }
@@ -78,23 +98,29 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
   const [baseFreight, setBaseFreight] = useState(initialForm.baseFreight);
   const [baseCurrency, setBaseCurrency] = useState(initialForm.baseCurrency);
   const [fuelSurcharge, setFuelSurcharge] = useState(initialForm.fuelSurcharge);
+  const [fuelCurrency, setFuelCurrency] = useState(initialForm.fuelCurrency);
   const [surgeFee, setSurgeFee] = useState(initialForm.surgeFee);
-  const [otherCharges, setOtherCharges] = useState(initialForm.otherCharges);
+  const [surgeCurrency, setSurgeCurrency] = useState(initialForm.surgeCurrency);
+  const [otherCharges, setOtherCharges] = useState<ChargeRow[]>(initialForm.otherCharges);
   const [notes, setNotes] = useState(initialForm.notes);
 
   const [preview, setPreview] = useState<UpsSettlementPreview | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
-  const [previewing, setPreviewing] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [confirmKind, setConfirmKind] = useState<ConfirmKind>(null);
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
 
+  const filledCharges = useMemo(
+    () => otherCharges.filter((charge) => charge.name.trim() !== '' && toNumberOrNull(charge.amount) != null),
+    [otherCharges],
+  );
+
   const hasAnyInput = useMemo(
-    () => [weightKg, lengthCm, widthCm, heightCm, baseFreight, fuelSurcharge, surgeFee, otherCharges]
-      .some((value) => value.trim() !== ''),
-    [weightKg, lengthCm, widthCm, heightCm, baseFreight, fuelSurcharge, surgeFee, otherCharges],
+    () => [weightKg, lengthCm, widthCm, heightCm, baseFreight, fuelSurcharge, surgeFee]
+      .some((value) => value.trim() !== '') || filledCharges.length > 0,
+    [weightKg, lengthCm, widthCm, heightCm, baseFreight, fuelSurcharge, surgeFee, filledCharges.length],
   );
 
   const buildInput = (): UpsSettlementInput => {
@@ -106,7 +132,6 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
     const base = toNumberOrNull(baseFreight);
     const fuel = toNumberOrNull(fuelSurcharge);
     const surge = toNumberOrNull(surgeFee);
-    const other = toNumberOrNull(otherCharges);
     if (invoiceNo.trim()) input.upsInvoiceNo = invoiceNo.trim();
     if (invoiceDate) input.upsInvoiceDate = invoiceDate;
     if (weight != null) input.actualWeightKg = weight;
@@ -114,9 +139,15 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
     if (width != null) input.actualWidthCm = width;
     if (height != null) input.actualHeightCm = height;
     if (base != null) input.baseFreight = { amount: base, currency: baseCurrency };
-    if (fuel != null) input.fuelSurcharge = { amount: fuel, currency: 'KRW' };
-    if (surge != null) input.surgeFee = { amount: surge, currency: 'KRW' };
-    if (other != null) input.otherCharges = [{ name: t('rowOtherCharges'), amount: other, currency: 'KRW' }];
+    if (fuel != null) input.fuelSurcharge = { amount: fuel, currency: fuelCurrency };
+    if (surge != null) input.surgeFee = { amount: surge, currency: surgeCurrency };
+    if (filledCharges.length > 0) {
+      input.otherCharges = filledCharges.map((charge) => ({
+        name: charge.name.trim(),
+        amount: toNumberOrNull(charge.amount) as number,
+        currency: charge.currency,
+      }));
+    }
     if (notes.trim()) input.notes = notes.trim();
     return input;
   };
@@ -130,10 +161,8 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
     }
     let active = true;
     const timer = setTimeout(async () => {
-      setPreviewing(true);
       const res = await previewUpsSettlement(buildInput());
       if (!active) return;
-      setPreviewing(false);
       if (!res.success) {
         setPreview(null);
         setPreviewError(res.error ?? t('actionFailed'));
@@ -148,7 +177,7 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    settled, hasAnyInput, detail.orderId, baseCurrency,
+    settled, hasAnyInput, detail.orderId, baseCurrency, fuelCurrency, surgeCurrency,
     invoiceNo, invoiceDate, weightKg, lengthCm, widthCm, heightCm,
     baseFreight, fuelSurcharge, surgeFee, otherCharges, notes,
   ]);
@@ -186,6 +215,10 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
     setConfirmKind(null);
     toast.success(confirmKind === 'settle' ? t('markSuccess') : t('unmarkSuccess'));
     router.refresh();
+  };
+
+  const updateCharge = (index: number, patch: Partial<ChargeRow>) => {
+    setOtherCharges((prev) => prev.map((charge, i) => (i === index ? { ...charge, ...patch } : charge)));
   };
 
   const listHref = `/${locale}/finance/order-settlement`;
@@ -233,6 +266,9 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
         {detail.legacyInvoiced && (
           <p className="rounded-xl bg-amber-50 p-3 text-amber-800" role="status">{t('legacyNotice')}</p>
         )}
+        {saved && saved.calcVersion < 3 && (
+          <p className="rounded-xl bg-stone-50 p-3 text-stone-700" role="status">{t('savedKrwNotice')}</p>
+        )}
       </ZenCard>
 
       <ZenCard className="space-y-4">
@@ -275,36 +311,22 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
                   />
                 </td>
               </tr>
-              <tr className="border-b">
-                <td className="py-2 px-1">{t('rowBaseFreight')}</td>
-                <td className="py-2 px-1 text-stone-400">—</td>
-                <td className="py-2 px-1">
-                  <div className="grid grid-cols-2 gap-2">
-                    <ZenInput aria-label={t('fieldBaseFreight')} type="number" step="0.01" value={baseFreight} onChange={(e) => setBaseFreight(e.target.value)} disabled={disabled} />
-                    <ZenSelect
-                      aria-label={t('fieldBaseCurrency')}
-                      value={baseCurrency}
-                      onValueChange={setBaseCurrency}
-                      options={CURRENCY_OPTIONS}
-                    />
-                  </div>
-                </td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2 px-1">{t('rowFuelSurcharge')}</td>
-                <td className="py-2 px-1 text-stone-400">—</td>
-                <td className="py-2 px-1"><ZenInput aria-label={t('fieldFuelSurcharge')} type="number" step="0.01" value={fuelSurcharge} onChange={(e) => setFuelSurcharge(e.target.value)} disabled={disabled} /></td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2 px-1">{t('rowSurgeFee')}</td>
-                <td className="py-2 px-1 text-stone-400">—</td>
-                <td className="py-2 px-1"><ZenInput aria-label={t('fieldSurgeFee')} type="number" step="0.01" value={surgeFee} onChange={(e) => setSurgeFee(e.target.value)} disabled={disabled} /></td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2 px-1">{t('rowOtherCharges')}</td>
-                <td className="py-2 px-1 text-stone-400">—</td>
-                <td className="py-2 px-1"><ZenInput aria-label={t('fieldOtherCharges')} type="number" step="0.01" value={otherCharges} onChange={(e) => setOtherCharges(e.target.value)} disabled={disabled} /></td>
-              </tr>
+              {([
+                ['rowBaseFreight', 'fieldBaseFreight', baseFreight, setBaseFreight, baseCurrency, setBaseCurrency],
+                ['rowFuelSurcharge', 'fieldFuelSurcharge', fuelSurcharge, setFuelSurcharge, fuelCurrency, setFuelCurrency],
+                ['rowSurgeFee', 'fieldSurgeFee', surgeFee, setSurgeFee, surgeCurrency, setSurgeCurrency],
+              ] as const).map(([rowKey, fieldKey, value, setter, currency, setCurrency]) => (
+                <tr className="border-b" key={rowKey}>
+                  <td className="py-2 px-1">{t(rowKey)}</td>
+                  <td className="py-2 px-1 text-stone-400">—</td>
+                  <td className="py-2 px-1">
+                    <div className="grid grid-cols-2 gap-2">
+                      <ZenInput aria-label={t(fieldKey)} type="number" step="0.01" value={value} onChange={(e) => setter(e.target.value)} disabled={disabled} />
+                      <ZenSelect aria-label={`${t(fieldKey)} ${t('colChargeCurrency')}`} value={currency} onValueChange={setCurrency} options={CURRENCY_OPTIONS} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
               <tr>
                 <td className="py-2 px-1">{t('rowDims')}</td>
                 <td className="py-2 px-1 text-stone-400">—</td>
@@ -318,6 +340,42 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-stone-700">{t('rowOtherCharges')}</h3>
+            <ZenButton type="button" variant="ghost" onClick={() => setOtherCharges((prev) => [...prev, { ...EMPTY_CHARGE }])} disabled={disabled}>
+              <Plus size={14} />{t('addCharge')}
+            </ZenButton>
+          </div>
+          {otherCharges.length === 0 ? (
+            <p className="text-xs text-stone-400">—</p>
+          ) : (
+            <div className="space-y-2">
+              {otherCharges.map((charge, index) => (
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end" key={`${index}-${charge.name}`}>
+                  <div className="md:col-span-5">
+                    <span className="block mb-1 text-xs text-stone-500">{t('colChargeName')}</span>
+                    <ZenInput aria-label={`${t('colChargeName')} ${index + 1}`} value={charge.name} onChange={(e) => updateCharge(index, { name: e.target.value })} disabled={disabled} />
+                  </div>
+                  <div className="md:col-span-3">
+                    <span className="block mb-1 text-xs text-stone-500">{t('colChargeAmount')}</span>
+                    <ZenInput aria-label={`${t('colChargeAmount')} ${index + 1}`} type="number" step="0.01" value={charge.amount} onChange={(e) => updateCharge(index, { amount: e.target.value })} disabled={disabled} />
+                  </div>
+                  <div className="md:col-span-3">
+                    <span className="block mb-1 text-xs text-stone-500">{t('colChargeCurrency')}</span>
+                    <ZenSelect aria-label={`${t('colChargeCurrency')} ${index + 1}`} value={charge.currency} onValueChange={(value) => updateCharge(index, { currency: value })} options={CURRENCY_OPTIONS} />
+                  </div>
+                  <div className="md:col-span-1">
+                    <ZenButton type="button" variant="ghost" aria-label={`${t('removeCharge')} ${index + 1}`} onClick={() => setOtherCharges((prev) => prev.filter((_, i) => i !== index))} disabled={disabled}>
+                      <Trash2 size={14} />
+                    </ZenButton>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <label className="block text-sm">
@@ -334,7 +392,7 @@ export default function OrderSettlementDetail({ detail, locale }: OrderSettlemen
           {t('previewTotal', { amount: formatKrw(totalCostKrw ?? 0) })}
         </p>
         {hasAnyInput && totalCostKrw == null && !previewError && (
-          <p className="text-sm text-stone-500">{previewing ? t('previewPending') : t('previewPending')}</p>
+          <p className="text-sm text-stone-500">{t('previewPending')}</p>
         )}
         {preview && (
           <div className="text-sm text-stone-600 space-y-2">
