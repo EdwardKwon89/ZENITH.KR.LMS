@@ -3,8 +3,10 @@
 - **Path**: `src/app/actions/finance.ts`
 
 ### generateInvoicesForOrder(orderId)
-- **설명**: 오더 완료(RELEASED) 시 RPC를 호출하여 비용 산출 후 청구서 자동 생성
+- **Path**: `src/app/actions/finance/settlement.ts`
+- **설명**: 오더 완료(RELEASED) 시 RPC를 호출하여 비용 산출 후 청구서 자동 생성. **TASK-B-381 PR-3(#1459)부터 UPS 오더는 서버에서 거부**합니다(`logger.warn` + `ups_invoice_blocked`) — UPS는 `finalizeUpsSettlement` 경로만 사용합니다. 비UPS 동작 불변.
 - **RPC Link**: `calculate_order_costs`
+- **오류**: UPS 오더(`ups_invoice_blocked`), 오더 가드 조회 실패(`generic{ORDER_LOOKUP}`)
 
 ### updatePaymentStatus(invoiceId, status, paidAmount)
 - **설명**: 입금 확인 처리 및 연결된 오더의 빌링 상태 동기화
@@ -250,3 +252,13 @@
 - **청구서 연계**: `billing_items_amounts`는 최신 run만 사용하므로, run이 없는 UPS 오더 청구는 `settlement_run_missing`으로 차단됩니다.
 
 
+
+### 4.5 일별 청구 일괄 마감 — `src/app/actions/finance/daily-billing.ts` (TASK-B-381 PR-3 / Issue #1459)
+
+#### finalizeDailyShipperInvoices(invoiceIds, reason?)
+- **설명**: 일별/주별/월별 집계 단위로 인보이스를 일괄 마감합니다. **UPS 인보이스는 마감 대상에서 제외**하고 `skippedCount`로 집계합니다(§2-7). UPS는 `finalizeUpsSettlement` 경로만 사용합니다.
+- **권한**: `validateUserAction()` + ADMIN·MANAGER·ZENITH_SUPER_ADMIN 또는 AGENCY(기존과 동일)
+- **Input**: `invoiceIds: string[]`, `reason?: string`
+- **Output**: `{ success, finalizedCount, failedCount, skippedCount, errors? }` (`skippedCount` 신규)
+- **오류**: 권한 불충분(`permission_denied`), 인보이스/오더 조회 실패는 **fail-closed**(`generic{INVOICE_LOOKUP|ORDER_LOOKUP}` — 아무것도 마감하지 않음)
+- **부수효과**: 비UPS 인보이스만 `finalizeInvoice` 호출, `revalidatePath('/finance/daily-billing')`·`revalidatePath('/admin/ups-actual-charges')`

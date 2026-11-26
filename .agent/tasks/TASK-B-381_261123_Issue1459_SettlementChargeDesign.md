@@ -503,3 +503,46 @@ zen_ups_settlement_run_charges
 - **PR-4**: 새 정산마감 화면 + 옛 액션·UI 제거를 같은 PR(4a), Ds-11 마무리·R-10 증적(4b).
 - **`settled_by` 노출**: Aiden 판단 대기. PR-2는 노출하지 않는다(범위 밖).
 - **커밋 해시**: 코드·문서 커밋 해시는 PR 본문 참조.
+
+## 10. [구현 작업 결과] PR-3 — 자동 인보이스 중단·서버 가드 (2026-11-26)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr3-guards` |
+| **PR** | #PR3 (`TeamB_Dev`, `Refs #1459`) |
+| **범위** | 서버 방어만 — ① RELEASED 분기 UPS 미호출 ② `generateInvoicesForOrder` 내부 UPS 거부 ③ `finalizeDailyShipperInvoices` UPS 제외 |
+| **범위 밖** | 옛 액션·UI 제거(PR-4a), `zen_ups_actual_charges` DROP, `unmarkOrderCostSettled` 변경, M4/M4-b/M5, 운영 DB |
+
+### 10-1. 산출물
+- `src/app/actions/operations/orders.ts` — `nextStatus === RELEASED && transport_mode !== 'UPS'`일 때만 자동 인보이스
+- `src/app/actions/finance/settlement.ts` — `generateInvoicesForOrder`가 UPS 오더를 `logger.warn` + `ups_invoice_blocked`로 거부(가드 조회 실패는 `generic{ORDER_LOOKUP}`)
+- `src/app/actions/finance/daily-billing.ts` — `finalizeDailyShipperInvoices`가 UPS 인보이스를 `skippedCount`로 제외, 인보이스/오더 조회 실패는 fail-closed
+- `messages/{ko,en,zh,ja}.json` — `ups_invoice_blocked` 신규(4개 로케일)
+- 테스트: `tests/unit/finance/task-b381-pr3-ups-invoice-guards.test.ts`(5건), `tests/unit/finance/task-b381-pr3-generate-invoices-guard.test.ts`(4건), 기존 i18n 키 동기화(118키)
+- 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-381_Issue1459_pr3_guards.md`
+- Ds-11: `Ds_11_04_Finance_Settlement.md` §`generateInvoicesForOrder`·§4.5
+
+### 10-2. 테스트 결과
+- 신규 **9/9 PASS** — UPS 출고확정 미호출·비UPS 양성 대조·비RELEASED 미호출·UPS 직접 호출 거부(ADMIN/AGENCY)·비UPS 생성기 호출·가드 조회 실패·UPS/비UPS 혼재 일괄 마감(`skippedCount`)·조회 실패 fail-closed
+- 기존 영향 테스트: `tests/integration/finance.test.ts`·`tests/unit/finance/agency-settlement-permission.test.ts`·`tests/unit/orders/ups-product-guard.test.ts`·`tests/unit/finance/daily-billing-aggregation.test.ts`·`tests/unit/logistics/order-actions.test.ts` **전부 PASS**(가드 추가 후에도 기존 fixture의 기본 `maybeSingle` 반환으로 비UPS 경로 유지)
+- 전체 회귀: `npm run test:regression` — **311 files passed · 1 skipped / 2,386 passed · 16 skipped**(PR-2 대비 +9, skip은 B-373 16건). `npm run build` SUCCESS.
+
+### 10-3. 설계 §2-11 14항목 매핑 (PR-3 반영)
+
+| # | 항목 | PR/테스트 |
+|:-:|:--|:--|
+| 6 | UPS 출고확정 인보이스 미생성 (비UPS 회귀) | **PR-3 TC-381B-01~03** |
+| 10 | `generateInvoicesForOrder` 직접 호출 UPS 거부 (비UPS 성공) | **PR-3 TC-381B-04~07** |
+| 14 | 전체 회귀·build | 각 PR CI |
+
+- 나머지 항목은 PR-1·PR-2·PR-4/범위 밖 매핑(§9-7) 유지.
+
+### 10-4. 연속 병합·배포 제외
+- PR-3과 PR-4a는 **같은 날 연달아 병합**하며, 그 사이 `TeamB_Dev`는 수동 테스트·UAT·배포 대상에서 제외한다. 시작·종료 시각은 각 병합 때 `date`로 기재한다. 이 조건을 PR-3 본문에도 적는다.
+- PR-3은 새 화면 없이 서버 가드만 추가하므로 병합 시점에도 빌드가 유지된다.
+
+### 10-5. 후속
+- **PR-4a**: 새 정산마감 화면 + 옛 액션·UI 제거. `/finance/daily-billing` UPS 항목 숨김을 함께 처리한다. `skippedCount`의 화면 표시는 UPS 항목 제거로 불필요해질 수 있어 PR-4a에서 확인한다.
+- **PR-4b**: Ds-11 마무리·R-10 증적.
+- **`settled_by` 노출**: Aiden 판단 대기(PR-2 미노출 유지).
+- 커밋 해시는 PR 본문 참조.
