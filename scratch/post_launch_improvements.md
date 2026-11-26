@@ -2408,3 +2408,12 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/misc/notifications.ts`, 알림 테이블 RLS 마이그레이션(신규), `docs/00_GUIDE/211_PRODUCTION_DEPLOY_RUNBOOK.md`
 - **예상 공수**: 0.5 MD (경로 전환 + 마이그레이션 + 실세션 테스트, 설계 후 확정)
 - **우선순위**: Medium — 본 사업 시작 시 처리(Edward 결정, 발령 보류). 로컬 재현 결과에 따라 재평가. 관련: IMP-213, TASK-B-381 PR-4a(PR #1553).
+
+## [IMP-217] UPS 정산 원가 요약 `baseRawKrw` 값 정정 — +7% 가산 전 원금액을 담도록 (Riley 독립 검토 시범에서 지적, Aiden 코드 확인, 2026-11-26)
+- **발견 경위**: 2026-11-26 독립 검토 시범(Riley 읽기 전용 검토)에서 TASK-B-381 PR-2(PR #1544, 병합됨) 코드의 지적 1건을 Aiden이 코드로 확인했다. 시범에서 나온 다른 지적은 확인하지 못했거나 기존 구현과 같은 동작이라 등록하지 않는다.
+- **현재 상태**: `src/lib/ups/settlement/build.ts`의 원가 요약에서 `baseRawKrw`에 `computed.base.krw`를 대입한다. `computed.base.krw`는 기본운임에 원가 가산율(+7%)을 반영한 값(`actual-cost.ts`의 `baseKrw`)이라 이름이 뜻하는 "가산 전 환산 원금액"과 다르다. 2026-11-26 `origin/TeamB_Dev`와 PR #1553 head 기준 src에서 이 값을 읽는 곳은 없다(`git grep`: 대입 1, 타입 선언 1, 단위 테스트 입력값 1). 화면·금액·DB에 영향은 없다(추정, DB 저장 여부는 코드상 참조 없음으로만 확인).
+- **임시 조치**: 없음. 이 값을 읽는 코드(화면·PDF·감사 로그 등)가 생기기 전에 정정한다.
+- **목표 구현**: ① `baseRawKrw`를 가산 전 환산 원금액(`computed.base.krw - computed.base.surchargeAmountKrw`와 같은 값)으로 정정 ② 단위 테스트에서 이 필드의 값을 단언(현재는 입력 상수만 있고 계산 값을 단언하지 않음) ③ 같은 요약의 다른 금액 필드와 이름·의미 일치 여부 점검.
+- **관련 파일**: `src/lib/ups/settlement/build.ts`, `src/lib/ups/settlement/types.ts`, `tests/unit/ups/settlement-build.test.ts` (Team B 소유 — 착수 시 소유 확인 후 Issue로 요청)
+- **예상 공수**: 0.1 MD
+- **우선순위**: Low — 이 값을 읽는 코드가 추가되기 전까지 지금 조치하지 않음(Edward 결정 2026-11-26, IMP로 등록).
