@@ -406,12 +406,12 @@ zen_ups_settlement_run_charges
 ### 9-2. 테스트 결과
 
 - 자기완결형: `beforeAll`에서 조직·GoTrue 계정(런타임 난수, 비밀번호는 대/소문자·숫자 포함)·오더·스냅샷을 만들고 `afterAll`에서 `session_replication_role=replica`로 정리한다. 게이트/전용 환경변수 없이 CI에서 실행된다.
-- 신규 통합 **10/10 PASS** — 미리보기 무쓰기·임시저장 원가만·정산마감 run/charges/SETTLED·멱등 재호출·SETTLED 다른 입력 거부+원가 불변·인보이스 방어·SHIPPER 거부·환율 실패·비UPS 가드·도착국 미확인. 거부 사유는 `trError`를 키 반환으로 mock해 **오류 키로 단언**(`already_settled`·`ups_invoice_exists`·`permission_denied`·`not_ups_order`·`currency_conversion_failed`·`ups_estimate_unavailable`).
+- 신규 통합 **11/11 PASS** — 미리보기 무쓰기·임시저장 원가만·정산마감 run/charges/SETTLED·멱등 재호출·SETTLED 다른 입력 거부+원가 불변·인보이스 방어·SHIPPER 거부·환율 실패·비UPS 가드·도착국 미확인·인보이스 조회 오류 fail-closed. 거부 사유는 `trError`를 키 반환으로 mock해 **오류 키로 단언**(`already_settled`·`ups_invoice_exists`·`permission_denied`·`not_ups_order`·`currency_conversion_failed`·`ups_estimate_unavailable`).
 - 신규 단위 **8/8 PASS** (`settlement-build.test.ts`) — 고정 estimate·환율(3자리 소수)·스냅샷으로 두 tier의 7개 금액(구성요소·음수 조정·부가항목 2자리 합·`line_total`)과 부가항목 payload를 **값으로** 단언하고, 대리점 `agencyCostPrice <= 0` 폴백·`agency/shipper 없음` 조정 0·상품/도착국 실패를 고정했다.
 - 통합 finalize는 **미리보기 금액 = run 저장 금액 = `billing_items_amounts` 반환 금액**을 값으로 비교하고, `charge_details` 항목 값·`charge_weight_kg`도 함께 확인한다.
 - `npm run build` SUCCESS.
 - **회귀 1차**: 오류 키 5개 추가로 `tests/unit/i18n/errors-key-sync.test.ts`의 기준 키 수(111→116)·목록을 갱신했다. 같은 실행에서 DB 테스트 3파일이 로컬 DB 재생성 중 스키마 소실(`relation does not exist`·프로필 org_id 공백)로 실패했으나, 재실행에서 **3파일 83/83 PASS**로 코드와 무관함을 확인했다.
-- **최종 회귀**: `npm run test:regression` — **309 files passed · 1 skipped / 2,376 passed · 16 skipped**(skip은 B-373 세션 테스트 16건), `npm run build` SUCCESS.
+- **최종 회귀**: `npm run test:regression` — **309 files passed · 1 skipped / 2,377 passed · 16 skipped**(skip은 B-373 세션 테스트 16건), `npm run build` SUCCESS.
 
 ### 9-3. 환율·통화 실패 처리 (§B)
 
@@ -438,10 +438,10 @@ zen_ups_settlement_run_charges
 | ① 금전적 영향 | **해당** | 정산마감 금액이 청구서·run의 단일 원천 |
 | ② 외부 SLA/고객 접점 | 비해당 | 관리자 내부 정산 업무 |
 | ③ 침묵성 | 비해당 | 실패를 동기 응답으로 반환하고 `logger.error`로 기록 |
-| ④ 과거 사고 이력 | **해당** | UPS 원가·정산 경로는 이미 핵심 지점으로 지정(#1183, ①③) |
+| ④ 과거 사고 이력 | **해당** | UPS 원가·정산 경로는 이미 핵심 지점으로 지정(TASK-B-321/#1183 로그 커버리지, ①③) |
 
 - **2개 해당 → 핵심 지점**. 조치: RPC 실패·통화 실패·예외 3경로 모두 `logger.error`를 **반환 이전에** 호출한다. 서버 `logger.error`는 `zen_error_logs`에 ERROR로 자동 적재되어 `/admin/error-logs`에서 즉시 확인할 수 있다(DEF-145/IMP-183 계열 기존 경로).
-- CRITICAL 승격(이메일·인앱)은 #1183 계열 공통 알림 구성 과제로, 이 PR 범위(승인된 3파일) 밖이라 새 인프라를 추가하지 않았다. **후속 위치: #1183(핵심 지점 CRITICAL 승격 공통 과제)**.
+- CRITICAL 승격(이메일·인앱)은 **IMP-192**(`scratch/post_launch_improvements.md` — `ups-actual-cost`/`ups-actual-charges` 실패 지점의 `logClientError(CRITICAL)` 미구성)의 후속 범위다. 이 PR의 `ups-settlement.ts`도 **같은 사안**(핵심 지점 ①·④, CRITICAL 미승격)이며, IMP-192 범위에 이 파일을 포함할지는 Aiden이 판단한다(IMP 번호 소관). 이 PR에서는 새 인프라를 추가하지 않았다.
 
 ### 9-6. `logger.error` 반환 이전 위치 (증거)
 
@@ -491,8 +491,8 @@ zen_ups_settlement_run_charges
 | J1 | 대리점 target `> 0` 폴백 누락 | `agencyCostPrice <= 0`이면 플랫폼 합계 target. `settlement-build.test.ts`에서 조정 24(플랫폼 120 − 구성 96)로 고정 |
 | J2 | 금액 값 단언 없음·§9-7 매핑 과대 | 단위 8건(고정 fixture, 7개 금액·음수 조정·3자리 환율 반올림) + 통합에서 미리보기=run=`billing_items_amounts` 값 비교. §9-7을 실제 단언 범위로 수정 |
 | J3 | 거부 사유 미단언 | `trError`를 키 반환으로 mock하고 6개 오류 키를 정확히 단언 |
-| A1 | 인보이스 조회 오류 시 원가 선저장 | 조회 오류를 **fail-closed**(`rpc_failed`)로 변경 — 원가 저장 전에 반환 |
-| A2 | 핵심 지점 후속 Issue | #1183(공통 CRITICAL 승격)으로 명시 |
+| A1 | 인보이스 조회 오류 시 원가 선저장 | 조회 오류를 **fail-closed**(`rpc_failed`)로 변경 — 원가 저장 전에 반환. 조회 오류 stub 클라이언트로 TC-381A-12 고정 |
+| A2 | 핵심 지점 후속 Issue | **IMP-192**(CRITICAL 미구성)로 정정, `ups-settlement.ts`도 동일 사안임을 명시 |
 | A3 | 멱등 재계산 한계 | §9-4에 명시(안전한 방향의 실패) |
 
 - 참고(비차단, 후속 검토): `saveCostDraft`의 부가항목 delete→insert는 트랜잭션이 아니다(기존 `recordUpsActualCost` 패턴과 동일). 중간 실패 시 부가항목이 빈 상태로 남을 수 있어 `logger.error`만 남긴다. PR-4a에서 옛 경로 제거 시 RPC/단일 트랜잭션 편입을 검토한다.

@@ -22,9 +22,10 @@
 | TC-381A-09 | 오더 가드 — 비UPS 오더 | `success:false`(`not_ups_order`) | 동일 |
 | TC-381A-10 | 도착국 미확인 — estimate 불가 | `success:false`(`ups_estimate_unavailable`) | 동일 |
 | TC-381A-11 | 금액 값 고정 fixture — 구성요소·음수 조정·2자리 반올림·agency 0 폴백 | 두 tier 7개 금액과 부가항목 값 일치 | `tests/unit/ups/settlement-build.test.ts` |
+| TC-381A-12 | 인보이스 조회 오류 — fail-closed | `success:false`(`rpc_failed`), 원가·run 미저장, `NOT_SETTLED` | `tests/integration/task-b381-ups-settlement-actions.test.ts` |
 
-**자기완결형**: `beforeAll`에서 조직·GoTrue 계정(런타임 난수 비밀번호)·오더·스냅샷을 만들고 `afterAll`에서 정리합니다. 게이트/전용 환경변수 없이 CI에서 실행됩니다. **통합 10/10 · 단위 8/8 PASS**(로컬 실DB). 거부 사유는 `trError`를 키 반환으로 mock해 **오류 키로 단언**합니다.
+**자기완결형**: `beforeAll`에서 조직·GoTrue 계정(런타임 난수 비밀번호)·오더·스냅샷을 만들고 `afterAll`에서 정리합니다. 게이트/전용 환경변수 없이 CI에서 실행됩니다. **통합 11/11 · 단위 8/8 PASS**(로컬 실DB). 거부 사유는 `trError`를 키 반환으로 mock해 **오류 키로 단언**합니다.
 
 **금액 불변식**: `freight_adjustment = target − (base+fuel+surge+other)`, `settlement_charges_total` = 항목별 2자리 반올림 합, `line_total` = 4개 합 + 조정 + 부가항목 합. 같은 부가항목을 양 tier에 적용하며 RPC가 동일 불변식을 재검증합니다. 단위 테스트는 고정 스냅샷·estimate·환율(3자리 소수)로 **7개 금액을 값으로** 단언하고, 대리점 `agencyCostPrice <= 0` 폴백과 음수 조정을 고정합니다.
 
-**회귀**: `npm run test:regression` — **309 files passed · 1 skipped / 2,376 passed · 16 skipped**(skip은 B-373 세션 테스트), `npm run build` SUCCESS. Ds-11 `§11.20`·`§4.4` 갱신.
+**회귀**: `npm run test:regression` — **309 files passed · 1 skipped / 2,377 passed · 16 skipped**(skip은 B-373 세션 테스트), `npm run build` SUCCESS. Ds-11 `§11.20`·`§4.4` 갱신.
