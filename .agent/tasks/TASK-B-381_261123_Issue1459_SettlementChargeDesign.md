@@ -503,3 +503,41 @@ zen_ups_settlement_run_charges
 - **PR-4**: 새 정산마감 화면 + 옛 액션·UI 제거를 같은 PR(4a), Ds-11 마무리·R-10 증적(4b).
 - **`settled_by` 노출**: Aiden 판단 대기. PR-2는 노출하지 않는다(범위 밖).
 - **커밋 해시**: 코드·문서 커밋 해시는 PR 본문 참조.
+
+## 11. [구현 작업 결과] PR-4a — 화면 전환·옛 액션/UI 제거 (2026-11-26)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr4a-ui` (`TeamB_Dev` 분기) |
+| **PR** | #PR4a (`TeamB_Dev`, `Refs #1459`) |
+| **범위** | 새 정산마감 화면 전환 + 옛 액션·UI 제거를 같은 PR에서 수행. 4b(Ds-11 마무리·R-10)는 분리 |
+
+### 11-1. 산출물
+- `OrderSettlementDetail.tsx` — `previewUpsSettlement`·`saveUpsSettlementDraft`·`finalizeUpsSettlement` 사용, tier별 금액·조정·부가항목 표시, 기본운임 통화 선택
+- `ups-actual-cost.ts` — `recordUpsActualCost`·`previewUpsActualCost`·`recordActualCostAndFinalize`·`markOrderCostSettled` 제거(잔존: `getUpsActualCost`·`getOrdersForCostSettlement`·`unmarkOrderCostSettled`)
+- `ups-actual-charges.ts` — `recordUpsActualCharges` 제거(잔존: 조회·검색·대사)
+- `BillingConfirmModal.tsx`·`UpsActualAdjustmentForm.tsx` 삭제, `orders/[orderId]`·`admin/ups-actual-charges`는 새 정산 화면 링크로 대체
+- `OrderFinanceSummary` — UPS에서 인보이스 생성 버튼 미노출
+- `daily-billing.ts` — UPS 인보이스 집계·상세 제외, `ShipperDailyBillingClient` 개별 청구확정 버튼 제거
+- 오류 키 `legacy_invoiced_order` 제거(4개 로케일), i18n 기준 117키
+- Ds-11 11B §11.14 잔존 액션 정리, 회귀 항목 `TASK-B-381_Issue1459_pr4a_ui.md`
+
+### 11-2. 제거·유지 결정
+- **`rejectInvoice`**: 유지(비UPS 재발행). UPS는 PR-3 공통 진입점이 재발행을 거부하며 취소만 수행.
+- **`getOrdersForCostSettlement`의 `legacyInvoiced` 표시**: 목록 정보로 유지(가드 아님). 최종 차단은 새 RPC의 `ups_invoice_exists`.
+- **`unmarkOrderCostSettled`**: 유지(청구서 포함 차단).
+- **`zen_ups_actual_charges` 테이블**: DROP하지 않음(별도 결정).
+
+### 11-3. 테스트
+- 신규 `task-b381-pr4a-daily-billing-exclusion.test.ts` 2건 — UPS 제외·비UPS 양성
+- 기존 `daily-billing-aggregation` fixture를 비UPS(AIR)로 전환해 집계·상세 로직 회귀 유지
+- 옛 액션·모달·폼 전용 테스트 제거: `ups-actual-cost`·`ups-actual-charges`(2)·`task-b364`·`task-b366`(unit/integration)·`BillingConfirmModal`·`UpsActualAdjustmentForm`·`order-settlement-detail`·E2E `r11`
+- 전체 회귀: `npm run test:regression` — **301 files passed · 1 skipped / 2,299 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+
+### 11-4. 후속 인계 (PR-4a 본문 기재 항목)
+- `createPostFinalizationAdjustment`→`createAdjustmentInvoice` 직접 insert 경로: 옛 후청구 액션 제거 여부·PR-3~4a 사이 UPS 도달 가능성
+- `rejectInvoice` UPS 취소 후 재발행 없음의 사용자 메시지 표시 → PR-4a에서 안내 문구 없이 `success:true`(후속 표시 검토)
+- `ShipperDailyBillingClient` `skippedCount` 표시: UPS 항목 자체를 숨겨 그룹 표시는 비UPS 기준으로 유지
+- RLS 하 AGENCY 조회 통합 검증 → 4b R-10
+- `settled_by` 노출 → Aiden 판단 전 미노출
+- IMP-192(CRITICAL 승격) 범위

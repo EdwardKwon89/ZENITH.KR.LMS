@@ -521,9 +521,9 @@ SHXK `createorder` 페이로드의 `shipper.shipper_name`이 화면 "담당자�
 | TC-352-03 | 수동 배송완료 상태 update 실패 | `error` = generic(ko)+`STATUS_UPDATE`, 원문 미포함, logger 인자 검증 | 동일 |
 | TC-352-04 | getter 조회 실패(throw) | throw 메시지가 generic(ko)+`ACTUAL_COST_LOOKUP`, 원문 미포함 | 동일 |
 | TC-352-05 | 신규 키 4개 로케일 문구 | `not_ups_order`·`ups_actual_charge_status_invalid`·`manual_reason_required` 각 ko/en/zh/ja 실제 문장 | `tests/unit/i18n/task-b352-locale.test.ts` |
-| TC-352-06 | 상태/권한/스코프 문구 | `recordUpsActualCost`·`recordUpsActualCharges` 대표 실패가 ko 문장(`toBe`) | `tests/unit/finance/ups-actual-cost.test.ts`, `ups-actual-charges.test.ts` |
+| TC-352-06 | 상태/권한/스코프 문구 | `recordUpsActualCost`·`recordUpsActualCharges` 대표 실패가 ko 문장(`toBe`) | PR-4a에서 제거(옛 경로), `ups-actual-charges.test.ts` |
 | TC-352-07 | 케이스별 기대값 | `billing_finalize_status_invalid`·`shipper_scope_denied`·`label_not_found` `toBe` | `ups-actual-cost.test.ts`, `ups-order-detail-status.test.ts` |
-| TC-352-08 | 하위 조정 실패 원문 은닉 | generic(ko)+`POST_FINALIZATION_ADJUST` | `tests/unit/finance/ups-actual-charges-dual-invoice.test.ts` |
+| TC-352-08 | 하위 조정 실패 원문 은닉 | generic(ko)+`POST_FINALIZATION_ADJUST` | PR-4a에서 제거(옛 경로) |
 | TC-352-09 | 트래킹 이벤트 INSERT 실패 | throw 아님 — `{success:false,error:generic(ko)+TRACKING_EVENT_SAVE}` | `tests/unit/operations/tracking-actions.test.ts` |
 | TC-352-10 | `Errors` 키 동기화(30키) | ko 기준 30키 완전 일치 + ICU 파라미터 일치 | `tests/unit/i18n/errors-key-sync.test.ts` |
 | TC-352-RST-A | DB 원문 은닉 되돌리기 | **1 failed / 3 passed** → 복구 4 passed | `task-b352-error-locale.test.ts` |

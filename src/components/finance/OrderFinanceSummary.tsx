@@ -37,6 +37,7 @@ interface OrderFinanceSummaryProps {
   incidentFees?: any[];
   isAdmin: boolean;
   canManageFinance?: boolean;
+  transportMode?: string | null;
 }
 
 export default function OrderFinanceSummary({ 
@@ -45,9 +46,11 @@ export default function OrderFinanceSummary({
   initialInvoice,
   incidentFees = [],
   isAdmin,
-  canManageFinance
+  canManageFinance,
+  transportMode
 }: OrderFinanceSummaryProps) {
   const canManage = canManageFinance !== undefined ? canManageFinance : isAdmin;
+  const isUps = transportMode === 'UPS';
   const t = useTranslations('Finance');
   const te = useTranslations('Errors');
   const [costs, setCosts] = useState<CostItem[]>(initialCosts);
@@ -82,7 +85,7 @@ export default function OrderFinanceSummary({
   };
 
   const handleGenerateInvoice = async () => {
-    if (!isAdmin || invoice) return;
+    if (!isAdmin || invoice || isUps) return;
 
     setIsInvoicing(true);
     try {
@@ -244,7 +247,13 @@ export default function OrderFinanceSummary({
           </div>
         </div>
 
-        {canManage && !invoice && (
+        {canManage && !invoice && isUps && (
+          <p className="w-full mt-8 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+            UPS 오더는 자동 인보이스 대신 정산마감 화면에서 청구합니다.
+          </p>
+        )}
+
+        {canManage && !invoice && !isUps && (
           <button 
             onClick={handleGenerateInvoice}
             disabled={isInvoicing || costs.length === 0}

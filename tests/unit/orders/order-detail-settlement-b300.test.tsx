@@ -83,7 +83,6 @@ vi.mock('@/components/customs/OrderCustomsSection', () => ({ default: () => <div
 vi.mock('@/components/customs/OrderCustomsAdminControl', () => ({ default: () => <div /> }));
 vi.mock('@/components/claims/OrderClaimTrigger', () => ({ OrderClaimTrigger: () => <div /> }));
 vi.mock('@/components/orders/UpsTradeDocumentActions', () => ({ default: () => <div /> }));
-vi.mock('@/components/orders/UpsActualAdjustmentForm', () => ({ UpsActualAdjustmentForm: () => <div /> }));
 
 import OrderDetailPage from '@/app/[locale]/(dashboard)/orders/[orderId]/page';
 import { getOrderDetails } from '@/app/actions/orders';

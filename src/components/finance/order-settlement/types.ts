@@ -41,6 +41,7 @@ export interface SavedActualCost {
   actualWidthCm: number | null;
   actualHeightCm: number | null;
   baseFreightHkd: number | null;
+  baseFreightCurrency: string | null;
   fuelSurchargeHkd: number | null;
   surgeFeeHkd: number | null;
   otherChargesHkd: number | null;

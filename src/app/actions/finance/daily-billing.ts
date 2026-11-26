@@ -202,6 +202,28 @@ export async function getShipperDailyBillingSummary(params?: {
       invoices.map((inv: any) => inv.metadata?.source_order_id).filter(Boolean)
     )] as string[];
 
+    // TASK-B-381 PR-4a (§2-7): UPS 오더 청구 항목은 일별 청구 화면에서 숨긴다.
+    if (sourceOrderIds.length > 0) {
+      const { data: transportRows, error: transportError } = await supabase
+        .from('zen_orders')
+        .select('id, transport_mode')
+        .in('id', sourceOrderIds);
+      if (transportError) {
+        logger.error('daily-billing: transport lookup for UPS exclusion failed', transportError);
+        throw new Error(await trError('generic', { code: 'ORDER_LOOKUP' }));
+      }
+      const upsOrderIds = new Set(
+        (transportRows ?? [])
+          .filter((row: any) => row.transport_mode === 'UPS')
+          .map((row: any) => row.id),
+      );
+      invoices = invoices.filter((inv: any) => !upsOrderIds.has(inv.metadata?.source_order_id));
+    }
+
+    if (invoices.length === 0) {
+      return { success: true, groups: [], exchangeRate: fallbackRate };
+    }
+
     const costsByOrderId = new Map<string, any[]>();
     if (sourceOrderIds.length > 0) {
       const { data: allCosts } = await supabase
@@ -363,7 +385,7 @@ export async function getShipperDailyOrdersDetails(
       .select('order_id, cost_type, unit_price, quantity, total_amount, currency')
       .in('order_id', orderIds);
 
-    const resultRows: ShipperDailyOrderRow[] = orders.map((o: any) => {
+    const resultRows: ShipperDailyOrderRow[] = orders.filter((o: any) => o.transport_mode !== 'UPS').map((o: any) => {
       const oCosts = (costs || []).filter((c: any) => c.order_id === o.id);
 
       const matchingInv = invoices.find((inv: any) => inv.metadata?.source_order_id === o.id);

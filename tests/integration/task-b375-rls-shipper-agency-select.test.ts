@@ -23,7 +23,6 @@ import {
   getUpsActualCharges,
   getUpsChargeReconciliation,
   searchDeliveredUpsOrders,
-  recordUpsActualCharges,
 } from '@/app/actions/finance/ups-actual-charges';
 
 function psql(sql: string): string {
@@ -186,8 +185,8 @@ describe('TASK-B-375 — 정책 제거 후 화주·대리점·OPERATOR·anon SEL
   });
 });
 
-describe('TASK-B-375 — 관리자 3역할은 4개 함수 정상 (admin client 경로)', () => {
-  it.each(['super', 'admin', 'manager'] as Key[])('%s 세션: 검색·조회·대사·등록 성공', async (key) => {
+describe('TASK-B-375 — 관리자 3역할은 조회·검색·대사 정상 (admin client 경로)', () => {
+  it.each(['super', 'admin', 'manager'] as Key[])('%s 세션: 검색·조회·대사 성공', async (key) => {
     mockValidateUserAction.mockResolvedValue({
       supabase: sessions[key],
       user: { id: profiles[key]!.id },
@@ -198,11 +197,5 @@ describe('TASK-B-375 — 관리자 3역할은 4개 함수 정상 (admin client �
     await expect(getUpsActualCharges(ORDER)).resolves.toBeTruthy();
     const recon = await getUpsChargeReconciliation(ORDER);
     expect(recon).not.toBeNull();
-
-    const res = await recordUpsActualCharges(ORDER, [
-      { chargeType: 'BY_ADMIN', amount: 5, currency: 'USD' },
-    ]);
-    expect(res.success, JSON.stringify(res)).toBe(true);
-    psql(`DELETE FROM public.zen_ups_actual_charges WHERE order_id='${ORDER}' AND charge_type='BY_ADMIN';`);
   });
 });

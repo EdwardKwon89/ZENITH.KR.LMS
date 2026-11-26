@@ -89,7 +89,6 @@ describe('Errors 네임스페이스 로케일 키 동기화 (TASK-B-350)', () =>
       'label_issue_failed',
       'label_not_found',
       'label_void_failed',
-      'legacy_invoiced_order',
       'manual_reason_required',
       'master_order_bound',
       'measurements_stale',
