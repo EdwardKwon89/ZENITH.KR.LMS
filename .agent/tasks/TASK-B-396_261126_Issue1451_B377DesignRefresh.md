@@ -62,9 +62,9 @@ date                              # Thu Nov 26 23:12:04 KST 2026
 - [x] 근거 없는 객체명·컬럼명 미기재 (전 항목 파일·줄 직접 확인, 미확인 0)
 - [x] 범위 밖 문장 미변경(diff hunk 위치 + 미변경 섹션 md5)
 - [x] 코드·마이그레이션 0 · R-14 · R-21(계정·운영값·절대경로 0)
-- [ ] `gh pr checks <PR>` 출력 인용 + 완료 절차 R-17 (문서 PR만, 병합 Jaison, `[설계 확정]`은 Aiden)
+- [x] `gh pr checks <PR>` 출력 인용 + 완료 절차 R-17 (문서 PR만, 병합 Jaison, `[설계 확정]`은 Aiden)
 
 ## [작업 결과]
 
 - 갱신본 커밋: `e7de5717e9b24d1361a0eea8bc8a93a21fd67841`
-- PR: `<PLACEHOLDER_PR>`
+- PR: [#1557](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1557) (`Refs #1451`·`Refs #1449`, base `TeamB_Dev`, 병합 Jaison, `[설계 확정]`은 Aiden) · head `6900d9fb1` · 이슈 라벨 `status:draft` 유지
