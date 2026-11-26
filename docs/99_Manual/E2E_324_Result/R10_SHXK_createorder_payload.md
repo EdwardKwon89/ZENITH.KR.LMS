@@ -8,7 +8,7 @@
 
 | 단계 | 내용 | 증적 |
 | :--- | :--- | :--- |
-| 1 | `admin@zenith.kr`(ADMIN, PLATFORM)로 로그인 | 로그: `logged in: http://localhost:3000/ko/orders` |
+| 1 | `admin@example.com`(ADMIN, PLATFORM)로 로그인 | 로그: `logged in: http://localhost:3000/ko/orders` |
 | 2 | 오더 수정 화면에서 "수기입력" 모드 진입 → 화주명 입력 UI 확인 | `01-order-edit-manual-shipper-name.png` |
 | 3 | 대상 오더 `ZEN-2026-000007` — 조직명(`zen_organizations.name`) = `Master Air`, 수기입력 화주명(`zen_orders.shipper_name`) = `Test Shipper XYZ` | DB fixture |
 | 4 | `/ko/warehouse/ups-receive`에서 해당 오더 선택 → **UPS 등록 확정** 클릭 | `03-ups-receive-selected.png` |
