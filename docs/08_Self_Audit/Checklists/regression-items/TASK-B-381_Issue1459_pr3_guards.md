@@ -21,7 +21,7 @@
 | TC-381B-11 | `InvoiceGenerator.generateInvoice` 공통 진입점 — UPS | `ups_invoice_blocked`, `logger.warn`, 생성 로직 미실행 | `tests/unit/finance/task-b381-pr3-invoice-generator-guard.test.ts` |
 | TC-381B-12 | 공통 진입점 가드 조회 실패 | `generic:ORDER_LOOKUP`, `logger.error` | 동일 |
 | TC-381B-13 | `generateInvoiceAction` — UPS/비UPS | UPS는 인보이스 없이 거부, 비UPS 성공 | `tests/unit/finance/task-b381-pr3-generate-invoices-guard.test.ts` |
-| TC-381B-14 | `rejectInvoice` — UPS/비UPS | UPS는 취소만(`newInvoiceId` 없음), 비UPS는 재발행 | 동일 |
+| TC-381B-14 | `rejectInvoice` — UPS/비UPS | 양쪽 모두 `zen_invoices` `status:'CANCELED'` UPDATE 호출, UPS는 재발행 없음·비UPS는 재발행 | 동일 |
 | TC-381B-08 | 일괄 마감 — UPS/비UPS 혼재 | UPS `skippedCount` 1, 비UPS만 `finalizeInvoice` 호출 | `tests/unit/finance/task-b381-pr3-ups-invoice-guards.test.ts` |
 | TC-381B-09 | 일괄 마감 — 인보이스/오더 조회 실패 | fail-closed(`INVOICE_LOOKUP`·`ORDER_LOOKUP`), 마감 0건, `logger.error` | 동일 |
 | TC-381B-10 | 오류 키 동기화 — `ups_invoice_blocked` | 4개 로케일 동일 키 집합(118키) | `tests/unit/i18n/errors-key-sync.test.ts` |

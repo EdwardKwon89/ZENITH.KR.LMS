@@ -563,6 +563,7 @@ zen_ups_settlement_run_charges
 | A1 | `ShipperDailyBillingClient`가 `skippedCount`를 무시 | PR-4a 본문에 표시 처리 결과를 기재(비차단, 인계) |
 | A2 | RLS 하 AGENCY 조회 미검증 | PR-4a R-10과 함께 통합 검증(비차단) |
 | A3 | `.in()` 요청 길이 한계 | 50~100건 분할을 후속 검토(비차단) |
+| S1 | `rejectInvoice` UPS 테스트가 "취소"를 단언하지 않음 | update spy로 `zen_invoices` `status:'CANCELED'` 호출을 UPS·비UPS 양쪽에서 단언. 생성기 "비UPS 통과" 테스트 제목을 "가드 통과만 검증"으로 명확화 |
 
 - `generateInvoicesForOrder` 가드와 `InvoiceGenerator` 가드가 중복되지만, 전자는 역할·AGENCY 문맥에서 빠른 사용자 메시지를, 후자는 모든 호출처의 최종 방어를 담당한다.
 - **회귀**: `npm run test:regression` — **312 files passed · 1 skipped / 2,394 passed · 16 skipped**(1차 PR-3 대비 +8, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
