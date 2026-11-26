@@ -4,9 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { validateUserAction } from '@/lib/auth/guards';
 import { hasAdminOrManagerRole } from '@/lib/auth/ups-rate-permissions';
 import { logger } from '@/lib/logger';
-import { trError, trNotification } from '@/lib/i18n/action-error';
-import { sendInAppNotification } from '@/app/actions/misc/notifications';
-import { createAdminClient } from '@/utils/supabase/server';
+import { trError } from '@/lib/i18n/action-error';
+import { notifyUpsSettlementAdmins } from '@/lib/ups/settlement/notify-admins.server';
 import { computeSettlementCost, buildSettlementPreview } from '@/lib/ups/settlement/build';
 import { SettlementCurrencyError, SettlementEstimateError, type UpsSettlementActionResult, type UpsSettlementInput } from '@/lib/ups/settlement/types';
 
@@ -200,45 +199,11 @@ async function runAction(
     }
     const row = Array.isArray(data) ? data[0] : data;
 
-    // §2-1 7단계: 관리자 3역할 전원에게 알림(best-effort). 수신자 조회·발송 실패는 정산 결과를 되돌리지 않는다.
+    // §2-1 7단계: 알림은 서버 내부 헬퍼에서 best-effort로 처리한다(실패해도 정산 결과 유지).
     try {
-    const recipientRoles = ['ADMIN', 'MANAGER', 'ZENITH_SUPER_ADMIN'] as const;
-      // MANAGER는 zen_profiles 전체 SELECT 정책이 없어 세션 조회 시 수신자가 자기 자신으로 좁혀진다.
-      // 수신자 ID 조회만 관리자 클라이언트로 수행하고(권한은 이미 3역할로 제한), 알림 insert도 asAdmin으로 보낸다.
-      const recipientClient = await createAdminClient();
-      const { data: recipients, error: recipientError } = await recipientClient
-        .from('zen_profiles')
-        .select('id')
-        .in('role', recipientRoles);
-      if (recipientError) {
-        logger.warn('ups-settlement: notification recipients lookup failed (best-effort)', recipientError);
-      } else {
-        const recipientIds = [...new Set(((recipients ?? []) as Array<{ id: string }>).map((r) => r.id))];
-        let title = 'UPS settlement finalized';
-        let message = order.order_no;
-        try {
-          title = await trNotification('title');
-          message = await trNotification('body', { orderNo: order.order_no });
-        } catch (copyError) {
-          logger.warn('ups-settlement: notification copy failed (best-effort)', copyError);
-        }
-        for (const recipientId of recipientIds) {
-          try {
-            await sendInAppNotification({
-              userId: recipientId,
-              title,
-              message,
-              type: 'SYSTEM',
-              orderId: input.orderId,
-              asAdmin: true,
-            });
-          } catch (notifyError) {
-            logger.warn('ups-settlement: notification send failed (best-effort)', notifyError);
-          }
-        }
-      }
-    } catch (notifySetupError) {
-      logger.warn('ups-settlement: notification setup failed (best-effort)', notifySetupError);
+      await notifyUpsSettlementAdmins({ orderNo: order.order_no, orderId: input.orderId });
+    } catch (notifyError) {
+      logger.warn('ups-settlement: notification helper failed (best-effort)', notifyError);
     }
     revalidatePath(`/(dashboard)/orders/${input.orderId}`, 'page');
     revalidatePath('/(dashboard)/finance/daily-billing', 'page');

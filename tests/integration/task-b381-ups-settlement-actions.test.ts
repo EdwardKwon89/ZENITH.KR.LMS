@@ -7,9 +7,13 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 const mockValidate = vi.hoisted(() => vi.fn());
-const notifyMock = vi.hoisted(() => vi.fn());
+const loggerMock = vi.hoisted(() => ({ warn: vi.fn(), error: vi.fn(), info: vi.fn() }));
+const notifyHelperMock = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/auth/guards', () => ({ validateUserAction: mockValidate }));
-vi.mock('@/app/actions/misc/notifications', () => ({ sendInAppNotification: notifyMock }));
+vi.mock('@/lib/logger', () => ({ logger: loggerMock }));
+vi.mock('@/lib/ups/settlement/notify-admins.server', () => ({
+  notifyUpsSettlementAdmins: notifyHelperMock,
+}));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: unknown) => fn }));
 // 화면 문구 대신 오류 키를 반환시켜 거부 사유를 정확히 단언한다.
 vi.mock('@/lib/i18n/action-error', () => ({
@@ -165,7 +169,7 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
   beforeAll(async () => {
     if (!URL || !ANON || !SERVICE) throw new Error('Supabase test env missing');
     service = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
-    notifyMock.mockResolvedValue(undefined);
+    notifyHelperMock.mockResolvedValue(undefined);
     await cleanup();
     const { error } = await service.from('zen_organizations').upsert([
       { id: PLATFORM_ORG, name: '381a Platform', type: 'CORPORATE', status: 'ACTIVE' },
@@ -266,26 +270,22 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     expect(otherChargeCount(O.rt)).toBe(1);
   }, 60000);
 
-  it('finalize 알림 — 관리자 3역할 전원에게 발송, 실패해도 정산 유지(best-effort)', async () => {
+  it('finalize는 알림 헬퍼를 호출하고, 헬퍼 예외에도 정산은 유지한다(best-effort)', async () => {
     asActor(admin);
-    notifyMock.mockClear();
+    notifyHelperMock.mockClear();
     const ok = await finalizeUpsSettlement({ orderId: O.notify, ...INPUT });
     expect(ok.success).toBe(true);
+    expect(notifyHelperMock).toHaveBeenCalledTimes(1);
+    expect(notifyHelperMock).toHaveBeenCalledWith(expect.objectContaining({ orderId: O.notify }));
 
-    const notifiedIds = notifyMock.mock.calls.map((call) => call[0].userId);
-    expect(notifiedIds).toEqual(expect.arrayContaining([admin.userId, managerActor.userId, superActor.userId]));
-    expect(notifiedIds).not.toContain(shipperActor.userId);
-    expect(notifyMock).toHaveBeenCalledWith(expect.objectContaining({
-      orderId: O.notify,
-      type: 'SYSTEM',
-      title: 'title',
-      message: expect.stringContaining('body:ZEN-381A-'),
-    }));
-
-    notifyMock.mockRejectedValueOnce(new Error('notify failure'));
+    notifyHelperMock.mockRejectedValueOnce(new Error('notify helper failure'));
     const res = await finalizeUpsSettlement({ orderId: O.notifyFail, ...INPUT });
     expect(res.success).toBe(true);
     expect(status(O.notifyFail)).toBe('SETTLED');
+    expect(loggerMock.warn).toHaveBeenCalledWith(
+      'ups-settlement: notification helper failed (best-effort)',
+      expect.any(Error),
+    );
   }, 60000);
 
   it('finalize — run 2 tier·charges·SETTLED, 원장/ADJ 미변경', async () => {

@@ -47,6 +47,7 @@ interface Actor {
 let service: SupabaseClient;
 const actors: Actor[] = [];
 let shipperActor: Actor;
+let agencyActor: Actor;
 
 async function createActor(role: string, orgId: string): Promise<Actor> {
   const suffix = randomUUID().slice(0, 8);
@@ -155,6 +156,7 @@ describe('TASK-B-381 PR-4a — 정산마감 알림 실DB 발송(모킹 없음)',
 
     for (const role of ROLES) actors.push(await createActor(role, PLATFORM_ORG));
     shipperActor = await createActor('SHIPPER', SHIPPER_ORG);
+    agencyActor = await createActor('AGENCY', AGENCY_ORG);
 
     for (const id of ORDER_IDS) {
       await createOrder(id);
@@ -188,6 +190,17 @@ describe('TASK-B-381 PR-4a — 정산마감 알림 실DB 발송(모킹 없음)',
         expect(await notificationCount(orderId, recipient.userId), `${actor.role} → ${recipient.role}`).toBe(1);
       }
       expect(await notificationCount(orderId, shipperActor.userId)).toBe(0);
+      expect(await notificationCount(orderId, agencyActor.userId)).toBe(0);
+
+      const { data: row } = await service
+        .from('zen_notifications')
+        .select('type, title, message')
+        .eq('order_id', orderId)
+        .eq('user_id', actors[0].userId)
+        .single();
+      expect(row?.type).toBe('SYSTEM');
+      expect(row?.title).toBeTruthy();
+      expect(row?.message).toContain(`ZEN-381N-${orderId.slice(-4)}`);
     }
   }, 90000);
 });
