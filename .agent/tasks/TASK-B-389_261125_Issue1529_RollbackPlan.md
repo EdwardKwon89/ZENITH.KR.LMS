@@ -155,7 +155,7 @@ FROM rollback_bak.b381_m4_invoice_bak b
 LEFT JOIN public.zen_invoices i ON i.id = b.id;
 ```
 
-- **판독 규칙**: `status_matches`는 `joined_rows > 0`이고 불일치 0건일 때만 true — PASS 근거는 `joined_rows > 0`과 `restored + skipped = backup_rows`, `skipped`는 M4 이후 변경 건(정상 복원 제외)인지 대조한다.
+- **판독 규칙**: `status_matches`는 `joined_rows > 0`이고 불일치 0건일 때만 true. **행이 없는 백업 건도 불일치로 센다**(LEFT JOIN의 의도된 엄격 동작 — `skipped`에 포함). PASS 근거는 ① `joined_rows = backup_rows`(행 누락 없음) ② `restored`·`skipped`를 **실행 전에 알고 있는 건수와의 대조**이며, `restored + skipped = backup_rows`는 여집합에 따른 **항등식이라 근거가 아니다**. `skipped`는 M4 이후 변경 건(정상 복원 제외) 또는 현재 행 없는 건. **`status_matches` false가 곧 실패는 아니다** — `skipped` 사유를 대조해 판정한다.
 
 - **복원 불가·부분 복원**: M4 이후 해당 인보이스에 결제·상태 변경이 생기면 그 행은 복원하지 않는다(부분 복원). M4가 남긴 이력 행은 복원 시 삭제되므로 **감사 이력이 사라진다**(롤백 사실은 승인 기록에 남긴다). 외부 감사 로그·알림 발송 이력은 복원 대상이 아니다.
 
@@ -259,7 +259,7 @@ SELECT count(*) AS dup_invoice_no FROM (
 ) d;
 ```
 
-- **판독 규칙**: `content_matches`는 `joined_rows > 0`이고 불일치 0건일 때만 true — PASS 근거는 `backup_rows = joined_rows = restored`, `joined_rows = 0`(공허 상태)이면 PASS 아님.
+- **판독 규칙**: `content_matches`는 `joined_rows > 0`이고 불일치 0건일 때만 true — **행이 없는 백업 건도 불일치로 센다**(LEFT JOIN의 의도된 엄격 동작). PASS 근거는 `backup_rows = joined_rows = restored`, `joined_rows = 0`(공허 상태)이면 PASS 아님.
 
 ---
 
@@ -361,7 +361,7 @@ WHERE cost_settlement_status = 'SETTLED'
   AND (cost_settled_at IS NULL OR cost_settled_by IS NULL);
 ```
 
-- **판독 규칙**: `content_matches`는 `joined_rows > 0`이고 불일치 0건일 때만 true(전부 복원일 때뿐) — PASS 근거는 `joined_rows > 0`과 `restored + skipped = backup_rows`이며, `skipped`는 신규 run·청구항목 충돌(정상 건너뜀)인지 대조한다.
+- **판독 규칙**: `content_matches`는 `joined_rows > 0`이고 불일치 0건일 때만 true(전부 복원일 때뿐). **행이 없는 백업 건도 불일치로 센다**(LEFT JOIN의 의도된 엄격 동작 — `skipped`에 포함). PASS 근거는 ① `joined_rows = backup_rows`(행 누락 없음) ② `restored`·`skipped`를 **실행 전에 알고 있는 건수와의 대조**(예: 건너뜀 예정 2건 = `skipped 2`)이며, `restored + skipped = backup_rows`는 여집합에 따른 **항등식이라 근거가 아니다**. `skipped`는 신규 run·청구항목 충돌(정상 건너뜀) 또는 현재 행 없는 건. **`content_matches` false가 곧 실패는 아니다** — `skipped` 사유를 대조해 판정한다.
 
 ---
 
