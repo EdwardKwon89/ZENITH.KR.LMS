@@ -113,9 +113,9 @@ date                              # Thu Nov 26 13:52:06 KST 2026
 - [x] 세 질의 exit 0 · `db reset` 원상복구(이력 319·잔류 0·freshness OK) · `git status` 0건(계획서 커밋 후)
 - [x] 추가된 줄에 절대경로·계정·운영 식별자·운영 값 없음 (정정 커밋 추가줄 grep 0건 · scratch/ 커밋 0)
 - [x] B-392 task file(Baker) 미수정 (diff 0줄)
-- [ ] 완료 절차 R-17 준수 (문서 PR만 · `gh pr checks <PR>` 출력 그대로 인용 · 병합은 Jaison)
+- [x] 완료 절차 R-17 준수 (문서 PR만 · `gh pr checks` 출력 그대로 인용 코멘트 · 병합은 Jaison)
 
 ## [작업 결과]
 
 - 계획서 정정 커밋: `ae9e9a778`
-- PR: `<PLACEHOLDER_PR>`
+- PR: [#1547](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1547) (`Refs #1529` · `Refs #1539` · `Refs #1546`, base `TeamB_Dev`, 병합은 Jaison) · head `3c19103ec`
