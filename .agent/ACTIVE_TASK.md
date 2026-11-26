@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1546) | [Team B] TASK-B-393: 롤백 계획서 검증 질의의 공허한 참 정정·§4 M4-b 문구 모순 (EPIC #1364, B-392 후속) | b | p2 | open | 미배정 | 2026-11-26 |
+| [#1546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1546) | [Team B] TASK-B-393: 롤백 계획서 검증 질의의 공허한 참 정정·§4 M4-b 문구 모순 (EPIC #1364, B-392 후속) | b | p2 | in-progress | 미배정 | 2026-11-26 |
 | [#1542](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1542) | [IMP 제안] agent-worktree-init.sh를 워크트리 안에서 실행하면 중첩 워크트리 경로 생성 | - | - | - | 미배정 | 2026-11-26 |
 | [#1539](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1539) | [Team B] TASK-B-392: M4·M4-b·M5 롤백 재리허설 — 정정 SQL 왕복·M5 실제 run 테이블 실측 (EPIC #1364, B-390·B-391 후속) | b | p2 | review | 미배정 | 2026-11-26 |
 | [#1537](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1537) | [Team B] TASK-B-391: TASK-B-389 계획서 정정 7건 (M4·M4-b·M5 롤백, B-390 리허설 후속) | b | p2 | review | 미배정 | 2026-11-26 |
