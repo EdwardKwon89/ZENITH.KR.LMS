@@ -154,8 +154,8 @@ describe('지점군 ① 매핑 누락 — logger.warn(신규 로깅 4지점) + �
 });
 
 describe('지점군 ② 헬퍼 DB 오류 흡수 — logger.error + 오류 객체 전달(신규 로깅 3지점)', () => {
-  it('resolveCountryCode DB 오류 → error(오류 객체 인자) + 호출부 warn + 반환 불변', async () => {
-    const portsErr = { message: 'PORTS_SELECT_FAILED_395' };
+  it('resolveCountryCode 그 외 코드 오류 → error(오류 객체 동일성) + 호출부 warn + 반환 불변', async () => {
+    const portsErr = { message: 'PORTS_SELECT_FAILED_395', code: 'XX000' };  // 그 외 코드(내부 오류) — error 로깅 대상
     mockLookup({ zen_ports: { data: null, error: portsErr } });
 
     const { previewShxkPayload } = await import('@/app/actions/operations/ups-labels');
@@ -171,8 +171,8 @@ describe('지점군 ② 헬퍼 DB 오류 흡수 — logger.error + 오류 객체
     expect(result).toEqual({ success: false, error: await trError('destination_country_not_found') });
   });
 
-  it('resolveShxkCode DB 오류 → error(오류 객체 인자) + 호출부 warn + 반환 불변', async () => {
-    const mapErr = { message: 'SHXK_MAP_SELECT_FAILED_395' };
+  it('resolveShxkCode 그 외 코드 오류 → error(오류 객체 동일성) + 호출부 warn + 반환 불변', async () => {
+    const mapErr = { message: 'SHXK_MAP_SELECT_FAILED_395', code: '42P01' };  // 그 외 코드(테이블 미존재) — error 로깅 대상
     mockLookup(
       { zen_ups_shxk_country_map: { data: null, error: mapErr } },
       { recipient_country_code: 'US' },
@@ -206,6 +206,37 @@ describe('지점군 ② 헬퍼 DB 오류 흡수 — logger.error + 오류 객체
       expect.stringContaining('voidUpsLabel: no active label'),
     );
     expect(result).toEqual({ success: false, error: await trError('label_not_found') });
+  });
+
+  it('resolveCountryCode PGRST116(행 없음) → error 미호출 + 호출부 warn 단독 + 반환 불변', async () => {
+    mockLookup({
+      zen_ports: { data: null, error: { code: 'PGRST116', message: 'JSON object requested, multiple (or no) rows returned' } },
+    });
+
+    const { previewShxkPayload } = await import('@/app/actions/operations/ups-labels');
+    const result = await previewShxkPayload(ORDER_ID, 'CREATEORDER');
+
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('previewShxkPayload: destination country code not found'),
+    );
+    expect(result).toEqual({ success: false, error: await trError('destination_country_not_found') });
+  });
+
+  it('resolveShxkCode PGRST116(행 없음) → error 미호출 + 호출부 warn 단독 + 반환 불변', async () => {
+    mockLookup(
+      { zen_ups_shxk_country_map: { data: null, error: { code: 'PGRST116', message: 'no rows returned' } } },
+      { recipient_country_code: 'US' },
+    );
+
+    const { previewShxkPayload } = await import('@/app/actions/operations/ups-labels');
+    const result = await previewShxkPayload(ORDER_ID, 'CREATEORDER');
+
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('previewShxkPayload: shipping method not found'),
+    );
+    expect(result).toEqual({ success: false, error: await trError('shipping_method_not_found') });
   });
 });
 

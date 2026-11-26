@@ -252,7 +252,7 @@ async function resolveCountryCode(supabase: SupabaseClient, destPortId: string):
     .select('country_code')
     .eq('id', destPortId)
     .single();
-  if (error) logger.error('resolveCountryCode: zen_ports select failed', error);
+  if (error && error.code !== 'PGRST116') logger.error('resolveCountryCode: zen_ports select failed', error);  // PGRST116(행 없음)은 정상 업무 실패 — 호출부 warn에 맡김
   return data?.country_code ?? null;
 }
 
@@ -276,7 +276,7 @@ export async function resolveShxkCode(
     .eq('country_code', countryCode)
     .eq('incoterms', incoterms)
     .single();
-  if (error) logger.error('resolveShxkCode: zen_ups_shxk_country_map select failed', error);
+  if (error && error.code !== 'PGRST116') logger.error('resolveShxkCode: zen_ups_shxk_country_map select failed', error);  // PGRST116(행 없음)은 정상 업무 실패 — 호출부 warn에 맡김
   return data?.shxk_code ?? null;
 }
 
@@ -757,7 +757,7 @@ async function fetchActiveLabelByOrder(
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (error) logger.error('fetchActiveLabelByOrder: zen_ups_labels select failed', error);
+  if (error) logger.error('fetchActiveLabelByOrder: zen_ups_labels select failed', error);  // maybeSingle — 행 없음은 오류가 아니므로 error 있을 때만
   return data;
 }
 
