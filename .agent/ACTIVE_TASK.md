@@ -58,7 +58,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1529](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1529) | [Team B] TASK-B-389: B-381 데이터 작업(M4·M4-b·M5) 롤백 계획 작성 (EPIC #1364, 문서) | b | p2 | review | 미배정 | 2026-11-25 |
 | [#1528](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1528) | [Team B] TASK-B-388: 롤백 통합본 미실측 항목 로컬 실측 (EPIC #1364, TASK-B-387 후속) | b | p2 | review | jungjs | 2026-11-25 |
 | [#1524](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1524) | [Team B] TASK-B-387: 청구서관리 마이그레이션 적용 순서·롤백 로컬 왕복 리허설 (EPIC #1364) | b | p2 | review | 미배정 | 2026-11-25 |
-| [#1518](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1518) | [Aiden 요청] E2E_324_Result payload 문서의 개인 메일 기재 정리 — Team B 소유 파일 (IS #1490 후속) | b | p3 | in-progress | 미배정 | 2026-11-26 |
+| [#1518](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1518) | [Aiden 요청] E2E_324_Result payload 문서의 개인 메일 기재 정리 — Team B 소유 파일 (IS #1490 후속) | b | p3 | review | 미배정 | 2026-11-26 |
 | [#1516](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1516) | [Team B] TASK-B-386: E2E_B374_Result JSON 증적 R-21 점검·처리 (IS #1490 후속) | b | p3 | review | 미배정 | 2026-11-24 |
 | [#1513](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1513) | [Team B] TASK-B-385: E2E 증적 출력 경로를 저장소 밖으로 전환 (IS #1490 후속, R-13/R-21 정합, 설계 의견부터) | b | p2 | review | jungjs | 2026-11-25 |
 | [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | review | jungjs | 2026-11-25 |
