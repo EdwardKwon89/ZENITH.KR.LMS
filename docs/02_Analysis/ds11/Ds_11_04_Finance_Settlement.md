@@ -128,7 +128,7 @@
 
 #### 마감 후 조정 — `createPostFinalizationAdjustment`·`createAdjustmentInvoice` (TASK-B-381 PR-4a에서 제거)
 - TASK-194-C의 마감 후 조정 인보이스 직접 insert 경로였습니다. **PR-4a에서 함수를 제거**해 옛 후청구 경로를 폐쇄했습니다(현재 `src` 참조 0건).
-- UPS는 `finalizeUpsSettlement` 단일 경로만 사용하며, `rejectInvoice`의 **비UPS** 재발행만 `InvoiceGenerator`를 경유합니다.
+- UPS는 `finalizeUpsSettlement` 단일 경로만 사용합니다. `generateInvoicesForOrder`·`generateInvoiceAction`·`rejectInvoice`(비UPS 재발행)는 모두 `InvoiceGenerator.generateInvoice`를 호출하며, **UPS 거부는 그 공통 진입점 내부 가드**에서 이뤄집니다.
 
 #### rejectInvoice(invoiceId)
 - **Path**: `src/app/actions/finance/settlement.ts:633-697`
@@ -254,6 +254,16 @@
 
 
 ### 4.5 일별 청구 일괄 마감 — `src/app/actions/finance/daily-billing.ts` (TASK-B-381 PR-3 / Issue #1459)
+
+#### getShipperDailyBillingSummary(params?) — TASK-B-381 PR-3·PR-4a 변경
+- **Path**: `src/app/actions/finance/daily-billing.ts`
+- **변경**: 인보이스의 출처 오더가 **UPS이면 집계에서 제외**합니다(§2-7). 출처 오더 조회 실패는 fail-closed(`generic{ORDER_LOOKUP}`).
+- **Output**: `{ success, groups, exchangeRate }` (UPS 제외 후 비UPS 기준)
+
+#### getShipperDailyOrdersDetails(invoiceIds) — TASK-B-381 PR-3·PR-4a 변경
+- **Path**: `src/app/actions/finance/daily-billing.ts`
+- **변경**: 반환 행에서 **UPS 오더를 제외**합니다(§2-7). 인보이스·오더 조회 실패는 fail-closed.
+- **Output**: `{ success, orders }` (UPS 제외)
 
 #### finalizeDailyShipperInvoices(invoiceIds, reason?)
 - **설명**: 일별/주별/월별 집계 단위로 인보이스를 일괄 마감합니다. **UPS 인보이스는 마감 대상에서 제외**하고 `skippedCount`로 집계합니다(§2-7). UPS는 `finalizeUpsSettlement` 경로만 사용합니다.

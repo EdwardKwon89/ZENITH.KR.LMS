@@ -352,7 +352,7 @@ zen_ups_settlement_run_charges
 | 6 | UPS 출고확정 인보이스 미생성 (비UPS 회귀) | PR-3 |
 | 7 | 기존 UPS 인보이스 일괄 취소 | 범위 밖(#1532·운영) |
 | 8 | SETTLED·run 없음 초기화 | 범위 밖(#1532·운영) |
-| 9 | MANAGER 비취소 인보이스 → `ups_invoice_exists` | **PR-1** TC-381-07 |
+| 9 | 비취소 인보이스 → `ups_invoice_exists` | **PR-1** TC-381-07(파일 확인: admin으로 실행, MANAGER 양성은 TC-381-05) |
 | 10 | `generateInvoicesForOrder` 직접 호출 UPS 거부 | PR-3 |
 | 11 | M4-b 삭제·참조 무결성 | 범위 밖(#1532·운영) |
 | 12 | 옛 UPS 화면·액션 제거 후 비UPS 무회귀 | PR-4 |
@@ -381,7 +381,7 @@ zen_ups_settlement_run_charges
 | 6 | 인보이스 `source_order_id` 비교를 **text 비교**로 변경(비uuid 값 형변환 오류 방지) | M3 |
 | 7 | **RLS 음성 대조**(비소속 대리점·타 조직 화주 0건) + 오류 `not_ups_order`·`already_settled`(다른 입력)·`paid_invoice_exists` 테스트 | 동일 테스트 파일 |
 
-- 신규 DB 통합 **12/12 PASS**(자기완결형, CI 실행), 전체 **307 passed · 1 skipped / 2,357 passed · 16 skipped**, build SUCCESS.
+- 신규 DB 통합 **12/12 PASS**(자기완결형, CI 실행), 전체 **307 passed · 1 skipped / 2,357 passed · 16 skipped**, build SUCCESS. (PR-1 재검토에서 멱등 정규화 1건 추가되어 최종 **13/13**)
 - 되돌리기: 불변 트리거 비활성 1 failed, GRANT 회수 시 호출 실패, M1~M3 롤백 블록 검증.
 
 ## 9. [구현 작업 결과] PR-2 — 서버 액션·정산마감 경로 (2026-11-26)
@@ -684,13 +684,13 @@ zen_ups_settlement_run_charges
 - 참고: 시드된 기존 UPS 오더는 옛 인보이스가 남아 있어 `ups_invoice_exists`로 정산이 차단됩니다(설계대로). R-10은 옛 인보이스가 없는 신규 fixture로 정산 성공 경로를 확인한 뒤 fixture를 정리했습니다.
 
 ### 12-3. RLS 실세션 검증
-- `tests/integration/task-b381-settlement-run-db.test.ts` **13/13 PASS** — ADMIN/AGENCY/SHIPPER/비소속/anon 세션의 run·amounts 조회 허용·거부를 실DB에서 확인(기존 PR-1 RLS 매트릭스 재사용). 역할별 정책 결과는 공개 문서에 서술하지 않고 통과 여부만 기록합니다.
+- `tests/integration/task-b381-settlement-run-db.test.ts` **13/13 PASS** — **run·amounts 테이블 조회 범위**의 ADMIN/AGENCY/SHIPPER/비소속/anon 실세션 결과를 확인했습니다. 이 테스트는 PR-1 소관이며 이 PR은 추가하지 않았습니다. **PR-3 경로(`settlement.ts` transport_mode 조회·`findUpsInvoiceIds`·`InvoiceGenerator` 가드)의 AGENCY 실세션 검증은 미검증**이며 **#1569(TASK-B-400)**로 이월합니다. 역할별 정책 결과는 공개 문서에 쓰지 않고 통과 여부만 기록합니다.
 
 ### 12-4. 후속 인계 구분
 | 항목 | 이 PR | 비고 |
 |:--|:--|:--|
 | `createPostFinalizationAdjustment` 직접 insert | **처리** | PR-4a에서 제거, Ds-11에 제거 기록 |
-| RLS 하 AGENCY 조회 | **처리** | 실세션 통합 테스트 13/13 PASS |
+| RLS 하 AGENCY 조회 | **미검증 이월** | run·amounts 조회 13/13은 PR-1 범위. PR-3 경로 실세션은 **#1569(TASK-B-400)**로 분리 인계 |
 | `rejectInvoice` UPS 안내 문구 | **별도** | UI 후속(코드 변경 필요) |
 | `skippedCount` 표시 | **별도(불필요)** | UPS 항목 자체를 숨겨 표시 대상 없음 |
 | `settled_by` 노출 | **보류** | Aiden 판단 전 미노출 |
@@ -698,5 +698,19 @@ zen_ups_settlement_run_charges
 | `zen_ups_actual_charges` DROP | **별도** | JSJung 결정 |
 
 ### 12-5. 검증
-- RLS 통합 13/13, UI R-10 PASS, 오류 로그 0.
+- run·amounts RLS 통합 13/13(PR-1 범위), UI R-10 PASS, 오류 로그 0. PR-3 경로 AGENCY 실세션은 #1569로 이월(미검증).
 - `npm run test:regression` — **312 files passed · 1 skipped / 2,364 passed · 16 skipped**(skip은 B-373 16건), `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+
+### 12-6. PR-4b 재검토 반영 (2026-11-27, Aiden 필수 4·권고 6)
+
+| # | 지적 | 반영 |
+|:-:|:--|:--|
+| A1 | §11.13 `recordUpsActualCharges`가 활성 API로 잔존 | 제거 기록으로 대체, 제거된 `createPostFinalizationAdjustment` 호출 서술 삭제 |
+| A2 | `finalizeUpsSettlement` 알림·권한·로케일 불일치 | 부수효과에 알림(멱등 재호출 포함, revalidate 앞), 공통 권한에 알림 헬퍼 관리자 클라이언트 예외, 문구는 요청 로케일 1개·수신자 동일 문구·실패 시 영문 폴백 명시 |
+| A3 | §11.19 REVOKE/GRANT 대상 불일치 | SQL 기준 `REVOKE`(PUBLIC·anon·authenticated) / `GRANT SELECT`(authenticated·service_role)로 정정, 역할별 결과 표 제거 |
+| A4 | RLS 하 AGENCY “처리” 근거 부족 | run·amounts 13/13은 PR-1 범위로 정정. **PR-3 경로 AGENCY 실세션은 미검증 → #1569(TASK-B-400) 이월** (Jaison ⓑ 결정) |
+| R6 | Ds_11_04 보강 | 생성기 3호출처·UPS 거부는 생성기 내부 가드임을 명시, `getShipperDailyBillingSummary`·`getShipperDailyOrdersDetails` UPS 제외 항목 추가 |
+| R7 | 인덱스 stale | 03=66·07=72·11A=416·04=274·11B=222로 `wc -l` 확인 갱신 |
+| R8 | 소스 줄·server-only 표기 | `ups-actual-charges` 인용 줄(17-40·42-108·110-189) 정정, `server-only`는 `build.ts`만임을 명시 |
+| R9 | `tests/` 죽은 참조 2곳 | 문서 “`src` 0건” 유지, 테스트 정리는 IMP 건의 대상으로 보고(번호는 Aiden) |
+| R10 | task 정합 | §8 12→13 사유(멱등 정규화 1건 추가), §8-5 #9 실제 실행 역할(admin) 정정, 회귀 증가는 base 병합분과 상쇄 — 정확한 분해는 미확인 |

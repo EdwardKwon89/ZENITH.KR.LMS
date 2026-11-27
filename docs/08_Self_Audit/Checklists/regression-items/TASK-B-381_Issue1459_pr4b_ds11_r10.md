@@ -13,7 +13,7 @@
 | :-- | :-- | :-- | :-- |
 | TC-381D-01 | Ds-11 내부 헬퍼·제거 함수 정리 | `notifyUpsSettlementAdmins` 기재, `createPostFinalizationAdjustment` 제거 기록 | `Ds_11_11B §11.20`, `Ds_11_04 §4.2` |
 | TC-381D-02 | R-10 새 정산마감 화면 | 미리보기 → 정산 완료 성공, 오류 화면 0 | 저장소 밖 스크린샷(결과 PASS) |
-| TC-381D-03 | RLS 실세션(AGENCY 포함) | run·amounts 조회 허용/거부 실DB 확인 | `tests/integration/task-b381-settlement-run-db.test.ts` 13/13 |
+| TC-381D-03 | RLS 실세션(run·amounts 범위) | run·amounts 조회 허용/거부 실DB 확인(PR-1 소관 13/13). **PR-3 경로 AGENCY 실세션은 미검증 — #1569 이월** | `tests/integration/task-b381-settlement-run-db.test.ts` 13/13 |
 | TC-381D-04 | 에러 로그 | `zen_error_logs` 신규 0건 | “에러 로그 확인 — 無” |
 | TC-381D-05 | 전체 회귀·build | `312 files passed · 1 skipped / 2,364 passed · 16 skipped`(skip은 B-373), build SUCCESS | `npm run test:regression` / CI |
 

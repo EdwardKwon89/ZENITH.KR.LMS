@@ -3,7 +3,7 @@
   "ds11": "docs/02_Analysis/Ds_11_API_상세_명세서.md",
   "generatedAt": "2026-11-27",
   "total": 305,
-  "count": 123,
+  "count": 121,
   "entries": [
     "admin/auth.ts:changePassword",
     "admin/auth.ts:changePasswordWithReauth",
@@ -43,8 +43,6 @@
     "admin/organization.ts:requestOrganizationSupplement",
     "admin/organization.ts:updateOrganization",
     "admin/rbac.ts:updateRolePermissions",
-    "finance/daily-billing.ts:getShipperDailyBillingSummary",
-    "finance/daily-billing.ts:getShipperDailyOrdersDetails",
     "finance/invoice-files.ts:generateInvoicePdf",
     "finance/order-revenue-cost.ts:getOrderRevenueCost",
     "finance/order-revenue-cost.ts:getOrderRevenueCostList",
