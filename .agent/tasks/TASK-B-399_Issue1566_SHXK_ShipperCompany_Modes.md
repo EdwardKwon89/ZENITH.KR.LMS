@@ -4,7 +4,7 @@
 |:--|:--|
 | **Issue / Task** | [#1566](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1566) / `TASK-B-399` |
 | **Worker / 검증** | Baker(조사·설계 의견) / Jaison(검증) / Aiden(`[설계 확정]` 승인) |
-| **우선순위 / 단계** | p1 / **1단계 — 조사·설계 의견만**(구현·마이그레이션 금지) |
+| **우선순위 / 단계** | p1 / **PR1 구현·검증 완료 — 재검토 반영**(PR2·PR3 후속) |
 | **상태** | ✅ **[설계 확정] 완료** — 2026-11-27 13:46 KST Aiden(Edward 지시). IS #1566 `status:in-progress` → PR1 구현 완료 후 `status:review` 전환(아래 `[작업 결과 — PR1]`) |
 | **PR1 범위·브랜치** | DB·RPC·타입·Ds-11만 / `feature/teamb-task-b399-pr1-shipper-company-db-rpc` (base `origin/TeamB_Dev` `b9e0254f1`) |
 | **채번 근거** | `git fetch origin` 후 원격 브랜치 `git ls-remote --heads origin \| grep -i task-b399` = 0건, Issue 제목 조회 = #1566 본건 1건. `./scripts/next-task-number.sh B`는 자기 Issue 제목까지 세어 `TASK-B-400`을 반환(#1564 스크립트 결함) → **B-399 확정**. 착수 워크트리는 전용(`git rev-parse --show-toplevel` 확인). |
@@ -189,11 +189,11 @@
 - 코드 커밋: `cd30feae64ed2119436483a7754ef16a5d75d980`
 - **구현 범위**: `zen_orders.shipper_company` nullable 컬럼(`20261127090000_task_b399_shipper_company.sql`, DEFAULT·백필 없음, COMMENT 포함) + `create_order_atomic` v8(`20261127090100_task_b399_create_order_atomic_v8.sql`, v7 전문 재정의·시그니처 `jsonb,uuid,uuid` 불변·`NULLIF(BTRIM(p_payload->>'shipper_company'), '')`·롤백 주석에 v7 경로와 컬럼 잔존 명시) + `src/types/supabase.ts` Row·Insert·Update 3건 + Ds-11 발송인 표·신규 DB 컬럼·v8 경로 + 회귀 항목 파일 1개. **UI·Zod·서버 액션·payload·env 제거·실호출은 포함하지 않음**(PR2·PR3).
 - **채번 근거**: 착수 시점 `TeamB_Dev` 최신 마이그레이션 `20261126120000_task_b381_pr4a_cost_amount_comments.sql` 이후로 `20261127090000`/`20261127090100` 채번(Aiden 조건 5).
-- **R-09 test-first**: 구현 전 동일 6건 실행 → `Test Files 1 failed (1) / Tests 6 failed (6)`, `Start at 14:24:43`(증적은 저장소 밖 세션 임시 파일). 구현 후 → `Test Files 1 passed (1) / Tests 6 passed (6)`, `Start at 14:26:49`. 단언은 모두 값 기반(`includes(...).toBe(true)`)이며 문자열 포함 단독 단언을 쓰지 않았다.
+- **R-09 test-first**: 구현 전 동일 6건 실행 → `Test Files 1 failed (1) / Tests 6 failed (6)`, `Start at 14:24:43`(증적은 저장소 밖 세션 임시 파일). 구현 후 → `Test Files 1 passed (1) / Tests 6 passed (6)`, `Start at 14:26:49`. 당시 6건은 파일 포함 검사(`includes(...).toBe(true)`)였고 DB 동작을 증명하지 못했다는 지적을 Jaison·Aiden에게 받아, 아래 `[작업 결과 — 재검토 반영]`에서 값 기반 실DB 테스트로 보완했다.
 - **전체 회귀**: `date` = `Fri Nov 27 14:26:55 KST 2026`; `npm run test:regression` → `Test Files 313 passed | 1 skipped (314)`, `Tests 2370 passed | 16 skipped (2386)`, `Duration 791.68s`. skip 16건은 기존 B-373 세션 테스트.
 - **정적 검사**: `npm run check:ds11` OK(허용 목록 밖 신규 미반영 0), `npm run check:lrtm` OK(유령 경로 0·신규 미등재 0·E2E 미표기 0), `npm run check:doc-links` OK(신규 깨진 링크 0), `npm run check:evidence` OK(저장소 내 증적 신규·변경 0).
 - **타입 회귀**: `npx tsc --noEmit` 220건 오류는 변경 전 HEAD와 출력이 **완전히 동일**(기존 실패분), 신규 오류 0건·변경 파일 오류 0건. 타입 재생성 범위(영문 주소 스테일)는 확장하지 않고 신규 컬럼만 반영.
-- **R-21·R-14**: 실제 값·계정·오더 식별자·요청/응답 본문·절대경로를 보고에 기재하지 않았다. 운영 DB·운영 호출은 실행하지 않았고, 실호출은 PR3 로컬 Supabase 1회만(Jaison 승인 후) 수행한다.
+- **R-21·R-14**: 실제 값·계정·오더 식별자·요청/응답 본문·절대경로를 보고에 기재하지 않았다. 운영 DB·운영 호출은 실행하지 않았고, **RPC 실DB 회귀**는 PR1 실DB 테스트로 수행했다. **SHXK 외부 실호출**은 PR3 로컬 Supabase 1회만(Jaison 승인 후) 수행한다.
 - **Aiden 조건 (3) 반영**: 위 test-first 실패 증적 기재. 조건 (4) 새 head `gh pr checks` 원문 인용은 PR 생성 후 PR 코멘트에 게시한다. 조건 (1)의 mode 미전달 `updateOrder` 값 보존 단언은 PR2(서버 액션 구현 시)에 포함한다. 조건 (2) 200자 출처 확인은 PR2에서 수행한다.
 - **후속**: PR1 병합 후 PR2(UI/Zod/payload/env/#1562 이관) → PR3(회귀/R-10/로컬 실호출) 순서를 유지한다.
 
@@ -204,4 +204,20 @@
 - [x] Issue #1566 라벨 `status:review` 전환(문서 커밋 전 실행)
 - [x] R-09 test-first 실패→성공 증적, 전체 회귀·정적 검사·타입 baseline 기재
 - [x] 문서 커밋(task file만) 후 PR 생성 — base `TeamB_Dev`, 본문 `Refs #1566`, `Closes` 없음(Aiden 지정)
-- [x] 병합은 Aiden 권한 — Baker는 PR 생성까지만 수행
+- [x] 병합은 **Jaison 소관**(Aiden은 R-01 검토 의견만) — Baker는 PR 생성·재검토 반영까지만 수행
+
+## [작업 결과 — 재검토 반영] (2026-11-27, Baker)
+
+- 코드 커밋: `b47cb83f6ffb954edcb8be157bc88d05bc9b1bd7`
+- **계기**: Jaison [15:05 검토](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1575#issuecomment-7211210534) 필수 1·2 + 비차단 3, Aiden [R-01 15:07 검토](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1575#issuecomment-7211242323) 필수 1·2 + 권고 3~6.
+- **Jaison 필수 1 — 자기완결 실DB 테스트**: `tests/integration/task-b399-shipper-company-db.test.ts` 신규(5 cases / 8회 RPC 호출). 런타임 난수 UUID·이메일 픽스처, 단일 psql 세션 `BEGIN…ROLLBACK`, `afterAll` 방어적 정리, `skipIf` 없음. 값 단언 ① 앞뒤 공백이 제거된 원문 ② 공백만(ASCII·TAB·LF·NBSP·전각 공백) NULL ③ 키 없음·JSON null NULL ④ 기존 `shipper_name`·`recipient_company`·`shipper_contact_email` 값 보존 + 패키지·아이템·트래킹·상태이력 각 1행 ⑤ `pg_proc` 시그니처·`SECURITY DEFINER`·본문 반영 ⑥ 컬럼 nullable. 정적 6건은 보조로만 두고 DB 검증 건수에 계산하지 않음.
+  - **R-09 test-first**: 마이그레이션 적용 전 동일 테스트 → `ERROR: column o.shipper_company does not exist`, `Test Files 2 failed (2)` / `Tests 1 failed | 5 passed | 5 skipped (11)`(2026-11-27 15:10:40 KST). `supabase db reset --yes` + seed 적용 후 → `Test Files 2 passed (2)` / `Tests 11 passed (11)`(2026-11-27 15:13:07 KST). 증적은 저장소 밖 세션 임시 파일에 보관.
+- **Jaison 필수 2 — 롤백 실행 검증**: 로컬 DB 임시 SQL(`BEGIN…ROLLBACK`, 저장소 파일 미변경, 2026-11-27 15:13:26 KST). v7 전문 재적용 후 RPC 호출 성공·`shipper_company` 미저장·컬럼 잔존(`column_after_v7=1`, `v7_with_column|<NULL>|true|true`), 이어 `DROP COLUMN` 후 호출 성공(`column_after_drop=0`, `v7_after_drop|<NULL>|n/a|true`). 역순(v8 잔존 상태에서 DROP 먼저)은 `ERROR: column "shipper_company" of relation "zen_orders" does not exist`로 실패. 트랜잭션 ROLLBACK 후 현재 상태 `1|true`(컬럼 1건·v8 본문 유지). 로컬 DB는 reset+seed로 원복 완료.
+- **Aiden 필수 1 — 정적 허점·경계값·표기 정정**: `stripComments()`로 헤더 주석을 제거한 DDL 본문에서 시그니처·`RETURNS`·`SECURITY DEFINER`·`SET search_path` 검사(①). 컬럼 정의 전체 exact match로 `NOT NULL`·`DEFAULT` 부재 고정, `splitTopLevel()`로 INSERT 컬럼/VALUES의 개수·인덱스 위치 일치와 직접 참조 인덱스를 검증, `Row`(필수)와 `Insert`·`Update`(선택 `?`)를 구분해 단언(②). 실DB 공백 5종·기존 컬럼 3개 값 단언(③). "문자열 포함 단독 단언을 쓰지 않았다"는 기존 표기는 포함 검사(`includes(...).toBe(true)`) 사실에 맞게 정정하고, "실DB는 PR3"은 **RPC 실DB 회귀(PR1)** 와 **SHXK 외부 실호출(PR3)** 를 구분해 수정(④).
+- **Aiden 필수 2 — Ds-11 정합**: `PR1 현행`(TASK-B-397 환경변수 경로 유지) / `PR2 적용 시`(모드별 출처·전송 직전 쉼표 제거)을 구분 표기하고 환경변수 서술 제거를 PR2 범위로 복원. `validateShxkPayload`는 **구조 방어(공백·길이) 이관**만 담당(수기 누락 차단 아님)으로 정정. TC-B399-06이 양쪽 서술과 환경변수 경로 유지를 값으로 고정.
+- **권고 반영**: `BTRIM` 제거 문자를 `E' \t\n\r\u00A0\u3000'`로 확장해 JS `trim()`과 모드 추론을 일치(UTF8 로컬 서버에서 동작 확인). 롤백 주석을 `앱 롤백 → create_order_atomic v8→v7 복구 → DROP COLUMN` 순서로 보강하고 위 실행 검증에 포함. Ds-11 셀 이스케이프 `\|` 확인, `src/types/supabase.ts`의 `shipper_company`를 알파벳 순(`shipper_city` 다음)으로 이동, task file 상단 메타·병합 권한 서술 정정.
+- **Jaison 비차단 3 — 채번 근거**: `supabase db reset` 적용 로그상 직전 최신은 `20261126120000_task_b381_pr4a_cost_amount_comments.sql`, `git ls-remote --heads origin | grep -i task-b399` = 0건(열린 PR 브랜치 충돌 없음), B-383 PR #1510(`20261124…`)과 시각 겹침 없음 확인 후 `20261127090000`/`20261127090100` 채번.
+- **전체 회귀**: `date` = `2026-11-27 15:13:53 KST`; `npm run test:regression` → `Test Files 314 passed | 1 skipped (315)`, `Tests 2375 passed | 16 skipped (2391)`, `Duration 709.23s`. 재검토 전(head `12ebeebb8`) 대비 **passed +1 파일·+5 테스트, skipped 16건 불변** — 신규 실DB 테스트 5건이 skip 아님으로 실행됨. skip 16건은 기존 B-373 세션 테스트.
+- **정적 검사·타입 회귀**: `date` = `2026-11-27 15:16:21 KST`; `npm run check:ds11` OK(허용 목록 밖 신규 미반영 0), `npm run check:lrtm` OK(유령 경로 0·신규 미등재 0·E2E 미표기 0), `npm run check:doc-links` OK(신규 깨진 링크 0), `npm run check:evidence` OK(저장소 내 증적 신규·변경 0). `npx tsc --noEmit` 220건 — 변경 전 HEAD baseline과 건수 동일, 변경 파일 언급 0건(신규 오류 0).
+- **R-21·R-14·병합 권한**: 실제 값·계정·오더 식별자·요청/응답 본문·절대경로는 기재하지 않았다. 운영 DB·운영 호출 없음. 병합은 **Jaison 소관**이며 Aiden은 R-01 확인 의견만 낸다. 마이그레이션 운영 적용은 Edward R-14 승인·211 런북과 별개다.
+- **후속**: 새 head `gh pr checks 1575` 원문 인용 → Jaison 재검토 → Aiden R-01 확인 → 병합. 병합 후 PR2(UI/Zod/payload/env/#1562 이관) → PR3(회귀 실측·SHXK 로컬 실호출) 순서 유지.
