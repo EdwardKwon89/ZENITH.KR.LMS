@@ -5,7 +5,7 @@
 | **Issue** | [#1451](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1451) (#1449 A·#1442 대체, 설계 의견부터) |
 | **담당(Worker)** | Dave (Team B) |
 | **검증(Auditor)** | Jaison |
-| **상태** | 📝 설계 의견 (`status:draft`) — **구현 금지** |
+| **상태** | 🔔 **[설계 확정] 완료** (`status:open`) — 구현은 별도 PR(창수는 B-381 PR-4b 병합 후) |
 | **브랜치** | `feature/teamb-task-b377-iss1451-cost-display-design` (base `origin/TeamB_Dev` 83bb486f1) |
 | **공개 저장소 주의** | 목표 상태·판정 기준만 기재. 현재 코드의 역할별 반환·접근·가드 여부, 컬럼명, 응답 값, 재현 형태는 쓰지 않는다. |
 
@@ -137,10 +137,21 @@
 
 - 두 원가 테이블의 **허용 집합 = admin 3역할(ZENITH_SUPER_ADMIN·ADMIN·MANAGER) + `SUB_ADMIN`(Pilot 예외)**, 그 외 모든 인증 역할(AGENCY·SHIPPER·INDIVIDUAL 등)은 **거부**한다. 달성 수단은 §8-1의 B-377 마이그레이션 ①·②이며 롤백은 §8-1 표를 따른다. **`SUB_ADMIN`은 Master Agency 업무 기능(자신의 원가 별도 관리·자신의 수익금 조회)을 보장하며 Pilot 단계의 현행 접근 범위를 바꾸지 않는다**(AGENCY·SHIPPER·INDIVIDUAL 거부는 유지). 결정 이력: 09:26 "3역할 외 모든 인증 역할 = 거부" → **Edward 2026-11-27 `SUB_ADMIN` Pilot 예외 정정(JSJung 수락)**.
 
+## [설계 확정] (Aiden 전속 — R-17)
+
+| 항목 | 내용 |
+|:--|:--|
+| **확정 대상** | 설계 갱신본(TASK-B-377, TASK-B-396 반영) — PR #1557 head `752ac805`(CI: `gh pr checks 1557` Regression Tests pass 11m6s, `CLEAN`) |
+| **확정 일시** | 2026-11-27 12:00 KST — Edward 지시로 확정. 근거: [Aiden R-01 재검토 3차](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1557#issuecomment-7207413727)·[정정본](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1557#issuecomment-7207588968)·[보완 반영 확인](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1557#issuecomment-7208279241), [Jaison 수용](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1557#issuecomment-7208381219), [Mike 최종 반영](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1557#issuecomment-7208603358) |
+| **확정 범위** | ① **표시 원천**: run 단일 원천(`run_charges`), 환산 제거(KRW 고정), 가드 조회 함수 `getOrderAdditionalCharges(orderId)`(소유·admin 검증 후 항목 DTO만 반환, 최신 version, 자기 tier 항목만) — §3-1 ② ② **라벨**: 화주·대리점 경로 전체 "부가운임"(오더 상세·일별 청구·인보이스 PDF·청구서 화면·Excel), 관리자 경로 원문 유지, **조정 행은 별도 라벨 안 2**(ko `운임 조정분` / en `freight adjustment` / zh `运费调整` / ja `運賃調整分`, 확정 규칙 5의 예외 — JSJung 수락), 0원 비표시, 음수 부호 `-1,234`, **행 합 = `line_total`** 목표, 합계는 저장값 사용·역산 금지 ③ **권한 목표 상태**: 원가 테이블 2개의 허용 집합 = admin 3역할 + `SUB_ADMIN`(Pilot 예외 — Edward 2026-11-27, 본 사업 재판단 IMP-218), 그 외 인증 역할 거부. 화주·대리점의 원가 열람 제거(정책 마이그레이션 ①②, **앱 배포 뒤 마지막**), `SUB_ADMIN` 허용 정책은 유지, `ups-detail`은 판매가 구성만 표시·원가 계열 미전달, 원가 조인 경로도 원가 미반환이 목표 ④ **순서·롤백**: §8-1 표(b375 완료 → B-377 ①② → B-379 2/2), 롤백 SQL(정책 재생성)을 마이그레이션 파일에 포함하되 **기존 정의 복원 전 의도 대조(Aiden)** ⑤ **테스트**: §6 5번(`run_charges` tier×역할 신규 매트릭스, `SUB_ADMIN` 허용 케이스·수익금 조회/원가 관리 비파괴 회귀, 실DB 세션 테스트, 오더 상세 양성 대조, R-10 UI 확인·비공개 증적) |
+| **조건(비차단, 구현 PR에서 반영)** | (1) §6 1번 "`getUpsActualCost`에 admin 가드(SUPER_ADMIN·ADMIN·MANAGER)" 문구를 §8-2 허용 집합과 같은 표현으로 정합(`SUB_ADMIN` 포함 여부는 구현 시 **현행 접근 기준**으로 확인) (2) DEF-B-165 현상①(AGENCY 허용)·DEF-B-166(a)(0행 무시)는 **잔존**이므로 이 Task 범위에 넣을지 별도 Task로 둘지 구현 착수 때 Jaison이 정한다(이번 설계 확정 범위 아님) (3) 안전 뷰 `breakdown` 원가 키 건은 Team B 로컬 확인 결과 후 **별도 처리 경로**를 정한다(이번 설계 확정 범위 아님) |
+| **유지되는 전제** | 구현 순서 B-382 → B-381 → **B-377** → B-383 → B-379(B-381은 PR-3·PR-4a 병합 완료, **PR-4b 남음** — 이 Task 착수는 B-381 구현 병합 후). 구현은 별도 PR, 마이그레이션 적용은 R-14·Edward 별도 승인과 211 런북. 확정 규칙 1·4의 `SUB_ADMIN` 예외는 Pilot 한정. |
+| **상태 라벨** | IS #1451 `status:draft` 제거 → `status:open`(2026-11-27, Aiden). **담당자 지정과 선행 구현(B-381 PR-4b) 병합 후 Aiden이 `status:ready` 부여**, 착수 시 담당 Agent가 `status:in-progress` 전환 |
+
 ## 9. [작업 결과]
 
-- 설계 의견. **구현·마이그레이션 없음**(설계 확정 전).
+- 설계 갱신본. **구현·마이그레이션 없음**([설계 확정] 후에도 구현은 별도 PR).
 - 증빙 이미지는 현재 상태를 보여줄 수 있어 **저장소에서 제거하고 비공개 보관**한다(경로는 Jaison·Aiden에게 전달).
 - 공개 기재 전수 점검 결과: 현재 상태 표·컬럼명·민감 표현 없음(사용 명령은 PR 코멘트 참조).
-- PR: #1454 (draft, `Refs #1451`·`Refs #1449`) — after 스크린샷은 구현 단계에서 비공개 증적으로.
-- **커밋 해시**: `1bb5b125a` (DEF-B-165/166 표현 정정 커밋). 해시 갱신 커밋 별도.
+- PR: **#1557** (`Refs #1451`·`Refs #1449`, base `TeamB_Dev`) — 최종 커밋은 PR head로 확인. 이전 draft PR #1454는 close 정리 완료(Dave 보고 2026-11-27) — after 스크린샷은 구현 단계에서 비공개 증적으로.
+- **커밋 해시**: 최종은 PR #1557 head로 확인(본 커밋 포함, 자기 참조 불가). 원안 커밋: `1bb5b125a` (DEF-B-165/166 표현 정정).
