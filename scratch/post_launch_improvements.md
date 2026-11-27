@@ -2426,3 +2426,12 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/lib/auth/rbac.ts`, `src/app/actions/finance/order-revenue-cost.ts`, `src/app/actions/ups/`(요율 관리), 원가 테이블 RLS 마이그레이션(신규), TASK-B-377 설계 task file
 - **예상 공수**: 설계 1~2 MD (본 사업 설계 시 확정)
 - **우선순위**: Medium — 본 사업 시작 시 처리(Edward 결정 2026-11-27). 관련: TASK-B-377(PR #1557), IMP-213, IMP-216, 확정 규칙 1·4의 Pilot 예외.
+
+## [IMP-219] 채번 체계를 GitHub Issue 번호 기반으로 전환 검토 — TASK·DEF 별도 순번과 채번 스크립트 폐지 (IS #1564 채택 대체, Edward 결정 2026-11-27)
+- **발견 경위**: 2026-11-27, Team B가 `next-task-number.sh`·`next-def-number.sh`가 작업 중인 자기 파일까지 세어 번호가 건너뛴다는 IMP 제안(IS #1564)을 올렸다. Edward가 "복수 팀 참여 프로젝트에서는 별도 채번 기능 자체가 불필요하다"고 판단해, 스크립트를 고치는 대신 채번 체계 전환을 검토하기로 했다.
+- **현재 상태**: TASK·DEF가 Issue 번호와 별개의 팀별 순번(`TASK-NNN`/`TASK-B-NNN`/`DEF-B-NNN`)을 쓰고 이를 세는 스크립트에 의존한다. 번호 충돌·혼선 이력: Issue #358(2026-07), 2026-11-27 `TASK-B-394` 중복·`TASK-B-396/397` 혼선, IS #1564의 자기 파일 포함 결함.
+- **임시 조치**: 스크립트는 수정하지 않는다. Team B·Team A는 번호 확정 시 `origin` 기준 원격 브랜치와 Issue 제목 조회로 확인하는 현행 절차를 유지한다.
+- **목표 구현**: ① 신규 Task·DEF의 식별자를 **Issue 번호**로 한다(R-17은 이미 Task 발령을 Issue 생성으로 정하므로 번호가 항상 먼저 존재하고 GitHub이 유일성을 보장). 팀 구분은 `team:a`/`team:b` 라벨로 한다. ② 변경 범위: GOV R-17·R-19 조문, task file·defect 파일 명명 규칙, `next-task-number.sh`·`next-def-number.sh` 폐지, CI Task File Check, 회귀 항목·LRTM 명명, WBS 표기. ③ 기존 `TASK-*`·`DEF-*` 번호 이력은 유지하고 전환일 이후 신규 건부터 적용한다(Team A·B 동시 적용, 진행 중 PR 도중에는 전환하지 않음). IMP 번호는 Aiden 단독 채번(R-15)을 유지한다.
+- **관련 파일**: `GOV_COMMON.md`(R-17·R-19), `scripts/next-task-number.sh`, `scripts/next-def-number.sh`, `.github/workflows/pr-checks.yml`(Task File Check), `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`
+- **예상 공수**: 1~2 MD (영향 점검 후 확정)
+- **우선순위**: Low — 통합·배포 안정 후 별도 판단(Edward 결정 2026-11-27). 관련: IS #1564, Issue #358.
