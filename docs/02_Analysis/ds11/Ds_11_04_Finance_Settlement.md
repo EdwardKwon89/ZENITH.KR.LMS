@@ -51,7 +51,7 @@
 #### getInvoicePdfHistory(invoiceId)
 - **Path**: `src/app/actions/finance/invoice.ts:109-132`
 - **설명**: 인보이스(`invoiceId`)의 PDF 발행 이력 목록을 조회하고 각 파일의 1시간(3,600초) 유효 다운로드 서명 URL(`download_url`)을 생성해 반환합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/invoice.ts:110`, 로그인 세션만 검증하며 액션 내 별도 역할·소유권 검증 없음 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` (`src/app/actions/finance/invoice.ts:110`, 목표: 인보이스 접근 권한 정렬 대상 — `DEF-150` 참조)
 - **Input**: `invoiceId: string` (인보이스 UUID)
 - **Output**: `Promise<Array<Record<string, unknown> & { download_url?: string }>>` (`invoice.ts:120-131`)
 - **오류**: 미인증 시 `validateUserAction` 예외 throw; 이력 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'INVOICE_HISTORY_LOOKUP' }))` throw (`invoice.ts:115-118`)
@@ -105,7 +105,7 @@
 #### getWeeklyRevenueChart()
 - **Path**: `src/app/actions/finance/settlement.ts:372-417`
 - **설명**: 최근 7일간 결제 완료(`PAID`)된 인보이스 금액을 요일(`Sun`~`Sat`)별로 집계해 주간 매출 차트 데이터를 반환합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/settlement.ts:373-378`: `ZENITH_SUPER_ADMIN`·`ADMIN`은 전체 조회, 그 외 역할은 `shipperId = profile.org_id`로 본인 조직분만 조회 — 단, `MANAGER` 역할이 `isAdmin`에서 누락된 점은 `DEF-150` 참조)
+- **권한**: `validateUserAction()` (`src/app/actions/finance/settlement.ts:373-378`, 목표: 조회 권한 역할 정렬 대상 — `DEF-150` 참조)
 - **Input**: 없음 (`()`)
 - **Output**: `Promise<Array<{ name: string; revenue: number }>>` (`settlement.ts:411-416`)
 - **오류**: 프로필 부재 시 `Error(await trError('profile_not_found'))` throw (`L374`); DB 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'REVENUE_CHART_LOOKUP' }))` throw (`L390-393`)
