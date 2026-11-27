@@ -50,7 +50,6 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1564](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1564) | [IMP][Team B] 채번 스크립트가 작업 중인 자기 파일을 세어 다음 번호를 건너뛴다 | b | p3 | open | 미배정 | 2026-11-27 |
 | [#1562](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1562) | [Team B] TASK-B-398: SHXK createorder 사전검증 보강·거절 문구 사용자 매핑 (IS #1560 채택, #1552 후속) | b | p2 | open | 미배정 | 2026-11-27 |
 | [#1560](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1560) | [IMP 제안] SHXK 거절 사유 원문 가시화 — createorder 실패 원인을 화면·사전검증에서 확인 가능하게 (DEF-B-172 후속) | b | p3 | open | 미배정 | 2026-11-27 |
 | [#1552](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1552) | [Aiden → Team B] DEF: SHXK createorder 발송인 회사명 누락 거절(`发件人公司不能为空`, FXUPS 추정) — B-345 이후 재발 (DEF-B-054 재현) | b | p1 | review | 미배정 | 2026-11-27 |
