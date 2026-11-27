@@ -70,7 +70,9 @@
 - **라벨/로케일**: 신규 키 `Orders.shipper_company`를 4개 로케일에 추가 — ko `발송인 회사명`, en `Shipper company`, zh `发件人公司名称`, ja `発送者会社名`. (현재 `shipper_label`은 ko/en만 있고 zh/ja는 키 누락 — `messages/{ko,en,zh,ja}.json`. 이번 Task에서 신규 키만 4개 모두 채우고, 기존 키 누락은 별도 IMP 제안 대상.)
 - **필수 표기**: Jaison·Aiden 승인 완료 — 결정 2("필수 입력 항목")에 따라 컨트롤에 `*` 필수 표시. Issue 본문의 옛 "필수 아님 표기" 문구는 무시한다.
 - **모드 전환 시 값 처리**: "수기입력" 클릭 → 컨트롤 표시 + `shipper_company`를 `''`로 초기화(기존 13개 필드 초기화 로직에 포함). "내 정보 사용" 클릭 → 컨트롤 숨김 + `shipper_company` 클리어(**DB에는 NULL 저장**)해 모드 추론이 `auto`로 유지되게 한다. 서버도 auto이면 전달값을 무시하고 NULL로 저장해 **모드·값 일관성을 강제**한다(클라이언트 클리어에만 의존하지 않음).
-- **수정 모드 복원 — 영향 범위**: `OrderRegistrationForm.tsx:493-499`는 `saved && saved !== autoShipperName`이면 manual로 시작하므로, affiliation 미로드·개인 화주·`shippers` 미매칭으로 `autoShipperName`이 빈 값인 오더를 포함해 **저장된 화주명이 있는데 계산값이 빈 오더는 모두 manual로 열리고 company가 NULL**이라 필수 컨트롤이 비어 있다. ① 이 집합은 저장이 막힌다(의도: 필수 입력 원칙에 따라 수기 입력을 강제), ② 저장 전까지 SHXK 등록은 `auto` 규칙(`company = shipper_name`)으로 계속 동작한다. ③ 단, auto 복원 자체가 빈 값이 되는 기존 문제(`restoreAutoShipperInfo`, `:300-322,453-457`)는 **본 Task 밖 IMP 제안**으로 분리하며, 위 ①의 "저장 막힘"과 혼동하지 않는다.
+- **수정 모드 복원 — 영향 범위**: `OrderRegistrationForm.tsx:493-499`는 `saved && saved !== autoShipperName`이면 manual로 시작하므로, affiliation 미로드·개인 화주·`shippers` 미매칭으로 `autoShipperName`이 빈 값인 오더를 포함해 **저장된 화주명이 있는데 계산값이 빈 오더는 모두 manual로 열리고 company가 NULL**이라 필수 컨트롤이 비어 있다. ① 이 집합은 저장이 막힌다 — **JSJung 결정 ⓐ(2026-11-27, 기존 NULL 오더도 수정 저장 시 회사명 입력 강제)가 근거**이며 ⓑ(기존 NULL 오더 수정 저장 허용)는 **채택하지 않음**. ② 저장 전까지 SHXK 등록은 `auto` 규칙(`company = shipper_name`)으로 계속 동작한다. ③ 단, auto 복원 자체가 빈 값이 되는 기존 문제(`restoreAutoShipperInfo`, `:300-322,453-457`)는 **본 Task 밖 IMP 제안**([IMP 제안 #1570](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1570))으로 분리하며, 위 ①의 "저장 막힘"과 혼동하지 않는다.
+- **수정 경로 전수 (ⓐ 영향 확인 — 코드 대조)**: `updateOrder`(`orders.ts:254`)가 `orderRegistrationSchema.parse()`를 **무조건 호출**(`:290`)하고 화주 필드 화이트리스트(`:304-350`)로 `zen_orders`를 갱신(`:395`)하는 **유일한 화주 수정 경로**다. 프로덕션 호출처는 `OrderRegistrationForm.tsx:839` 하나뿐이며, 화주 필드를 폼으로 다시 보내지 않는 경로는 모두 스키마 parse를 거치지 않아 **ⓐ의 필수 검사에 영향받지 않는다**: `updateOrderStatus`(`:672-756`), 창고 부분 수정 `confirmInbound`·`saveInboundMeasurements`(`:1275-1294`, `:1300-1314` → `applyPackageMeasurements` `:1051-1128`; 패키지·무게만 기록), 라우팅/트래킹/클레임/정산/UPS 라벨 갱신(상태·메타 전용). 관리자 오더 수정 페이지는 없다. `shipper_company_mode`가 없는 호출(대량 등록 `bulkCreateOrders` 포함)은 optional·기본 `auto`로 취급해 필수 검사를 하지 않는다 — ⓐ는 UI가 `manual`로 열린 오더에 적용되며, 위 비-폼 경로의 무관한 수정(예: 포장 무게)까지 막지 않는다. 테스트가 서버 액션을 직접 호출하는 다수 케이스(`tests/integration/iss1070-*`, `ups-edit-before-registration.test.ts`, `tests/unit/logistics/order-update*.test.ts` 등)는 PR2에서 조건부 규칙에 맞게 갱신한다. 저장소 밖 임의 SQL 경로는 **미확인**.
+- **사용자 안내 (ⓐ 후속)**: 저장이 막힐 때 오류가 `shipper_company` 컨트롤을 가리키고 **포커스를 이동**시키며, "발송인 회사명은 필수 입력 항목입니다" 안내를 4로케일로 제공한다 — ko `발송인 회사명은 필수 입력 항목입니다.` / en `Shipper company is required.` / zh `发件人公司名称为必填项。` / ja `発送者会社名は必須入力です。`(신규 키 `Orders.shipper_company_required`).
 - **길이·문자**: `shxk-limits.ts`에 company 상수(200자, 출처는 위 "추정" 표기)를 정의해 UI `maxLength` + Zod `.max()` + 사전검증의 구조 방어에 적용. 허용 문자 제한은 **미확인**이므로 두지 않고, 쉼표는 전송 시 `sanitizeComma` 적용 안을 결정 요청에 둔다.
 - **모드 전달·서버 검증**: 폼 전송 페이로드에 일시적 `shipper_company_mode: 'auto' | 'manual'`을 포함한다(Zod enum 검증, **DB에는 저장하지 않음**, Ds-11 입력 표에 기재 — R-12). "수기 모드인데 값 비었음"은 ① 클라이언트 Zod와 ② 서버 액션이 차단한다. 대량 등록 경로는 optional·기본 `auto`, 엑셀 컬럼 추가 없음.
 
@@ -85,22 +87,22 @@
 - **검증 층 (Jaison 정정·Aiden 필수 1 반영)**:
   - ① **클라이언트 Zod** — UPS + manual이면 `shipper_company` 필수(trim 후 빈 값 금지), max 200, 오류 `path: ['shipper_company']`.
   - ② **서버 액션** — `createOrder`/`updateOrder`가 동일 스키마 `parse`(`orders.ts:121,290`) + auto이면 company를 무시하고 NULL 저장(모드·값 일관성 강제). **필수 검사는 모드를 아는 ①②에만 둔다.**
-  - ③ **SHXK 사전검증** — `validateShxkPayload()`는 **payload 구조 방어선**(company 공백·길이 등)만 담당한다. `placeShxkOrder`·`previewShxkPayload`는 DB 오더를 읽는 시점에 모드가 없어 "manual인데 비었음"과 auto를 구분할 수 없으므로, **③이 수기 누락을 차단한다는 서술은 성립하지 않는다**(설계 `:59`·`:79`의 모드 인자 제안은 제거). 오류 문구는 필드 키 중심으로 둔다.
-- **#1562(TASK-B-398) 정합 (Jaison 판단)**: 사전검증의 `shipper_company` **구조 방어(길이·공백)만 본 Task PR2가 이관**해 구현하고, #1562는 나머지 필수 필드와 거절 문구 매핑을 맡는다. 오류 키 이름·모드 인자 설계는 본 Task 설계 확정 후 #1562가 따른다. #1562는 해당 항목에 착수하지 않는다.
+  - ③ **SHXK 사전검증** — `validateShxkPayload()`는 **payload 구조 방어선**(company 공백·길이 등)만 담당한다. `placeShxkOrder`·`previewShxkPayload`는 DB 오더를 읽는 시점에 모드가 없어 "manual인데 비었음"과 auto를 구분할 수 없으므로, ③이 수기 누락을 차단하지 않는다. 오류 문구는 필드 키 중심으로 둔다.
+- **#1562(TASK-B-398) 정합 (Jaison 판단)**: 사전검증의 `shipper_company` **구조 방어(길이·공백)만 본 Task PR2가 이관**해 구현하고, #1562는 나머지 필수 필드와 거절 문구 매핑을 맡는다. 오류 키 이름은 본 Task 설계 확정 후 #1562가 따른다(③은 모드를 알지 못한다). #1562는 해당 항목에 착수하지 않는다.
 
 ### 5. 위험·미확인 (반드시 명시)
 
 - **실호출 미확인**: #1552 보류분은 본 Task로 흡수했으나 **지금은 실행하지 않는다**. FXUPS가 ① auto의 `shipper_name` 결정값, ② manual의 사용자 입력값을 받아들이는지는 **미확인**(실측 전까지 확정 불가).
 - **SHXK 제약 미확인**: company 길이·허용 문자·쉼표 처리 규칙은 원문 명세에 확인되는 상한(수취인 기준 200자) 외 상세가 없다. 200자는 "추정(수취인 기준 유추)"로 표기하고, 문자 제한은 두지 않는다. 쉼표는 결정 요청(선례에 따른 `sanitizeComma` 적용안)으로 올린다.
-- **수정 모드 영향(위 §3 참조)**: `autoShipperName`이 빈 값인 오더 전체가 manual로 열려 company NULL 필수 컨트롤이 비어 있다. 저장 막힘은 의도된 동작이고 저장 전 SHXK 등록은 auto 규칙으로 지속된다. 별개의 **기존 결함**(`restoreAutoShipperInfo` 빈 복원, `Checking...` 배지)은 본 Task 밖 IMP 제안 대상([IMP 제안 #1570](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1570))으로 분리한다.
+- **수정 모드 영향(위 §3 참조)**: `autoShipperName`이 빈 값인 오더 전체가 manual로 열려 company NULL 필수 컨트롤이 비어 있다. **저장 막힘은 JSJung 결정 ⓐ(기존 NULL 오더도 회사명 입력 강제)에 따른 확정 동작**이고 ⓑ(수정 저장 허용)는 채택하지 않았다. 저장 전 SHXK 등록은 auto 규칙으로 지속된다. 비-폼 수정 경로는 스키마 parse를 거치지 않아 무관한 수정이 막히지 않음(전수는 §3). 별개의 **기존 결함**(`restoreAutoShipperInfo` 빈 복원, `Checking...` 배지)은 본 Task 밖 IMP 제안 대상([IMP 제안 #1570](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1570))으로 분리한다.
 - **문구 충돌(해결)**: Jaison·Aiden 승인으로 `*` 필수 표기를 확정, 옛 "필수 아님 표기"는 무시한다.
 - **타입 스테일**: `src/types/supabase.ts`에 영문 주소 컬럼이 누락된 기존 문제가 있어 신규 컬럼 재생성 시 함께 해소될 수 있음 — 생성 범위는 Aiden 확인 사항. `CreateOrderRequest`는 미사용 타입이라 갱신 대상에서 제외(위 §2).
 
 ### 6. R-11/R-12·회귀·증적 계획
 
 - **R-11/R-12**: `docs/02_Analysis/ds11/Ds_11_03_Orders_Warehouse.md:27-36`의 company 출처를 "환경변수" → "모드별(화주명/입력값)"으로 갱신하고, 신규 `shipper_company` 입력·`shipper_company_mode` 전달(optional·기본 `auto`, DB 미저장)을 오더 등록 API 입력 표에 추가한다. `create_order_atomic` v8은 같은 PR에서 명세 기재, env 제거 서술도 함께 반영한다. 외부 SHXK 명세 자체는 변경 없음.
-- **회귀 테스트 계획**: `tests/unit/shxk/`·`tests/unit/ups/`에 **값 단언**으로 모드×경로 매트릭스(2모드 × 4경로 + 대량 등록 + 기존 오더)를 추가. 문자열 포함(`toContain`) 검사는 쓰지 않는다. 폼 테스트는 토글 전환 시 값 초기화·필수 오류·수정 모드 복원을 값으로 단언한다. **구현 전 코드에서 신규 테스트가 실패함을 확인**해 보고한다. 회귀 항목 파일은 `docs/08_Self_Audit/Checklists/regression-items/TASK-B-399_*.md` 1개 추가, `check:lrtm`/`check:ds11` OK 확인.
-- **R-10 증적**: 구현 후 로컬/개발 UI에서 ① auto 모드(컨트롤 숨김), ② manual 모드(필수 컨트롤 표시·빈 값 제출 차단), ③ 수정 모드 복원을 실제 조작해 캡처한다. **증적 파일은 저장소 밖**에 두고 보고에는 보유 여부만 적는다(R-21). 운영 `/admin/error-logs` 열람은 R-14 범위 밖이므로 미실행 사유를 보고한다.
+- **회귀 테스트 계획**: `tests/unit/shxk/`·`tests/unit/ups/`에 **값 단언**으로 모드×경로 매트릭스(2모드 × 4경로 + 대량 등록 + 기존 오더)를 추가. 문자열 포함(`toContain`) 검사는 쓰지 않는다. 폼 테스트는 토글 전환 시 값 초기화·필수 오류·수정 모드 복원을 값으로 단언한다. **ⓐ 확정 건으로 "회사명이 NULL인 기존 오더의 수정: ① 입력 전 저장 차단 ② 입력 후 저장 성공 ③ 이후 payload에 입력값 사용"을 값 단언으로 추가**하고, 비-폼 경로(창고 부분 수정·상태 변경)가 차단되지 않는지도 값으로 단언한다. 서버 액션을 직접 호출하는 기존 테스트(`tests/integration/iss1070-*`, `ups-edit-before-registration.test.ts`, `tests/unit/logistics/order-update*.test.ts` 등)는 조건부 규칙에 맞춰 갱신한다. **구현 전 코드에서 신규 테스트가 실패함을 확인**해 보고한다. 회귀 항목 파일은 `docs/08_Self_Audit/Checklists/regression-items/TASK-B-399_*.md` 1개 추가, `check:lrtm`/`check:ds11` OK 확인.
+- **R-10 증적**: 구현 후 로컬/개발 UI에서 ① auto 모드(컨트롤 숨김), ② manual 모드(필수 컨트롤 표시·빈 값 제출 차단·오류 포커스 이동), ③ 수정 모드 복원, ④ **회사명 NULL 기존 오더의 수정(입력 전 차단 → 입력 후 성공 → payload 반영)**을 실제 조작해 캡처한다. **증적 파일은 저장소 밖**에 두고 보고에는 보유 여부만 적는다(R-21). 운영 `/admin/error-logs` 열람은 R-14 범위 밖이므로 미실행 사유를 보고한다.
 - **실호출 1회 제안 (Jaison 조건부 승인·Aiden 동의)**: 구현 후 **로컬 Supabase(R-14)**에서 **manual 시나리오**를 먼저 검증한다 — 더미 화주·수하인으로 "모두 더미" 체크 기록 → 필수 컨트롤에 **쉼표 포함 더미 값** 입력 → `createorder` 1회 → 즉시 `removeorder` → 4줄 보고. auto 시나리오의 실호출은 별도 승인. 거절 시 같은 호출을 반복하지 않고 오류 종류만 보고하며 우회 구현을 하지 않는다.
 
 ### 7. 예상 PR 분할·공수
@@ -108,7 +110,7 @@
 | PR | 범위 | 선행 조건 | 공수(추정) |
 |:--|:--|:--|:--|
 | PR1 | `zen_orders.shipper_company` 컬럼 + `create_order_atomic` v8 + 타입/저장 경로 + Ds-11 + DB 먼저 적용·롤백 절차 | Aiden `[설계 확정]` + Team B 구현 PR에서 마이그레이션 작성 / 운영 적용은 별도 Edward R-14 승인·211 런북 | 2~3h |
-| PR2 | 폼 컨트롤·4로케일·Zod/서버 강제·사전검증 구조 방어(#1562 이관분 포함)·payload 규칙·env 의존 정리 + 단위 테스트 | PR1 병합 | 4~6h |
+| PR2 | 폼 컨트롤·4로케일·오류 안내/포커스·Zod/서버 강제·사전검증 구조 방어(#1562 이관분 포함)·payload 규칙·env 의존 정리·수정 이력 화이트리스트에 `shipper_company` 포함(Jaison 제 의견, Aiden 확인) + 단위 테스트 | PR1 병합 | 4~6h |
 | PR3 | 회귀 항목·R-10 증적·로컬 1회 실검증 보고 | PR2 병합 + Jaison 실호출 승인 | 1~2h(+CI) |
 
 - 설계 의견 작성 공수: 1~2h; 검토 반영 +1h. **설계 확정 전에는 코드·마이그레이션을 작성하지 않는다.**
@@ -124,6 +126,10 @@
 | 5 | 실호출 1회 — 로컬 Supabase·더미 값(쉼표 포함)·manual 우선, 1회·즉시 `removeorder`·4줄 보고 | 조건부 승인 / 동의 | 구현 후 실행 |
 | 6 | 기존 수정 모드 결함 IMP 분리(`type:imp`, 번호 Aiden 부여) + §3의 "저장 막힘"과 구분 | 승인 / 동의 | **승인됨** ([#1570](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1570), 번호는 Aiden 부여 예정) |
 | 7 | **쉼표 처리**: 전송 시 `sanitizeComma` 적용·저장은 원문(안 ①) / 미적용 근거 제시(안 ②). 실호출 더미 값에 쉼표 포함 | 안 ① 지지 / Aiden "결정 요청에 추가" 지시 | Aiden 확정 대기 |
+| 8 | 수정 모드 "저장 막힘"의 의도 — ⓐ 기존 NULL 오더도 회사명 입력 강제 / ⓑ 기존 NULL 오더 수정 저장 허용 | Jaison이 JSJung에 확인 | **JSJung 확정: ⓐ** (ⓑ 채택하지 않음) |
+| 9 | `ORDER_EDIT_LOG_CORE_FIELDS`에 `shipper_company` 포함 여부 | Jaison 제 의견: 포함(PR2, `recipient_company` 선례) | Aiden 확정 대기 |
+
+> JSJung 몫(8번)은 확정 완료. 남은 1·2·4·7·9번은 Aiden `[설계 확정]` 대상(Edward 지시).
 
 ## [1단계 DoD]
 
@@ -134,6 +140,7 @@
 - [x] 위험·미확인(실호출/200자 추정/쉼표/수정 모드 범위) 명시
 - [x] R-11/R-12·회귀·R-10·로컬 실호출 1회 계획, PR 분할·공수 기재
 - [x] Jaison 보완 1~6 + 정정, Aiden R-01 필수 1~3·권고 4~9 반영(지목 코드 줄 직접 대조, 미확인 없음)
+- [x] Jaison 13:22 보완 3건(구판본 줄 번호·모드 인자 잔존·코멘트 삭제), 결정 요청 8·9번, JSJung ⓐ 확정 후속 5건 반영(수정 경로 전수·4로케일 안내·테스트/R-10 증적)
 - [x] R-21 스캔(값·계정·식별자·원문·절대경로 0건)
 - [ ] Aiden `[설계 확정]` → `status:ready` 전환 및 2단계 착수(본 Task 범위 밖)
 
