@@ -1,6 +1,7 @@
-// TASK-B-399 (Issue #1566) PR1 — 발송인 회사명 컬럼·create_order_atomic v8 정적 회귀 (R-09).
-// 값 단언만 사용(doc 문자열 toContain 단독 단언 금지). 구현 전 이 테스트가 실패함을 확인한 뒤 작성했다.
-// 실DB 호출 검증은 PR3 로컬 Supabase 실호출 1회에서 수행한다(R-14).
+// TASK-B-399 (Issue #1566) PR1 — 정적 보조 테스트 (Jaison·Aiden 검토 반영).
+// 이 파일은 파일 내용을 읽는 **정적 검사보조**이며 DB 동작을 증명하지 않는다.
+// DB 동작(컬럼 생성·RPC 저장·공백 정규화·시그니처)은
+// tests/integration/task-b399-shipper-company-db.test.ts의 실DB 값 단언이 근거다.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -15,56 +16,122 @@ function read(rel: string): string {
   return readFileSync(path.join(ROOT, rel), 'utf8');
 }
 
-function has(text: string, needle: string): boolean {
-  return text.includes(needle);
+/** 주석을 제거해 헤더 주석이 DDL 단언을 통과시키는 허점을 막는다(Aiden 필수 1-①). */
+function stripComments(sql: string): string {
+  return sql
+    .split('\n')
+    .filter((line) => !line.trimStart().startsWith('--'))
+    .join('\n');
 }
 
-describe('TASK-B-399 PR1 — shipper_company 마이그레이션·RPC v8·타입·Ds-11', () => {
-  it('TC-B399-01: nullable 컬럼 추가 + COMMENT, 백필/DEFAULT 없음', () => {
+/** 괄호 깊이와 따옴표를 고려해 최상위 콤마로 분리(Aiden 필수 1-②: 목록 위치 고정). */
+function splitTopLevel(text: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let quote: string | null = null;
+  let cur = '';
+  for (const ch of text) {
+    if (quote) {
+      cur += ch;
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === "'" || ch === '"') {
+      quote = ch;
+      cur += ch;
+      continue;
+    }
+    if (ch === '(') depth += 1;
+    if (ch === ')') depth -= 1;
+    if (ch === ',' && depth === 0) {
+      out.push(cur.trim());
+      cur = '';
+      continue;
+    }
+    cur += ch;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+
+describe('TASK-B-399 PR1 — 정적 보조 검사(실DB 검증은 별도 테스트)', () => {
+  it('TC-B399-01: nullable 컬럼 정의 전체에 NOT NULL·DEFAULT가 없고 COMMENT·백필 없음', () => {
     const sql = read(COLUMN_MIGRATION);
-    expect(has(sql, 'ADD COLUMN IF NOT EXISTS shipper_company text')).toBe(true);
-    expect(has(sql, 'COMMENT ON COLUMN public.zen_orders.shipper_company')).toBe(true);
-    expect(/ADD COLUMN[^;]*shipper_company[^;]*DEFAULT/i.test(sql)).toBe(false);
+    const def = sql.match(/ADD COLUMN IF NOT EXISTS shipper_company text[^;]*;/i)?.[0] ?? '';
+    expect(def).toBe('ADD COLUMN IF NOT EXISTS shipper_company text;');
+    expect(sql.includes('COMMENT ON COLUMN public.zen_orders.shipper_company')).toBe(true);
     expect(/UPDATE\s+public\.zen_orders/i.test(sql)).toBe(false);
   });
 
-  it('TC-B399-02: v8 함수 시그니처 불변 — p_payload jsonb / p_user_id uuid / p_org_id uuid', () => {
-    const sql = read(RPC_MIGRATION);
-    expect(has(sql, 'CREATE OR REPLACE FUNCTION public.create_order_atomic(')).toBe(true);
-    expect(/p_payload jsonb,\s*p_user_id uuid,\s*p_org_id uuid\s*\)/.test(sql)).toBe(true);
-    expect(has(sql, 'RETURNS jsonb')).toBe(true);
-    expect(has(sql, 'SECURITY DEFINER')).toBe(true);
+  it('TC-B399-02: 주석 제거 본문에서 시그니처·RETURNS·SECURITY DEFINER·search_path 불변', () => {
+    const body = stripComments(read(RPC_MIGRATION));
+    expect(
+      /CREATE OR REPLACE FUNCTION public\.create_order_atomic\(\s*p_payload jsonb,\s*p_user_id uuid,\s*p_org_id uuid\s*\)/.test(
+        body
+      )
+    ).toBe(true);
+    expect(body.includes('RETURNS jsonb')).toBe(true);
+    expect(body.includes('SECURITY DEFINER')).toBe(true);
+    expect(body.includes("SET search_path TO 'public', 'auth'")).toBe(true);
   });
 
-  it('TC-B399-03: RPC가 shipper_company를 저장하고 공백은 NULL로 정규화', () => {
-    const sql = read(RPC_MIGRATION);
-    expect(has(sql, "    shipper_company,\n")).toBe(true);
-    expect(has(sql, "NULLIF(BTRIM(p_payload->>'shipper_company'), '')")).toBe(true);
-    expect(has(sql, 'p_payload->>\'recipient_company\'')).toBe(true);
+  it('TC-B399-03: INSERT 컬럼 목록과 VALUES 목록의 개수·인덱스가 일치하고 공백 확장 정규화 적용', () => {
+    const body = stripComments(read(RPC_MIGRATION));
+    const block = body.match(
+      /INSERT INTO public\.zen_orders \(([\s\S]*?)\) VALUES \(([\s\S]*?)\) RETURNING id INTO v_order_id;/
+    );
+    expect(block).toBeTruthy();
+    const columns = splitTopLevel(block![1]);
+    const values = splitTopLevel(block![2]);
+    expect(columns.length).toBe(values.length);
+    expect(columns[3]).toBe('shipper_name');
+    expect(values[3]).toBe("p_payload->>'shipper_name'");
+    expect(columns[4]).toBe('shipper_company');
+    expect(values[4]).toBe(
+      String.raw`NULLIF(BTRIM(p_payload->>'shipper_company', E' \t\n\r\u00A0\u3000'), '')`
+    );
+    // 단순 p_payload 참조는 항상 같은 인덱스의 컬럼에 들어가야 한다(위치 어긋남 방지).
+    for (let i = 0; i < values.length; i += 1) {
+      const direct = values[i].match(/^p_payload->>'([a-z_]+)'$/);
+      if (direct) expect(columns[i]).toBe(direct[1]);
+    }
+    const recipientIdx = columns.indexOf('recipient_company');
+    expect(recipientIdx).toBeGreaterThan(-1);
+    expect(values[recipientIdx]).toBe("p_payload->>'recipient_company'");
   });
 
-  it('TC-B399-04: v8 롤백 지시가 v7 복구·컬럼 잔존을 명시', () => {
+  it('TC-B399-04: v8 롤백 지시가 v7 복구·컬럼 잔존·DROP 순서를 명시', () => {
     const sql = read(RPC_MIGRATION);
-    expect(has(sql, '-- ROLLBACK')).toBe(true);
-    expect(has(sql, '20261113090100_task_b346_create_order_atomic_v7.sql')).toBe(true);
-    expect(has(sql, '컬럼 잔존')).toBe(true);
+    expect(sql.includes('-- ROLLBACK')).toBe(true);
+    expect(sql.includes('20261113090100_task_b346_create_order_atomic_v7.sql')).toBe(true);
+    expect(sql.includes('컬럼 잔존')).toBe(true);
+    const columnSql = read(COLUMN_MIGRATION);
+    expect(columnSql.indexOf('v7 복구')).toBeLessThan(columnSql.indexOf('DROP COLUMN IF EXISTS shipper_company'));
   });
 
-  it('TC-B399-05: 생성 타입 Row·Insert·Update에 shipper_company가 각각 1건씩 존재', () => {
+  it('TC-B399-05: Row는 필수·Insert/Update는 선택적 shipper_company를 각각 1건씩 보유', () => {
     const types = read(TYPES);
     const start = types.indexOf('      zen_orders: {');
     expect(start).toBeGreaterThan(-1);
     const end = types.indexOf('        Relationships: [', start);
     const block = types.slice(start, end);
-    const matches = block.match(/^\s+shipper_company\??: string \| null$/gm) ?? [];
-    expect(matches.length).toBe(3);
+    const row = block.slice(block.indexOf('Row: {'), block.indexOf('Insert: {'));
+    const insert = block.slice(block.indexOf('Insert: {'), block.indexOf('Update: {'));
+    const update = block.slice(block.indexOf('Update: {'));
+    expect((row.match(/^\s+shipper_company: string \| null$/gm) ?? []).length).toBe(1);
+    expect((row.match(/^\s+shipper_company\?: string \| null$/gm) ?? []).length).toBe(0);
+    expect((insert.match(/^\s+shipper_company\?: string \| null$/gm) ?? []).length).toBe(1);
+    expect((update.match(/^\s+shipper_company\?: string \| null$/gm) ?? []).length).toBe(1);
   });
 
-  it('TC-B399-06: Ds-11에 신규 컬럼·모드 전달·v8 저장 경로가 기재', () => {
+  it('TC-B399-06: Ds-11에 PR1 현행/PR2 적용 시 구분·구조 방어 이관·v8 경로가 기재', () => {
     const ds11 = read(DS11);
-    expect(has(ds11, 'zen_orders.shipper_company')).toBe(true);
-    expect(has(ds11, 'shipper_company_mode')).toBe(true);
-    expect(has(ds11, 'create_order_atomic` v8')).toBe(true);
-    expect(has(ds11, '환경변수 `SHXK_SHIPPER_COMPANY`에서 주입')).toBe(false);
+    expect(ds11.includes('zen_orders.shipper_company')).toBe(true);
+    expect(ds11.includes('shipper_company_mode')).toBe(true);
+    expect(ds11.includes('create_order_atomic` v8')).toBe(true);
+    expect(ds11.includes('PR1 현행')).toBe(true);
+    expect(ds11.includes('PR2 적용 시')).toBe(true);
+    expect(ds11.includes('구조 방어(공백·길이) 이관')).toBe(true);
+    expect(ds11.includes('**PR1 현행**: 환경변수 `SHXK_SHIPPER_COMPANY` 주입')).toBe(true);
   });
 });

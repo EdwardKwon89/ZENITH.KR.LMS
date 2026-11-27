@@ -2820,13 +2820,13 @@ export type Database = {
           shipper_address_detail: string | null
           shipper_biz_no: string | null
           shipper_city: string | null
+          shipper_company: string | null
           shipper_contact_email: string | null
           shipper_contact_name: string | null
           shipper_contact_phone: string | null
           shipper_country_code: string | null
           shipper_id: string | null
           shipper_name: string | null
-          shipper_company: string | null
           shipper_state_province: string | null
           shipper_zipcode: string | null
           special_cargo_type: string | null
@@ -2876,13 +2876,13 @@ export type Database = {
           shipper_address_detail?: string | null
           shipper_biz_no?: string | null
           shipper_city?: string | null
+          shipper_company?: string | null
           shipper_contact_email?: string | null
           shipper_contact_name?: string | null
           shipper_contact_phone?: string | null
           shipper_country_code?: string | null
           shipper_id?: string | null
           shipper_name?: string | null
-          shipper_company?: string | null
           shipper_state_province?: string | null
           shipper_zipcode?: string | null
           special_cargo_type?: string | null
@@ -2932,13 +2932,13 @@ export type Database = {
           shipper_address_detail?: string | null
           shipper_biz_no?: string | null
           shipper_city?: string | null
+          shipper_company?: string | null
           shipper_contact_email?: string | null
           shipper_contact_name?: string | null
           shipper_contact_phone?: string | null
           shipper_country_code?: string | null
           shipper_id?: string | null
           shipper_name?: string | null
-          shipper_company?: string | null
           shipper_state_province?: string | null
           shipper_zipcode?: string | null
           special_cargo_type?: string | null

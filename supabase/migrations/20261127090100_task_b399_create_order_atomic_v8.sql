@@ -2,7 +2,8 @@
 -- v7(20261113090100_task_b346_create_order_atomic_v7.sql) 전문을 기준으로 CREATE OR REPLACE로 함수 전체 재정의.
 -- 시그니처(p_payload jsonb, p_user_id uuid, p_org_id uuid)·RETURNS jsonb·SECURITY DEFINER 불변.
 -- 기존 마이그레이션(v7 이하)은 수정하지 않는다 (TASK-B-305·B-346 선례 준수).
--- 수기 입력은 원문 저장, 공백/미전달은 NULL(자동 모드) — JSJung 결정·Aiden [설계 확정].
+-- 수기 입력은 앞뒤 공백을 제거한 원문 저장, 공백만/미전달은 NULL(자동 모드) — JSJung 결정·Aiden [설계 확정].
+-- BTRIM 제거 문자를 ASCII 공백 외 탭·개행·NBSP·전각 공백까지 확장해 JS trim()과 모드 추론을 일치시킨다.
 
 CREATE OR REPLACE FUNCTION public.create_order_atomic(
   p_payload jsonb,
@@ -83,7 +84,7 @@ BEGIN
     p_payload->>'order_type',
     (p_payload->>'shipper_id')::UUID,
     p_payload->>'shipper_name',
-    NULLIF(BTRIM(p_payload->>'shipper_company'), ''),
+    NULLIF(BTRIM(p_payload->>'shipper_company', E' \t\n\r\u00A0\u3000'), ''),
     (p_payload->>'origin_port_id')::UUID,
     (p_payload->>'dest_port_id')::UUID,
     p_payload->>'description',
