@@ -29,7 +29,7 @@
 
 | 경로 (현재 구조 — 갱신) | 원가 계열 | 부가운임 항목 | 판정 기준 |
 |:--|:--:|:--:|:--|
-| `getUpsActualCost` (관리자 정산) | admin만 | — | admin 3역할만 허용 · 실제 호출처 **1곳(재측정 2026-11-27 10:17 KST — `git grep -n "getUpsActualCost" HEAD -- src/` 실호출 기준, 실비 조정 폼은 PR-4a로 제거 확인)** |
+| `getUpsActualCost` (관리자 정산) | **admin 3역할 + `SUB_ADMIN`(Pilot 예외, §8-2)** | — | **허용 집합은 §8-2와 동일** · 실제 호출처 **1곳(재측정 2026-11-27 10:17 KST — `git grep -n "getUpsActualCost" HEAD -- src/` 실호출 기준, 실비 조정 폼은 PR-4a로 제거 확인)** |
 | 오더정산 상세 `finance/order-settlement/[orderId]` (PR-4a 갱신 대상) | admin만 | admin | admin 전용 화면 |
 | 오더 상세 `orders/[orderId]` → `OrderFinanceSummary` | 거부 | **허용 (run 경로로 전환, 항목1)** | 현재 `zen_order_costs`(`initialCosts`)에서 항목 수신 — 표시 소스를 run 단일 원천으로 교체. 라벨 "부가운임" |
 | UPS 오더 상세 `orders/[orderId]/ups-detail` (`UpsOrderBreakdownCard`) | 거부 | **판매가 구성만 표시(원가 계열 미전달 — 관리자 현행)** | **확정(Aiden, #1451 결정3, 2026-11-27)**: `zen_order_costs` 조회(68~71행)·카드 렌더(160행) — 화주·대리점에게는 판매가 구성만 전달 |
