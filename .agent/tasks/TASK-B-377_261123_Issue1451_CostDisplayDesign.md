@@ -44,7 +44,8 @@
 
 - 오더 상세의 현재 구현: `orders/[orderId]/page.tsx`가 `zen_order_costs`를 조회해 `OrderFinanceSummary`에 `initialCosts`로 전달(`cost_type` 항목 라벨은 `getCostTypeLabel`) — **run을 읽지 않는 구조**이며 PR-4a 이후 변화는 §7 잠정 기재. (2026-11-26 직접 확인)
 - **원가 테이블 조인 서버 액션 경로(목표 상태만 기재 — 전수 목록은 비공개)**: 이 경로들도 **원가 계열을 반환하지 않는다**(§3-1 DTO 기준).
-- **SUB_ADMIN 대상 원가 경로의 보여줄 값(목표 상태 — Team B 안, Aiden 확인 필요, #1451 결정1)**: 원가 계열(`total_cost` 등)은 제외하고 **판매가 구성(기본·유류·급행·기타)과 부가운임(`charge_details`·정산 부가합)만 전달**한다 — 관리자 3역할은 현행 전체.
+- **`SUB_ADMIN`(Master Agency 업무 역할)**: **Master Agency 업무 기능을 현행대로 유지(Pilot 예외 — Edward 2026-11-27)** — 원가 조인 경로의 `SUB_ADMIN`도 현행 유지. "자신의"가 가리키는 값·화면의 정확한 범위는 **Aiden이 Edward 확인 후 §2에 목표 상태로 확정 — 현재 미확정**.
+- **현행 `SUB_ADMIN` 기능 목록(코드 확인 사실만 — 2026-11-27 `git grep SUB_ADMIN HEAD -- src/`)**: ① `/admin/sub-agency-profit` 화면(수익 집계) ② `/admin/ups-rates` 화면 — 기본요율 Matrix 탭만 노출·SUB_ADMIN 전용 원가 수정 폼(#618) ③ `order-revenue-cost.ts`의 Sub-Agency별 수익금 집계 조회(SUB_ADMIN·ADMIN·MANAGER 전용, 298·313행) ④ `rates.ts` 기본요율 조회 허용(23행) ⑤ `rates-mutation.ts`의 Sub-Agency 원가 할인율 관리(#605)·SUB_ADMIN 전용 원가 업데이트(#618, 111행) ⑥ 라우트 `/admin/ups-rates`·`/voc`·`/support`·`/mypage`·`/address-book`(`rbac.ts` 48행). **미확정**: "자신의" 범위(본인 한정 여부 등)는 Aiden·Edward 확정 대기. **미확인**: 위 목록 외 개별 기능의 전수(부분 grep 기준 — 전수는 비공개 전달분과 대조 후 확정).
 - **청구서 스냅샷 컬럼 표시(확정 — (c) 별도 라벨, Edward·JSJung 2026-11-27)**: B-381 M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷 컬럼을 추가했으나(M2 12~13행), 현재 `src`·`messages`의 화면 표시 코드는 **0건**(2026-11-26 확인) — 화주·대리점에게는 **`charge_details` 항목명·금액과 조정 행(별도 라벨·중립 표기·0원 비표시)**를 표시한다(§5). 합계는 저장값을쓴다(합계 정합성 확인).
 
 ## 3. 부가운임 항목별 표시안 비교
@@ -79,12 +80,8 @@
 - i18n: `ko/en/zh/ja` 4로케일 `Finance.additionalCharge`(가칭) 추가. 관리자 화면 라벨 불변.
 - **갱신 — 라벨 범위 재정의(항목4)**: 적용 대상은 §2 표의 "허용" 행 전체로 확정한다 — 화주·대리점 경로(오더 상세 `OrderFinanceSummary`, 일별 청구 `ShipperDailyBillingClient`, **청구서 화면 `finance/statements`, 청구서 Excel `statement-excel(-data)`**)는 전부 "부가운임", 관리자 경로(오더정산 상세·실비 조정 폼)는 원문 유지. **남는 경로** = 기존 행(비UPS `zen_order_costs`)과 §2의 "표시 범위 확인 필요" 행.
 - **`freight_adjustment` 라벨 확인(근거, 한 줄 — `cost_type` 경로에 한정)**: `src/lib/finance/settlement/cost-type-labels.ts`의 `COST_TYPE_LABELS`에 `FREIGHT_ADJUSTMENT`는 **미등재**라 fallback(`cost_type.replace(/_/g, ' ')`) 영문으로 노출되며, src·messages에 "운임 조정" 표기는 **0건**(2026-11-26 `git grep` 직접 확인). **이 확인이 가리키는 대상은 오더 상세의 `cost_type` 라벨 경로(`zen_order_costs` 항목)이며**, 그 경로는 §2의 원가 거부 대상이라 **규칙 5와 충돌하지 않는 결론도 이 `cost_type` 경로에 한정한다**. **청구서 스냅샷 컬럼(`freight_adjustment`·`charge_details`) 경로는 다른 대상**이며, 표시 방식은 아래 **(c) 별도 라벨 확정(Edward, JSJung 2026-11-27)으로 해소**되었다. 단, 관리자 경로의 영문 fallback도 "남는 경로"에 포함해 원문 라벨(가칭 "운임 조정") 처리를 §5에서 확정한다.
-- **`freight_adjustment` 청구서 스냅샷 표시 — (c) 별도 라벨 확정(Edward 결정, JSJung 수락 2026-11-27 10:12 KST)**: M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷을 추가했으나(M2 12~13·92·258행) 현재 화면 표시 코드는 **0건**. **결정 이력: (a) 숨김(JSJung 09:26) → (c) 정정(Edward, JSJung 수락)** — 행 단위 합 불일치 확인 전 결정의 정정. 결정: **(c) 별도 라벨 + 중립 표기(아래 4로케일 안, 확정은 Aiden) + 0원이면 비표시** — `charge_details` 항목과 이 조정 행을 구분해 **행 합 = `line_total`**이 되게 한다. **(a) 숨김·(b) "부가운임" 합산은 채택하지 않음.** → §2 청구서 행의 "허용"은 **`charge_details` 항목명·금액 + 조정 행(별도 라벨) 한정으로 확정**.
-- **중립 라벨 4로케일 안(제시 — 확정은 Aiden)**: 원가·차액을 연상시키지 않는 중립어로 두 안.
-  - **안 1(합계 반영형)**: ko `청구 합계 반영` / en `billing total reconciliation` / zh `账单合计反映` / ja `請求合計反映`
-  - **안 2(표준 중립어)**: ko `운임 조정분` / en `freight adjustment` / zh `运费调整` / ja `運賃調整分`
-  - **0원 비표시(Edward 결정)**: 값이 0이면 해당 행을 표시하지 않는다.
-  - **음수 표시 방식(선택지 — Aiden 확정)**: (i) 부호 표기 `-1,234` · (ii) 회계 표기 `(-1,234)` · (iii) 0원과 동일하게 비표시 — 단 (iii)는 **행 합 = `line_total` 목표와 어긋날 수 있어** (i)·(ii)를 권고.
+- **`freight_adjustment` 청구서 스냅샷 표시 — (c) 별도 라벨 확정(Edward 결정, JSJung 수락 2026-11-27 10:12 KST)**: M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷을 추가했으나(M2 12~13·92·258행) 현재 화면 표시 코드는 **0건**. **결정 이력: (a) 숨김(JSJung 09:26) → (c) 정정(Edward, JSJung 수락)** — 행 단위 합 불일치 확인 전 결정의 정정. 결정: **(c) 별도 라벨 + 중립 표기(안 2 확정, 아래) + 0원 비표시 + 음수 부호 표기** — `charge_details` 항목과 이 조정 행을 구분해 **행 합 = `line_total`**이 되게 한다. **(a) 숨김·(b) "부가운임" 합산은 채택하지 않음.** → §2 청구서 행의 "허용"은 **`charge_details` 항목명·금액 + 조정 행(별도 라벨) 한정으로 확정**.
+- **조정 행 라벨 확정 — 안 2 채택(Edward 결정, JSJung 수락 2026-11-27 10:52 KST)**: ko `운임 조정분` / en `freight adjustment` / zh `运费调整` / ja `運賃調整分`. **안 1(합계 반영형)은 채택하지 않음.** **0원이면 비표시(기확정)**, **음수는 부호 표기 `-1,234`로 확정**. 결정 이력: 두 안 제시 → **안 2·부호 표기 채택으로 선택지 종결**.
 - **합계 정합성 확인(지시 3 — 2026-11-27 코드로 직접 확인. 대상은 ① 헤더 합계와 ② 행 단위 구성요소 합 두 가지로 구분)**:
   - **청구서 화면**(`src/components/finance/statements/StatementDetail.tsx`): 헤더 합계는 **저장된 `total_amount`**(83·115행), 항목 행은 저장된 `line_total` 등(104~108행) — 화면 내 합산(reduce) **0건**. `freight_adjustment`·`charge_details` 표시 **0건**.
   - **Excel**(`src/lib/finance/billing/statement-excel-data.ts`): 헤더 합계는 **저장된 `total_amount`**(154행), `totalsOf`(281~293행)의 컴포넌트별 합은 출력용이며 **검증은 항목 `line_total` 합 = 헤더**(§1-1, 296행 — 0.01 어긋나도 파일 미생성). items select(189행)에 두 컬럼 **미포함**.
@@ -97,16 +94,20 @@
 ## 6. 이슈 #1449 A 구현 계획 (설계 확정 후)
 
 1. 앱: `getUpsActualCost`에 admin 가드(SUPER_ADMIN·ADMIN·MANAGER) + `logger.warn`/`permission_denied`.
-2. 마이그레이션(별도, **앱 배포 뒤 마지막**): `zen_ups_actual_cost`의 화주·대리점 SELECT 정책 제거.
+2. 마이그레이션(별도, **앱 배포 뒤 마지막**): `zen_ups_actual_cost`의 화주·대리점 SELECT 정책 제거 — **제거 대상은 화주·대리점이며, `SUB_ADMIN`을 포함한 관리자 정책은 유지한다**.
 3. 롤백 SQL: 정책 재생성 — 마이그레이션 파일에 포함.
-4. **(갱신 — 항목3)** `zen_ups_actual_other_charges`(부가항목 입력·관리자 초안 저장소)의 **목표 상태는 admin 전용 입력·조회**로 정한다. 화주·대리점의 항목 표시는 이 테이블이 아니라 **run 경로(§3-1 `getOrderAdditionalCharges`)**가 맡는다 — 기존 서술의 "소유·admin 검증으로 화주에게 항목 조회" 방향은 폐기. 정책/가드 수정(별도)은 **admin 전용화** 기준으로 재작성.
-5. 테스트 **(갱신 — 항목7)**: ① **RLS 매트릭스 재사용** — B-381 PR-1의 `tests/integration/task-b381-settlement-run-db.test.ts`(tier×역할) · **단, 이 파일은 `run_charges` RLS를 단언하지 않으므로 `zen_ups_settlement_run_charges`의 tier×역할 매트릭스를 신규로 추가한다**(Aiden 확인) ② **신규 가드·정책은 실DB 세션 테스트**(`getOrderAdditionalCharges`: 소유·admin 통과 / 타 tier 거부 / 원가 컬럼 미반환, 되돌리기 포함) ③ **오더 상세 양성 대조(Edward 결정)** — 화주 자기 tier·대리점 자기 tier 항목 표시, 타 tier 0행, 원가 계열 미표시 ④ 비관리자 원가 미반환 / admin 3역할 읽기 / 함수별 되돌리기 / UI before-after(비공개 증적) + **R-10 UI 확인 대상에 오더 상세 화면 포함**.
+4. **(갱신 — 항목3)** `zen_ups_actual_other_charges`(부가항목 입력·관리자 초안 저장소)의 **목표 상태는 admin 전용 입력·조회**로 정한다. 화주·대리점의 항목 표시는 이 테이블이 아니라 **run 경로(§3-1 `getOrderAdditionalCharges`)**가 맡는다 — 기존 서술의 "소유·admin 검증으로 화주에게 항목 조회" 방향은 폐기. 정책/가드 수정(별도)은 **admin 전용화** 기준으로 재작성 — **제거 대상은 화주·대리점(SELECT)이고 `SUB_ADMIN` 허용 관리자 정책은 유지한다**.
+5. 테스트 **(갱신 — 항목7)**: ① **RLS 매트릭스 재사용** — B-381 PR-1의 `tests/integration/task-b381-settlement-run-db.test.ts`(tier×역할) · **단, 이 파일은 `run_charges` RLS를 단언하지 않으므로 `zen_ups_settlement_run_charges`의 tier×역할 매트릭스를 신규로 추가한다**(Aiden 확인) ② **신규 가드·정책은 실DB 세션 테스트**(`getOrderAdditionalCharges`: 소유·admin 통과 / 타 tier 거부 / 원가 컬럼 미반환, 되돌리기 포함) ③ **오더 상세 양성 대조(Edward 결정)** — 화주 자기 tier·대리점 자기 tier 항목 표시, 타 tier 0행, 원가 계열 미표시 ④ 비관리자 원가 미반환 / admin 3역할 읽기 / 함수별 되돌리기 / UI before-after(비공개 증적) + **R-10 UI 확인 대상에 오더 상세 화면 포함** ⑤ **`SUB_ADMIN` 회귀**: 역할 매트릭스에 **`SUB_ADMIN` 허용 케이스 추가**(`ZENITH_SUPER_ADMIN`과 함께 fixture), 화주·대리점 거부 유지 — **`SUB_ADMIN`의 수익금 조회·원가 관리 기능이 이 변경으로 깨지지 않는지를 회귀 항목으로 설정**.
 
 ## 7. DEF 보고 (R-18, 수정 금지)
 
 - **DEF-B-165**: 일괄 마감의 역할·대상 조건 불일치와 거짓 성공.
 - **DEF-B-166**: 마감 갱신 미반영 무시·이력 거짓 기록·부분 성공 경로.
-- **(갱신 — 항목5, 재측정 반영)** PR-3(#1549)·PR-4a(#1553)은 **`TeamB_Dev` 병합 완료**(2026-11-27). **재측정(2026-11-27 10:17 KST, 명령: `git merge origin/TeamB_Dev` 후 `git grep -n "getUpsActualCost" HEAD -- src/`(실호출 기준) · `git grep -n "getCostTypeLabel" HEAD -- src/`)**: `getUpsActualCost` 호출처 **2곳 → 1곳 확정**(오더정산 상세 page 76행 — 실비 조정 폼은 PR-4a로 제거), `getCostTypeLabel` 사용 **2곳 → 1곳**(OrderFinanceSummary만). DEF-B-165/166의 **유효성 판정은 미실시(사유: Jaison의 유효성 재측정 알림 대기 — 본 재측정은 호출처·사용처 수치 한정)**.
+- **(갱신 — 항목5, 재측정 반영)** PR-3(#1549)·PR-4a(#1553)은 **`TeamB_Dev` 병합 완료**(2026-11-27). **재측정(2026-11-27 10:17 KST, 명령: `git merge origin/TeamB_Dev` 후 `git grep -n "getUpsActualCost" HEAD -- src/`(실호출 기준) · `git grep -n "getCostTypeLabel" HEAD -- src/`)**: `getUpsActualCost` 호출처 **2곳 → 1곳 확정**(오더정산 상세 page 76행 — 실비 조정 폼은 PR-4a로 제거), `getCostTypeLabel` 사용 **2곳 → 1곳**(OrderFinanceSummary만). DEF-B-165/166의 유효성 판정은 아래 **유효성 판정** 항목에 반영.
+
+- **유효성 판정(2026-11-27 10:58 KST — 명령: `git grep -n "<함수명>" HEAD -- src/` + 함수 본문 직접 읽기, 병합 후 `TeamB_Dev` 기준)**:
+  - **DEF-B-165: 부분 해소** — 현상②(거짓 성공 집계)는 일괄 마감이 **인보이스별 결과를 집계**하는 구조로 정비 → **해소**: `finalizedCount`·`failedCount`·`skippedCount` + `errors` 반환(`daily-billing.ts` 500~531행), UPS 인보이스는 skipped로 제외(516~521행). 현상①(역할·대상 정렬)은 **잔존**: 허용 역할이 admin 3역할 외 **AGENCY(자기 shipper 스코프 검증 포함)**까지 포함(`settlement.ts` 94~112행 `assertFinalizePermission`) — "admin 3역할로의 완전 정렬"은 아니며, 개별 마감의 최종 상태 미확인은 DEF-B-166(a)와 연동.
+  - **DEF-B-166: 부분 해소** — (a) 0행 무시는 **유효(잔존)**: `markInvoiceFinalized`가 `error`만 검사하고갱신 행 수를 검사하지 않음(`settlement.ts` 132~144행, 호출 184행). (b) 부분 성공 경로(원가 저장 후 마감 실패를 경고만 남김)는 **무효(경로 제거)**: `recordActualCostAndFinalize`·`recordUpsActualCharges`가 현행 `src/`에 **실제 존재하지 않음**(grep 실질 0건 — 역사 주석만 `lib/ups/actual-cost.ts` 4~5행).
 
 ## 8. Ds-11 / 마이그레이션 분리
 
@@ -118,8 +119,8 @@
 | 순서 | 마이그레이션 | 대상 | 상태 | 롤백 | 비고 |
 |:--:|:--|:--|:--|:--|:--|
 | — | `20261123100000_task_b375_drop_shipper_agency_select_rls.sql` | `zen_ups_actual_charges`의 shipper·agency SELECT 정책 제거 | **완료**(2026-11-23 `TeamB_Dev` 병합, 파일 직접 확인) | `20260720000000_iss589_ups_actual_charges.sql`의 `shipper_agency_select` 재생성(파일 주석) | 대체 정책 없음·admin 정책 유지 |
-| 2 | B-377 정책 마이그레이션 ① — **미작성**(설계 단계) | `zen_ups_actual_cost`의 화주·대리점 SELECT 정책 제거 | 설계 확정 후 작성 | **정책 재생성 SQL을 마이그레이션 파일에 포함**(§6 3번) | **"앱 배포 뒤 마지막" 원칙의 본체** |
-| 2 | B-377 정책 마이그레이션 ② — **미작성**(설계 단계) | `zen_ups_actual_other_charges`의 shipper·agency 읽기 거부 전환(§6 4번 항목3 admin 전용화) | 설계 확정 후 작성 | 정책 재생성 SQL 포함(예정) — **롤백 시 기존 정의 복원 전에 그 조건이 의도와 맞는지 Aiden 비공개 상세와 대조 후 확정** | **목표: admin 3역할만 허용(§8-2 표)** |
+| 2 | B-377 정책 마이그레이션 ① — **미작성**(설계 단계) | `zen_ups_actual_cost`의 화주·대리점 SELECT 정책 제거(**화주·대리점 한정 — `SUB_ADMIN` 포함 관리자 정책은 유지**) | 설계 확정 후 작성 | **정책 재생성 SQL을 마이그레이션 파일에 포함**(§6 3번) | **"앱 배포 뒤 마지막" 원칙의 본체** |
+| 2 | B-377 정책 마이그레이션 ② — **미작성**(설계 단계) | `zen_ups_actual_other_charges`의 shipper·agency 읽기 거부 전환(§6 4번 항목3 admin 전용화 — **화주·대리점 한정, `SUB_ADMIN` 허용 관리자 정책은 유지**) | 설계 확정 후 작성 | 정책 재생성 SQL 포함(예정) — **롤백 시 기존 정의 복원 전에 그 조건이 의도와 맞는지 Aiden 비공개 상세와 대조 후 확정** | **목표: admin 3역할만 허용(§8-2 표)** |
 | 3 | B-379 2/2 스냅샷 정책 교체 — **미작성** | 입고 실측 스냅샷 정책 | [#1453](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1453) `status:open`(설계 미확정) | 마이그레이션 포함(예정 — 미확인) | 설계 확정 후 확정 |
 
 - **적용 순서 원칙**: (1) 앱 배포 → (2) B-377 정책 제거 → (3) B-379 2/2. b375(완료)는 참조선이며 남은 두 건은 각각 "앱 배포 뒤 마지막" 원칙을 따른다.
@@ -131,9 +132,10 @@
 | ZENITH_SUPER_ADMIN | 허용 | 허용 |
 | ADMIN | 허용 | 허용 |
 | MANAGER | 허용 | 허용 |
-| **위 3역할 외 모든 인증 역할** (예: AGENCY·SHIPPER·SUB_ADMIN·INDIVIDUAL) | **거부** | **거부** |
+| `SUB_ADMIN`(Master Agency 업무 역할) | **허용(현행 유지, Pilot 예외 — Edward 2026-11-27, 본 사업 시 재판단)** | **허용(현행 유지, Pilot 예외)** |
+| **위 3역할 외 모든 인증 역할** (예: AGENCY·SHIPPER·INDIVIDUAL 등) | **거부** | **거부** |
 
-- 두 원가 테이블의 허용 역할 집합은 확정 규칙 1(SUPER_ADMIN·ADMIN·MANAGER)과 **정확히 같은 3역할**만 허용한다 — **(JSJung 확정: 3역할 외 모든 인증 역할 = 거부)**. 달성 수단은 §8-1의 B-377 마이그레이션 ①·②이며 롤백은 §8-1 표를 따른다.
+- 두 원가 테이블의 허용 역할 집합은 확정 규칙 1(SUPER_ADMIN·ADMIN·MANAGER)과 **정확히 같은 3역할**만 허용한다 — **(JSJung 확정: 3역할 외 모든 인증 역할 = 거부)**. 달성 수단은 §8-1의 B-377 마이그레이션 ①·②이며 롤백은 §8-1 표를 따른다. **`SUB_ADMIN`은 Master Agency 업무 기능(자신의 원가 별도 관리·자신의 수익금 조회)을 보장하며 Pilot 단계의 현행 접근 범위를 바꾸지 않는다**(AGENCY·SHIPPER·INDIVIDUAL 거부는 유지). 결정 이력: 09:26 "3역할 외 모든 인증 역할 = 거부" → **Edward 2026-11-27 `SUB_ADMIN` Pilot 예외 정정(JSJung 수락)**.
 
 ## 9. [작업 결과]
 
