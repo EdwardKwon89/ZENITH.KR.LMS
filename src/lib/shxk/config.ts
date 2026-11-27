@@ -15,10 +15,11 @@ export function assertShxkConfig(): void {
   }
 }
 
-export const SHXK_SHIPPER_NAME     = process.env.SHXK_SHIPPER_NAME     ?? 'SNTL Korea Co Ltd'
+// TASK-B-397 보완: 환경변수가 빈 문자열·공백이어도 대체값이 비지 않도록 trim 후 빈 값 판정.
+export const SHXK_SHIPPER_NAME     = process.env.SHXK_SHIPPER_NAME?.trim() || 'SNTL Korea Co Ltd'
 
 // TASK-B-397 (Issue #1552 / DEF-B-172): SHXK 서버는 FXUPS 경로에서 발송인 회사명을 필수 검증한다.
-// 값은 소스에 적지 않고 환경변수로만 주입한다. 미설정 시 빈 값을 보내지 않도록
+// 값은 소스에 적지 않고 환경변수로만 주입한다. 미설정·빈 값·공백 시 빈 값을 보내지 않도록
 // 기존 SHXK_SHIPPER_NAME 값으로 대체하고, 운영에서 누락을 알아챌 수 있게 warn을 남긴다.
 const configuredShipperCompany = process.env.SHXK_SHIPPER_COMPANY?.trim()
 if (!configuredShipperCompany) {

@@ -111,6 +111,7 @@ export function resolveConsigneeStreet(
 //   FXUPS는 이 필드를 실제 서버가 필수 검증한다(DEF-B-054 실측). 명세상 선택 필드라도
 //   경로별 서버 검증이 다를 수 있으므로 전 경로에서 항상 키를 보낸다.
 //   미설정 시 config.ts가 SHXK_SHIPPER_NAME 값으로 대체하므로 빈 값을 전송하지 않는다.
+// TASK-B-397 보완: company·name 모두 trim 후 빈 값을 판정해 공백 문자열을 전송하지 않는다.
 // 담당자명(order.shipper_contact_name)은 SHXK payload 어디에도 전송하지 않는다.
 function buildShipperPayload(
   order: Record<string, unknown>,
@@ -122,9 +123,12 @@ function buildShipperPayload(
     || (shipperOrg?.name as string)
     || shipperDefaults.name;
 
+  // TASK-B-397 보완: 공백만 있는 company는 빈 값으로 보고 name으로 대체한다.
+  const shipperCompany = shipperDefaults.company?.trim() || shipperDefaults.name.trim();
+
   return {
     shipper_name: shipperDisplayName,
-    shipper_company: shipperDefaults.company || shipperDefaults.name,
+    shipper_company: shipperCompany,
     shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
     shipper_province: sanitizeComma((order.shipper_state_province as string) || ''),
     shipper_city: sanitizeComma((order.shipper_city as string) || ''),

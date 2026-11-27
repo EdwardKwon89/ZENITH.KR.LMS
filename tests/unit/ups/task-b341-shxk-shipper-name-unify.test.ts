@@ -246,7 +246,7 @@ beforeEach(() => {
   });
 });
 
-describe('TASK-B-341 → TASK-B-345: 실제 서버 액션 경로 — createorder payload (mock SHXK)', () => {
+describe('TASK-B-341 → TASK-B-397: 실제 서버 액션 경로 — createorder payload (mock SHXK)', () => {
   it('TC-341-7: registerUpsOrder()가 SHXK createorder로 보내는 shipper_name은 화주명이고 shipper_company는 환경변수 값을 전송한다 (TASK-B-397 갱신)', async () => {
     const { chain } = createMockSupabase({ shipper_name: 'ABC Trading' });
     mockValidateUserAction.mockResolvedValue({

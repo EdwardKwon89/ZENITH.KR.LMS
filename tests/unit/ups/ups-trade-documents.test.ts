@@ -58,7 +58,9 @@ describe('Issue #565/569: previewShxkPayload + issueUpsLabel', () => {
 
     expect(mappingSrc).toContain('export function buildCreateOrderPayload');
     expect(mappingSrc).toContain('shipperDefaults: { name: string; country: string; company?: string }');
-    expect(mappingSrc).toContain('shipper_company: shipperDefaults.company || shipperDefaults.name');
+    // TASK-B-397 보완: trim 후 빈 값 판정 계약으로 갱신(공백 문자열 미전송).
+    expect(mappingSrc).toContain('shipperDefaults.company?.trim() || shipperDefaults.name.trim()');
+    expect(mappingSrc).toContain('shipper_company: shipperCompany');
     expect(actionsSrc).toContain('buildCreateOrderPayload(shxkCode, order, countryCode, packages');
   });
 
