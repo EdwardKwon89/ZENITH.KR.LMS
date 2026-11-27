@@ -44,8 +44,8 @@
 
 - 오더 상세의 현재 구현: `orders/[orderId]/page.tsx`가 `zen_order_costs`를 조회해 `OrderFinanceSummary`에 `initialCosts`로 전달(`cost_type` 항목 라벨은 `getCostTypeLabel`) — **run을 읽지 않는 구조**이며 PR-4a 이후 변화는 §7 잠정 기재. (2026-11-26 직접 확인)
 - **원가 테이블 조인 서버 액션 경로(목표 상태만 기재 — 전수 목록은 비공개)**: 이 경로들도 **원가 계열을 반환하지 않는다**(§3-1 DTO 기준).
-- **`SUB_ADMIN`(Master Agency 업무 역할)**: **Master Agency 업무 기능을 현행대로 유지(Pilot 예외 — Edward 2026-11-27)** — 원가 조인 경로의 `SUB_ADMIN`도 현행 유지. "자신의"가 가리키는 값·화면의 정확한 범위는 **Aiden이 Edward 확인 후 §2에 목표 상태로 확정 — 현재 미확정**.
-- **현행 `SUB_ADMIN` 기능 목록(코드 확인 사실만 — 2026-11-27 `git grep SUB_ADMIN HEAD -- src/`)**: ① `/admin/sub-agency-profit` 화면(수익 집계) ② `/admin/ups-rates` 화면 — 기본요율 Matrix 탭만 노출·SUB_ADMIN 전용 원가 수정 폼(#618) ③ `order-revenue-cost.ts`의 Sub-Agency별 수익금 집계 조회(SUB_ADMIN·ADMIN·MANAGER 전용, 298·313행) ④ `rates.ts` 기본요율 조회 허용(23행) ⑤ `rates-mutation.ts`의 Sub-Agency 원가 할인율 관리(#605)·SUB_ADMIN 전용 원가 업데이트(#618, 111행) ⑥ 라우트 `/admin/ups-rates`·`/voc`·`/support`·`/mypage`·`/address-book`(`rbac.ts` 48행). **미확정**: "자신의" 범위(본인 한정 여부 등)는 Aiden·Edward 확정 대기. **미확인**: 위 목록 외 개별 기능의 전수(부분 grep 기준 — 전수는 비공개 전달분과 대조 후 확정).
+- **`SUB_ADMIN`(Master Agency 업무 역할)**: **Master Agency 업무 기능을 현행대로 유지(Pilot 예외 — Edward 2026-11-27)** — 원가 조인 경로의 `SUB_ADMIN`도 현행 유지. "자신의"의 범위: **Pilot 단계는 현행 유지, 범위 한정 여부는 본 사업에서 재판단(IMP-218)** — 현행 접근 범위의 구체 서술은 R-21에 따라 쓰지 않는다.
+- **현행 `SUB_ADMIN` 기능 목록(코드 확인 사실만 — 2026-11-27 `git grep SUB_ADMIN HEAD -- src/`)**: ① `/admin/sub-agency-profit` 화면(수익 집계) ② `/admin/ups-rates` 화면(기본요율·원가 수정 폼, #618) ③ `order-revenue-cost.ts`의 Sub-Agency별 수익금 집계 조회액션(298·313행) ④ `rates.ts`의 기본요율 조회(23행) ⑤ `rates-mutation.ts`의 Sub-Agency 원가 할인율 관리(#605)·원가 업데이트(#618, 111행) ⑥ 라우트 `/admin/ups-rates`·`/voc`·`/support`·`/mypage`·`/address-book`(`rbac.ts` 48행). **범위**: "자신의"의 범위는 **Pilot 단계 현행 유지, 본 사업에서 재판단(IMP-218)** — 구체 서술은 R-21로 쓰지 않는다. **미확인**: 위 목록 외 개별 기능의 전수(부분 grep 기준 — 전수는 비공개 전달분과 대조 후 확정).
 - **청구서 스냅샷 컬럼 표시(확정 — (c) 별도 라벨, Edward·JSJung 2026-11-27)**: B-381 M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷 컬럼을 추가했으나(M2 12~13행), 현재 `src`·`messages`의 화면 표시 코드는 **0건**(2026-11-26 확인) — 화주·대리점에게는 **`charge_details` 항목명·금액과 조정 행(별도 라벨·중립 표기·0원 비표시)**를 표시한다(§5). 합계는 저장값을쓴다(합계 정합성 확인).
 
 ## 3. 부가운임 항목별 표시안 비교
@@ -107,7 +107,7 @@
 
 - **유효성 판정(2026-11-27 10:58 KST — 명령: `git grep -n "<함수명>" HEAD -- src/` + 함수 본문 직접 읽기, 병합 후 `TeamB_Dev` 기준)**:
   - **DEF-B-165: 부분 해소** — 현상②(거짓 성공 집계)는 일괄 마감이 **인보이스별 결과를 집계**하는 구조로 정비 → **해소**: `finalizedCount`·`failedCount`·`skippedCount` + `errors` 반환(`daily-billing.ts` 500~531행), UPS 인보이스는 skipped로 제외(516~521행). 현상①(역할·대상 정렬)은 **잔존**: 허용 역할이 admin 3역할 외 **AGENCY(자기 shipper 스코프 검증 포함)**까지 포함(`settlement.ts` 94~112행 `assertFinalizePermission`) — "admin 3역할로의 완전 정렬"은 아니며, 개별 마감의 최종 상태 미확인은 DEF-B-166(a)와 연동.
-  - **DEF-B-166: 부분 해소** — (a) 0행 무시는 **유효(잔존)**: `markInvoiceFinalized`가 `error`만 검사하고갱신 행 수를 검사하지 않음(`settlement.ts` 132~144행, 호출 184행). (b) 부분 성공 경로(원가 저장 후 마감 실패를 경고만 남김)는 **무효(경로 제거)**: `recordActualCostAndFinalize`·`recordUpsActualCharges`가 현행 `src/`에 **실제 존재하지 않음**(grep 실질 0건 — 역사 주석만 `lib/ups/actual-cost.ts` 4~5행).
+  - **DEF-B-166: 부분 해소** — (a) 0행 무시는 **유효(잔존)**: `markInvoiceFinalized`가 `error`만 검사하고 갱신 행 수를 검사하지 않음(`settlement.ts` 132~144행, 호출 184행). (b) 부분 성공 경로(원가 저장 후 마감 실패를 경고만 남김)는 **무효(경로 제거)**: `recordActualCostAndFinalize`·`recordUpsActualCharges`가 현행 `src/`에 **실제 존재하지 않음**(grep 실질 0건 — 역사 주석만 `lib/ups/actual-cost.ts` 4~5행).
 
 ## 8. Ds-11 / 마이그레이션 분리
 
@@ -120,7 +120,7 @@
 |:--:|:--|:--|:--|:--|:--|
 | — | `20261123100000_task_b375_drop_shipper_agency_select_rls.sql` | `zen_ups_actual_charges`의 shipper·agency SELECT 정책 제거 | **완료**(2026-11-23 `TeamB_Dev` 병합, 파일 직접 확인) | `20260720000000_iss589_ups_actual_charges.sql`의 `shipper_agency_select` 재생성(파일 주석) | 대체 정책 없음·admin 정책 유지 |
 | 2 | B-377 정책 마이그레이션 ① — **미작성**(설계 단계) | `zen_ups_actual_cost`의 화주·대리점 SELECT 정책 제거(**화주·대리점 한정 — `SUB_ADMIN` 포함 관리자 정책은 유지**) | 설계 확정 후 작성 | **정책 재생성 SQL을 마이그레이션 파일에 포함**(§6 3번) | **"앱 배포 뒤 마지막" 원칙의 본체** |
-| 2 | B-377 정책 마이그레이션 ② — **미작성**(설계 단계) | `zen_ups_actual_other_charges`의 shipper·agency 읽기 거부 전환(§6 4번 항목3 admin 전용화 — **화주·대리점 한정, `SUB_ADMIN` 허용 관리자 정책은 유지**) | 설계 확정 후 작성 | 정책 재생성 SQL 포함(예정) — **롤백 시 기존 정의 복원 전에 그 조건이 의도와 맞는지 Aiden 비공개 상세와 대조 후 확정** | **목표: admin 3역할만 허용(§8-2 표)** |
+| 2 | B-377 정책 마이그레이션 ② — **미작성**(설계 단계) | `zen_ups_actual_other_charges`의 shipper·agency 읽기 거부 전환(§6 4번 항목3 admin 전용화 — **화주·대리점 한정, `SUB_ADMIN` 허용 관리자 정책은 유지**) | 설계 확정 후 작성 | 정책 재생성 SQL 포함(예정) — **롤백 시 기존 정의 복원 전에 그 조건이 의도와 맞는지 Aiden 비공개 상세와 대조 후 확정** | **목표: admin 3역할 + `SUB_ADMIN`(Pilot 예외) 허용, 그 외 거부(§8-2 표)** |
 | 3 | B-379 2/2 스냅샷 정책 교체 — **미작성** | 입고 실측 스냅샷 정책 | [#1453](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1453) `status:open`(설계 미확정) | 마이그레이션 포함(예정 — 미확인) | 설계 확정 후 확정 |
 
 - **적용 순서 원칙**: (1) 앱 배포 → (2) B-377 정책 제거 → (3) B-379 2/2. b375(완료)는 참조선이며 남은 두 건은 각각 "앱 배포 뒤 마지막" 원칙을 따른다.
@@ -135,7 +135,7 @@
 | `SUB_ADMIN`(Master Agency 업무 역할) | **허용(현행 유지, Pilot 예외 — Edward 2026-11-27, 본 사업 시 재판단)** | **허용(현행 유지, Pilot 예외)** |
 | **위 3역할 외 모든 인증 역할** (예: AGENCY·SHIPPER·INDIVIDUAL 등) | **거부** | **거부** |
 
-- 두 원가 테이블의 허용 역할 집합은 확정 규칙 1(SUPER_ADMIN·ADMIN·MANAGER)과 **정확히 같은 3역할**만 허용한다 — **(JSJung 확정: 3역할 외 모든 인증 역할 = 거부)**. 달성 수단은 §8-1의 B-377 마이그레이션 ①·②이며 롤백은 §8-1 표를 따른다. **`SUB_ADMIN`은 Master Agency 업무 기능(자신의 원가 별도 관리·자신의 수익금 조회)을 보장하며 Pilot 단계의 현행 접근 범위를 바꾸지 않는다**(AGENCY·SHIPPER·INDIVIDUAL 거부는 유지). 결정 이력: 09:26 "3역할 외 모든 인증 역할 = 거부" → **Edward 2026-11-27 `SUB_ADMIN` Pilot 예외 정정(JSJung 수락)**.
+- 두 원가 테이블의 **허용 집합 = admin 3역할(ZENITH_SUPER_ADMIN·ADMIN·MANAGER) + `SUB_ADMIN`(Pilot 예외)**, 그 외 모든 인증 역할(AGENCY·SHIPPER·INDIVIDUAL 등)은 **거부**한다. 달성 수단은 §8-1의 B-377 마이그레이션 ①·②이며 롤백은 §8-1 표를 따른다. **`SUB_ADMIN`은 Master Agency 업무 기능(자신의 원가 별도 관리·자신의 수익금 조회)을 보장하며 Pilot 단계의 현행 접근 범위를 바꾸지 않는다**(AGENCY·SHIPPER·INDIVIDUAL 거부는 유지). 결정 이력: 09:26 "3역할 외 모든 인증 역할 = 거부" → **Edward 2026-11-27 `SUB_ADMIN` Pilot 예외 정정(JSJung 수락)**.
 
 ## 9. [작업 결과]
 
