@@ -26,11 +26,11 @@ date                              # Thu Nov 26 23:12:04 KST 2026
 | run amounts 컬럼 성격 | 동 파일 31~41행 `zen_ups_settlement_run_amounts` + `src/lib/ups/settlement/build.ts` 151~156·184~198행 | **(정정) `base_freight`·`fuel_surcharge`·`surge_fee`는 원가가 아니라 tier별 판매가 구성요소**(`baseSellingPrice` 계열 기반) — 원가는 `zen_ups_actual_cost` · 표시는 `run_charges` 한정(항목명 근거) |
 | M1 tier RLS | 동 파일 106·134·167행 정책 3개 | 행·tier 접근 통제 **반환 DTO(컬럼) 미통제** |
 | src의 run 조회 | `git grep zen_ups_settlement_run -- src/` | **0건**(RPC `finalize_ups_settlement_run` 호출만) → 표시 DTO 경로 부재 |
-| `getUpsActualCost` 호출처 | `git grep` (src) | **2곳**(오더정산 상세 page·실비 조정 폼 79행) — PR-4a가 폼 제거하면 1곳(**잠정**) |
-| `getCostTypeLabel` | `src/lib/finance/settlement/cost-type-labels.ts` | 사용 2곳(오더 상세·실비 조정 폼) · `FREIGHT_ADJUSTMENT` **미등재** → 영문 fallback, "운임 조정" 표기 src·messages **0건** |
+| `getUpsActualCost` 호출처 | `git grep` (src) | **1곳 확정(재측정 2026-11-27 10:17 KST — `git grep -n "getUpsActualCost" HEAD -- src/` 실호출 기준, 실비 조정 폼은 PR-4a 제거 확인)** · (구 측정: 2곳 잠정) |
+| `getCostTypeLabel` | `src/lib/finance/settlement/cost-type-labels.ts` | 사용 **1곳(재측정 2026-11-27 — 실비 조정 폼 제거; 구: 2곳)** · `FREIGHT_ADJUSTMENT` **미등재** → 영문 fallback, "운임 조정" 표기 src·messages **0건** |
 | 오더 상세 구현 | `orders/[orderId]/page.tsx` 57~58·578행 | `zen_order_costs` → `OrderFinanceSummary(initialCosts)` — **run 미사용 구조** |
 | 경로 파일 | `finance/order-settlement/[orderId]`, `finance/daily-billing`, `ShipperDailyBillingClient`, `finance/statements(/id)`, `statement-excel(-data)`, `invoice-generator` | 현행 경로 확인 |
-| PR-3·PR-4a | #1549·#1553 | **둘 다 OPEN(병합 전)** → 항목5 값은 잠정 |
+| PR-3·PR-4a | #1549·#1553 | **둘 다 병합 완료(2026-11-27 `TeamB_Dev`)** → 잠정 해제, 수치 재측정 반영 |
 | b375 마이그레이션 | `20261123100000_task_b375_drop_shipper_agency_select_rls.sql` | **완료**(2026-11-23), 롤백=iss589 정책 재생성(파일 주석) |
 | B-377 정책 마이그레이션 | `git grep zen_ups_actual_cost -- supabase/migrations/` | **제거 마이그레이션 미존재**(생성 파일만) → 미작성 |
 | B-379 2/2 | #1453 `status:open` | 설계 미확정 → 마이그레이션 **미작성** |
@@ -79,6 +79,8 @@ date                              # Thu Nov 26 23:12:04 KST 2026
 
 - **미작성**: 필수2 ②의 원가 조인 서버 액션 **전수 목록 반영**(사유: Aiden 비공개 상세 전달 대기 — 받은 뒤 공개 문서에는 목표 상태만 기재).
 - 요청하지 않은 정리·통일 **0건**.
+
+- **수치 재측정(2026-11-27 10:17 KST)**: `git merge origin/TeamB_Dev`(rebase 금지, 커밋 `f08e8798f`) 후 기존 방법(`git grep`)으로 재측정 — `getUpsActualCost` 호출처 **2 → 1곳**, `getCostTypeLabel` 사용 **2 → 1곳**, PR-3(#1549)·PR-4a(#1553) **병합 완료**. 사용 명령·날짜는 B-377 §7에 기재. DEF-B-165/166 **유효성 판정은 미실시(사유: Jaison의 유효성 재측정 알림 대기 — 본 재측정은 수치 한정)**.
 
 ## [DoD]
 
