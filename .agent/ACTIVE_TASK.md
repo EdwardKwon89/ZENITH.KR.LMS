@@ -51,7 +51,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#1560](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1560) | [IMP 제안] SHXK 거절 사유 원문 가시화 — createorder 실패 원인을 화면·사전검증에서 확인 가능하게 (DEF-B-172 후속) | b | p3 | open | 미배정 | 2026-11-27 |
-| [#1552](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1552) | [Aiden → Team B] DEF: SHXK createorder 발송인 회사명 누락 거절(`发件人公司不能为空`, FXUPS 추정) — B-345 이후 재발 (DEF-B-054 재현) | b | p1 | in-progress | 미배정 | 2026-11-27 |
+| [#1552](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1552) | [Aiden → Team B] DEF: SHXK createorder 발송인 회사명 누락 거절(`发件人公司不能为空`, FXUPS 추정) — B-345 이후 재발 (DEF-B-054 재현) | b | p1 | review | 미배정 | 2026-11-27 |
 | [#1546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1546) | [Team B] TASK-B-393: 롤백 계획서 검증 질의의 공허한 참 정정·§4 M4-b 문구 모순 (EPIC #1364, B-392 후속) | b | p2 | review | 미배정 | 2026-11-26 |
 | [#1542](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1542) | [IMP 제안] agent-worktree-init.sh를 워크트리 안에서 실행하면 중첩 워크트리 경로 생성 | - | - | - | 미배정 | 2026-11-26 |
 | [#1539](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1539) | [Team B] TASK-B-392: M4·M4-b·M5 롤백 재리허설 — 정정 SQL 왕복·M5 실제 run 테이블 실측 (EPIC #1364, B-390·B-391 후속) | b | p2 | review | 미배정 | 2026-11-26 |
@@ -72,7 +72,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1371](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1371) | [Team B → Aiden] Gale(Gemini 4 Argon) 페르소나 등록 요청 — agent-worktree-init.sh 등 | a | p3 | open | 미배정 | 2026-11-18 |
 | [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | open | 미배정 | 2026-11-24 |
 | [#1368](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1368) | [Team B] TASK-B-362: 청구서관리 ⑤ 청구서 PDF 생성·다운로드 및 발행 이메일 | b | p2 | blocked | 미배정 | 2026-11-17 |
-| [#1364](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1364) | [Team B] EPIC: 청구서관리 — 오더정산·청구서 생성/관리 (추적용) | b | p2 | in-progress | 미배정 | 2026-11-26 |
+| [#1364](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1364) | [Team B] EPIC: 청구서관리 — 오더정산·청구서 생성/관리 (추적용) | b | p2 | in-progress | 미배정 | 2026-11-27 |
 | [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) | [Aiden → Team B] DEF-151 UPS 요율 조회 액션 접근 가드 정렬 및 비관리자 화면 데이터 최소화 요청 | b | p1 | review | jungjs | 2026-11-26 |
 | [#1356](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1356) | [Aiden → Team B] DEF-150 finance/UPS 실비·정산 액션 대리점 필터 누락·가드 공백 수정 요청 | b | p1 | in-progress | 미배정 | 2026-11-22 |
 | [#1346](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1346) | [Team A] TASK-1160: 231 PoC 단계 2 — 모듈 ①② 위험 3군 재현·실DB 편입 측정 (§10 #4·#6·#13·#16 확정 반영) | a | p3 | blocked | 미배정 | 2026-11-18 |
