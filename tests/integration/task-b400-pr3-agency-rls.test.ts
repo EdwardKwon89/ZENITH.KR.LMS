@@ -243,22 +243,41 @@ describe('TASK-B-400 — B-381 PR-3 서버 가드 실세션 통합 검증', () =
     expect(invoiceFinalized(INV.hiddenUps)).toBe('false|true');
   }, 60000);
 
-  // DEF-B-173: 목표 상태(단건 마감 포함 다른 경로 없음) 미충족 — 수정은 Aiden/JSJung 승인 후.
-  //   현재 동작을 고정하지 않기 위해 it.fails를 사용한다. 목표가 충족되면 이 테스트가 실패하므로
-  //   그때 it.fails를 제거하고 일반 단언으로 전환한다.
-  it.fails('단건 마감 경로(admin)는 UPS 인보이스를 마감하지 않는다 [DEF-B-173]', async () => {
-    asActor(admin);
+  it('단건 마감 준비 상태 — 인보이스 존재·UPS·미마감·세션 조회', async () => {
+    // DEF-162 대상 경로의 픽스처가 유효한지 먼저 고정한다(it.fails가 픽스처 오류로 통과하는 것 방지).
+    const targetIds = [INV.upsAdminSingle, INV.upsAgencySingle];
+    expect(psql(`SELECT transport_mode FROM public.zen_orders WHERE id='${O.ups}'`)).toBe('UPS');
+    for (const id of targetIds) {
+      expect(psql(`SELECT count(*) FROM public.zen_invoices WHERE id='${id}' AND metadata->>'source_order_id'='${O.ups}'`)).toBe('1');
+      expect(invoiceFinalized(id)).toBe('false|true');
+    }
 
-    const res = await finalizeInvoice(INV.upsAdminSingle, 'TASK-B-400 single path');
-    expect(res.success).toBe(false);
-    expect(invoiceFinalized(INV.upsAdminSingle)).toBe('false|true');
+    asActor(admin);
+    const adminSeen = await admin.client.from('zen_invoices').select('id').in('id', targetIds);
+    expect(adminSeen.error).toBeNull();
+    expect((adminSeen.data ?? []).map((r) => r.id).sort()).toEqual([...targetIds].sort());
+
+    asActor(agency);
+    const agencySeen = await agency.client.from('zen_invoices').select('id').in('id', targetIds);
+    expect(agencySeen.error).toBeNull();
+    expect((agencySeen.data ?? []).map((r) => r.id).sort()).toEqual([...targetIds].sort());
   }, 60000);
 
-  it.fails('단건 마감 경로(AGENCY)는 UPS 인보이스를 마감하지 않는다 [DEF-B-173]', async () => {
-    asActor(agency);
-
-    const res = await finalizeInvoice(INV.upsAgencySingle, 'TASK-B-400 single path');
-    expect(res.success).toBe(false);
-    expect(invoiceFinalized(INV.upsAgencySingle)).toBe('false|true');
+  // DEF-162: 단건 마감 경로 목표 미해소. 목표 해소 시 it.fails가 실패하므로 일반 단언으로 전환한다.
+  it.fails('단건 마감 경로는 UPS 인보이스를 마감하지 않는다 [DEF-162]', async () => {
+    const attempts = [
+      { actor: admin, invoiceId: INV.upsAdminSingle },
+      { actor: agency, invoiceId: INV.upsAgencySingle },
+    ];
+    const results: Array<{ invoiceId: string; success: boolean }> = [];
+    for (const { actor, invoiceId } of attempts) {
+      asActor(actor);
+      const res = await finalizeInvoice(invoiceId, 'TASK-B-400 single path');
+      results.push({ invoiceId, success: res.success });
+    }
+    for (const { invoiceId, success } of results) {
+      expect(success).toBe(false);
+      expect(invoiceFinalized(invoiceId)).toBe('false|true');
+    }
   }, 60000);
 });
