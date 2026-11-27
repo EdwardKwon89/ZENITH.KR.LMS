@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1579](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1579) | [Aiden → Team B] RPC 호출 권한·호출자 검증 정렬 — 원격 시연 배포 전 핵심 조치 (IMP-221 1단계, p1) | b | p1 | - | 미배정 | 2026-11-27 |
 | [#1573](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1573) | [Team B] TASK-B-401: UPS 오더 수정 모드 화주명 자동 모드 오인·'내 정보 사용' 전환 시 화주 정보 소실 방지 (IMP-220, B-399 PR2 배포 전 처리) | b | p2 | open | 미배정 | 2026-11-27 |
 | [#1569](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1569) | [Team B] TASK-B-400: B-381 PR-3 서버 가드의 AGENCY 실세션(RLS) 통합 검증 — PR-4b 분리 인계 (#1459 후속) | b | p2 | review | 미배정 | 2026-11-27 |
 | [#1566](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1566) | [Team B] TASK-B-399: UPS 오더 발송인 입력 방식별 shipper_company 처리 — 내 정보 사용=화주명·수기입력=필수 입력 컨트롤 (#1552 변경) | b | p1 | review | jungjs | 2026-11-27 |
@@ -71,7 +72,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | review | jungjs | 2026-11-27 |
 | [#1453](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1453) | [Team B] TASK-B-379: 청구 금액 함수 base 테이블 의존 제거 + 입고 실측 스냅샷 갱신 주체 정리 (#1449 C, 설계 의견부터) | b | p2 | open | jungjs | 2026-11-26 |
 | [#1451](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1451) | [Team B] TASK-B-377: UPS 원가 열람 admin 전용 정렬 + 화주·대리점 부가운임 항목별 표시·라벨 중립화 (#1449 A·#1442 대체, 설계 의견부터) | b | p1 | in-progress | 미배정 | 2026-11-27 |
-| [#1449](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1449) | [Aiden → Team B] 통합(#1448) 전 필수 조치 3건 — UPS 실비 원가 테이블 권한 정렬·채번 함수 권한·청구 금액 함수 base 의존 제거 | b | p1 | open | jungjs | 2026-11-23 |
+| [#1449](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1449) | [Aiden → Team B] 통합(#1448) 전 필수 조치 3건 — UPS 실비 원가 테이블 권한 정렬·채번 함수 권한·청구 금액 함수 base 의존 제거 | b | p1 | open | jungjs | 2026-11-27 |
 | [#1428](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1428) | [보류] 회귀 테스트 2파일 DB 질의 방식 통일 (npx supabase db query → docker exec psql) | b | p4 | - | 미배정 | 2026-11-22 |
 | [#1371](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1371) | [Team B → Aiden] Gale(Gemini 4 Argon) 페르소나 등록 요청 — agent-worktree-init.sh 등 | a | p3 | open | 미배정 | 2026-11-18 |
 | [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | open | 미배정 | 2026-11-24 |
