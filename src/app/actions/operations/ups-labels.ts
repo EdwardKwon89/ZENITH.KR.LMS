@@ -6,7 +6,7 @@ import { USER_ROLES } from '@/lib/auth/rbac';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
 import {
-  SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
+  SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY, SHXK_SHIPPER_COMPANY,
 } from '@/lib/shxk/config';
 import { buildCreateOrderPayload } from '@/lib/ups/label-mapping';
 import { validateShxkPayload, type ShxkPayloadShape } from '@/lib/shxk/validate-payload';
@@ -289,6 +289,7 @@ async function placeShxkOrder(
   const payload = buildCreateOrderPayload(shxkCode, order, countryCode, packages, {
     name: SHXK_SHIPPER_NAME,
     country: SHXK_SHIPPER_COUNTRY,
+    company: SHXK_SHIPPER_COMPANY,
   });
 
   // TASK-B-277 (Issue #1052): SHXK 필수 필드 사전 검증 — 누락 시 API 호출 스킵하고 즉시 실패
@@ -877,6 +878,7 @@ export async function previewShxkPayload(
       const payload = buildCreateOrderPayload(shxkCode, order, countryCode, packages, {
         name: SHXK_SHIPPER_NAME,
         country: SHXK_SHIPPER_COUNTRY,
+        company: SHXK_SHIPPER_COMPANY,
       });
       return { success: true, payload: payload as Record<string, unknown> };
     }

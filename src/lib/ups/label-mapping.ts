@@ -104,16 +104,17 @@ export function resolveConsigneeStreet(
   return localAddr ? `${road} (${localAddr})` : road;
 }
 
-// TASK-B-341 (Issue #1261) → TASK-B-342 (Issue #1263) → TASK-B-345 (Issue #1277): SHXK createorder의 shipper 블록.
+// TASK-B-341 (Issue #1261) → TASK-B-342 (Issue #1263) → TASK-B-345 (Issue #1277) → TASK-B-397 (Issue #1552): SHXK createorder의 shipper 블록.
 // shipper_name    = 화면 "화주명"(zen_orders.shipper_name). 폴백: order.shipper_name → shipper_org.name → shipperDefaults.name
-// shipper_company = 전송하지 않는다.
-//   (2026-11-12 JSJung 결정 — TASK-B-342의 "회사 기본값 고정" 결정을 번복, TASK-B-345)
-//   SHXK 명세상 선택 필드이므로 키 자체를 payload에서 제거한다(빈 문자열 전송 아님).
-//   shipperDefaults.name은 shipper_name 폴백용으로만 사용한다.
+// shipper_company = 환경변수 SHXK_SHIPPER_COMPANY 값을 전송한다.
+//   (2026-11-27 JSJung 결정 — TASK-B-345의 "키 미전송"을 번복, TASK-B-397 / DEF-B-172)
+//   FXUPS는 이 필드를 실제 서버가 필수 검증한다(DEF-B-054 실측). 명세상 선택 필드라도
+//   경로별 서버 검증이 다를 수 있으므로 전 경로에서 항상 키를 보낸다.
+//   미설정 시 config.ts가 SHXK_SHIPPER_NAME 값으로 대체하므로 빈 값을 전송하지 않는다.
 // 담당자명(order.shipper_contact_name)은 SHXK payload 어디에도 전송하지 않는다.
 function buildShipperPayload(
   order: Record<string, unknown>,
-  shipperDefaults: { name: string; country: string },
+  shipperDefaults: { name: string; country: string; company?: string },
 ): Record<string, unknown> {
   const shipperOrg = order.shipper_org as Record<string, unknown> | undefined;
   const shipperDisplayName =
@@ -123,6 +124,7 @@ function buildShipperPayload(
 
   return {
     shipper_name: shipperDisplayName,
+    shipper_company: shipperDefaults.company || shipperDefaults.name,
     shipper_countrycode: (order.shipper_country_code as string) || shipperDefaults.country,
     shipper_province: sanitizeComma((order.shipper_state_province as string) || ''),
     shipper_city: sanitizeComma((order.shipper_city as string) || ''),
@@ -164,7 +166,7 @@ export function buildCreateOrderPayload(
   order: Record<string, unknown>,
   countryCode: string,
   packages: Record<string, unknown>[],
-  shipperDefaults: { name: string; country: string },
+  shipperDefaults: { name: string; country: string; company?: string },
 ): Record<string, unknown> {
   const { cargotype, mailCargoType } = determineOrderCargotype(packages);
   const cargovolume = buildCargovolume(packages);

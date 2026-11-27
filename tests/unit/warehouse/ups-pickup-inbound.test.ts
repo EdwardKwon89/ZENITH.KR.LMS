@@ -13,7 +13,7 @@ vi.mock('@/app/actions/operations/orders', () => ({
   attachOperatorNames: (_supabase: any, rows: any[]) => Promise.resolve(rows.map((r: any) => ({ ...r, operator: { full_name: 'Test Operator' } }))),
 }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
-vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }));
+vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn() } }));
 vi.mock('@/lib/repositories', () => ({
   BaseRepository: class {},
   OrderRepository: class {
