@@ -661,3 +661,42 @@ zen_ups_settlement_run_charges
 - **필수 1**: `sendInAppNotification`의 `asAdmin` 옵션을 제거해 **공개 액션 시그니처 원복**. 관리자 클라이언트 쓰기는 `notify-admins.server.ts`(`server-only`, 서버 액션 아님)로 분리.
 - **필수 2**: ① 수신자 조회 실패 ② setup(`createAdminClient`) 실패 ③ insert 오류 반환/예외 — 각각 `logger.warn` + `SETTLED` 유지 검증. 액션은 헬퍼 예외도 try/catch로 방어.
 - **권고 3**: 실DB에서 `type='SYSTEM'`·title/message 저장 값, 비수신 역할(AGENCY) 0건 단언. `type`은 알림 UI에서 아이콘/필터 분기에 사용되지 않음(`NotificationBell`에 type 참조 없음)을 확인.
+
+## 12. [구현 작업 결과] PR-4b — Ds-11 마무리·R-10 증적 (2026-11-27)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr4b-ds11-r10` (`origin/TeamB_Dev` 분기) |
+| **PR** | #PR4b (`TeamB_Dev`, `Refs #1459`) |
+| **범위** | 문서(Ds-11)·R-10 증적·RLS 실세션 검증. 코드·마이그레이션 변경 없음 |
+| **범위 밖(별도)** | `rejectInvoice` 안내 문구(UI 후속), `skippedCount` 표시(현재 UPS 숨김으로 불필요), `settled_by` 노출(Aiden), IMP-192, `zen_ups_actual_charges` DROP |
+
+### 12-1. Ds-11 마무리 (R-12)
+- `Ds_11_11B_UPS_Agency_Actuals.md` §11.20 내부 헬퍼에 **`notifyUpsSettlementAdmins`**(경로·권한·입출력·best-effort 오류) 추가.
+- `Ds_11_04_Finance_Settlement.md`에서 **제거된** `createPostFinalizationAdjustment`·`createAdjustmentInvoice` 항목을 “PR-4a에서 제거(옛 후청구 경로 폐쇄, `src` 참조 0건)”로 대체.
+- 인덱스 줄 수 갱신(11B 227줄, 04 264줄).
+- **`npm run check:ds11` 결과는 함수명 언급 여부만 보는 도구**입니다: `액션 함수 305개 | Ds-11 언급 182개 | 미반영 123개(허용 목록 123개)` — 갱신 증거가 아니며, 위 수동 항목 추가가 증거입니다.
+
+### 12-2. R-10 증적 (저장소 밖 보관)
+- 실제 로그인(ADMIN) → `/ko/finance/order-settlement/[orderId]` → 값 입력 → **미리보기(2 tier)** → **정산 완료 모달 → 성공**까지 UI 구동 확인.
+- 결과: **PASS** — 화면 제목·미리보기·`SETTLED` 전환 확인, 브라우저 콘솔 오류 0, 오류 화면 0, `zen_error_logs` 신규 0건(“에러 로그 확인 — 無”).
+- 증적 스크린샷은 **저장소 밖**에 보관했습니다(R-21·GOV 증적 정책). 보고에는 결과만 기재합니다.
+- 참고: 시드된 기존 UPS 오더는 옛 인보이스가 남아 있어 `ups_invoice_exists`로 정산이 차단됩니다(설계대로). R-10은 옛 인보이스가 없는 신규 fixture로 정산 성공 경로를 확인한 뒤 fixture를 정리했습니다.
+
+### 12-3. RLS 실세션 검증
+- `tests/integration/task-b381-settlement-run-db.test.ts` **13/13 PASS** — ADMIN/AGENCY/SHIPPER/비소속/anon 세션의 run·amounts 조회 허용·거부를 실DB에서 확인(기존 PR-1 RLS 매트릭스 재사용). 역할별 정책 결과는 공개 문서에 서술하지 않고 통과 여부만 기록합니다.
+
+### 12-4. 후속 인계 구분
+| 항목 | 이 PR | 비고 |
+|:--|:--|:--|
+| `createPostFinalizationAdjustment` 직접 insert | **처리** | PR-4a에서 제거, Ds-11에 제거 기록 |
+| RLS 하 AGENCY 조회 | **처리** | 실세션 통합 테스트 13/13 PASS |
+| `rejectInvoice` UPS 안내 문구 | **별도** | UI 후속(코드 변경 필요) |
+| `skippedCount` 표시 | **별도(불필요)** | UPS 항목 자체를 숨겨 표시 대상 없음 |
+| `settled_by` 노출 | **보류** | Aiden 판단 전 미노출 |
+| IMP-192(CRITICAL 승격) | **별도** | Aiden 범위 판단 |
+| `zen_ups_actual_charges` DROP | **별도** | JSJung 결정 |
+
+### 12-5. 검증
+- RLS 통합 13/13, UI R-10 PASS, 오류 로그 0.
+- `npm run test:regression` — **312 files passed · 1 skipped / 2,364 passed · 16 skipped**(skip은 B-373 16건), `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.

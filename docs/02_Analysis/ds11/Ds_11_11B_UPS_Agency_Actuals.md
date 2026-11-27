@@ -208,6 +208,13 @@
 - **관측성**: RPC 실패 시 `logger.error`를 **반환 이전에** 호출하고 오더·오류코드·원가 KRW 합계·부가항목 건수만 기록합니다(청구서 번호·거래처 값 비노출, R-21).
 - **부수효과**: 원가 저장(미정산 오더만), RPC 호출, `revalidatePath` 3곳(오더 상세·`/finance/daily-billing`·`/finance/statements`)
 
+#### 내부 헬퍼 `notifyUpsSettlementAdmins` (서버 액션 아님) — TASK-B-381 PR-4a
+- **Path**: `src/lib/ups/settlement/notify-admins.server.ts` (`server-only`)
+- **설명**: 정산마감 성공 후 ADMIN·MANAGER·ZENITH_SUPER_ADMIN **전원**에게 인앱 알림을 남깁니다. 수신자 조회·문구 로드(`UpsSettlementNotify` 4개 로케일)·`zen_notifications` insert를 관리자 클라이언트로 수행합니다.
+- **권한**: 서버 액션이 아니며 클라이언트에서 호출할 수 없습니다. 호출은 `finalizeUpsSettlement` 내부 1곳.
+- **Input**: `{ orderNo: string; orderId: string }` / **Output**: `Promise<void>`
+- **오류**: 수신자 조회·문구·insert 오류/예외는 모두 `logger.warn`만 남기고 throw하지 않습니다(best-effort). 정산 결과(`SETTLED`)는 유지됩니다.
+
 #### 내부 헬퍼 (서버 액션 아님)
 - `computeSettlementCost(supabase, order, input)` — `src/lib/ups/settlement/build.ts`
   - 출고확정일 기준 **통화별 환율을 `zen_exchange_rates`에서 직접 조회**하고, 유효 환율이 없으면 `getExchangeRate`의 최후 fallback(1350)을 쓰지 않고 `SettlementCurrencyError`를 던집니다(→ `currency_conversion_failed`). `computeUpsActualCostKrw`(기본운임 +7%)로 원가·계산 스냅샷을 만듭니다.
