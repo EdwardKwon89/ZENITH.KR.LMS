@@ -50,6 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
+| [#1560](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1560) | [IMP 제안] SHXK 거절 사유 원문 가시화 — createorder 실패 원인을 화면·사전검증에서 확인 가능하게 (DEF-B-172 후속) | b | p3 | open | 미배정 | 2026-11-27 |
 | [#1552](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1552) | [Aiden → Team B] DEF: SHXK createorder 발송인 회사명 누락 거절(`发件人公司不能为空`, FXUPS 추정) — B-345 이후 재발 (DEF-B-054 재현) | b | p1 | in-progress | 미배정 | 2026-11-27 |
 | [#1546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1546) | [Team B] TASK-B-393: 롤백 계획서 검증 질의의 공허한 참 정정·§4 M4-b 문구 모순 (EPIC #1364, B-392 후속) | b | p2 | review | 미배정 | 2026-11-26 |
 | [#1542](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1542) | [IMP 제안] agent-worktree-init.sh를 워크트리 안에서 실행하면 중첩 워크트리 경로 생성 | - | - | - | 미배정 | 2026-11-26 |
