@@ -44,9 +44,9 @@ date                              # Thu Nov 27 14:23:17 KST 2026
 - [ ] 새 테스트가 **수정 전 코드에서 실패**하는지 확인·보고
 - [ ] 반환값 불변(가드 추가 외 기존 동작 회귀 없음) + `npm run build` · `npm run test:regression` 전체 PASS
 - [ ] Ds-11 갱신 · regression-items 등재 · `check:lrtm` OK
-- [ ] `gh pr checks` 출력 그대로 인용 · R-21 §2 준수 · 보고는 지시·코멘트读后 + 직전 재조회
+- [ ] `gh pr checks` 출력 그대로 인용 · R-21 §2 준수 · 보고는 지시·코멘트를 읽은 뒤 + 직전 재조회
 
 ## [작업 결과]
 
-- 커밋: `b9e0254f1e8876391c98415f0f3981e0b751f5df`
+- 커밋: `04801f569`
 - PR: `<PLACEHOLDER_PR>`
