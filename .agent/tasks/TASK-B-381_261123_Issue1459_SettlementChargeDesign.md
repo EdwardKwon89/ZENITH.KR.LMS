@@ -667,7 +667,7 @@ zen_ups_settlement_run_charges
 | 항목 | 내용 |
 |:--|:--|
 | **브랜치** | `feature/teamb-task-b381-iss1459-pr4b-ds11-r10` (`origin/TeamB_Dev` 분기) |
-| **PR** | #PR4b (`TeamB_Dev`, `Refs #1459`) |
+| **PR** | #1568 (`TeamB_Dev`, `Refs #1459`) |
 | **범위** | 문서(Ds-11)·R-10 증적·RLS 실세션 검증. 코드·마이그레이션 변경 없음 |
 | **범위 밖(별도)** | `rejectInvoice` 안내 문구(UI 후속), `skippedCount` 표시(현재 UPS 숨김으로 불필요), `settled_by` 노출(Aiden), IMP-192, `zen_ups_actual_charges` DROP |
 
