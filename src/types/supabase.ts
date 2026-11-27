@@ -2826,6 +2826,7 @@ export type Database = {
           shipper_country_code: string | null
           shipper_id: string | null
           shipper_name: string | null
+          shipper_company: string | null
           shipper_state_province: string | null
           shipper_zipcode: string | null
           special_cargo_type: string | null
@@ -2881,6 +2882,7 @@ export type Database = {
           shipper_country_code?: string | null
           shipper_id?: string | null
           shipper_name?: string | null
+          shipper_company?: string | null
           shipper_state_province?: string | null
           shipper_zipcode?: string | null
           special_cargo_type?: string | null
@@ -2936,6 +2938,7 @@ export type Database = {
           shipper_country_code?: string | null
           shipper_id?: string | null
           shipper_name?: string | null
+          shipper_company?: string | null
           shipper_state_province?: string | null
           shipper_zipcode?: string | null
           special_cargo_type?: string | null
