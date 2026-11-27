@@ -36,7 +36,7 @@
 - [x] IMP 건의 Issue 1건 — [#1560](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1560) (`type:imp,team:b,priority:p3,status:open`)
 - [x] `npm run test:regression` 전체 PASS — 312/313 파일, 2357/2373 테스트 (exit 0)
 - [x] R-21 점검(값·계정·경로·오더번호 0), 라벨 `status:review`, 병합은 Jaison
-  - `gh pr checks` verbatim 인용은 PR 생성 후 #1552 최종 보고·본 파일 추가 기재로 처리(PR 생성 전에는 출력 불가).
+  - `gh pr checks` verbatim 인용 — PR 생성 후 #1552 최종 보고(`issuecomment-7207478702`)와 아래 [CI 인용]에 기재 완료.
 
 ## [발견 이슈]
 
@@ -70,4 +70,22 @@
 
 - `check-R17-DoD` 실행 파일이 이 워크트리 PATH에 없어(`command -v` 미검출) **명령 실행 불가** → R-17 DoD 항목을 수동 동치 점검(전 항목 체크·`TBD`/빈 값 0·커밋 해시 기재)으로 대체했으며, PR diff 포함 여부는 PR 생성 시 확인한다. 스크립트 미설치 환경 정비는 Jaison 확인 필요.
 - 채번 근거: `./scripts/next-task-number.sh B`를 현재 브랜치에서 재실행해 B-396을 확인했으나, `origin/TeamB_Dev` 기준 원격 브랜치(PR #1557)가 B-396 사용 중 → Jaison 지시대로 **B-397** 확정(09:50 정정 코멘트 반영).
-- PR 생성 후 `date` + `gh pr checks` 출력 원문을 #1552 최종 보고에 인용하고, task file에도 추가 기재한다. 병합·✅ 전환은 Jaison/Aiden 권한이며 본 에이전트는 수행하지 않는다.
+- PR: **#1561**(`feature/teamb-task-b397-iss1552-shxk-shipper-company` → `TeamB_Dev`), 본문 `Refs #1552`만 기재(`Closes` 미사용). PR diff 추가 줄 R-21 스캔 0건 확인. 병합·✅ 전환은 Jaison/Aiden 권한이며 본 에이전트는 수행하지 않는다.
+- #1552 최종 보고: `issuecomment-7207478702` (지시 1~8번 항목별 회신 포함).
+
+### [CI 인용] — verbatim (2026-11-27 10:39:31 KST)
+
+```
+$ date
+Fri Nov 27 10:39:31 KST 2026
+
+$ gh pr checks 1561
+Dependency Audit (advisory, non-blocking)	pass	11s	https://github.com/EdwardKwon89/ZENITH.KR.LMS/actions/runs/45922574362/job/140256463733	
+Docs Sync Check (advisory, non-blocking)	pass	9s	https://github.com/EdwardKwon89/ZENITH.KR.LMS/actions/runs/45922574362/job/140256463718	
+Evidence Escape Check (advisory, non-blocking)	pass	10s	https://github.com/EdwardKwon89/ZENITH.KR.LMS/actions/runs/45922574362/job/140256463472	
+LRTM Sync Check (advisory, non-blocking)	pass	15s	https://github.com/EdwardKwon89/ZENITH.KR.LMS/actions/runs/45922574362/job/140256463834	
+Regression Tests	pass	12m42s	https://github.com/EdwardKwon89/ZENITH.KR.LMS/actions/runs/45922574362/job/140256463759	
+Task File Check (advisory, non-blocking)	pass	10s	https://github.com/EdwardKwon89/ZENITH.KR.LMS/actions/runs/45922574362/job/140256463694	
+Type Check (advisory, non-blocking)	pass	1m8s	https://github.com/EdwardKwon89/ZENITH.KR.LMS/actions/runs/45922574362/job/140256463725	
+Vendor Integrity (advisory, non-blocking)	pass	11s	https://github.com/EdwardKwon89/ZENITH.KR.LMS/actions/runs/45922574362/job/140256463722	
+```
