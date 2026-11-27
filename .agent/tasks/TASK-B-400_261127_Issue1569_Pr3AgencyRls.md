@@ -4,7 +4,7 @@
 |:--|:--|
 | **Issue** | #1569 (B-381 #1459 후속) |
 | **브랜치** | `feature/teamb-task-b400-iss1569-pr3-agency-rls` |
-| **PR** | #PR (base `TeamB_Dev`, `Refs #1569`, `Refs #1459`) |
+| **PR** | #1572 (base `TeamB_Dev`, `Refs #1569`, `Refs #1459`) |
 | **성격** | 테스트 추가 중심, **프로덕션 코드·마이그레이션 변경 0** |
 
 ## 1. 배경·범위
