@@ -39,12 +39,12 @@ const ORDER_IDS = Object.values(O);
 
 const AMOUNTS = [
   { tier: 'ADMIN_TO_AGENCY', base_freight: 100, fuel_surcharge: 10, surge_fee: 5, other_charges: 7, freight_adjustment: -2, settlement_charges_total: 6, line_total: 126 },
-  { tier: 'SHIPPER', base_freight: 100, fuel_surcharge: 10, surge_fee: 5, other_charges: 7, freight_adjustment: -2, settlement_charges_total: 6, line_total: 126 },
+  { tier: 'SHIPPER', base_freight: 100, fuel_surcharge: 10, surge_fee: 5, other_charges: 7, freight_adjustment: -2, settlement_charges_total: 7, line_total: 127 },
 ];
 const CHARGES = [
   { tier: 'ADMIN_TO_AGENCY', line_no: 1, name: '주소정정', amount: 6 },
   { tier: 'SHIPPER', line_no: 1, name: '주소정정', amount: 3 },
-  { tier: 'SHIPPER', line_no: 2, name: '주소정정', amount: 3 },
+  { tier: 'SHIPPER', line_no: 2, name: '주소정정', amount: 4 },
 ];
 const CHANGED = AMOUNTS.map((a) => ({ ...a, base_freight: a.base_freight + 1, line_total: a.line_total + 1 }));
 
@@ -53,6 +53,8 @@ interface Actor {
   userId: string;
   email: string;
   password: string;
+  role: string;
+  orgId: string | null;
 }
 
 let service: SupabaseClient;
@@ -84,7 +86,7 @@ async function createActor(role: string, orgId: string | null): Promise<Actor> {
   const client = createClient(URL, ANON, { auth: { persistSession: false, autoRefreshToken: false } });
   const { error: signInError } = await client.auth.signInWithPassword({ email, password });
   if (signInError) throw new Error(`signIn failed: ${signInError.message}`);
-  const actor = { client, userId, email, password };
+  const actor = { client, userId, email, password, role, orgId };
   actors.push(actor);
   return actor;
 }
@@ -121,9 +123,13 @@ async function cleanup() {
   try {
     psql(`
       SET session_replication_role = replica;
+      DELETE FROM public.zen_invoice_history WHERE invoice_id IN (
+        SELECT id FROM public.zen_invoices WHERE metadata->>'source_order_id' IN ('${ORDER_IDS.join("','")}')
+      );
       DELETE FROM public.zen_invoices WHERE metadata->>'source_order_id' IN ('${ORDER_IDS.join("','")}');
       DELETE FROM public.zen_ups_settlement_runs WHERE order_id IN ('${ORDER_IDS.join("','")}');
       DELETE FROM public.zen_orders WHERE id IN ('${ORDER_IDS.join("','")}');
+      DELETE FROM public.zen_agency_shippers WHERE agency_org_id IN ('${ORG_IDS.join("','")}') OR shipper_org_id IN ('${ORG_IDS.join("','")}');
       DELETE FROM public.zen_profiles WHERE email LIKE '381-%@test.kr';
       DELETE FROM auth.users WHERE email LIKE '381-%@test.kr';
       DELETE FROM public.zen_organizations WHERE id IN ('${ORG_IDS.join("','")}');
@@ -201,7 +207,7 @@ describe('TASK-B-381 PR-1 — run 저장소·RPC·RLS 실DB (자기완결형)', 
     const variantCharges = [
       { ...CHARGES[0], name: '  주소정정  ', amount: 6.001 },
       { ...CHARGES[1], name: '  주소정정  ', amount: 3.001 },
-      { ...CHARGES[2], name: '  주소정정  ', amount: 3.001 },
+      { ...CHARGES[2], name: '  주소정정  ', amount: 4.001 },
     ];
     const second = await finalize(admin, O.idem, variantAmounts, variantCharges);
     expect(second.error).toBeNull();
@@ -271,7 +277,16 @@ describe('TASK-B-381 PR-1 — run 저장소·RPC·RLS 실DB (자기완결형)', 
     expect(shipperAmountsError).toBeNull();
     expect(shipperAmounts).toHaveLength(1);
     expect(shipperAmounts?.[0]?.tier).toBe('SHIPPER');
-    expect(Number(shipperAmounts?.[0]?.line_total)).toBe(126);
+    expect(Number(shipperAmounts?.[0]?.line_total)).toBe(127);
+
+    const { data: shipperCharges, error: shipperChargesError } = await shipper.client
+      .from('zen_ups_settlement_run_charges')
+      .select('tier, amount')
+      .eq('run_id', runId);
+    expect(shipperChargesError).toBeNull();
+    expect(shipperCharges).toHaveLength(2);
+    expect(shipperCharges?.every((c) => c.tier === 'SHIPPER')).toBe(true);
+    expect((shipperCharges ?? []).map((c) => Number(c.amount)).sort((a, b) => a - b)).toEqual([3, 4]);
 
     const anon = createClient(URL, ANON, { auth: { persistSession: false, autoRefreshToken: false } });
     const anonRuns = await anon.from('zen_ups_settlement_runs').select('id').eq('id', runId);
@@ -321,7 +336,7 @@ describe('TASK-B-381 PR-1 — run 저장소·RPC·RLS 실DB (자기완결형)', 
     await finalize(admin, O.bill);
     const { data, error } = await admin.client.rpc('billing_items_amounts', { p_order_ids: [O.bill], p_tier: 'SHIPPER' });
     expect(error).toBeNull();
-    expect(data?.[0]?.line_total).toBe(126);
+    expect(data?.[0]?.line_total).toBe(127);
     expect(data?.[0]?.freight_adjustment).toBe(-2);
     expect(data?.[0]?.charge_details?.length).toBe(2);
     const missing = await admin.client.rpc('billing_items_amounts', { p_order_ids: [O.norun], p_tier: 'SHIPPER' });
