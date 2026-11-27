@@ -74,7 +74,6 @@ vi.mock('@/components/ups/UpsOrderStatusStepper', () => ({ default: () => <div /
 vi.mock('@/components/ups/UpsDetailBackToListButton', () => ({ default: () => <div /> }));
 vi.mock('@/components/ups/UpsPackageItemsModal', () => ({ default: () => <div /> }));
 vi.mock('@/components/ups/UpsOrderBreakdownCard', () => ({ default: () => <div data-testid="breakdown-card" /> }));
-vi.mock('@/components/orders/UpsActualAdjustmentForm', () => ({ UpsActualAdjustmentForm: () => <div /> }));
 vi.mock('@/components/tracking/UpsTrackingEventsList', () => ({ default: () => <div /> }));
 vi.mock('@/components/documents/DocumentDownloadButton', () => ({ default: () => <div /> }));
 vi.mock('@/components/documents/CommercialInvoicePDF', () => ({ default: () => <div /> }));

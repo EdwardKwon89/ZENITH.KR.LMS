@@ -411,7 +411,7 @@ zen_ups_settlement_run_charges
 - 통합 finalize는 **미리보기 금액 = run 저장 금액 = `billing_items_amounts` 반환 금액**을 값으로 비교하고, `charge_details` 항목 값·`charge_weight_kg`도 함께 확인한다.
 - `npm run build` SUCCESS.
 - **회귀 1차**: 오류 키 5개 추가로 `tests/unit/i18n/errors-key-sync.test.ts`의 기준 키 수(111→116)·목록을 갱신했다. 같은 실행에서 DB 테스트 3파일이 로컬 DB 재생성 중 스키마 소실(`relation does not exist`·프로필 org_id 공백)로 실패했으나, 재실행에서 **3파일 83/83 PASS**로 코드와 무관함을 확인했다.
-- **최종 회귀**: `npm run test:regression` — **309 files passed · 1 skipped / 2,377 passed · 16 skipped**(skip은 B-373 세션 테스트 16건), `npm run build` SUCCESS.
+- **최종 회귀**: `npm run test:regression` — **311 files passed · 1 skipped / 2,377 passed · 16 skipped**(skip은 B-373 세션 테스트 16건), `npm run build` SUCCESS.
 
 ### 9-3. 환율·통화 실패 처리 (§B)
 
@@ -567,3 +567,97 @@ zen_ups_settlement_run_charges
 
 - `generateInvoicesForOrder` 가드와 `InvoiceGenerator` 가드가 중복되지만, 전자는 역할·AGENCY 문맥에서 빠른 사용자 메시지를, 후자는 모든 호출처의 최종 방어를 담당한다.
 - **회귀**: `npm run test:regression` — **312 files passed · 1 skipped / 2,394 passed · 16 skipped**(1차 PR-3 대비 +8, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+
+## 11. [구현 작업 결과] PR-4a — 화면 전환·옛 액션/UI 제거 (2026-11-26)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr4a-ui` (`TeamB_Dev` 분기) |
+| **PR** | #1553 (`TeamB_Dev`, `Refs #1459`) |
+| **범위** | 새 정산마감 화면 전환 + 옛 액션·UI 제거를 같은 PR에서 수행. 4b(Ds-11 마무리·R-10)는 분리 |
+
+### 11-1. 산출물
+- `OrderSettlementDetail.tsx` — `previewUpsSettlement`·`saveUpsSettlementDraft`·`finalizeUpsSettlement` 사용, tier별 금액·조정·부가항목 표시, 기본운임·유류·급증·부가항목별 통화 선택, 항목 행 추가/삭제
+- `ups-actual-cost.ts` — `recordUpsActualCost`·`previewUpsActualCost`·`recordActualCostAndFinalize`·`markOrderCostSettled` 제거(잔존: `getUpsActualCost`·`getOrdersForCostSettlement`·`unmarkOrderCostSettled`)
+- `ups-actual-charges.ts` — `recordUpsActualCharges` 제거(잔존: 조회·검색·대사)
+- `BillingConfirmModal.tsx`·`UpsActualAdjustmentForm.tsx` 삭제, `orders/[orderId]`·`admin/ups-actual-charges`는 새 정산 화면 링크로 대체
+- `createPostFinalizationAdjustment`·`createAdjustmentInvoice` 제거 — 옛 후청구 경로(직접 `zen_invoices` insert) 폐쇄. `rejectInvoice`의 비UPS 재발행만 생성기 경유로 유지
+- `OrderFinanceSummary` — UPS에서 인보이스 생성 버튼 미노출
+- `finalizeUpsSettlement` — 성공 후 관리자 3역할 전원에게 인앱 알림(best-effort, 수신자별 실패는 `logger.warn` 후 정산 유지) — §2-1 7단계
+- `daily-billing.ts` — UPS 인보이스 집계·상세 제외, `ShipperDailyBillingClient` 개별 청구확정 버튼 제거
+- 오류 키 `legacy_invoiced_order` 제거(4개 로케일), i18n 기준 116키
+- **초안 저장값**: `zen_ups_actual_cost`의 금액 컬럼에 **원금액·입력 통화**를 저장하고, 환산·+7% 가산 결과는 `total_cost_krw`·`cost_surcharge_*`·`applied_exchange_rates`에만 기록(`calc_version=3`). 재오픈 시 원금액을 복원해 이중 가산을 방지. `calc_version<3` 초안은 금액 미복원·재입력 안내
+- Ds-11 11B §11.14 잔존 액션 정리, 회귀 항목 `TASK-B-381_Issue1459_pr4a_ui.md`
+
+### 11-2. 제거·유지 결정
+- **`rejectInvoice`**: 유지(비UPS 재발행). UPS는 PR-3 공통 진입점이 재발행을 거부하며 취소만 수행.
+- **`getOrdersForCostSettlement`의 `legacyInvoiced` 표시**: 목록 정보로 유지(가드 아님). 최종 차단은 새 RPC의 `ups_invoice_exists`.
+- **`unmarkOrderCostSettled`**: 유지(청구서 포함 차단).
+- **`zen_ups_actual_charges` 테이블**: DROP하지 않음(별도 결정).
+
+### 11-3. 테스트
+- 신규 `task-b381-pr4a-daily-billing-exclusion.test.ts` 2건 — UPS 제외·비UPS 양성
+- 신규 `task-b381-pr4a-notification-db.test.ts` 1건 — 알림 **실DB**(모킹 없음), 실행자 3역할 × 수신자 3명 행 생성·SHIPPER 0건
+- 신규 `order-settlement-detail.test.tsx` 7건 — 초안 복원(calc 3/2), 디바운스 미리보기·항목별 부가운임 전달, 행 추가/삭제, 임시저장 인자, 정산마감, 되돌리기 실패
+- 복원 `task-b381-pr4a-get-orders-list.test.ts` 6건 · `task-b381-pr4a-ups-charge-readers.test.ts` 6건 — 보존 함수 회귀
+- PR-2 통합에 초안 라운드트립·알림 best-effort 2건 추가(총 13건)
+- 기존 `daily-billing-aggregation` fixture를 비UPS(AIR)로 전환해 집계·상세 로직 회귀 유지
+- 옛 액션·모달·폼 전용 테스트 제거: `ups-actual-cost`·`ups-actual-charges`(2)·`task-b364`·`task-b366`(unit/integration)·`BillingConfirmModal`·`UpsActualAdjustmentForm`·`order-settlement-detail`·E2E `r11`
+- 전체 회귀: `npm run test:regression` — **311 files passed · 1 skipped / 2,354 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+
+### 11-4. 후속 인계 (PR-4a 본문 기재 항목)
+- `createPostFinalizationAdjustment`→`createAdjustmentInvoice` 직접 insert 경로: 옛 후청구 액션 제거 여부·PR-3~4a 사이 UPS 도달 가능성
+- `rejectInvoice` UPS 취소 후 재발행 없음의 사용자 메시지 표시 → PR-4a에서 안내 문구 없이 `success:true`(후속 표시 검토)
+- `ShipperDailyBillingClient` `skippedCount` 표시: UPS 항목 자체를 숨겨 그룹 표시는 비UPS 기준으로 유지
+- RLS 하 AGENCY 조회 통합 검증 → 4b R-10
+- `settled_by` 노출 → Aiden 판단 전 미노출
+- IMP-192(CRITICAL 승격) 범위
+
+### 11-5. PR-4a 재검토 반영 (2026-11-26)
+
+| # | 지적 | 반영 |
+|:-:|:--|:--|
+| J1 | 초안 재오픈 시 원가 이중 가산·부가운임 소실 | 금액 컬럼에 원금액·통화 저장(`calc_version=3`), 페이지가 자식 부가항목까지 복원, `calc_version<3`은 금액 미복원·재입력 안내. 통합 라운드트립 테스트(저장→복원 preview 동일→재저장 total 불변→부가항목 유지) |
+| J2 | 보존 코드 테스트 소실 | `getOrdersForCostSettlement` 6건, `getUpsChargeReconciliation`/`searchDeliveredUpsOrders` 6건 복원. 새 화면 7건. 알림 best-effort 통합 1건. 삭제 파일은 "대상 함수 삭제"로 한정 |
+| J3 | 부가운임 항목별 입력 불가 | 항목명·금액·통화 행 추가/삭제 UI, `otherCharges[]`로 전달. 유류·급증도 통화 선택 |
+| a | 알림 수신자·문구 | **확정 사양 반영**: ADMIN·MANAGER·ZENITH_SUPER_ADMIN 전원, 제목·본문 4개 로케일 키(`UpsSettlementNotify`, 본문은 오더번호만), 수신자별 best-effort(조회/발송 실패에도 SETTLED 유지·`logger.warn`) |
+| b | `legacyInvoiced` 표시 | M4(옛 UPS 인보이스 취소) 전까지 목록·상세에 정보로 유지. 최종 차단은 새 RPC `ups_invoice_exists` |
+| N1 | head 해시 오기 | `gh pr view` 기준 head로 보고 |
+| N2 | i18n 제목 117 vs 실제 116 | 제목을 116으로 정정 |
+| N3 | 동일 삼항 | `previewing` 상태 제거, 단일 문구 |
+| M1 | PR-3 선반영 | `origin/TeamB_Dev`·PR-3 가드 브랜치를 병합 커밋으로 반영, task file·i18n 충돌 해소(Errors 117키). 병합 후 전체 회귀 PASS |
+
+### 11-6. `calc_version=3`·`other_charges_hkd` 정의 (PR-4a 재확인 답변)
+
+**① `calc_version=3`으로 구분한 이유·대안**
+- 2는 PR-2가 이미 사용했고 **금액 컬럼에 환산·+7% 가산 후 값**을 저장했다. 3은 **원금액·입력 통화**를 저장한다. `>= 2`로 게이트하면 기존 v2 초안을 원금액으로 오인해 이중 가산하므로 **`>= 3`**이 필요하다.
+- 대안: v2 초안을 마이그레이션으로 원금액 복원하는 방법은 원금액이 저장되어 있지 않아 불가능(가산 전 값 미보존). v3부터 원금액을 보존한다.
+
+**② 정의·주석**
+- 값 정의: `1=레거시(가산 없음)`, `2=PR-2 계산값 저장(환산·+7% 포함)`, `3=PR-4a 원금액·입력 통화 저장(환산·가산은 total_cost_krw/스냅샷)`.
+- 컬럼 주석 갱신: `supabase/migrations/20261126120000_task_b381_pr4a_cost_amount_comments.sql`(스키마 변경 없음, COMMENT만).
+
+**③ 읽는 코드·롤백 영향**
+- `src`에서 금액 컬럼을 읽는 곳은 `finance/order-settlement/[orderId]/page.tsx`뿐이며 `calc_version>=3`에서만 금액을 복원한다. 그 외 `src` 참조 0건.
+- 운영 쿼리(BI/수동 SQL)는 미확인. 롤백 시 v3 행을 v2처럼 읽으면 이중 가산 위험이 있으므로, 롤백 게이트는 `calc_version >= 2`가 아니라 **`>= 3`을 유지**해야 한다(Aiden·Jaison 최종 정리).
+
+**other_charges_hkd**
+- 읽는 곳: `src`에서는 위 `page.tsx` 1곳. 의도는 **참고용 합계**이며, 항목별 원금액·통화는 `zen_ups_actual_other_charges` 자식 행이 단일 원천이다.
+- 통화가 다른 항목이 섞이면 서로 다른 통화의 원금액을 단순 합산한 값이므로 **금액 계산에는 사용하지 않는다**(화면 표시·복원도 자식 행 사용). 컬럼 주석도 이 정의로 갱신.
+
+### 11-7. 알림 실발송 경로 검증 (2026-11-26, Aiden 요청)
+
+- **실DB 검증**: `tests/integration/task-b381-pr4a-notification-db.test.ts` — `sendInAppNotification`을 모킹하지 않고, ADMIN·MANAGER·ZENITH_SUPER_ADMIN이 각각 정산마감한 뒤 service 클라이언트로 `zen_notifications`의 `(order_id,user_id)` 행을 건수 단언. 3역할 전원 1건, SHIPPER 0건. 자기완결 fixture(런타임 계정·정리), skip 게이트 없음.
+- **발견 1 — CHECK 위반**: `zen_notifications_type_check` 허용값에 `UPS_SETTLEMENT`가 없어 insert 실패. 타입을 **`SYSTEM`**으로 수정.
+- **발견 2 — MANAGER 수신자 조회**: `zen_profiles` SELECT 정책이 본인/ADMIN·SUPER만이라 MANAGER 실행 시 수신자가 자기 자신으로 좁혀짐. 수신자 ID 조회만 **관리자 클라이언트**로 수행(권한은 이미 3역할로 제한).
+- **발견 3 — 타 사용자 알림 insert**: 공개 서버 액션 `sendInAppNotification`의 세션 insert는 타 사용자/비요청 컨텍스트에서 RLS에 막힘. **공개 액션 시그니처는 그대로 두고**, 서버 내부 전용 `src/lib/ups/settlement/notify-admins.server.ts`가 관리자 클라이언트로 `zen_notifications`에 직접 insert(수신자 조회도 동일 클라이언트). `sendInAppNotification` 호출처 3곳은 변경 없음.
+- **best-effort**: 수신자 조회/문구/발송을 outer try로 감싸 실패 시 `logger.warn` 후 `SETTLED` 유지. insert가 오류를 반환하는 경우도 `logger.warn`.
+- **테스트**: 헬퍼 단위 5건(정상·조회 실패·설정 실패·insert 오류 반환·insert 예외), 액션 통합에서 헬퍼 예외에도 `SETTLED` 유지, 실DB에서 `type='SYSTEM'`·title/message 값·AGENCY 0건까지 단언.
+- 알림 insert 실패는 best-effort라 `logger.warn`으로 처리하며, 심각도(CRITICAL 승격) 재정리는 IMP-192(`ups-settlement.ts` 핵심 지점 알림 범위)에서 다룬다.
+- **컬럼 주석 마이그레이션**: `20261126120000_task_b381_pr4a_cost_amount_comments.sql` — 적용 순서는 M3 `20261126092000` 뒤(전체 마이그레이션 순서대로 적용). 롤백은 이전 COMMENT 문구 복원(스키마 변경 없음).
+
+
+**PR-4a 3차 보완 (Aiden 필수 1·2, Jaison 범위 정정)**
+- **필수 1**: `sendInAppNotification`의 `asAdmin` 옵션을 제거해 **공개 액션 시그니처 원복**. 관리자 클라이언트 쓰기는 `notify-admins.server.ts`(`server-only`, 서버 액션 아님)로 분리.
+- **필수 2**: ① 수신자 조회 실패 ② setup(`createAdminClient`) 실패 ③ insert 오류 반환/예외 — 각각 `logger.warn` + `SETTLED` 유지 검증. 액션은 헬퍼 예외도 try/catch로 방어.
+- **권고 3**: 실DB에서 `type='SYSTEM'`·title/message 저장 값, 비수신 역할(AGENCY) 0건 단언. `type`은 알림 UI에서 아이콘/필터 분기에 사용되지 않음(`NotificationBell`에 type 참조 없음)을 확인.

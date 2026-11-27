@@ -105,12 +105,7 @@ const mockSupabase: any = {
 };
 
 import { validateUserAction } from '@/lib/auth/guards';
-import {
-  getOrdersForCostSettlement,
-  markOrderCostSettled,
-  recordActualCostAndFinalize,
-  recordUpsActualCost,
-} from '@/app/actions/finance/ups-actual-cost';
+import { getOrdersForCostSettlement } from '@/app/actions/finance/ups-actual-cost';
 
 function order(overrides: Record<string, any> = {}) {
   return {
@@ -141,51 +136,6 @@ beforeEach(() => {
     user: { id: 'user-1' },
     profile: { id: 'user-1', role: 'ADMIN', org_id: 'org-1' },
   } as any);
-});
-
-describe('markOrderCostSettled 거부 사유 (TASK-B-366)', () => {
-  it('UPS 오더가 아니면 not_ups_order', async () => {
-    state.order = order({ transport_mode: 'AIR' });
-    const res = await markOrderCostSettled('order-1');
-    expect(res.success).toBe(false);
-    expect(res.error).toBe('UPS 오더가 아닙니다.');
-  });
-
-  it('DELIVERED가 아니면 ups_actual_cost_status_invalid', async () => {
-    state.order = order({ status: 'IN_TRANSIT' });
-    const res = await markOrderCostSettled('order-1');
-    expect(res.success).toBe(false);
-    expect(res.error).toBe('오더가 IN_TRANSIT 또는 DELIVERED 상태일 때만 실제 원가를 입력할 수 있습니다.');
-  });
-
-  it('이미 정산된 오더는 already_settled', async () => {
-    state.order = order({ cost_settlement_status: 'SETTLED' });
-    const res = await markOrderCostSettled('order-1');
-    expect(res.success).toBe(false);
-    expect(res.error).toBe('이미 오더정산이 완료되었습니다.');
-  });
-
-  it('원가 미입력 오더는 cost_not_entered', async () => {
-    state.costRow = null;
-    const res = await markOrderCostSettled('order-1');
-    expect(res.success).toBe(false);
-    expect(res.error).toBe('실제 원가를 먼저 입력해야 합니다.');
-  });
-
-  it('레거시 오더별 인보이스가 있으면 legacy_invoiced_order', async () => {
-    state.legacyInvoices = [{ id: 'inv-1' }];
-    const res = await markOrderCostSettled('order-1');
-    expect(res.success).toBe(false);
-    expect(res.error).toBe('기존 오더별 인보이스가 발행된 오더입니다. 신규 정산 대상이 아닙니다.');
-  });
-
-  it('정상 케이스는 SETTLED·처리시각·처리자를 조건부 UPDATE로 기록한다', async () => {
-    const res = await markOrderCostSettled('order-1');
-    expect(res.success).toBe(true);
-    expect(state.updatedPayload.cost_settlement_status).toBe('SETTLED');
-    expect(state.updatedPayload.cost_settled_by).toBe('user-1');
-    expect(typeof state.updatedPayload.cost_settled_at).toBe('string');
-  });
 });
 
 describe('getOrdersForCostSettlement 필터 (TASK-B-366)', () => {
@@ -246,38 +196,3 @@ describe('getOrdersForCostSettlement 필터 (TASK-B-366)', () => {
   });
 });
 
-describe('정산 후 수정 잠금 (TASK-B-366)', () => {
-  it('SETTLED 오더는 recordUpsActualCost(B)가 cost_settled_locked 로 거부한다', async () => {
-    state.order = order({ cost_settlement_status: 'SETTLED' });
-    const res = await recordUpsActualCost('order-1', { baseFreightHkd: 100 });
-    expect(res.success).toBe(false);
-    expect(res.error).toBe('오더정산이 완료된 오더는 원가·중량을 수정할 수 없습니다. 먼저 정산을 해제하세요.');
-  });
-
-  it('SETTLED 오더는 recordActualCostAndFinalize(A)가 cost_settled_locked 로 거부한다', async () => {
-    state.order = order({ cost_settlement_status: 'SETTLED' });
-    const res = await recordActualCostAndFinalize('order-1', {
-      baseFreightKrw: 1000,
-      baseFreightCurrency: 'KRW',
-    });
-    expect(res.success).toBe(false);
-    expect(res.error).toBe('오더정산이 완료된 오더는 원가·중량을 수정할 수 없습니다. 먼저 정산을 해제하세요.');
-  });
-});
-
-describe('DEF-B-159 — 기타부가운임 빈 목록 저장 시 자식 행 삭제 (TASK-B-366)', () => {
-  it('목록이 비어도 delete를 호출하고 insert는 하지 않는다', async () => {
-    const res = await recordActualCostAndFinalize('order-1', {
-      baseFreightKrw: 1000,
-      baseFreightCurrency: 'KRW',
-      fuelSurchargeKrw: 0,
-      surgeFeeKrw: 0,
-      otherChargesKrw: 0,
-      otherCharges: [],
-    });
-
-    expect(res.success).toBe(true);
-    expect(state.otherDelete).toBe(1);
-    expect(state.otherInsert).toBe(0);
-  });
-});

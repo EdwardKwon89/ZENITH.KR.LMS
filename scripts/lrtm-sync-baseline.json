@@ -1,8 +1,8 @@
 {
   "_comment": "R-09 회귀맵 래칫 허용 목록: 기존 미등재 Vitest 테스트 파일(tests/e2e, tests/poc-* 제외). 축소만 허용. 생성: node scripts/check-lrtm-sync.mjs --update-baseline",
-  "generatedAt": "2026-11-18",
-  "totalVitest": 264,
-  "count": 99,
+  "generatedAt": "2026-11-26",
+  "totalVitest": 302,
+  "count": 98,
   "entries": [
     "tests/integration/defb052-cancel-ups-registration-unlock.test.ts",
     "tests/integration/inventory.test.ts",
@@ -33,7 +33,6 @@
     "tests/unit/finance/pdf.test.ts",
     "tests/unit/finance/shipper-invoices-agency-rls.test.ts",
     "tests/unit/finance/shipper-invoices.test.ts",
-    "tests/unit/finance/ups-actual-adjustment-form.test.tsx",
     "tests/unit/hs-lookup/hs-lookup-cache.test.ts",
     "tests/unit/logistics/address-english-display.test.ts",
     "tests/unit/logistics/order-update.test.ts",

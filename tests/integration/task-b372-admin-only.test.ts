@@ -1,5 +1,5 @@
 // TASK-B-372 (Issue #1356) — JSJung 확정: UPS 실비는 SUPER_ADMIN·ADMIN·MANAGER 전용.
-// 실제 로그인 세션·실DB로 4개 함수의 허용/거부를 검증한다.
+// 실제 로그인 세션·실DB로 실비 조회·검색·대사 함수의 허용/거부를 검증한다.
 import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
@@ -20,7 +20,6 @@ vi.mock('@/lib/auth/guards', () => ({
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: any) => fn }));
 
 import {
-  recordUpsActualCharges,
   searchDeliveredUpsOrders,
   getUpsActualCharges,
   getUpsChargeReconciliation,
@@ -131,8 +130,8 @@ afterAll(async () => {
   try { await deleteUsers(); } catch { /* best-effort */ }
 });
 
-describe('TASK-B-372 — 관리자 3역할: 실비 4개 함수 허용', () => {
-  it.each(['super', 'admin', 'manager'] as Key[])('%s 세션: 검색·조회·대사·등록 모두 성공', async (key) => {
+describe('TASK-B-372 — 관리자 3역할: 실비 조회·검색·대사 허용', () => {
+  it.each(['super', 'admin', 'manager'] as Key[])('%s 세션: 검색·조회·대사 모두 성공', async (key) => {
     actAs(key);
 
     const searched = await searchDeliveredUpsOrders('ZEN-B372-ADMIN-ONLY');
@@ -141,24 +140,12 @@ describe('TASK-B-372 — 관리자 3역할: 실비 4개 함수 허용', () => {
     await expect(getUpsActualCharges(ORDER)).resolves.toBeTruthy();
     const recon = await getUpsChargeReconciliation(ORDER);
     expect(recon).not.toBeNull();
-
-    const res = await recordUpsActualCharges(ORDER, [
-      { chargeType: 'TEST', amount: 10, currency: 'USD' },
-    ]);
-    expect(res.success, JSON.stringify(res)).toBe(true);
-    expect(Number(psql(`SELECT count(*) FROM public.zen_ups_actual_charges WHERE order_id='${ORDER}';`))).toBe(1);
   });
 });
 
-describe('TASK-B-372 — 비관리자 3역할: 실비 4개 함수 모두 거부', () => {
-  it.each(['agency', 'shipper', 'operator'] as Key[])('%s 세션: 등록·검색·조회·대사 모두 거부 + 행 불변', async (key) => {
+describe('TASK-B-372 — 비관리자 3역할: 실비 조회·검색·대사 거부', () => {
+  it.each(['agency', 'shipper', 'operator'] as Key[])('%s 세션: 검색·조회·대사 모두 거부 + 행 불변', async (key) => {
     actAs(key);
-
-    const rec = await recordUpsActualCharges(ORDER, [
-      { chargeType: 'TEST', amount: 10, currency: 'USD' },
-    ]);
-    expect(rec.success).toBe(false);
-    expect(rec.error).toBe('권한이 없습니다.');
 
     await expect(searchDeliveredUpsOrders('ZEN-B372-ADMIN-ONLY')).rejects.toThrow('권한이 없습니다.');
     await expect(getUpsActualCharges(ORDER)).rejects.toThrow('권한이 없습니다.');

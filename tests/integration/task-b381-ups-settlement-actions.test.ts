@@ -7,11 +7,23 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 const mockValidate = vi.hoisted(() => vi.fn());
+const loggerMock = vi.hoisted(() => ({ warn: vi.fn(), error: vi.fn(), info: vi.fn() }));
+const notifyHelperMock = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/auth/guards', () => ({ validateUserAction: mockValidate }));
+vi.mock('@/lib/logger', () => ({ logger: loggerMock }));
+vi.mock('@/lib/ups/settlement/notify-admins.server', () => ({
+  notifyUpsSettlementAdmins: notifyHelperMock,
+}));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: unknown) => fn }));
 // 화면 문구 대신 오류 키를 반환시켜 거부 사유를 정확히 단언한다.
-vi.mock('@/lib/i18n/action-error', () => ({ trError: async (key: string) => key, actionLocale: async () => 'ko' }));
+vi.mock('@/lib/i18n/action-error', () => ({
+  trError: async (key: string) => key,
+  actionLocale: async () => 'ko',
+  trNotification: async (key: string, params?: Record<string, unknown>) =>
+    params?.orderNo ? `${key}:${params.orderNo}` : key,
+}));
 
+import { getUpsActualCost } from '@/app/actions/finance/ups-actual-cost';
 import {
   previewUpsSettlement,
   saveUpsSettlementDraft,
@@ -37,7 +49,8 @@ const SHIPPER_ORG = `${P}03`;
 const O = {
   preview: `${P}21`, draft: `${P}22`, final: `${P}23`, idem: `${P}24`,
   lock: `${P}25`, invoice: `${P}26`, deny: `${P}27`, curr: `${P}28`, nochange: `${P}29`,
-  nocountry: `${P}2a`, invErr: `${P}2b`,
+  nocountry: `${P}2a`, invErr: `${P}2b`, rt: `${P}2c`, notify: `${P}2d`, notifyFail: `${P}2e`,
+  notifyLookup: `${P}2f`,
 } as const;
 const ORDER_IDS = Object.values(O);
 const ORG_IDS = [PLATFORM_ORG, AGENCY_ORG, SHIPPER_ORG];
@@ -52,6 +65,8 @@ interface Actor {
 let service: SupabaseClient;
 let admin: Actor;
 let shipperActor: Actor;
+let managerActor: Actor;
+let superActor: Actor;
 
 async function createActor(role: string, orgId: string): Promise<Actor> {
   const suffix = randomUUID().slice(0, 8);
@@ -154,6 +169,7 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
   beforeAll(async () => {
     if (!URL || !ANON || !SERVICE) throw new Error('Supabase test env missing');
     service = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
+    notifyHelperMock.mockResolvedValue(undefined);
     await cleanup();
     const { error } = await service.from('zen_organizations').upsert([
       { id: PLATFORM_ORG, name: '381a Platform', type: 'CORPORATE', status: 'ACTIVE' },
@@ -167,6 +183,8 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
 
     admin = await createActor('ADMIN', PLATFORM_ORG);
     shipperActor = await createActor('SHIPPER', SHIPPER_ORG);
+    managerActor = await createActor('MANAGER', PLATFORM_ORG);
+    superActor = await createActor('ZENITH_SUPER_ADMIN', PLATFORM_ORG);
 
     for (const id of ORDER_IDS) { if (id === O.nochange || id === O.nocountry) continue; await createOrder(id); }
     await createOrder(O.nocountry, { countryCode: null });
@@ -210,6 +228,64 @@ describe('TASK-B-381 PR-2 — UPS 정산마감 서버 액션 실DB (자기완결
     expect(otherChargeCount(O.draft)).toBe(1);
     expect(runCount(O.draft)).toBe(0);
     expect(status(O.draft)).toBe('NOT_SETTLED');
+  }, 60000);
+
+  it('draft 라운드트립 — 원금액 복원, 재저장 이중가산 없음, 부가항목 유지', async () => {
+    asActor(admin);
+    const first = await saveUpsSettlementDraft({ orderId: O.rt, ...INPUT });
+    expect(first.success).toBe(true);
+
+    const saved = await getUpsActualCost(O.rt);
+    expect(Number(saved.base_freight_hkd)).toBe(1000); // +7% 가산 전 원금액
+    expect(saved.base_freight_currency).toBe('KRW');
+    expect(Number(saved.fuel_surcharge_hkd)).toBe(100);
+    expect(Number(saved.surge_fee_hkd)).toBe(50);
+    expect(Number(saved.other_charges_hkd)).toBe(30);
+    expect(Number(saved.calc_version)).toBe(3);
+
+    const { data: chargeRows } = await service
+      .from('zen_ups_actual_other_charges')
+      .select('charge_name, amount, currency')
+      .eq('order_id', O.rt);
+    expect(chargeRows).toHaveLength(1);
+    expect(Number(chargeRows![0].amount)).toBe(30);
+    expect(chargeRows![0].charge_name).toBe('주소정정');
+
+    const restored = {
+      orderId: O.rt,
+      baseFreight: { amount: Number(saved.base_freight_hkd), currency: saved.base_freight_currency },
+      fuelSurcharge: { amount: Number(saved.fuel_surcharge_hkd), currency: saved.fuel_surcharge_currency },
+      surgeFee: { amount: Number(saved.surge_fee_hkd), currency: saved.surge_fee_currency },
+      otherCharges: (chargeRows ?? []).map((c: any) => ({ name: c.charge_name, amount: Number(c.amount), currency: c.currency })),
+    };
+
+    const totalBefore = Number(psql(`SELECT total_cost_krw FROM public.zen_ups_actual_cost WHERE order_id='${O.rt}'`));
+    const preview = await previewUpsSettlement(restored);
+    expect(preview.success).toBe(true);
+    expect(preview.preview!.cost.totalCostKrw).toBe(totalBefore);
+
+    await saveUpsSettlementDraft(restored);
+    const totalAfter = Number(psql(`SELECT total_cost_krw FROM public.zen_ups_actual_cost WHERE order_id='${O.rt}'`));
+    expect(totalAfter).toBe(totalBefore);
+    expect(otherChargeCount(O.rt)).toBe(1);
+  }, 60000);
+
+  it('finalize는 알림 헬퍼를 호출하고, 헬퍼 예외에도 정산은 유지한다(best-effort)', async () => {
+    asActor(admin);
+    notifyHelperMock.mockClear();
+    const ok = await finalizeUpsSettlement({ orderId: O.notify, ...INPUT });
+    expect(ok.success).toBe(true);
+    expect(notifyHelperMock).toHaveBeenCalledTimes(1);
+    expect(notifyHelperMock).toHaveBeenCalledWith(expect.objectContaining({ orderId: O.notify }));
+
+    notifyHelperMock.mockRejectedValueOnce(new Error('notify helper failure'));
+    const res = await finalizeUpsSettlement({ orderId: O.notifyFail, ...INPUT });
+    expect(res.success).toBe(true);
+    expect(status(O.notifyFail)).toBe('SETTLED');
+    expect(loggerMock.warn).toHaveBeenCalledWith(
+      'ups-settlement: notification helper failed (best-effort)',
+      expect.any(Error),
+    );
   }, 60000);
 
   it('finalize — run 2 tier·charges·SETTLED, 원장/ADJ 미변경', async () => {
