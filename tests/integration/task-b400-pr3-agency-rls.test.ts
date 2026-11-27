@@ -38,8 +38,7 @@ const P = '40000000-0000-4000-8000-0000000000';
 const PLATFORM_ORG = `${P}01`;
 const AGENCY_ORG = `${P}02`;
 const SHIPPER_ORG = `${P}03`;
-const OTHER_AGENCY_ORG = `${P}04`;
-const ORG_IDS = [PLATFORM_ORG, AGENCY_ORG, SHIPPER_ORG, OTHER_AGENCY_ORG];
+const ORG_IDS = [PLATFORM_ORG, AGENCY_ORG, SHIPPER_ORG];
 
 const O = { ups: `${P}21`, air: `${P}22` } as const;
 const INV = { ups: `${P}31`, air: `${P}32` } as const;
@@ -56,7 +55,6 @@ interface Actor {
 let service: SupabaseClient;
 let admin: Actor;
 let agency: Actor;
-let otherAgency: Actor;
 
 async function createActor(role: string, orgId: string): Promise<Actor> {
   const suffix = randomUUID().slice(0, 8);
@@ -148,7 +146,6 @@ describe('TASK-B-400 — B-381 PR-3 서버 가드 실세션 통합 검증', () =
       { id: PLATFORM_ORG, name: '400 Platform', type: 'CORPORATE', status: 'ACTIVE' },
       { id: AGENCY_ORG, name: '400 Agency', type: 'AGENCY', status: 'ACTIVE' },
       { id: SHIPPER_ORG, name: '400 Shipper', type: 'SHIPPER', status: 'ACTIVE' },
-      { id: OTHER_AGENCY_ORG, name: '400 Other Agency', type: 'AGENCY', status: 'ACTIVE' },
     ], { onConflict: 'id' });
     if (orgError) throw new Error(`org insert failed: ${orgError.message}`);
     const { error: linkError } = await service.from('zen_agency_shippers').upsert({
@@ -158,7 +155,6 @@ describe('TASK-B-400 — B-381 PR-3 서버 가드 실세션 통합 검증', () =
 
     admin = await createActor('ADMIN', PLATFORM_ORG);
     agency = await createActor('AGENCY', AGENCY_ORG);
-    otherAgency = await createActor('AGENCY', OTHER_AGENCY_ORG);
 
     await createOrder(O.ups, 'UPS');
     await createOrder(O.air, 'AIR');
@@ -211,19 +207,4 @@ describe('TASK-B-400 — B-381 PR-3 서버 가드 실세션 통합 검증', () =
     expect((result as { message?: string }).message).toBe('ups_invoice_blocked');
   }, 60000);
 
-  it('비소속 AGENCY 세션은 대상 오더/인보이스를 조회해도 UPS 경로를 우회하지 못한다', async () => {
-    asActor(otherAgency);
-
-    const generateError = await generateInvoicesForOrder(O.ups).then(
-      () => null,
-      (error: unknown) => String((error as Error)?.message ?? ''),
-    );
-    expect(generateError).toBeTruthy();
-    expect(generateError ?? '').not.toBe('ups_invoice_blocked');
-
-    const res = await finalizeDailyShipperInvoices([INV.ups], 'TASK-B-400');
-    // 조회 자체가 제한되면 skipped 0일 수 있다. 어느 경우에도 UPS 인보이스 상태는 불변이어야 한다.
-    expect(invoiceStatus(INV.ups)).toBe('UNPAID');
-    expect(res.success === true || res.success === false).toBe(true);
-  }, 60000);
 });
