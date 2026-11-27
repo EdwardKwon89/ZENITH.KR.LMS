@@ -653,6 +653,7 @@ zen_ups_settlement_run_charges
 - **발견 3 — 타 사용자 알림 insert**: 공개 서버 액션 `sendInAppNotification`의 세션 insert는 타 사용자/비요청 컨텍스트에서 RLS에 막힘. **공개 액션 시그니처는 그대로 두고**, 서버 내부 전용 `src/lib/ups/settlement/notify-admins.server.ts`가 관리자 클라이언트로 `zen_notifications`에 직접 insert(수신자 조회도 동일 클라이언트). `sendInAppNotification` 호출처 3곳은 변경 없음.
 - **best-effort**: 수신자 조회/문구/발송을 outer try로 감싸 실패 시 `logger.warn` 후 `SETTLED` 유지. insert가 오류를 반환하는 경우도 `logger.warn`.
 - **테스트**: 헬퍼 단위 5건(정상·조회 실패·설정 실패·insert 오류 반환·insert 예외), 액션 통합에서 헬퍼 예외에도 `SETTLED` 유지, 실DB에서 `type='SYSTEM'`·title/message 값·AGENCY 0건까지 단언.
+- 알림 insert 실패는 best-effort라 `logger.warn`으로 처리하며, 심각도(CRITICAL 승격) 재정리는 IMP-192(`ups-settlement.ts` 핵심 지점 알림 범위)에서 다룬다.
 - **컬럼 주석 마이그레이션**: `20261126120000_task_b381_pr4a_cost_amount_comments.sql` — 적용 순서는 M3 `20261126092000` 뒤(전체 마이그레이션 순서대로 적용). 롤백은 이전 COMMENT 문구 복원(스키마 변경 없음).
 
 
