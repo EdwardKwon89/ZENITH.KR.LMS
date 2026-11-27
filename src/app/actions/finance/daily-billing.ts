@@ -202,6 +202,28 @@ export async function getShipperDailyBillingSummary(params?: {
       invoices.map((inv: any) => inv.metadata?.source_order_id).filter(Boolean)
     )] as string[];
 
+    // TASK-B-381 PR-4a (§2-7): UPS 오더 청구 항목은 일별 청구 화면에서 숨긴다.
+    if (sourceOrderIds.length > 0) {
+      const { data: transportRows, error: transportError } = await supabase
+        .from('zen_orders')
+        .select('id, transport_mode')
+        .in('id', sourceOrderIds);
+      if (transportError) {
+        logger.error('daily-billing: transport lookup for UPS exclusion failed', transportError);
+        throw new Error(await trError('generic', { code: 'ORDER_LOOKUP' }));
+      }
+      const upsOrderIds = new Set(
+        (transportRows ?? [])
+          .filter((row: any) => row.transport_mode === 'UPS')
+          .map((row: any) => row.id),
+      );
+      invoices = invoices.filter((inv: any) => !upsOrderIds.has(inv.metadata?.source_order_id));
+    }
+
+    if (invoices.length === 0) {
+      return { success: true, groups: [], exchangeRate: fallbackRate };
+    }
+
     const costsByOrderId = new Map<string, any[]>();
     if (sourceOrderIds.length > 0) {
       const { data: allCosts } = await supabase
@@ -363,7 +385,7 @@ export async function getShipperDailyOrdersDetails(
       .select('order_id, cost_type, unit_price, quantity, total_amount, currency')
       .in('order_id', orderIds);
 
-    const resultRows: ShipperDailyOrderRow[] = orders.map((o: any) => {
+    const resultRows: ShipperDailyOrderRow[] = orders.filter((o: any) => o.transport_mode !== 'UPS').map((o: any) => {
       const oCosts = (costs || []).filter((c: any) => c.order_id === o.id);
 
       const matchingInv = invoices.find((inv: any) => inv.metadata?.source_order_id === o.id);
@@ -429,14 +451,58 @@ export async function getShipperDailyOrdersDetails(
 }
 
 /**
+ * TASK-B-381 PR-3 (§2-7): 일괄 마감에서 UPS 인보이스를 제외하기 위해
+ * 인보이스 → 출처 오더의 transport_mode를 조회한다. 조회 실패는 fail-closed.
+ */
+async function findUpsInvoiceIds(supabase: any, invoiceIds: string[]): Promise<Set<string>> {
+  if (invoiceIds.length === 0) return new Set();
+  const { data: invoices, error } = await supabase
+    .from('zen_invoices')
+    .select('id, metadata')
+    .in('id', invoiceIds);
+  if (error) {
+    logger.error('daily-billing: invoice lookup for UPS exclusion failed:', error.message);
+    throw new Error(await trError('generic', { code: 'INVOICE_LOOKUP' }));
+  }
+
+  const sourceOrderByInvoice = new Map<string, string>();
+  for (const row of (invoices ?? []) as Array<{ id: string; metadata?: Record<string, any> | null }>) {
+    const sourceOrderId = row?.metadata?.source_order_id;
+    if (sourceOrderId) sourceOrderByInvoice.set(row.id, String(sourceOrderId));
+  }
+  const orderIds = [...new Set(sourceOrderByInvoice.values())];
+  if (orderIds.length === 0) return new Set();
+
+  const { data: orders, error: orderError } = await supabase
+    .from('zen_orders')
+    .select('id, transport_mode')
+    .in('id', orderIds);
+  if (orderError) {
+    logger.error('daily-billing: order lookup for UPS exclusion failed:', orderError.message);
+    throw new Error(await trError('generic', { code: 'ORDER_LOOKUP' }));
+  }
+
+  const upsOrderIds = new Set(
+    ((orders ?? []) as Array<{ id: string; transport_mode: string | null }>)
+      .filter((order) => order.transport_mode === 'UPS')
+      .map((order) => order.id),
+  );
+  return new Set(
+    [...sourceOrderByInvoice.entries()]
+      .filter(([, orderId]) => upsOrderIds.has(orderId))
+      .map(([invoiceId]) => invoiceId),
+  );
+}
+
+/**
  * 일별/주별/월별 집계 단위 인보이스 일괄 마감 처리
  */
 export async function finalizeDailyShipperInvoices(
   invoiceIds: string[],
   reason?: string
-): Promise<{ success: boolean; finalizedCount: number; failedCount: number; errors?: string[] }> {
+): Promise<{ success: boolean; finalizedCount: number; failedCount: number; skippedCount: number; errors?: string[] }> {
   try {
-    const { profile } = await validateUserAction();
+    const { supabase, profile } = await validateUserAction();
     if (!profile) throw new Error(await trError('profile_not_found'));
 
     const adminRoles = [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.ZENITH_SUPER_ADMIN] as string[];
@@ -446,11 +512,18 @@ export async function finalizeDailyShipperInvoices(
       throw new Error(await trError('permission_denied'));
     }
 
+    const upsInvoiceIds = await findUpsInvoiceIds(supabase, invoiceIds);
     let finalizedCount = 0;
     let failedCount = 0;
+    let skippedCount = 0;
     const errors: string[] = [];
 
     for (const invId of invoiceIds) {
+      if (upsInvoiceIds.has(invId)) {
+        skippedCount += 1;
+        logger.warn('daily-billing: UPS invoice excluded from bulk finalize', { invoiceId: invId });
+        continue;
+      }
       const res = await finalizeInvoice(invId, reason || '집계 단위 일괄 마감');
       if (res.success) {
         finalizedCount += 1;
@@ -463,9 +536,9 @@ export async function finalizeDailyShipperInvoices(
     revalidatePath('/finance/daily-billing');
     revalidatePath('/admin/ups-actual-charges');
 
-    return { success: true, finalizedCount, failedCount, errors };
+    return { success: true, finalizedCount, failedCount, skippedCount, errors };
   } catch (err: any) {
     logger.error('finalizeDailyShipperInvoices failed:', err);
-    return { success: false, finalizedCount: 0, failedCount: invoiceIds.length, errors: [err.message] };
+    return { success: false, finalizedCount: 0, failedCount: invoiceIds.length, skippedCount: 0, errors: [err.message] };
   }
 }

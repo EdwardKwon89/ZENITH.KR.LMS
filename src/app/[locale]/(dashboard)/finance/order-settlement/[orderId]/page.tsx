@@ -117,6 +117,13 @@ export default async function FinanceOrderSettlementDetailPage({
     shipperTotal: toNum(shipper?.finalFreight) ?? platformTotal,
   };
 
+  const { data: savedCharges } = savedRow
+    ? await supabase
+      .from('zen_ups_actual_other_charges')
+      .select('charge_name, amount, currency')
+      .eq('order_id', orderId)
+    : { data: [] };
+
   const savedCost: SavedActualCost | null = savedRow
     ? (() => {
       const krwBased = savedRow.base_freight_currency === 'KRW';
@@ -127,10 +134,19 @@ export default async function FinanceOrderSettlementDetailPage({
         actualLengthCm: toNum(savedRow.actual_length_cm),
         actualWidthCm: toNum(savedRow.actual_width_cm),
         actualHeightCm: toNum(savedRow.actual_height_cm),
-        baseFreightHkd: krwBased ? null : toNum(savedRow.base_freight_hkd),
-        fuelSurchargeHkd: krwBased ? null : toNum(savedRow.fuel_surcharge_hkd),
-        surgeFeeHkd: krwBased ? null : toNum(savedRow.surge_fee_hkd),
-        otherChargesHkd: krwBased ? null : toNum(savedRow.other_charges_hkd),
+        baseFreightHkd: toNum(savedRow.base_freight_hkd),
+        baseFreightCurrency: savedRow.base_freight_currency ?? 'KRW',
+        fuelSurchargeHkd: toNum(savedRow.fuel_surcharge_hkd),
+        fuelSurchargeCurrency: savedRow.fuel_surcharge_currency ?? 'KRW',
+        surgeFeeHkd: toNum(savedRow.surge_fee_hkd),
+        surgeFeeCurrency: savedRow.surge_fee_currency ?? 'KRW',
+        otherChargesHkd: toNum(savedRow.other_charges_hkd),
+        otherCharges: (savedCharges ?? []).map((charge: any) => ({
+          name: charge.charge_name,
+          amount: Number(charge.amount) || 0,
+          currency: charge.currency || 'KRW',
+        })),
+        calcVersion: Number(savedRow.calc_version) || 0,
         notes: savedRow.notes ?? null,
         totalCostKrw: Number(savedRow.total_cost_krw ?? 0),
         krwBased,

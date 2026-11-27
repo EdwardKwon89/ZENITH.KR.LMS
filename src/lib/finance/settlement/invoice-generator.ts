@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { trError } from '@/lib/i18n/action-error';
 import { createAdminClient } from '@/utils/supabase/server';
 import { getExchangeRate } from '../exchange-rate';
 import { getKstToday } from '@/lib/utils/date-kst';
@@ -15,6 +16,22 @@ export class InvoiceGenerator {
   async generateInvoice(orderId: string) {
     try {
       const supabase = await createAdminClient();
+
+      // TASK-B-381 PR-3 (§2-4): 모든 인보이스 생성 경로의 공통 진입점에서 UPS를 거부한다.
+      // 호출처: generateInvoicesForOrder · generateInvoiceAction · rejectInvoice(재발행).
+      const { data: guardOrder, error: guardError } = await supabase
+        .from('zen_orders')
+        .select('transport_mode')
+        .eq('id', orderId)
+        .maybeSingle();
+      if (guardError) {
+        logger.error('[InvoiceGenerator] order guard lookup failed:', guardError.message);
+        throw new Error(await trError('generic', { code: 'ORDER_LOOKUP' }));
+      }
+      if (guardOrder?.transport_mode === 'UPS') {
+        logger.warn(`[InvoiceGenerator] UPS order blocked — use settlement finalize (${orderId})`);
+        return { success: false, message: await trError('ups_invoice_blocked') };
+      }
 
       // 0. 정산 마감 여부 확인 — 마감 후 인보이스 생성 차단
       const { data: existingFinalized } = await supabase

@@ -31,7 +31,7 @@ vi.mock('@/utils/supabase/server', () => ({
 }));
 
 import { validateAdminAction, validateUserAction } from '@/lib/auth/guards';
-import { recordUpsActualCharges, getUpsActualCharges, getUpsChargeReconciliation, searchDeliveredUpsOrders } from '@/app/actions/finance/ups-actual-charges';
+import { getUpsActualCharges, getUpsChargeReconciliation, searchDeliveredUpsOrders } from '@/app/actions/finance/ups-actual-charges';
 
 describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
   beforeEach(() => {
@@ -62,102 +62,8 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     });
   }
 
-  it('TC-B204-01: IN_TRANSIT → 부가요금 등록 성공', async () => {
-    mockValidateUser(USER_ROLES.ADMIN);
-    mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
 
-    const result = await recordUpsActualCharges('order-1', [
-      { chargeType: 'BASE', amount: 200, currency: 'USD' },
-    ]);
-
-    expect(result.success).toBe(true);
-  });
-
-  it('TC-B204-02: REGISTERED 상태 → 차단 (IN_TRANSIT/DELIVERED만 허용)', async () => {
-    mockValidateUser(USER_ROLES.ADMIN);
-    mockOrderChain({ status: 'REGISTERED', transport_mode: 'UPS', shipper_id: 'shipper-1' });
-
-    const result = await recordUpsActualCharges('order-1', []);
-    expect(result.success).toBe(false);
-    expect(result.error).toBe('오더가 IN_TRANSIT 또는 DELIVERED 상태일 때만 실제 청구 요금을 입력할 수 있습니다.');
-  });
-
-  it('TC-B204-03: SHIPPER 권한 없음 → 거부', async () => {
-    mockValidateUser(USER_ROLES.CORPORATE);
-    mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
-
-    const result = await recordUpsActualCharges('order-1', []);
-    expect(result.success).toBe(false);
-  });
-
-  it('TC-B204-04: AGENCY 권한 거부 → 실비 등록 불가 (JSJung 확정 규칙)', async () => {
-    mockValidateUser(USER_ROLES.AGENCY, 'agency-org');
-    mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
-    // AGENCY → shipper-1 연결되어 있다고 가정
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') return createChainableMock({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
-      if (table === 'zen_invoices') return createChainableMock(null);
-      if (table === 'zen_agency_shippers') return createChainableMock([{ shipper_org_id: 'shipper-1' }]);
-      if (table === 'zen_order_costs') return createChainableMock([
-        { cost_type: 'BASE_FREIGHT', unit_price: 150, quantity: 1 },
-        { cost_type: 'FUEL_SURCHARGE', unit_price: 50, quantity: 1 },
-      ]);
-      if (table === 'zen_ups_actual_charges') return createChainableMock(null, null);
-      return createChainableMock();
-    });
-
-    const result = await recordUpsActualCharges('order-1', [
-      { chargeType: 'BASE', amount: 100, currency: 'USD' },
-    ]);
-    expect(result.success).toBe(false);
-    expect(result.error).toBe('권한이 없습니다.');
-  });
-
-  it('TC-B204-04b: NaN/Infinity 금액은 거부하고 쓰기를 수행하지 않는다', async () => {
-    mockValidateUser(USER_ROLES.ADMIN);
-    mockOrderChain({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') return createChainableMock({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
-      if (table === 'zen_agency_shippers') return createChainableMock([{ shipper_org_id: 'shipper-1' }]);
-      return createChainableMock();
-    });
-
-    for (const amount of [Number.NaN, Number.POSITIVE_INFINITY]) {
-      const result = await recordUpsActualCharges('order-1', [
-        { chargeType: 'BASE', amount, currency: 'USD' },
-      ]);
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('금액은 0보다 커야 합니다.');
-    }
-    const { createAdminClient } = await import('@/utils/supabase/server');
-    expect(createAdminClient).not.toHaveBeenCalled();
-  });
-
-  it('TC-B204-05: DELIVERED 상태 기존 플로우 회귀 확인 (마감 전)', async () => {
-    mockValidateUser(USER_ROLES.ADMIN);
-    mockOrderChain({ status: 'DELIVERED', transport_mode: 'UPS', shipper_id: 'shipper-1' });
-
-    const result = await recordUpsActualCharges('order-1', [
-      { chargeType: 'BASE', amount: 200, currency: 'USD' },
-    ]);
-    expect(result.success).toBe(true);
-  });
-
-  it('TC-B204-06: AGENCY 타 화주 오더 → 차단', async () => {
-    mockValidateUser(USER_ROLES.AGENCY, 'agency-org');
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') return createChainableMock({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'other-shipper' });
-      if (table === 'zen_agency_shippers') return createChainableMock([{ shipper_org_id: 'shipper-1' }]);
-      return createChainableMock();
-    });
-
-    const result = await recordUpsActualCharges('order-1', []);
-    expect(result.success).toBe(false);
-    expect(result.error).toBe('권한이 없습니다.');
-    const { createAdminClient } = await import('@/utils/supabase/server');
-    expect(createAdminClient).not.toHaveBeenCalled();
-  });
-
+  // 보존 함수 searchDeliveredUpsOrders·getUpsChargeReconciliation 회귀 (PR-4a에서 등록 액션만 제거)
   it('TC-B204-07: searchDeliveredUpsOrders가 recipient_country_code를 사용한다 (DEF-B-018)', async () => {
     mockValidateUser(USER_ROLES.ADMIN);
     const mockOrders = [
@@ -290,22 +196,4 @@ describe('TASK-B-204: IN_TRANSIT 부가요금 등록', () => {
     });
   });
 
-  it('TC-B204-10: recordUpsActualCharges에서 adjustmentAmount = actualSum - estimatedSum 수식 유지', async () => {
-    mockValidateUser(USER_ROLES.ADMIN);
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') return createChainableMock({ status: 'DELIVERED', transport_mode: 'UPS', shipper_id: 'shipper-1' });
-      if (table === 'zen_invoices') return createChainableMock(null);
-      if (table === 'zen_order_costs') return createChainableMock([
-        { cost_type: 'BASE_FREIGHT', unit_price: 100, quantity: 1, currency: 'USD' },
-      ]);
-      if (table === 'zen_ups_actual_charges') return createChainableMock(null, null);
-      return createChainableMock();
-    });
-
-    const result = await recordUpsActualCharges('order-1', [
-      { chargeType: 'ADDITIONAL', amount: 50, currency: 'USD' },
-    ]);
-    expect(result.success).toBe(true);
-    expect(result.adjustmentAmount).toBe(50);
-  });
 });

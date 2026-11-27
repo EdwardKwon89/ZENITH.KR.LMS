@@ -16,10 +16,10 @@
 | TC-364-03 | 항목 통화 혼합(USD/HKD/KRW) | 1,539,500 (USD base + HKD fuel + KRW other) | 동일 |
 | TC-364-04 | 기타부가운임 2행 | 행별 환산(15,000+50,000), 합계 65,000 | 동일 |
 | TC-364-05 | 환율 누락 | `MISSING_RATE:JPY` throw | 동일 |
-| TC-364-06 | A·B 경로 동일 결과 | A(기본 HKD 1,000·유류 45,000 KRW·급증 7,500 KRW)와 B(기본 1,000·유류 300·급증 50 HKD) 모두 `total_cost_krw=213000` | `tests/unit/finance/task-b364-cost-integration.test.ts` |
+| TC-364-06 | A·B 경로 동일 결과 | A(기본 HKD 1,000·유류 45,000 KRW·급증 7,500 KRW)와 B(기본 1,000·유류 300·급증 50 HKD) 모두 `total_cost_krw=213000` | PR-4a에서 제거(옛 경로) |
 | TC-364-07 | KRW 기본운임 저장 | `applied_exchange_rate=1`, `total_cost_krw=107000` | 동일 |
 | TC-364-08 | 기타부가운임 2행 저장 | 자식 2행 + 메인 `other_charges_hkd`=65,000 | 동일 |
-| TC-364-09 | 청구확정 모달 표시 합계 | 서버 preview `totalCostKrw`(213,000)와 화면 표시 일치, 클라이언트 `×1.07` 없음 | `tests/unit/components/billing-confirm-modal-preview.test.tsx` |
+| TC-364-09 | 청구확정 모달 표시 합계 | 서버 preview `totalCostKrw`(213,000)와 화면 표시 일치, 클라이언트 `×1.07` 없음 | PR-4a에서 제거(옛 경로) |
 | TC-364-RST | 되돌리기: 가산 계수 제거 | `(1+surchargeRate)`→`1` 원복 시 **5 failed / 3 passed** → 복구 8 passed | `actual-cost-compute.test.ts`, `task-b364-cost-integration.test.ts` |
 
 **회귀 검증 (2026-11-18, rebase 후)**: `npm run test:regression` **266 test files / 1,966 tests 전부 PASS**(B-365 포함). `npm run build` **EXIT=0**.

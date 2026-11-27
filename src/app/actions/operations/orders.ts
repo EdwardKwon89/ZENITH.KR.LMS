@@ -731,7 +731,8 @@ export async function updateOrderStatus(
   }
 
   await Promise.all([
-    nextStatus === OrderStatus.RELEASED
+    // TASK-B-381 PR-3 (§2-4): RELEASED 분기에서 UPS는 자동 인보이스 생성 대신 신규 정산마감 경로를 사용한다.
+    nextStatus === OrderStatus.RELEASED && currentOrder?.transport_mode !== 'UPS'
       ? generateInvoicesForOrder(orderId).catch(financeError => {
           logger.error("[CRITICAL] Finance automation failed during release:", financeError);
         })

@@ -11,11 +11,11 @@
 
 | ID | 검증 내용 | 기대 결과 | 테스트 위치 |
 | :-- | :-- | :-- | :-- |
-| TC-372-01 | SUPER_ADMIN·ADMIN·MANAGER 4함수 | 검색·조회·대사·등록 모두 성공 | `tests/integration/task-b372-admin-only.test.ts` |
-| TC-372-02 | AGENCY·SHIPPER·OPERATOR 4함수 | 모두 `permission_denied`, 실비 행 불변 | 동일 |
-| TC-372-03 | AGENCY 등록 단위 | `권한이 없습니다.` | `tests/unit/finance/ups-actual-charges.test.ts` |
-| TC-372-04 | 비유한 금액(ADMIN) | `cost_amount_invalid`, admin client 미호출 | 동일 |
-| TC-372-05 | §1.2 helper 이동 | 단위 14/14 + 페이지 import 정상 | `tests/unit/finance/ups-actual-cost.test.ts` |
+| TC-372-01 | SUPER_ADMIN·ADMIN·MANAGER 3함수 | 검색·조회·대사 모두 성공(등록은 PR-4a에서 제거) | `tests/integration/task-b372-admin-only.test.ts` |
+| TC-372-02 | AGENCY·SHIPPER·OPERATOR 3함수 | 모두 `permission_denied`, 실비 행 불변 | 동일 |
+| TC-372-03 | AGENCY 등록 단위 | `권한이 없습니다.` — 등록 액션은 PR-4a에서 제거 | `tests/integration/task-b372-admin-only.test.ts` |
+| TC-372-04 | 비유한 금액(ADMIN) | `cost_amount_invalid` — 등록 액션은 PR-4a에서 제거 | `tests/integration/task-b372-admin-only.test.ts` |
+| TC-372-05 | §1.2 helper 이동 | 단위 14/14 + 페이지 import 정상 | `tests/unit/finance/task-b352-error-locale.test.ts` |
 | TC-372-RST-1 | `assertAdminOnly` 가드 제거 | **3 failed / 3 passed** → 복구 6/6 | 통합 |
 
 **회귀 검증**: `npm run test:regression` → **294파일 / 2,255케이스 전부 PASS (exit 0)**. `npm run build` → **성공 (exit 0)**. `zen_error_logs` 최근 1일 신규 ERROR 0건.
