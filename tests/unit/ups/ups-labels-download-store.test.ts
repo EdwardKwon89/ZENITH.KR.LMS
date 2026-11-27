@@ -9,7 +9,7 @@ vi.mock('@/lib/auth/guards', () => ({
     profile: { id: 'user-1', role: 'ADMIN' },
   }),
 }));
-vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR' }));
+vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR', SHXK_SHIPPER_COMPANY: 'TEST SHIPPER CO' }));
 vi.mock('@/lib/shxk/order', () => ({
   createorder: vi.fn(),
   getnewlabel: vi.fn(),

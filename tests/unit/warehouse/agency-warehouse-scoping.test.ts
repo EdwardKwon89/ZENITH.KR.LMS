@@ -8,7 +8,7 @@ const mockUpdateStatus = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/auth/guards', () => ({ validateUserAction: mockValidate }));
 vi.mock('@/app/actions/operations/orders', () => ({ updateOrderStatus: mockUpdateStatus }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
-vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }));
+vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn() } }));
 
 const mockRepo = vi.hoisted(() => ({ findById: vi.fn() }));
 vi.mock('@/lib/repositories', () => ({

@@ -14,6 +14,7 @@ const mockConfigKeys = vi.hoisted(() => ({ shxkAppKey: 'test-key', shxkAppToken:
 
 vi.mock('@/lib/shxk/config', () => ({
   SHXK_ENDPOINT: 'https://mock-shxk.test/api',
+  SHXK_SHIPPER_COMPANY: 'TEST SHIPPER CO',
   get SHXK_APP_KEY() { return mockConfigKeys.shxkAppKey },
   get SHXK_APP_TOKEN() { return mockConfigKeys.shxkAppToken },
   assertShxkConfig: () => {

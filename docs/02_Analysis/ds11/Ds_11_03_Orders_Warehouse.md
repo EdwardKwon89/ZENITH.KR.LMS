@@ -24,6 +24,17 @@
 
 - **SHXK 명세상 미전송 수하인 필드 (TASK-B-346 PR③ 감사)**: `consignee_district`(300)·`consignee_doorplate`(300)·`consignee_areacode`(10)·`consignee_mobile`(100)·`consignee_fax`(100)·`consignee_certificatetype`·`consignee_certificatecode`(50)·`consignee_credentials_period`(50) 8개는 현재 입력 UI·payload 매핑이 없다. 신규 DB 컬럼·UI가 필요할 수 있는 항목으로, 구현 전 결정 요청 대상 — `scratch/post_launch_improvements.md` IMP-191 참조.
 
+- **주요 Input 필드 — 발송인(Shipper)**: `buildCreateOrderPayload()`가 SHXK createorder `shipper.*`로 매핑하는 필드. `shipper_company`는 TASK-B-345에서 한 번 제거됐으나, 실제 SHXK 서버가 `FXUPS` 경로에서 필수 검증한다는 실측(DEF-B-054)에 따라 TASK-B-397(#1552)로 전 경로 재전송한다.
+
+  | 필드 | 타입 | 필수 | SHXK 매핑 | 값 출처·비고 |
+  | :--- | :--- | :-- | :--- | :--- |
+  | `shipper_name` | string | Y | `shipper.shipper_name` | 화면 화주명(`zen_orders.shipper_name`) → `shipper_org.name` → 기본값 폴백 (TASK-B-341) |
+  | `shipper_company` | string | Y(실서버) | `shipper.shipper_company` | 환경변수 `SHXK_SHIPPER_COMPANY`에서 주입. 미설정 시 `SHXK_SHIPPER_NAME` 값으로 대체하고 `logger.warn` 기록(`src/lib/shxk/config.ts`). 값 자체는 저장소에 두지 않는다(R-21) |
+  | `shipper_country_code` / `shipper_state_province` / `shipper_city` / `shipper_zipcode` / `shipper_contact_phone` | string | N | `shipper.shipper_countrycode` / `shipper_province` / `shipper_city` / `shipper_postcode` / `shipper_telephone` | 오더 값 우선, 없으면 발송인 기본값. 전화번호는 숫자만 추출 |
+
+  - 적용 경로: `placeShxkOrder()`(실제 `createorder`)·`previewShxkPayload()`(CREATEORDER 미리보기) 모두 동일 계약(`src/app/actions/operations/ups-labels.ts`).
+  - 값은 운영 환경변수로 주입하므로 코드·문서·로그에 실제 회사명을 기재하지 않는다(R-21). 사전검증(`validateShxkPayload`)은 현행 `shipper_company` 누락을 검사하지 않는다 — 감사 항목은 IMP 건의로 분리.
+
 - **DB 컬럼**: `zen_orders.recipient_company` (text, nullable) — 마이그레이션 `20261113090000_task_b346_recipient_company.sql`로 추가. `create_order_atomic` v7이 `p_payload->>'recipient_company'`를 저장.
 - **레거시 참고**: `zen_orders.recipient_contact` 컬럼은 조회 전용 레거시로, 본 명세의 수하인 입력/전송 경로에서는 사용하지 않는다.
 

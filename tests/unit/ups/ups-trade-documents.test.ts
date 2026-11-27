@@ -4,7 +4,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/shxk/order', () => ({ createorder: vi.fn(), getnewlabel: vi.fn(), removeorder: vi.fn() }));
-vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR' }));
+vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR', SHXK_SHIPPER_COMPANY: 'TEST SHIPPER CO' }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 vi.mock('@/lib/auth/guards', () => ({
@@ -57,7 +57,10 @@ describe('Issue #565/569: previewShxkPayload + issueUpsLabel', () => {
     const actionsSrc = fs.readFileSync('src/app/actions/operations/ups-labels.ts', 'utf-8');
 
     expect(mappingSrc).toContain('export function buildCreateOrderPayload');
-    expect(mappingSrc).toContain('shipperDefaults: { name: string; country: string }');
+    expect(mappingSrc).toContain('shipperDefaults: { name: string; country: string; company?: string }');
+    // TASK-B-397 보완: trim 후 빈 값 판정 계약으로 갱신(공백 문자열 미전송).
+    expect(mappingSrc).toContain('shipperDefaults.company?.trim() || shipperDefaults.name.trim()');
+    expect(mappingSrc).toContain('shipper_company: shipperCompany');
     expect(actionsSrc).toContain('buildCreateOrderPayload(shxkCode, order, countryCode, packages');
   });
 
