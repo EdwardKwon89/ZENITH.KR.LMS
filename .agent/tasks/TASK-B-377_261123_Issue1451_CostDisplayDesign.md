@@ -35,8 +35,8 @@
 | UPS 오더 상세 `orders/[orderId]/ups-detail` (`UpsOrderBreakdownCard`) | 거부 | 표시 범위 확정 필요 | `zen_order_costs` 조회(68~71행) 후 카드 렌더(160행) — 표시 소스·범위는 §3-1 기준으로 재판단 |
 | 일별 청구 `finance/daily-billing` (`ShipperDailyBillingClient`) | 거부 | 허용 | 부가운임 금액·항목명 표시 · PR-3 이후 UPS 자동인보이스 제외 |
 | 인보이스 PDF (`invoice-generator`) | 거부 | 허용 | 항목 라벨 "부가운임" · PR-3 이후 UPS 경로 제외 |
-| **청구서 화면 `finance/statements`·`statements/[id]`** | 거부 | **허용** | **항목명·금액 표시, 라벨 "부가운임" (Edward 결정 2026-11-26)** |
-| **청구서 Excel `statement-excel(-data)`** | 거부 | **허용** | 위와 동일 (Edward 결정) |
+| **청구서 화면 `finance/statements`·`statements/[id]`** | 거부 | **허용 — `charge_details` 항목명·금액 한정**(`freight_adjustment` **숨김**, JSJung 2026-11-27) | **항목명·금액 표시, 라벨 "부가운임" (Edward 결정 2026-11-26)** |
+| **청구서 Excel `statement-excel(-data)`** | 거부 | **허용 — 위와 동일**(`freight_adjustment` 숨김, JSJung 2026-11-27) | 위와 동일 (Edward 결정) |
 | 부가운임 항목 조회 (가드) | 거부 | 허용 | 소유(화주/대리점) 또는 admin 검증 — `getOrderAdditionalCharges` (§3-1 결정) |
 | `zen_ups_actual_charges` (실비 항목) | — | 닫힘 | admin 전용 (b375 정책 유지) — 화주·대리점 읽기 거부 |
 | `zen_ups_actual_other_charges` (부가항목 입력·관리자 초안 저장소) | — | 입력만 | **admin 전용 입력·조회(§6 4번 목표)** — 화주·대리점 표시는 run 경로(§3-1)가 담당 (§8-1 ②) |
@@ -44,7 +44,7 @@
 
 - 오더 상세의 현재 구현: `orders/[orderId]/page.tsx`가 `zen_order_costs`를 조회해 `OrderFinanceSummary`에 `initialCosts`로 전달(`cost_type` 항목 라벨은 `getCostTypeLabel`) — **run을 읽지 않는 구조**이며 PR-4a 이후 변화는 §7 잠정 기재. (2026-11-26 직접 확인)
 - **원가 테이블 조인 서버 액션 경로(전수 목록은 Aiden 비공개 상세로 전달 — 받은 뒤 반영)**: 목표 상태는 이 경로들도 **원가 계열을 반환하지 않는 것**(§3-1 DTO 기준) — 상세 목록은 공개 문서에 기재하지 않는다.
-- **청구서 스냅샷 컬럼 표시(확정 필요)**: B-381 M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷 컬럼을 추가했으나(M2 12~13행), 현재 `src`·`messages`의 화면 표시 코드는 **0건**(2026-11-26 확인) — 화주·대리점 표시 목표·라벨은 §5의 선택지에서 **Aiden·JSJung 확정 필요**.
+- **청구서 스냅샷 컬럼 표시(확정 — (a) 숨김, JSJung 2026-11-27)**: B-381 M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷 컬럼을 추가했으나(M2 12~13행), 현재 `src`·`messages`의 화면 표시 코드는 **0건**(2026-11-26 확인) — 화주·대리점에게는 **`charge_details` 항목명·금액만** 표시하고 `freight_adjustment`는 숨긴다(§5·합계 정합성 확인 참조).
 
 ## 3. 부가운임 항목별 표시안 비교
 
@@ -77,8 +77,13 @@
 - 적용: `OrderFinanceSummary`(isAdmin prop), `ShipperDailyBillingClient` breakdown, `pdf.ts`(발행 audience 전달), 인보이스 PDF 라인.
 - i18n: `ko/en/zh/ja` 4로케일 `Finance.additionalCharge`(가칭) 추가. 관리자 화면 라벨 불변.
 - **갱신 — 라벨 범위 재정의(항목4)**: 적용 대상은 §2 표의 "허용" 행 전체로 확정한다 — 화주·대리점 경로(오더 상세 `OrderFinanceSummary`, 일별 청구 `ShipperDailyBillingClient`, **청구서 화면 `finance/statements`, 청구서 Excel `statement-excel(-data)`**)는 전부 "부가운임", 관리자 경로(오더정산 상세·실비 조정 폼)는 원문 유지. **남는 경로** = 기존 행(비UPS `zen_order_costs`)과 §2의 "표시 범위 확인 필요" 행.
-- **`freight_adjustment` 라벨 확인(근거, 한 줄 — `cost_type` 경로에 한정)**: `src/lib/finance/settlement/cost-type-labels.ts`의 `COST_TYPE_LABELS`에 `FREIGHT_ADJUSTMENT`는 **미등재**라 fallback(`cost_type.replace(/_/g, ' ')`) 영문으로 노출되며, src·messages에 "운임 조정" 표기는 **0건**(2026-11-26 `git grep` 직접 확인). **이 확인이 가리키는 대상은 오더 상세의 `cost_type` 라벨 경로(`zen_order_costs` 항목)이며**, 그 경로는 §2의 원가 거부 대상이라 **규칙 5와 충돌하지 않는 결론도 이 `cost_type` 경로에 한정한다**. **청구서 스냅샷 컬럼(`freight_adjustment`·`charge_details`) 경로는 다른 대상**이라 — 아래 "값의 성격"과 §2 청구서 행 선택지의 **확정 대기 항목(Edward·JSJung)으로 위임**한다. 단, 관리자 경로의 영문 fallback도 "남는 경로"에 포함해 원문 라벨(가칭 "운임 조정") 처리를 §5에서 확정한다.
-- **`freight_adjustment` 청구서 스냅샷 표시(항목4 보완 — Aiden·JSJung 확정 필요)**: M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷을 추가했으나(M2 12~13·92·258행) 현재 화면 표시 코드는 **0건**. 화주·대리점 표시 목표·라벨은 **택일 미정**: **(a) 숨김** — 청구서 스냅샷은 관리자 집계용으로 표시하지 않음 / **(b) "부가운임" 합산** — `charge_details` 항목과 함께 부가운임으로 합산 표시 / **(c) 별도 라벨**(가칭 "운임 조정") — 규칙 5와의 관계 재검토. **확정 전까지 §2 청구서 행의 "허용"은 `charge_details` 항목명·금액 한정으로 읽는다.**
+- **`freight_adjustment` 라벨 확인(근거, 한 줄 — `cost_type` 경로에 한정)**: `src/lib/finance/settlement/cost-type-labels.ts`의 `COST_TYPE_LABELS`에 `FREIGHT_ADJUSTMENT`는 **미등재**라 fallback(`cost_type.replace(/_/g, ' ')`) 영문으로 노출되며, src·messages에 "운임 조정" 표기는 **0건**(2026-11-26 `git grep` 직접 확인). **이 확인이 가리키는 대상은 오더 상세의 `cost_type` 라벨 경로(`zen_order_costs` 항목)이며**, 그 경로는 §2의 원가 거부 대상이라 **규칙 5와 충돌하지 않는 결론도 이 `cost_type` 경로에 한정한다**. **청구서 스냅샷 컬럼(`freight_adjustment`·`charge_details`) 경로는 다른 대상**이며, 표시 방식은 아래 **(a) 숨김 확정(JSJung, 2026-11-27)으로 해소**되었다. 단, 관리자 경로의 영문 fallback도 "남는 경로"에 포함해 원문 라벨(가칭 "운임 조정") 처리를 §5에서 확정한다.
+- **`freight_adjustment` 청구서 스냅샷 표시 — (a) 숨김 확정(JSJung, 2026-11-27 09:26 KST)**: M2가 `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 스냅샷을 추가했으나(M2 12~13·92·258행) 현재 화면 표시 코드는 **0건**. 결정: **(a) 숨김** — `freight_adjustment`는 화주·대리점에게 표시하지 않음(관리자 집계용), 화주·대리점에게는 **`charge_details` 항목명·금액만 표시**. **(b) "부가운임" 합산·(c) 별도 라벨(가칭 "운임 조정")은 채택하지 않음.** → §2 청구서 행의 "허용"은 **`charge_details` 항목명·금액 한정으로 확정**.
+- **합계 정합성 확인(지시 3 — 2026-11-27 코드로 직접 확인)**:
+  - **청구서 화면**(`src/components/finance/statements/StatementDetail.tsx`): 합계는 **저장된 헤더 `total_amount`**(83·115행), 항목 행도 저장된 `line_total` 등(104~108행) — 화면 내 합산(reduce) **0건**. `freight_adjustment`·`charge_details` 표시 **0건**.
+  - **Excel**(`src/lib/finance/billing/statement-excel-data.ts`): 합계는 **저장된 헤더 `total_amount`**(154행), `totalsOf`(281~293행)의 컴포넌트별 합은 출력용이며 **검증은 항목 `line_total` 합 = 헤더**(§1-1, 296행 — 0.01 어긋나도 파일 미생성). items select(189행)에 `freight_adjustment`·`charge_details` **미포함**.
+  - **PDF**: **청구서 PDF는 `src`에 미존재**(statement+pdf 검색 0건, 2026-11-27) — 인보이스 PDF(`invoice-generator`)는 UPS 인보이스의 자체 계산 경로(71·90행)로 **별개 대상**이다.
+  - **어긋남 영향 구분**: 헤더 `total_amount` = **`Σ items.line_total`**(M2 268~271행)이고 `line_total` = 구성합 + `freight_adjustment` + 부가합(빌드)이므로 두 경로 모두 **저장된 합계를 쓰며 현재 어긋남 없음** — 표시 코드에 `freight_adjustment`·`charge_details`가 아직 없어 **(a) 숨김과도 일치(현재 영향 없음)**. **앞으로 `charge_details` 표시를 만들 때의 조건**: 합계는 항상 저장된 `line_total`/`total_amount`에서 가져오고 **표시 컴포넌트의 합산으로 합계를 역산하지 않는다**(역산하면 `freight_adjustment`만큼 모자란다) — `charge_details`는 참고 표시로만 쓴다.
 - **값의 성격(참고, 결정 아님)**: 이 `freight_adjustment`는 **원가가 아니라 판매가 구성의 잔차**다 — `build.ts` 193행 `freight_adjustment = round2(target − (base+fuel+surge+other))`로, **음수일 수 있다**(Edward·JSJung 결정 대기).
 
 ## 6. 이슈 #1449 A 구현 계획 (설계 확정 후)
@@ -111,7 +116,7 @@
 
 - **적용 순서 원칙**: (1) 앱 배포 → (2) B-377 정책 제거 → (3) B-379 2/2. b375(완료)는 참조선이며 남은 두 건은 각각 "앱 배포 뒤 마지막" 원칙을 따른다.
 
-### 8-2. 정책 목표 상태 표 (역할별 허용/거부 — 공개 기재는 목표 상태만)
+### 8-2. 정책 목표 상태 표 (역할별 허용/거부 — **JSJung 확정 2026-11-27 09:26 KST**, 공개 기재는 목표 상태만)
 
 | 역할 | `zen_ups_actual_cost` (B-377 ①) | `zen_ups_actual_other_charges` (B-377 ②) |
 |:--|:--:|:--:|
@@ -120,7 +125,7 @@
 | MANAGER | 허용 | 허용 |
 | **위 3역할 외 모든 인증 역할** (예: AGENCY·SHIPPER·SUB_ADMIN·INDIVIDUAL) | **거부** | **거부** |
 
-- 두 원가 테이블의 허용 역할 집합은 확정 규칙 1(SUPER_ADMIN·ADMIN·MANAGER)과 **정확히 같은 3역할**만 허용한다. 달성 수단은 §8-1의 B-377 마이그레이션 ①·②이며 롤백은 §8-1 표를 따른다.
+- 두 원가 테이블의 허용 역할 집합은 확정 규칙 1(SUPER_ADMIN·ADMIN·MANAGER)과 **정확히 같은 3역할**만 허용한다 — **(JSJung 확정: 3역할 외 모든 인증 역할 = 거부)**. 달성 수단은 §8-1의 B-377 마이그레이션 ①·②이며 롤백은 §8-1 표를 따른다.
 
 ## 9. [작업 결과]
 
