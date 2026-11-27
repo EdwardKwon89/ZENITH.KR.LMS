@@ -20,7 +20,7 @@
 ## [TASK-B-345 번복 근거]
 
 - **원래 결정(2026-11-12, JSJung)**: SHXK 명세상 `shipper_company`가 선택 필드라서 키 자체를 보내지 않음(TASK-B-345 / #1277 / PR #1282).
-- **반증(DEF-B-054 실측, #1067)**: 같은 거절 문구가 `shipping_method: FXUPS`에서 확인됨. 명세와 달리 실제 서버는 이 경로에서 발송인 회사명을 필수 검증한다. `PK0035` 경로에서는 미발현だった 경로 의존 결함이다.
+- **반증(DEF-B-054 실측, #1067)**: 같은 거절 문구가 `shipping_method: FXUPS`에서 확인됨. 명세와 달리 실제 서버는 이 경로에서 발송인 회사명을 필수 검증한다. `PK0035` 경로에서는 미발현이었던 경로 의존 결함이다.
 - **재발(DEF-B-172 / #1552)**: B-345 상태가 그대로 배포된 뒤 운영 `createorder`가 동일 사유로 거절됐다. 사전검증(`validate-payload.ts`)에는 이 필드 검사가 없어 키 누락이 SHXK 호출까지 통과했다.
 - **현 결정(2026-11-26~27, JSJung/Jaison)**: 명세의 선택 표기보다 실서버 검증을 우선해 **전 경로 재전송**으로 번복한다. 값은 코드에 적지 않고 환경변수로만 주입한다(R-21).
 
@@ -37,6 +37,7 @@
 - [x] `npm run test:regression` 전체 PASS — 312/313 파일, 2357/2373 테스트 (exit 0)
 - [x] R-21 점검(값·계정·경로·오더번호 0), 라벨 `status:review`, 병합은 Jaison
   - `gh pr checks` verbatim 인용 — PR 생성 후 #1552 최종 보고(`issuecomment-7207478702`)와 아래 [CI 인용]에 기재 완료.
+- [x] Aiden R-01·Jaison 검토 보완 7건 반영(코드 2 · 테스트 · 문서 2 · 근거 2) — 아래 [검토 보완 반영] 섹션 참조.
 
 ## [발견 이슈]
 
@@ -63,8 +64,9 @@
 ### 회귀 실패 경위(최종 PASS까지)
 
 1. **1차**(수정 전 시작분, 중단): `task-b395-ups-labels-logging.test.ts` 2건 — `vi.mock('@/lib/shxk/config')`에 `SHXK_SHIPPER_COMPANY` 미정의. 22개 config mock에 더미 값 추가.
-2. **2차**(`/tmp/b397-regression.log`, exit 1): ① `agency-warehouse-scoping.test.ts`·`ups-pickup-inbound.test.ts` 2개 suite — logger mock에 `warn` 부재로 `config.ts` 모듈 로드 시 `TypeError`. 두 mock에 `warn: vi.fn()` 추가. ② `ups-trade-documents.test.ts` 1건 — `shipperDefaults` 시그니처 문자열 단언이 구 계약을 기대. 새 계약 + `shipper_company` 매핑 단언으로 갱신.
-3. **3차**(`/tmp/b397-regression2.log`, exit 0): 전체 PASS(위 표).
+2. **2차**(exit 1): ① `agency-warehouse-scoping.test.ts`·`ups-pickup-inbound.test.ts` 2개 suite — logger mock에 `warn` 부재로 `config.ts` 모듈 로드 시 `TypeError`. 두 mock에 `warn: vi.fn()` 추가. ② `ups-trade-documents.test.ts` 1건 — `shipperDefaults` 시그니처 문자열 단언이 구 계약을 기대. 새 계약 + `shipper_company` 매핑 단언으로 갱신. (로그 파일 경로는 R-21 절대경로 0건 서술과 맞추기 위해 기재하지 않는다.)
+3. **3차**(exit 0): 전체 PASS(위 표).
+4. **보완 반영 후 1차**(exit 1): `ups-trade-documents.test.ts` 1건 — 소스 문자열 단언이 구 계약(`company || name`)을 기대. trim 후 빈 값 판정 계약(`company?.trim() || name.trim()`, `shipper_company: shipperCompany`)으로 갱신.
 
 ### 자가 검증·절차 메모
 
@@ -73,7 +75,19 @@
 - PR: **#1561**(`feature/teamb-task-b397-iss1552-shxk-shipper-company` → `TeamB_Dev`), 본문 `Refs #1552`만 기재(`Closes` 미사용). PR diff 추가 줄 R-21 스캔 0건 확인. 병합·✅ 전환은 Jaison/Aiden 권한이며 본 에이전트는 수행하지 않는다.
 - #1552 최종 보고: `issuecomment-7207478702` (지시 1~8번 항목별 회신 포함).
 
-### [CI 인용] — verbatim (2026-11-27 10:39:31 KST)
+### 검토 보완 반영 (Aiden R-01 10:38 KST · Jaison 검토 10:52 KST)
+
+- **1. 빈 값·공백 방어**: `config.ts`의 `SHXK_SHIPPER_NAME`을 `?.trim() || 'SNTL Korea Co Ltd'`로, `label-mapping.ts`의 `shipper_company`를 `company?.trim() || name.trim()`으로 변경. 빈 문자열·공백만 있는 값은 대체값으로 넘어가고 앞뒤 공백은 제거해 전송한다.
+- **2. 테스트 경계**: `tests/unit/shxk/task-b397-shipper-company-env.test.ts`를 3건 → **10건**으로 확장. 추가 7건 = `""`·공백·앞뒤 공백 trim(`COMPANY`), `NAME` 공백 시 기본값, `company` 미전달 시 `name` 대체, `company` 빈 값·공백 시 `name` 대체, `company` 앞뒤 공백 trim. `warn`은 호출 횟수 + **메시지 인자**(`toHaveBeenCalledWith`)까지 단언. **수정 전 코드에서 신규 10건 중 3건 FAIL**(NAME 공백 / company 공백 / company 앞뒤 공백 — 나머지 7건은 기존 구현 회귀 확인) → 수정 후 **10/10 PASS**. 함께 `ups-trade-documents.test.ts`의 소스 문자열 단언을 새 trim 계약으로 갱신.
+- **3. 지연 조회(선택) 미채택 근거**: 환경변수는 배포 시 주입되는 프로세스 정적 설정이고, `SHXK_SHIPPER_*`는 상수 export 계약으로 22개 config mock·2경로 호출부가 참조한다. 함수 기반 지연 조회로 바꾸면 이번 수정 범위(`config.ts`·`label-mapping.ts`)를 넘어 전 호출부 변경이 필요하므로 미채택하고, 관측은 6번의 warn 라우팅 확인으로 대체한다.
+- **4. 문서 정리**: `DEF-B-172`의 진행형 서술(수정 중·키 미생성·조치 진행 중)을 완료형으로 정정하고, 5행(거절 **오류 문구** 기재)과 37행(응답 값 미기재) 서술을 "오류 문구는 기재 가능, 응답 값은 금지"로 맞춤. 본 task file의 한글·일본어 혼용 오타와 임시 로그 경로 언급 2곳 제거.
+- **5. 잔존 표기**: `tests/unit/ups/task-b341-shxk-shipper-name-unify.test.ts`의 `describe` 제목을 현 사양(`TASK-B-341 → TASK-B-397`)으로 갱신.
+- **6. warn 노이즈 확인**: `src/lib/logger.ts`의 `emit()`은 `level === 'error'`일 때만 `enqueueErrorLog()` + `captureErrorToSentry()`를 호출하고, `warn`은 `console.warn()` + `enqueueAxiomLog()`만 사용한다. 따라서 모듈 로드 시 1회 warn은 `/admin/error-logs` 자동 적재·Sentry 알림 대상이 아니며, 콜드스타트마다 반복돼도 Axiom 로그에만 남는다(에러 화면·알림 오염 없음).
+- **7. DEF 번호 확정 근거 / IMP 제안**: `./scripts/next-def-number.sh B`는 작업 중인 `DEF-B-172` 파일까지 세어 `DEF-B-173`을 반환했다. `origin/TeamB_Dev` 기준 원격 사용 번호에는 `DEF-B-172`가 없음을 확인했고 Jaison 검토에서도 동일하게 확인해 **`DEF-B-172`로 확정**. 스크립트 자기 카운팅 결함은 재현 명령과 함께 IMP [#1564](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1564)로 건의(`type:imp,team:b,priority:p3,status:open`). `TASK` 번호도 `B-397` 확정 근거는 상단 [채번 정정] 참조.
+- **전체 회귀(보완 후)**: `npm run test:regression` **exit 0** — `Test Files 312 passed | 1 skipped (313)`, `Tests 2364 passed | 16 skipped (2380)`, `Duration 709.44s`. 보완 반영 후 1차 실행에서 문자열 단언 1건 실패 → 갱신 후 재실행 PASS(위 4번 참조).
+- **실경로 미확인 유지**: Jaison 지시대로 "FXUPS가 이 값을 받아들이는지는 **미확인**(실호출 미실행)"을 PR 본문과 본 task file에 그대로 유지한다. TeamB_Dev 병합은 mock 검증으로 진행하고 실검증은 환경변수 설정 후 Aiden이 수행한다.
+
+### [CI 인용] — verbatim (2026-11-27 10:39:31 KST, 직전 커밋 기준)
 
 ```
 $ date
