@@ -1,12 +1,12 @@
 -- TASK-B-399 (Issue #1566): 발송인 회사명(shipper_company) 컬럼 추가
 -- JSJung 결정(2026-11-27)·Aiden [설계 확정]: 내 정보 사용 = NULL(화주명 결정값 전송),
--- 수기 입력 = 입력 원문 저장. 값 유무로 모드를 추론하므로 별도 모드 컬럼은 두지 않는다.
+-- 수기 입력 = 앞뒤 공백을 제거한 입력 원문 저장. 값 유무로 모드를 추론하므로 별도 모드 컬럼은 두지 않는다.
 -- 기존 행은 백필하지 않는다(NULL = 자동 모드). RLS는 zen_orders 테이블 정책을 상속한다.
 
 ALTER TABLE public.zen_orders
   ADD COLUMN IF NOT EXISTS shipper_company text;
 
-COMMENT ON COLUMN public.zen_orders.shipper_company IS '발송인 회사명 (NULL=내 정보 사용, 값=수기 입력 원문; SHXK shipper.shipper_company 매핑)';
+COMMENT ON COLUMN public.zen_orders.shipper_company IS '발송인 회사명 (NULL=내 정보 사용, 값=앞뒤 공백을 제거한 입력 원문; SHXK shipper.shipper_company 매핑)';
 
 -- ROLLBACK (주석 해제 후 수동 실행 — 반드시 아래 순서를 지킬 것)
 --   1) 앱을 이전 버전으로 되돌린다(PR1 이전 앱은 이 컬럼을 참조하지 않는다).

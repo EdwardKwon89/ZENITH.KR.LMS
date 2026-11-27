@@ -9,11 +9,12 @@ import { psql } from './helpers/db';
  * 아래 테스트가 마이그레이션의 실제 DB 동작을 증명한다. 로컬 Supabase 전용(원격 호출 없음).
  * 픽스처는 런타임 난수 UUID를 사용하고 단일 psql 세션의 BEGIN…ROLLBACK으로 잔여 행을 남기지 않으며,
  * afterAll에서 방어적 정리를 수행한다. skipIf 없음( CI는 supabase db reset 직후 실행 ).
+ * 결과는 jsonb_agg 한 줄 JSON으로 받아 저장값에 개행이 들어가도 행이 쪼개지지 않게 한다(Aiden 재검토 권고 6).
  *
  * 케이스:
- *   TC-B399-DB-01 컬럼 존재·nullable, 함수 시그니처·SECURITY DEFINER·본문 반영
- *   TC-B399-DB-02 앞뒤 공백이 있는 값 → 앞뒤 공백 제거된 원문 저장
- *   TC-B399-DB-03 공백만(ASCII·탭·개행·NBSP·전각 공백) → NULL
+ *   TC-B399-DB-01 컬럼 nullable, 함수 네임스페이스·시그니처·DEFINER·반환형·search_path, 본문 반영
+ *   TC-B399-DB-02 앞뒤 공백 제거 + 가운데 공백 보존
+ *   TC-B399-DB-03 공백만(ASCII·TAB·LF·CR·NBSP·전각 공백·chr(160)·chr(12288)) → NULL
  *   TC-B399-DB-04 키 없음 / JSON null → NULL
  *   TC-B399-DB-05 기존 컬럼(shipper_name·recipient_company·shipper_contact_email) 값 보존 + 부속 행 생성
  */
@@ -29,6 +30,19 @@ type DbRow = {
   storedName: string;
   storedRecipient: string;
   storedEmail: string;
+  pkgs: number;
+  items: number;
+  tracking: number;
+  history: number;
+};
+
+type JsonRow = {
+  case_id: string;
+  company: string | null;
+  is_null: boolean | null;
+  name: string;
+  recipient: string;
+  email: string;
   pkgs: number;
   items: number;
   tracking: number;
@@ -90,21 +104,27 @@ BEGIN
     ))
   );
 
-  -- (a) 앞뒤 공백이 있는 값 → 원문은 유지하되 앞뒤 공백 제거
-  v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', E'  B399 Manual Co  '), v_user, v_org);
-  INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('a', (v_res->>'id')::uuid, '(앞뒤 공백)');
+  -- (a) 앞뒤 공백은 제거, 가운데 공백은 유지
+  v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', E'  B399  Manual  Co  '), v_user, v_org);
+  INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('a', (v_res->>'id')::uuid, '(앞뒤+가운데 공백)');
 
-  -- (b1~b5) 공백만 — ASCII / 탭 / 개행 / NBSP / 전각 공백
+  -- (b1~b8) 공백만 — ASCII / TAB / LF / CR / NBSP(이스케이프) / 전각(이스케이프) / chr(160) / chr(12288)
   v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', E'   '), v_user, v_org);
   INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b1', (v_res->>'id')::uuid, 'ASCII');
   v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', E'\\t'), v_user, v_org);
   INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b2', (v_res->>'id')::uuid, 'TAB');
   v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', E'\\n'), v_user, v_org);
   INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b3', (v_res->>'id')::uuid, 'LF');
+  v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', E'\\r'), v_user, v_org);
+  INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b6', (v_res->>'id')::uuid, 'CR');
   v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', E'\\u00A0'), v_user, v_org);
-  INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b4', (v_res->>'id')::uuid, 'NBSP');
+  INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b4', (v_res->>'id')::uuid, 'NBSP escape');
   v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', E'\\u3000'), v_user, v_org);
-  INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b5', (v_res->>'id')::uuid, 'FULLWIDTH');
+  INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b5', (v_res->>'id')::uuid, 'FULLWIDTH escape');
+  v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', chr(160)), v_user, v_org);
+  INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b7', (v_res->>'id')::uuid, 'chr(160)');
+  v_res := public.create_order_atomic(v_base || jsonb_build_object('shipper_company', chr(12288)), v_user, v_org);
+  INSERT INTO tb399_results (case_id, order_id, input_key) VALUES ('b8', (v_res->>'id')::uuid, 'chr(12288)');
 
   -- (c) 키 없음 / (d) JSON null
   v_res := public.create_order_atomic(v_base, v_user, v_org);
@@ -126,11 +146,19 @@ SET stored_company = o.shipper_company,
 FROM public.zen_orders o
 WHERE o.id = r.order_id;
 
-SELECT case_id || '|' || coalesce(stored_company, '<NULL>') || '|' || is_null::text || '|' ||
-       coalesce(stored_name, '<NULL>') || '|' || coalesce(stored_recipient, '<NULL>') || '|' ||
-       coalesce(stored_email, '<NULL>') || '|' || pkgs || '|' || items || '|' || tracking || '|' || history
-FROM tb399_results
-ORDER BY case_id;
+SELECT jsonb_agg(jsonb_build_object(
+  'case_id', case_id,
+  'company', stored_company,
+  'is_null', is_null,
+  'name', stored_name,
+  'recipient', stored_recipient,
+  'email', stored_email,
+  'pkgs', pkgs,
+  'items', items,
+  'tracking', tracking,
+  'history', history
+) ORDER BY case_id)::text
+FROM tb399_results;
 
 ROLLBACK;
 `;
@@ -159,58 +187,64 @@ describe('TASK-B-399 PR1 — create_order_atomic v8 실DB 값 단언 (Issue #156
   let rows: DbRow[] = [];
   let signature = '';
   let securityDefiner = '';
+  let pronamespace = '';
+  let prorettype = '';
+  let proconfig = '';
   let columnNullable = '';
   let bodyHasColumn = '';
 
   beforeAll(() => {
     const raw = psql(fixtureSql());
-    rows = raw
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const [caseId, stored, isNull, name, recipient, email, pkgs, items, tracking, history] = line.split('|');
-        return {
-          caseId,
-          storedCompany: stored,
-          isNull: isNull === 'true',
-          storedName: name,
-          storedRecipient: recipient,
-          storedEmail: email,
-          pkgs: Number(pkgs),
-          items: Number(items),
-          tracking: Number(tracking),
-          history: Number(history),
-        };
-      });
-    signature = psql(`SELECT p.oid::regprocedure::text FROM pg_proc p WHERE p.proname = 'create_order_atomic';`);
-    securityDefiner = psql(`SELECT p.prosecdef::text FROM pg_proc p WHERE p.proname = 'create_order_atomic';`);
+    // |/개행 구분 대신 jsonb_agg 한 줄 JSON — 값에 개행이 들어가도 파싱이 깨지지 않는다.
+    const parsed = JSON.parse(raw || '[]') as JsonRow[];
+    rows = parsed.map((r) => ({
+      caseId: r.case_id,
+      storedCompany: r.company === null ? '<NULL>' : r.company,
+      isNull: r.is_null === true,
+      storedName: r.name,
+      storedRecipient: r.recipient,
+      storedEmail: r.email,
+      pkgs: r.pkgs,
+      items: r.items,
+      tracking: r.tracking,
+      history: r.history,
+    }));
+    const fn = `FROM pg_proc p WHERE p.proname = 'create_order_atomic' AND p.pronamespace = 'public'::regnamespace`;
+    signature = psql(`SELECT p.oid::regprocedure::text ${fn};`);
+    securityDefiner = psql(`SELECT p.prosecdef::text ${fn};`);
+    pronamespace = psql(`SELECT p.pronamespace::regnamespace::text ${fn};`);
+    prorettype = psql(`SELECT p.prorettype::regtype::text ${fn};`);
+    proconfig = psql(`SELECT p.proconfig::text ${fn};`);
     columnNullable = psql(
       `SELECT is_nullable FROM information_schema.columns WHERE table_schema='public' AND table_name='zen_orders' AND column_name='shipper_company';`
     );
+    // 헤더 주석의 shipper_company 언급으로 참이 되는 것을 막기 위해 실제 NULLIF(BTRIM(...)) 식까지 확인.
     bodyHasColumn = psql(
-      `SELECT (pg_get_functiondef(p.oid) LIKE '%shipper_company%')::text FROM pg_proc p WHERE p.proname = 'create_order_atomic';`
+      `SELECT (replace(pg_get_functiondef(p.oid), '''', '') LIKE '%NULLIF(BTRIM(p_payload->>shipper_company%')::text ${fn};`
     );
   });
 
   afterAll(() => cleanup());
 
-  it('TC-B399-DB-01: 컬럼은 nullable, 함수 시그니처·DEFINER 불변, 본문에 신규 컬럼 반영', () => {
+  it('TC-B399-DB-01: 컬럼 nullable, 함수 네임스페이스·시그니처·DEFINER·반환형·search_path, 본문 반영', () => {
     expect(columnNullable).toBe('YES');
+    expect(pronamespace).toBe('public');
     expect(signature).toBe('create_order_atomic(jsonb,uuid,uuid)');
     expect(securityDefiner).toBe('true');
+    expect(prorettype).toBe('jsonb');
+    expect(proconfig).toBe('{"search_path=public, auth"}');
     expect(bodyHasColumn).toBe('true');
   });
 
-  it('TC-B399-DB-02: 앞뒤 공백이 있는 값은 공백 제거된 원문으로 저장', () => {
+  it('TC-B399-DB-02: 앞뒤 공백은 제거하고 가운데 공백은 보존', () => {
     const row = rows.find((r) => r.caseId === 'a');
     expect(row).toBeTruthy();
-    expect(row!.storedCompany).toBe('B399 Manual Co');
+    expect(row!.storedCompany).toBe('B399  Manual  Co');
     expect(row!.isNull).toBe(false);
   });
 
-  it('TC-B399-DB-03: 공백만(ASCII·TAB·LF·NBSP·전각 공백)은 모두 NULL', () => {
-    for (const id of ['b1', 'b2', 'b3', 'b4', 'b5']) {
+  it('TC-B399-DB-03: 공백만(ASCII·TAB·LF·CR·NBSP·전각·chr(160)·chr(12288))은 모두 NULL', () => {
+    for (const id of ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8']) {
       const row = rows.find((r) => r.caseId === id);
       expect(row).toBeTruthy();
       expect(row!.isNull).toBe(true);
@@ -237,6 +271,6 @@ describe('TASK-B-399 PR1 — create_order_atomic v8 실DB 값 단언 (Issue #156
       expect(row.tracking).toBe(1);
       expect(row.history).toBe(1);
     }
-    expect(rows.length).toBe(8);
+    expect(rows.length).toBe(11);
   });
 });

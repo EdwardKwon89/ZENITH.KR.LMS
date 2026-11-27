@@ -13,25 +13,25 @@
 
 | ID | 검증 내용 | 기대 결과 | 테스트 위치 |
 | :-- | :-- | :-- | :-- |
-| TC-B399-01 | nullable 컬럼 정의 전체, COMMENT, DEFAULT·백필 없음 | 정의 문구 일치 / UPDATE 0건 | `tests/unit/migrations/taskb399-shipper-company.test.ts` |
+| TC-B399-01 | 줄·인라인·블록 주석 제거 본문의 nullable 컬럼 정의 전체, COMMENT, DEFAULT·백필 없음 | 정의 문구 일치 / UPDATE 0건 | `tests/unit/migrations/taskb399-shipper-company.test.ts` |
 | TC-B399-02 | 주석 제거 본문에서 시그니처·RETURNS·DEFINER·search_path 불변 | 4개 값 일치 | 동일 |
 | TC-B399-03 | INSERT 컬럼/VALUES 목록 개수·인덱스 일치, 공백 확장 정규화, 기존 컬럼 위치 | 각 인덱스·값 일치 | 동일 |
-| TC-B399-04 | 롤백 주석 — v7 복구 후 DROP COLUMN 순서·컬럼 잔존 | 순서 인덱스 일치 | 동일 |
+| TC-B399-04 | v8 롤백 주석 + 컬럼 롤백 3단계(앱 → v7 복구 → DROP COLUMN) 순서·컬럼 잔존 | 각 단계 인덱스 `> -1` 후 3단계 순서 일치 | 동일 |
 | TC-B399-05 | Row(필수)·Insert/Update(선택) 타입 구분 | 각 1건 | 동일 |
-| TC-B399-06 | Ds-11 PR1 현행/PR2 적용 시 구분·구조 방어 이관·v8 경로 | 값 일치 /旧 환경변수 문구 0건 | 동일 |
+| TC-B399-06 | Ds-11 PR1 현행/PR2 적용 시 구분·구조 방어 이관·v8 경로·PR1 현행 환경변수 주입 서술 유지 | 각 문구 존재 단언과 일치 | 동일 |
 
 ## 실DB 값 단언 (로컬 Supabase, `supabase db reset` 후 CI 실행)
 
 | ID | 검증 내용 | 기대 결과 | 테스트 위치 |
 | :-- | :-- | :-- | :-- |
-| TC-B399-DB-01 | 컬럼 nullable, 시그니처 `jsonb,uuid,uuid`, DEFINER, 본문 반영 | `YES` / 문구 일치 / `true` / `true` | `tests/integration/task-b399-shipper-company-db.test.ts` |
-| TC-B399-DB-02 | 앞뒤 공백이 있는 값 | 앞뒤 공백 제거된 원문 저장 | 동일 |
-| TC-B399-DB-03 | 공백만 — ASCII·TAB·LF·NBSP·전각 공백(5종) | 모두 NULL | 동일 |
+| TC-B399-DB-01 | 컬럼 nullable, 함수 `public` 네임스페이스·시그니처·DEFINER·반환형 `jsonb`·`search_path`, 주석이 아닌 본문의 `NULLIF(BTRIM(...))` | `YES` / `public` / 문구 일치 / `true` / `jsonb` / `{"search_path=public, auth"}` / `true` | `tests/integration/task-b399-shipper-company-db.test.ts` |
+| TC-B399-DB-02 | 앞뒤 공백 제거 + 가운데 공백 보존 | 앞뒤만 제거된 원문 저장 | 동일 |
+| TC-B399-DB-03 | 공백만 — ASCII·TAB·LF·CR·NBSP·전각 공백·`chr(160)`·`chr(12288)`(8종) | 모두 NULL | 동일 |
 | TC-B399-DB-04 | 키 없음 / JSON null | 모두 NULL | 동일 |
-| TC-B399-DB-05 | 기존 3컬럼 값 보존 + 패키지·아이템·트래킹·상태이력 부속 행 | 각 값 일치 / 각 1행, 총 8케이스 | 동일 |
+| TC-B399-DB-05 | 기존 3컬럼 값 보존 + 패키지·아이템·트래킹·상태이력 부속 행 | 각 값 일치 / 각 1행, 총 11케이스 | 동일 |
 
-- 픽스처는 런타임 난수 UUID·이메일을 쓰고 단일 psql 세션 `BEGIN…ROLLBACK`으로 잔여 행을 남기지 않으며 `afterAll`에서 방어적 정리를 한다. `skipIf` 없음.
-- **R-09 증적**: 마이그레이션 적용 전(컬럼 부재) 동일 실DB 테스트 실행 → `ERROR: column o.shipper_company does not exist`, `1 failed | 5 passed | 5 skipped`(2026-11-27 15:10:40 KST). `supabase db reset` 적용 후 2 files / **11 passed**(2026-11-27 15:13:07 KST). 증적은 저장소 밖 세션 임시 파일에 보관.
+- 픽스처는 런타임 난수 UUID·이메일을 쓰고 단일 psql 세션 `BEGIN…ROLLBACK`으로 잔여 행을 남기지 않으며 `afterAll`에서 방어적 정리를 한다. `skipIf` 없음. 결과는 `jsonb_agg` 한 줄 JSON으로 파싱해 저장값에 개행이 들어가도 행이 쪼개지지 않는다.
+- **R-09 증적**: 마이그레이션 적용 전(컬럼 부재) 동일 실행(2026-11-27 15:10:40 KST) → 정적 파일 `6 tests | 1 failed`(TC-B399-06), 실DB 파일 `5 tests | 5 skipped`(`ERROR: column o.shipper_company does not exist`), 합계 `1 failed | 5 passed | 5 skipped`. `supabase db reset` 적용 후 2 files / **11 passed**(2026-11-27 15:13:07 KST). 증적은 저장소 밖 세션 임시 파일에 보관.
 
 ## 되돌리기 검증 (로컬 DB, 저장소 파일 미변경 · 임시 SQL · `BEGIN…ROLLBACK`)
 

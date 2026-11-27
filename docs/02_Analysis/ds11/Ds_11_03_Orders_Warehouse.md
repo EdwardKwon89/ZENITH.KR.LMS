@@ -29,7 +29,7 @@
   | 필드 | 타입 | 필수 | SHXK 매핑 | 값 출처·비고 |
   | :--- | :--- | :-- | :--- | :--- |
   | `shipper_name` | string | Y | `shipper.shipper_name` | 화면 화주명(`zen_orders.shipper_name`) → `shipper_org.name` → 기본값 폴백 (TASK-B-341) |
-  | `shipper_company` | string | Y(실서버) | `shipper.shipper_company` | **PR2 적용 시**: `auto`(내 정보 사용) = 화주명 결정값, `manual`(수기 입력) = 앞뒤 공백을 제거한 입력 원문. 저장은 `zen_orders.shipper_company`(공백만이면 NULL), 전송 직전에만 쉼표 제거. **PR1 현행**: 환경변수 `SHXK_SHIPPER_COMPANY` 주입(TASK-B-397 경로 유지, 미설정 시 화주명 대체). 실제 값은 R-21에 따라 문서에 기재하지 않는다 |
+  | `shipper_company` | string | Y(실서버) | `shipper.shipper_company` | **PR2 적용 시**: `auto`(내 정보 사용) = 화주명 결정값, `manual`(수기 입력) = 앞뒤 공백을 제거한 입력 원문. 저장은 `zen_orders.shipper_company`(공백만이면 NULL), 전송 직전에만 쉼표 제거. **PR1 현행**: 환경변수 `SHXK_SHIPPER_COMPANY` 주입(TASK-B-397 경로 유지, 미설정·빈 값이면 `SHXK_SHIPPER_NAME` 값으로 대체하고 warn). 실제 값은 R-21에 따라 문서에 기재하지 않는다 |
   | `shipper_company_mode` | `'auto' \| 'manual'` | N(기본 `auto`) | — | 일시적 Zod 필드로만 존재하며 DB에 저장하지 않는다. 대량 등록은 생략 시 `auto`. 수정 저장 시 모드 미전달이면 `shipper_company` 키를 `headerData`에서 제외해 기존 값을 보존한다(UI·Zod 구현은 **PR2 적용 시**) |
   | `shipper_country_code` / `shipper_state_province` / `shipper_city` / `shipper_zipcode` / `shipper_contact_phone` | string | N | `shipper.shipper_countrycode` / `shipper_province` / `shipper_city` / `shipper_postcode` / `shipper_telephone` | 오더 값 우선, 없으면 발송인 기본값. 전화번호는 숫자만 추출 |
 

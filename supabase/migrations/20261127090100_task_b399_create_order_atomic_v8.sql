@@ -3,7 +3,8 @@
 -- 시그니처(p_payload jsonb, p_user_id uuid, p_org_id uuid)·RETURNS jsonb·SECURITY DEFINER 불변.
 -- 기존 마이그레이션(v7 이하)은 수정하지 않는다 (TASK-B-305·B-346 선례 준수).
 -- 수기 입력은 앞뒤 공백을 제거한 원문 저장, 공백만/미전달은 NULL(자동 모드) — JSJung 결정·Aiden [설계 확정].
--- BTRIM 제거 문자를 ASCII 공백 외 탭·개행·NBSP·전각 공백까지 확장해 JS trim()과 모드 추론을 일치시킨다.
+-- BTRIM 제거 문자를 ASCII 공백 외 탭·개행·NBSP·전각 공백(주요 6종)까지 확장해 JS trim()의 주요 동작과 모드 추론을 일치시킨다.
+-- 한계: 세로 탭·폼 피드·BOM(U+FEFF)·U+2028/2029·U+2000 계열은 SQL BTRIM에서 제거되지 않는다(로컬 확인).
 
 CREATE OR REPLACE FUNCTION public.create_order_atomic(
   p_payload jsonb,

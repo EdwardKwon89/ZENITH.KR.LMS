@@ -16,12 +16,47 @@ function read(rel: string): string {
   return readFileSync(path.join(ROOT, rel), 'utf8');
 }
 
-/** 주석을 제거해 헤더 주석이 DDL 단언을 통과시키는 허점을 막는다(Aiden 필수 1-①). */
+/** 줄·인라인·블록 주석을 제거해 헤더/인라인 주석이 DDL 단언을 통과시키는 허점을 막는다(Aiden 재검토 권고 5). */
 function stripComments(sql: string): string {
-  return sql
-    .split('\n')
-    .filter((line) => !line.trimStart().startsWith('--'))
-    .join('\n');
+  let out = '';
+  let quote: string | null = null;
+  let i = 0;
+  while (i < sql.length) {
+    const ch = sql[i];
+    if (quote) {
+      out += ch;
+      if (ch === quote) {
+        if (quote === "'" && sql[i + 1] === "'") {
+          out += sql[i + 1];
+          i += 2;
+          continue;
+        }
+        quote = null;
+      }
+      i += 1;
+      continue;
+    }
+    if (ch === "'" || ch === '"') {
+      quote = ch;
+      out += ch;
+      i += 1;
+      continue;
+    }
+    if (ch === '-' && sql[i + 1] === '-') {
+      while (i < sql.length && sql[i] !== '\n') i += 1;
+      continue;
+    }
+    if (ch === '/' && sql[i + 1] === '*') {
+      i += 2;
+      while (i < sql.length && !(sql[i] === '*' && sql[i + 1] === '/')) i += 1;
+      i += 2;
+      out += ' ';
+      continue;
+    }
+    out += ch;
+    i += 1;
+  }
+  return out;
 }
 
 /** 괄호 깊이와 따옴표를 고려해 최상위 콤마로 분리(Aiden 필수 1-②: 목록 위치 고정). */
@@ -55,8 +90,8 @@ function splitTopLevel(text: string): string[] {
 }
 
 describe('TASK-B-399 PR1 — 정적 보조 검사(실DB 검증은 별도 테스트)', () => {
-  it('TC-B399-01: nullable 컬럼 정의 전체에 NOT NULL·DEFAULT가 없고 COMMENT·백필 없음', () => {
-    const sql = read(COLUMN_MIGRATION);
+  it('TC-B399-01: 주석 제거 본문의 nullable 컬럼 정의 전체에 NOT NULL·DEFAULT가 없고 COMMENT·백필 없음', () => {
+    const sql = stripComments(read(COLUMN_MIGRATION));
     const def = sql.match(/ADD COLUMN IF NOT EXISTS shipper_company text[^;]*;/i)?.[0] ?? '';
     expect(def).toBe('ADD COLUMN IF NOT EXISTS shipper_company text;');
     expect(sql.includes('COMMENT ON COLUMN public.zen_orders.shipper_company')).toBe(true);
@@ -100,13 +135,23 @@ describe('TASK-B-399 PR1 — 정적 보조 검사(실DB 검증은 별도 테스�
     expect(values[recipientIdx]).toBe("p_payload->>'recipient_company'");
   });
 
-  it('TC-B399-04: v8 롤백 지시가 v7 복구·컬럼 잔존·DROP 순서를 명시', () => {
-    const sql = read(RPC_MIGRATION);
-    expect(sql.includes('-- ROLLBACK')).toBe(true);
-    expect(sql.includes('20261113090100_task_b346_create_order_atomic_v7.sql')).toBe(true);
-    expect(sql.includes('컬럼 잔존')).toBe(true);
+  it('TC-B399-04: v8 롤백 주석 + 컬럼 롤백 3단계(앱 → v7 복구 → DROP COLUMN) 순서를 명시', () => {
+    const rpcSql = read(RPC_MIGRATION);
+    expect(rpcSql.includes('-- ROLLBACK')).toBe(true);
+    expect(rpcSql.includes('20261113090100_task_b346_create_order_atomic_v7.sql')).toBe(true);
+    expect(rpcSql.includes('컬럼 잔존')).toBe(true);
     const columnSql = read(COLUMN_MIGRATION);
-    expect(columnSql.indexOf('v7 복구')).toBeLessThan(columnSql.indexOf('DROP COLUMN IF EXISTS shipper_company'));
+    const app = columnSql.indexOf('1) 앱을 이전 버전으로 되돌린다');
+    const v7 = columnSql.indexOf('2) create_order_atomic v8 → v7 복구');
+    const drop = columnSql.indexOf(
+      '3) ALTER TABLE public.zen_orders DROP COLUMN IF EXISTS shipper_company;'
+    );
+    // 문구가 지워져 -1이 되면 통과하는 거짓 양성 방지: 각 단계 존재를 먼저 확인.
+    expect(app).toBeGreaterThan(-1);
+    expect(v7).toBeGreaterThan(-1);
+    expect(drop).toBeGreaterThan(-1);
+    expect(app).toBeLessThan(v7);
+    expect(v7).toBeLessThan(drop);
   });
 
   it('TC-B399-05: Row는 필수·Insert/Update는 선택적 shipper_company를 각각 1건씩 보유', () => {
