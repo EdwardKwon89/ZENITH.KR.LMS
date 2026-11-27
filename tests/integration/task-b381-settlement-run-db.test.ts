@@ -246,7 +246,8 @@ describe('TASK-B-381 PR-1 — run 저장소·RPC·RLS 실DB (자기완결형)', 
     const runId = data?.[0]?.run_id;
     const count = async (actor: Actor, table: string) => {
       const col = table === 'zen_ups_settlement_runs' ? 'id' : 'run_id';
-      const { data: rows } = await actor.client.from(table).select(col).eq(col, runId);
+      const { data: rows, error } = await actor.client.from(table).select(col).eq(col, runId);
+      expect(error, `${actor.role} ${table}`).toBeNull();
       return rows?.length ?? 0;
     };
     expect(await count(admin, 'zen_ups_settlement_runs')).toBe(1);
@@ -258,6 +259,19 @@ describe('TASK-B-381 PR-1 — run 저장소·RPC·RLS 실DB (자기완결형)', 
     expect(await count(shipper, 'zen_ups_settlement_run_amounts')).toBe(1);
     expect(await count(otherAgency, 'zen_ups_settlement_run_amounts')).toBe(0);
     expect(await count(otherShipper, 'zen_ups_settlement_run_amounts')).toBe(0);
+    expect(await count(agency, 'zen_ups_settlement_run_charges')).toBe(3);
+    expect(await count(shipper, 'zen_ups_settlement_run_charges')).toBe(2);
+    expect(await count(otherAgency, 'zen_ups_settlement_run_charges')).toBe(0);
+    expect(await count(otherShipper, 'zen_ups_settlement_run_charges')).toBe(0);
+
+    const { data: shipperAmounts, error: shipperAmountsError } = await shipper.client
+      .from('zen_ups_settlement_run_amounts')
+      .select('tier, line_total')
+      .eq('run_id', runId);
+    expect(shipperAmountsError).toBeNull();
+    expect(shipperAmounts).toHaveLength(1);
+    expect(shipperAmounts?.[0]?.tier).toBe('SHIPPER');
+    expect(Number(shipperAmounts?.[0]?.line_total)).toBe(126);
 
     const anon = createClient(URL, ANON, { auth: { persistSession: false, autoRefreshToken: false } });
     const anonRuns = await anon.from('zen_ups_settlement_runs').select('id').eq('id', runId);
