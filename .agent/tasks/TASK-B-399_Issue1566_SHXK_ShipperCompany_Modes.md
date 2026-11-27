@@ -5,7 +5,8 @@
 | **Issue / Task** | [#1566](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1566) / `TASK-B-399` |
 | **Worker / 검증** | Baker(조사·설계 의견) / Jaison(검증) / Aiden(`[설계 확정]` 승인) |
 | **우선순위 / 단계** | p1 / **1단계 — 조사·설계 의견만**(구현·마이그레이션 금지) |
-| **상태** | ✅ **[설계 확정] 완료** — 2026-11-27 13:46 KST Aiden(Edward 지시), IS #1566 `status:draft` 제거→`status:open`. 담당자 지정 후 Aiden이 `status:ready` 부여, 착수 시 담당 Agent가 `status:in-progress` 전환 |
+| **상태** | ✅ **[설계 확정] 완료** — 2026-11-27 13:46 KST Aiden(Edward 지시). IS #1566 `status:in-progress` → PR1 구현 완료 후 `status:review` 전환(아래 `[작업 결과 — PR1]`) |
+| **PR1 범위·브랜치** | DB·RPC·타입·Ds-11만 / `feature/teamb-task-b399-pr1-shipper-company-db-rpc` (base `origin/TeamB_Dev` `b9e0254f1`) |
 | **채번 근거** | `git fetch origin` 후 원격 브랜치 `git ls-remote --heads origin \| grep -i task-b399` = 0건, Issue 제목 조회 = #1566 본건 1건. `./scripts/next-task-number.sh B`는 자기 Issue 제목까지 세어 `TASK-B-400`을 반환(#1564 스크립트 결함) → **B-399 확정**. 착수 워크트리는 전용(`git rev-parse --show-toplevel` 확인). |
 | **브랜치** | `feature/teamb-task-b399-iss1566-shipper-company-modes` (base `origin/TeamB_Dev`) |
 | **검토 반영** | Jaison 보완 1~6 + 정정, Aiden R-01 필수 1~3·권고 4~9, Jaison 13:22·13:39, JSJung ⓐ, Aiden 재검토 보완 1·2 반영(head `474d697ae` → `ebf1acbfc`). 지목된 코드 줄은 모두 직접 열어 대조함. |
@@ -179,6 +180,28 @@
 - [x] Aiden 13:36 보완 1·2 반영 — mode 미전달 시 `updateOrder` 키 제외(값 보존) 3경우 표 + 회귀 단언, `getOrderEditScope` 안전성 근거와 전수 확인 명령 기재
 - [x] R-21 스캔(값·계정·식별자·원문·절대경로 0건)
 - [x] Aiden `[설계 확정]`(13:46, Edward 지시) 원문 표를 `[설계 확정]` 섹션으로 이관, 결정 요청 1·2·4·7·9번 확정 반영
-- [ ] 담당자 지정 → Aiden `status:ready` 부여 → 2단계 PR1 착수(Aiden·Jaison 소관, 본 Task 범위 밖)
+- [x] 담당자 지정 → Aiden `status:ready` 부여 → 2단계 PR1 착수(2026-11-27, IS #1566 assignee `jungjs`, `status:in-progress`)
 
-> 본 문서는 **설계 의견**이며 구현·DDL·코드 변경을 포함하지 않는다. 승인 전 질문·결정 요청은 Issue #1566 코멘트로 올린다.
+> 본 문서의 위 섹션은 **설계 의견·[설계 확정]**이며, 구현 결과는 아래 `[작업 결과 — PR1]`에 기재한다. 승인 전 질문·결정 요청은 Issue #1566 코멘트로 올린다.
+
+## [작업 결과 — PR1] (2026-11-27, Baker)
+
+- 코드 커밋: `cd30feae64ed2119436483a7754ef16a5d75d980`
+- **구현 범위**: `zen_orders.shipper_company` nullable 컬럼(`20261127090000_task_b399_shipper_company.sql`, DEFAULT·백필 없음, COMMENT 포함) + `create_order_atomic` v8(`20261127090100_task_b399_create_order_atomic_v8.sql`, v7 전문 재정의·시그니처 `jsonb,uuid,uuid` 불변·`NULLIF(BTRIM(p_payload->>'shipper_company'), '')`·롤백 주석에 v7 경로와 컬럼 잔존 명시) + `src/types/supabase.ts` Row·Insert·Update 3건 + Ds-11 발송인 표·신규 DB 컬럼·v8 경로 + 회귀 항목 파일 1개. **UI·Zod·서버 액션·payload·env 제거·실호출은 포함하지 않음**(PR2·PR3).
+- **채번 근거**: 착수 시점 `TeamB_Dev` 최신 마이그레이션 `20261126120000_task_b381_pr4a_cost_amount_comments.sql` 이후로 `20261127090000`/`20261127090100` 채번(Aiden 조건 5).
+- **R-09 test-first**: 구현 전 동일 6건 실행 → `Test Files 1 failed (1) / Tests 6 failed (6)`, `Start at 14:24:43`(증적은 저장소 밖 세션 임시 파일). 구현 후 → `Test Files 1 passed (1) / Tests 6 passed (6)`, `Start at 14:26:49`. 단언은 모두 값 기반(`includes(...).toBe(true)`)이며 문자열 포함 단독 단언을 쓰지 않았다.
+- **전체 회귀**: `date` = `Fri Nov 27 14:26:55 KST 2026`; `npm run test:regression` → `Test Files 313 passed | 1 skipped (314)`, `Tests 2370 passed | 16 skipped (2386)`, `Duration 791.68s`. skip 16건은 기존 B-373 세션 테스트.
+- **정적 검사**: `npm run check:ds11` OK(허용 목록 밖 신규 미반영 0), `npm run check:lrtm` OK(유령 경로 0·신규 미등재 0·E2E 미표기 0), `npm run check:doc-links` OK(신규 깨진 링크 0), `npm run check:evidence` OK(저장소 내 증적 신규·변경 0).
+- **타입 회귀**: `npx tsc --noEmit` 220건 오류는 변경 전 HEAD와 출력이 **완전히 동일**(기존 실패분), 신규 오류 0건·변경 파일 오류 0건. 타입 재생성 범위(영문 주소 스테일)는 확장하지 않고 신규 컬럼만 반영.
+- **R-21·R-14**: 실제 값·계정·오더 식별자·요청/응답 본문·절대경로를 보고에 기재하지 않았다. 운영 DB·운영 호출은 실행하지 않았고, 실호출은 PR3 로컬 Supabase 1회만(Jaison 승인 후) 수행한다.
+- **Aiden 조건 (3) 반영**: 위 test-first 실패 증적 기재. 조건 (4) 새 head `gh pr checks` 원문 인용은 PR 생성 후 PR 코멘트에 게시한다. 조건 (1)의 mode 미전달 `updateOrder` 값 보존 단언은 PR2(서버 액션 구현 시)에 포함한다. 조건 (2) 200자 출처 확인은 PR2에서 수행한다.
+- **후속**: PR1 병합 후 PR2(UI/Zod/payload/env/#1562 이관) → PR3(회귀/R-10/로컬 실호출) 순서를 유지한다.
+
+### [PR1 DoD] (check-R17-DoD 수동 동치 점검 — 커맨드 템플릿은 셸 실행 불가)
+
+- [x] 코드 커밋 완료(위 해시 자동 삽입), 코드·회귀파일·Ds-11 포함
+- [x] `[작업 결과]` 섹션에 커밋 해시·검증값·미실행 사유 기재 — 미기재·빈 값 0건
+- [x] Issue #1566 라벨 `status:review` 전환(문서 커밋 전 실행)
+- [x] R-09 test-first 실패→성공 증적, 전체 회귀·정적 검사·타입 baseline 기재
+- [x] 문서 커밋(task file만) 후 PR 생성 — base `TeamB_Dev`, 본문 `Refs #1566`, `Closes` 없음(Aiden 지정)
+- [x] 병합은 Aiden 권한 — Baker는 PR 생성까지만 수행
