@@ -52,7 +52,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
 | [#1573](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1573) | [Team B] TASK-B-401: UPS 오더 수정 모드 화주명 자동 모드 오인·'내 정보 사용' 전환 시 화주 정보 소실 방지 (IMP-220, B-399 PR2 배포 전 처리) | b | p2 | open | 미배정 | 2026-11-27 |
 | [#1569](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1569) | [Team B] TASK-B-400: B-381 PR-3 서버 가드의 AGENCY 실세션(RLS) 통합 검증 — PR-4b 분리 인계 (#1459 후속) | b | p2 | review | 미배정 | 2026-11-27 |
-| [#1566](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1566) | [Team B] TASK-B-399: UPS 오더 발송인 입력 방식별 shipper_company 처리 — 내 정보 사용=화주명·수기입력=필수 입력 컨트롤 (#1552 변경) | b | p1 | ready | 미배정 | 2026-11-27 |
+| [#1566](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1566) | [Team B] TASK-B-399: UPS 오더 발송인 입력 방식별 shipper_company 처리 — 내 정보 사용=화주명·수기입력=필수 입력 컨트롤 (#1552 변경) | b | p1 | in-progress | 미배정 | 2026-11-27 |
 | [#1562](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1562) | [Team B] TASK-B-398: SHXK createorder 사전검증 보강·거절 문구 사용자 매핑 (IS #1560 채택, #1552 후속) | b | p2 | open | 미배정 | 2026-11-27 |
 | [#1560](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1560) | [IMP 제안] SHXK 거절 사유 원문 가시화 — createorder 실패 원인을 화면·사전검증에서 확인 가능하게 (DEF-B-172 후속) | b | p3 | open | 미배정 | 2026-11-27 |
 | [#1552](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1552) | [Aiden → Team B] DEF: SHXK createorder 발송인 회사명 누락 거절(`发件人公司不能为空`, FXUPS 추정) — B-345 이후 재발 (DEF-B-054 재현) | b | p1 | review | 미배정 | 2026-11-27 |
