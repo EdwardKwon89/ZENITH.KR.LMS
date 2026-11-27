@@ -2435,3 +2435,12 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `GOV_COMMON.md`(R-17·R-19), `scripts/next-task-number.sh`, `scripts/next-def-number.sh`, `.github/workflows/pr-checks.yml`(Task File Check), `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`
 - **예상 공수**: 1~2 MD (영향 점검 후 확정)
 - **우선순위**: Low — 통합·배포 안정 후 별도 판단(Edward 결정 2026-11-27). 관련: IS #1564, Issue #358.
+
+## [IMP-220] UPS 오더 수정 모드에서 화주명 자동 모드 판정이 `affiliation` 미로드 시 빈 값으로 오인되는 문제 (IS #1570 채택, TASK-B-399 설계 검토 중 발견)
+- **발견 경위**: 2026-11-27, TASK-B-399(IS #1566) 설계 검토에서 Aiden R-01 필수 2로 지적했고, Jaison이 "본 Task 밖 IMP 분리"를 승인했다. Baker가 IS #1570으로 건의했고 Edward가 2026-11-27 등록을 승인했다.
+- **현재 상태**: 수정 모드(`orderId` 있음)는 신규 등록용 `affiliation` 자동완성을 건너뛰어 `affiliation`이 비어 있다. 이 상태에서 ① 저장된 화주명이 `autoShipperName`(빈 값)과 달라 **manual 모드로 열리고**(`OrderRegistrationForm.tsx:493-499`), ② "내 정보 사용"으로 전환하면 `restoreAutoShipperInfo()`(`:300-322`)가 `affiliation`·`autoShipperName`에서 값을 채워 **화주명·연락처·주소가 빈 값으로 복원**되며 저장하면 오더의 화주 정보가 지워진다. 화주 배지의 `Checking...` 잔존은 같은 원인 계열이라는 Team B 보고가 있다(Aiden 미확인). 발생은 사용자의 모드 전환 조작이 있을 때이며 재입력으로 복구할 수 있다. 실제 발생 빈도는 운영 데이터를 조회하지 않아 미확인이다(R-14).
+- **임시 조치**: TASK-B-399 PR2는 신규 `shipper_company` 컨트롤을 저장값으로 복원하고 저장 전 SHXK 등록은 auto 규칙으로 계속한다. 이 결함 자체는 B-399 범위가 아니다(중복 수정 금지).
+- **목표 구현**: 수정 모드 초기화 시 저장된 화주명·조직 정보를 기반으로 `autoShipperName`을 계산해(조직 정보 로드 완료 대기 포함) 모드 오인을 방지하고, 수정 모드에서 "내 정보 사용"으로 전환할 때 저장값이 빈 값으로 덮이지 않게 한다. 화주 배지도 저장값·조직 정보로 결정한다.
+- **관련 파일**: `src/components/orders/OrderRegistrationForm.tsx`(`:280-322`, `:453-505`), `src/lib/orders/edit-defaults.ts`(`:73-94`), TASK-B-399 task file
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 금액·보안과 무관하고 사용자 조작이 있어야 발생하나, TASK-B-399 설계 확정(ⓐ: `shipper_company`가 NULL인 기존 오더도 수정 시 입력 강제)으로 기존 오더 다수가 manual로 열려 "내 정보 사용" 전환 유인이 커질 수 있으므로(추정) **B-399 PR2 배포 전에 처리**를 권고한다(Edward 승인 2026-11-27). 관련: IS #1570, IS #1566, TASK-B-399.
