@@ -23,6 +23,21 @@ export async function generateInvoicesForOrder(orderId: string) {
     throw new Error(await trError('permission_denied'));
   }
 
+  // TASK-B-381 PR-3 (§2-4): UPS는 신규 정산마감 경로만 사용한다 — 직접 호출도 서버에서 거부.
+  const { data: guardOrder, error: guardError } = await supabase
+    .from('zen_orders')
+    .select('transport_mode')
+    .eq('id', orderId)
+    .maybeSingle();
+  if (guardError) {
+    logger.error('[generateInvoicesForOrder] order guard lookup failed:', guardError.message);
+    throw new Error(await trError('generic', { code: 'ORDER_LOOKUP' }));
+  }
+  if (guardOrder?.transport_mode === 'UPS') {
+    logger.warn(`[generateInvoicesForOrder] UPS order blocked — use settlement finalize (${orderId})`);
+    throw new Error(await trError('ups_invoice_blocked'));
+  }
+
   if (profile.role === USER_ROLES.AGENCY) {
     const agencyShipperIds = await resolveAgencyShipperIds(supabase, profile.org_id!);
     const { data: order } = await supabase
