@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1582](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1582) | [Team B] TASK-B-404: develop→TeamB_Dev 동기화·충돌 해소 + 마이그레이션 적용 계획서 갱신 (12/2 시연 통합 준비) | b | p1 | in-progress | jungjs | 2026-11-28 |
+| [#1582](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1582) | [Team B] TASK-B-404: develop→TeamB_Dev 동기화·충돌 해소 + 마이그레이션 적용 계획서 갱신 (12/2 시연 통합 준비) | b | p1 | review | jungjs | 2026-11-28 |
 | [#1579](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1579) | [Aiden → Team B] RPC 호출 권한·호출자 검증 정렬 — 원격 시연 배포 전 핵심 조치 (IMP-221 1단계, p1) | b | p1 | - | 미배정 | 2026-11-28 |
 | [#1573](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1573) | [Team B] TASK-B-401: UPS 오더 수정 모드 화주명 자동 모드 오인·'내 정보 사용' 전환 시 화주 정보 소실 방지 (IMP-220, B-399 PR2 배포 전 처리) | b | p2 | open | 미배정 | 2026-11-27 |
 | [#1566](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1566) | [Team B] TASK-B-399: UPS 오더 발송인 입력 방식별 shipper_company 처리 — 내 정보 사용=화주명·수기입력=필수 입력 컨트롤 (#1552 변경) | b | p1 | review | jungjs | 2026-11-27 |
