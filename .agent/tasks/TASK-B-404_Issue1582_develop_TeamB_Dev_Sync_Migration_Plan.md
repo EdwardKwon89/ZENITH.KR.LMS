@@ -6,7 +6,7 @@
 | **Worker / 검증 / R-01** | Baker / Jaison / Aiden |
 | **우선순위 / 복잡도** | p1 / 단순 Task(설계 생략) |
 | **상태** | 착수 — `2026-11-28 12:51:40 KST` (Issue 라벨 `status:in-progress` 확인) |
-| **브랜치** | `feature/teamb-task-b404-sync-develop` (base `origin/TeamB_Dev` `eb29ffd2f137c314d330a0b366558c69b35de43d`, 최종 head `ef0189f4fd3b336947d5a497517687b2a68a47ee`) |
+| **브랜치** | `feature/teamb-task-b404-sync-develop` (base `origin/TeamB_Dev` `eb29ffd2f137c314d330a0b366558c69b35de43d`, 최종 head `90ca25b85f45b7352480efb34763066d020b8601`) |
 | **병합 대상** | 1차 `origin/develop` `a5a1e45a14cce4c6302cceebd211522997236647` → 재병합 `origin/develop` `7a773e984911964a1a1ebf32d8373288eee0e7d3`(PR #1583 병합분) |
 | **채번 근거** | `git fetch origin` 후 `./scripts/next-task-number.sh B` → `TASK-B-405` (Issue 제목 자체를 카운트하는 스크립트 결함 — B-399 선례와 동일). Issue #1582 제목은 `TASK-B-404`, `TASK-B-405` 이슈·원격 브랜치·task file은 각각 0건, `task-b404` 원격 브랜치 0건 → **`TASK-B-404` 확정**. |
 | **연관** | EPIC #1364, Aiden 12/2 시연 통합 준비 지시(issue #1364 코멘트), 통합 PR #1448 |
@@ -97,7 +97,7 @@ no checks reported on the 'TeamB_Dev' branch
 ```
 
 두 차례 모두 `exit 1`. **CI 통과를 주장하지 않습니다.** PR #1448은 base `develop` ← head `TeamB_Dev`, state `OPEN`, `mergeable=CONFLICTING`, `mergeStateStatus=DIRTY` (동기화 PR 병합 전 시점). 로컬 회귀 PASS는 CI 결과가 아닙니다.
-- 동기화 PR #1584의 CI — 재병합 푸시 후 `2026-11-28 14:40:22 KST` 최종 확인, **8/8 pass**, `exit 0`. `Regression Tests` **pass(7m43s)**. 나머지 7건도 전부 pass(Dependency Audit / Docs Sync / Evidence Escape / LRTM Sync / Task File Check / Type Check / Vendor Integrity). 원문은 PR 본문에 기재. 이는 **본 동기화 PR(head `ef0189f4`)의 CI**이며, 통합 PR #1448의 CI가 아님(#1448은 같은 시각에도 `no checks reported`, `exit 1`). 병합 후 #1448 재확인은 Jaison·Aiden.
+- 동기화 PR #1584의 CI — 재병합 푸시 후 `2026-11-28 14:40:22 KST`(head `ef0189f4`) 및 task file 반영 커밋 푸시 후 `2026-11-28 14:53:10 KST`(head `90ca25b85`) **두 차례 모두 8/8 pass**, `exit 0`. 최종 회귀 `Regression Tests` **pass(11m14s)**. 나머지 7건도 전부 pass(Dependency Audit / Docs Sync / Evidence Escape / LRTM Sync / Task File Check / Type Check / Vendor Integrity). 원문은 PR 본문에 기재. 이는 **본 동기화 PR(head 브랜치)의 CI**이며, 통합 PR #1448의 CI가 아님(#1448은 `14:40:22 KST`에도 `no checks reported`, `exit 1`). 병합 후 #1448 재확인은 Jaison·Aiden.
 - 재병합은 문서 2개 파일만 변경(코드·마이그레이션 변경 0건)했으므로 위 로컬 회귀 2차 결과(2393 passed)는 그대로 유효합니다. Aiden이 재실행하지 않은 로컬 결과이며 CI 결과와 별개입니다.
 - `gh pr checks 1584`는 푸시 직후 `14:32:02 KST`에 `no checks reported on the 'feature/teamb-task-b404-sync-develop' branch`(`exit 1`)를 반환했고, 약 50초 뒤 8건이 등록돼 `14:40:22 KST`에 8/8 pass를 확인했습니다(CI 등록 지연).
 
@@ -121,7 +121,7 @@ no checks reported on the 'TeamB_Dev' branch
 
 - PR #1575(B-399) 병합 **안 함** — #1582 지시로 통합 이후 보류.
 - 운영 반영 여부 확인표·적용 결과는 저장소·Issue에 **미기재**(R-21), 운영 DB 접속·호출 **0건**(R-14). 절대경로·계정·운영 식별자 미기재.
-- PR: [#1584](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1584) — base `TeamB_Dev`, head `feature/teamb-task-b404-sync-develop`(`ef0189f4`), state `OPEN`, `mergeable=true`, `Refs #1582`, `Closes` 없음(이슈 지시). 병합은 Jaison·Aiden 권한.
+- PR: [#1584](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1584) — base `TeamB_Dev`, head `feature/teamb-task-b404-sync-develop`(`90ca25b85`), state `OPEN`, `mergeable=true`, `Refs #1582`, `Closes` 없음(이슈 지시). 병합은 Jaison·Aiden 권한.
 - Aiden R-01 필수 2건 반영 완료 → Jaison에게 건수만 보고(문구 미인용) 후 증분 재검토 요청. 권고 2건은 비차단 후속(IMP 제안 Issue, PR 본문 CI 원문 갱신 — 본문 반영 완료).
 
 ## DoD
