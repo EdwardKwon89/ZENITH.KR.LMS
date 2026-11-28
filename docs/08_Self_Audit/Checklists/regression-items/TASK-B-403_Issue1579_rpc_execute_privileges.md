@@ -17,7 +17,8 @@
 | TC-B403-04 | 허용 역할 호출 | 역할 확인 대상 4개 정상 | 동일 |
 | TC-B403-05 | 역할 미확인 호출 | 역할 확인 대상 4개 거부 | 동일 |
 | TC-B403-06 | 인증 세션 오더 계열 | 대상 3개 정상 | 동일 |
+| TC-B403-07 | 서버 내부 키 호출 | 역할 확인 대상 4개 정상 | 동일 |
 
-**가드 비활성 확인**: 권한 복원 시 TC-01·02 FAIL, 역할 검사 비활성 시 TC-03 FAIL, `COALESCE` 제거 시 TC-05 FAIL(각 단독 실행). TC-04·06은 양성 대조로 PASS.
+**가드 비활성 확인**: 권한 복원 시 TC-01·02 FAIL, 역할 검사 비활성 시 TC-03·05 FAIL, `COALESCE` 제거 시 TC-05 FAIL, 서버 내부 키 예외 제거 시 TC-07 FAIL(각 단독 실행). TC-04·06은 양성 대조로 PASS.
 
-**회귀**: `npm run test:regression` — **314 files passed · 1 skipped / 2,376 passed · 1 expected fail · 16 skipped**, build SUCCESS.
+**회귀**: `npm run test:regression` — **314 files passed · 1 skipped / 2,377 passed · 1 expected fail · 16 skipped**, build SUCCESS.

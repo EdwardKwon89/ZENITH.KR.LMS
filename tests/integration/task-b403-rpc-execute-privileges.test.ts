@@ -30,7 +30,8 @@ const APPROVE_ORG = `${P}03`;
 const REJECT_ORG = `${P}04`;
 const SUPPLEMENT_ORG = `${P}05`;
 const NO_PROFILE_ORG = `${P}06`;
-const ORG_IDS = [PLATFORM_ORG, SHIPPER_ORG, APPROVE_ORG, REJECT_ORG, SUPPLEMENT_ORG, NO_PROFILE_ORG];
+const SERVICE_ORG = `${P}07`;
+const ORG_IDS = [PLATFORM_ORG, SHIPPER_ORG, APPROVE_ORG, REJECT_ORG, SUPPLEMENT_ORG, NO_PROFILE_ORG, SERVICE_ORG];
 
 const BASE_ORDER_ID = `${P}21`;
 const MASTER_ORDER_ID = `${P}31`;
@@ -62,7 +63,7 @@ const createdOrderIds = new Set<string>([BASE_ORDER_ID]);
 
 async function createActor(role: string, orgId: string): Promise<Actor> {
   const suffix = randomUUID().slice(0, 8);
-  const email = `403-${suffix}@test.kr`;
+  const email = `403-${suffix}@example.test`;
   const password = `Aa1-${randomUUID()}`;
   const { data, error } = await service.auth.admin.createUser({
     email, password, email_confirm: true,
@@ -81,7 +82,7 @@ async function createActor(role: string, orgId: string): Promise<Actor> {
 
 async function createNoProfileActor(): Promise<Actor> {
   const suffix = randomUUID().slice(0, 8);
-  const email = `403-noprofile-${suffix}@test.kr`;
+  const email = `403-noprofile-${suffix}@example.test`;
   const password = `Aa1-${randomUUID()}`;
   const { data, error } = await service.auth.admin.createUser({
     email, password, email_confirm: true,
@@ -113,8 +114,8 @@ async function cleanup() {
       DELETE FROM public.zen_orders WHERE id IN (${orderIds});
       DELETE FROM public.zen_master_order_history WHERE master_no = '${MASTER_NO}';
       DELETE FROM public.zen_master_orders WHERE id = '${MASTER_ORDER_ID}';
-      DELETE FROM public.zen_profiles WHERE email LIKE '403-%@test.kr';
-      DELETE FROM auth.users WHERE email LIKE '403-%@test.kr';
+      DELETE FROM public.zen_profiles WHERE email LIKE '403-%@example.test';
+      DELETE FROM auth.users WHERE email LIKE '403-%@example.test';
       DELETE FROM public.zen_organizations WHERE id IN ('${ORG_IDS.join("','")}');
       RESET session_replication_role;
     `);
@@ -158,6 +159,7 @@ describe('TASK-B-403 — 대상 RPC 실행 권한·호출자 검증', () => {
       { id: REJECT_ORG, name: '403 Reject', type: 'SHIPPER', status: 'PENDING' },
       { id: SUPPLEMENT_ORG, name: '403 Supplement', type: 'SHIPPER', status: 'PENDING' },
       { id: NO_PROFILE_ORG, name: '403 No Profile', type: 'SHIPPER', status: 'PENDING' },
+      { id: SERVICE_ORG, name: '403 Service', type: 'SHIPPER', status: 'PENDING' },
     ], { onConflict: 'id' });
     if (orgError) throw new Error(`org insert failed: ${orgError.message}`);
 
@@ -254,6 +256,25 @@ describe('TASK-B-403 — 대상 RPC 실행 권한·호출자 검증', () => {
       expect(errorText(error), fn).toMatch(/Access Denied/);
     }
     expect(psql(`SELECT status FROM public.zen_organizations WHERE id='${NO_PROFILE_ORG}';`)).toBe('PENDING');
+  }, 60000);
+
+  it('서버 내부 키 호출 — 역할 확인 대상 RPC 4개 정상', async () => {
+    const approve = await service.rpc('approve_organization', { target_org_id: SERVICE_ORG });
+    expect(approve.error).toBeNull();
+    expect(String(approve.data ?? '')).toMatch(/^\d{6}$/);
+    expect(psql(`SELECT status FROM public.zen_organizations WHERE id='${SERVICE_ORG}';`)).toBe('ACTIVE');
+
+    const reject = await service.rpc('reject_organization', { target_org_id: SERVICE_ORG, comment: '403 service' });
+    expect(reject.error).toBeNull();
+    expect(reject.data).toBe(true);
+
+    const supplement = await service.rpc('request_organization_supplement', { target_org_id: SERVICE_ORG, comment: '403 service' });
+    expect(supplement.error).toBeNull();
+    expect(supplement.data).toBe(true);
+
+    const seq = await service.rpc('get_next_order_sequence', { p_year: '2026', p_prefix: 'ZEN' });
+    expect(seq.error).toBeNull();
+    expect(String(seq.data ?? '')).toMatch(/^ZEN-2026-\d{6}$/);
   }, 60000);
 
   it('허용 역할 호출 — 오더 계열 RPC 3개는 인증 세션에서 정상 동작', async () => {

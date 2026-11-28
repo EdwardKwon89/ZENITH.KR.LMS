@@ -20,13 +20,13 @@
 
 | 함수명 | 실행 권한 | 호출자 검증 |
 | :--- | :--- | :--- |
-| `approve_organization` | `authenticated`, `service_role` | `COALESCE(get_my_role(), '')` 기준 관리자 계열 확인 |
+| `approve_organization` | `authenticated`, `service_role` | `COALESCE(get_my_role(), '')` 기준 관리자 계열 확인(서버 내부 키 예외) |
 | `reject_organization` | `authenticated`, `service_role` | 동일 |
 | `request_organization_supplement` | `authenticated`, `service_role` | 동일 |
-| `get_next_order_sequence` | `authenticated`, `service_role` | `COALESCE(get_my_role(), '')` 기준 기존 허용 역할 확인 |
-| `create_order_atomic` | `authenticated`, `service_role` | 비인증 호출 거부(인자 신원 검증은 후속) |
-| `create_order_services_atomic` | `authenticated`, `service_role` | 비인증 호출 거부(인자 신원 검증은 후속) |
-| `dissolve_master_order_atomic` | `authenticated`, `service_role` | 비인증 호출 거부(인자 신원 검증은 후속) |
+| `get_next_order_sequence` | `authenticated`, `service_role` | `COALESCE(get_my_role(), '')` 기준 기존 허용 역할 확인(서버 내부 키 예외) |
+| `create_order_atomic` | `authenticated`, `service_role` | 비인증 호출 거부(서버 내부 키 예외, 인자 신원 검증은 후속) |
+| `create_order_services_atomic` | `authenticated`, `service_role` | 비인증 호출 거부(서버 내부 키 예외, 인자 신원 검증은 후속) |
+| `dissolve_master_order_atomic` | `authenticated`, `service_role` | 비인증 호출 거부(서버 내부 키 예외, 인자 신원 검증은 후속) |
 
 - `service_role`(서버 내부 신뢰 키)과 DB 슈퍼유저 세션은 역할 확인 예외로 두어 기존 서버 내부 호출 동작을 유지한다.
 - 마이그레이션: `supabase/migrations/20261128090000_task_b403_rpc_execute_privileges.sql` (신규 1건, 롤백 SQL 주석 포함)
