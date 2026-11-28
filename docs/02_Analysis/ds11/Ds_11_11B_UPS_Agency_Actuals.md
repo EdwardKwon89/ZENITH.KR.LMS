@@ -73,7 +73,7 @@
 #### recordUpsActualCharges(orderId, charges)
 - **Path**: `src/app/actions/finance/ups-actual-charges.ts:27-277`
 - **설명**: UPS 오더(`IN_TRANSIT` 또는 `DELIVERED`)의 추가 실비 청구 항목(`zen_ups_actual_charges`)을 전체 교체 저장하고, 예상 비용 대비 차액(`adjustmentAmount`)을 `zen_order_costs`(`UPS_ACTUAL_ADJUSTMENT`) 및 연결 인보이스(`zen_invoices.total_amount`)에 반영합니다 (마감된 인보이스가 있으면 `createPostFinalizationAdjustment`로 추가 인보이스 발행).
-- **권한**: `validateUserAction()` + `assertAdminOrAgency(profile)` (`src/app/actions/finance/ups-actual-charges.ts:20-25, 32-34`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`·`AGENCY` 허용) + `AGENCY`인 경우 `zen_agency_shippers` 활성 연결 화주 소속 검증 (`L54-65` — 단, 대리점 본인 화주 `profile.org_id` 미포함은 `DEF-150` 참조)
+- **권한**: `validateUserAction()` + `assertAdminOrAgency(profile)` (`src/app/actions/finance/ups-actual-charges.ts:20-25, 32-34`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`·`AGENCY` 허용) + `AGENCY`인 경우 `zen_agency_shippers` 활성 연결 화주 소속 검증 (`L54-65` — 목표: 대리점 본인 화주(`profile.org_id`) 포함 정렬 대상, `DEF-150` 참조)
 - **Input**: `orderId: string` (오더 UUID), `charges: UpsActualChargeInput[]` (`Array<{ chargeType: string, amount: number, currency: string, upsInvoiceNo?: string, upsInvoiceDate?: string, notes?: string }>`, `L8-15`)
 - **Output**: `Promise<{ success: boolean; adjustmentAmount?: number; error?: string }>` (`ups-actual-charges.ts:30, 146, 272`)
 - **오류**: 권한 불충족(`permission_denied`, `L24`), 오더 미존재(`order_not_found`, `L45`), 비UPS 오더(`not_ups_order`, `L50`), 타 대리점 화주 오더(`shipper_scope_denied`, `L63`), 상태 부적합(`ups_actual_charge_status_invalid`, `L69`), 실비 삭제/삽입·조정 비용 반영·인보이스 금액 갱신·마감 후 조정 실패 또는 예외 발생 시 `logger.error` 기록 후 `{ success: false, error: await trError('generic', { code: ... }) }` 반환
@@ -98,7 +98,7 @@
 #### searchDeliveredUpsOrders(query)
 - **Path**: `src/app/actions/finance/ups-actual-charges.ts:366-454`
 - **설명**: 오더 번호(`order_no`) 또는 운송장 번호(`zen_tracking_configs.tracking_no`) 부분 일치(`ilike`)로 `IN_TRANSIT`·`DELIVERED` 상태의 UPS 오더 목록을 검색합니다.
-- **권한**: `validateUserAction()` + `assertAdminOrAgency(profile)` (`src/app/actions/finance/ups-actual-charges.ts:367-369`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`·`AGENCY` 허용) + 1단계(`order_no`) 검색 시 `AGENCY`는 `zen_agency_shippers` 소속 화주 오더만 필터링 (`L398-406` — 단, 2단계 `tracking_no` 검색 결과 병합 시 `AGENCY` 필터 누락 및 대리점 본인 화주 미포함 결함은 `DEF-150` 참조)
+- **권한**: `validateUserAction()` + `assertAdminOrAgency(profile)` (`src/app/actions/finance/ups-actual-charges.ts:367-369`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`·`AGENCY` 허용) + 1단계(`order_no`) 검색 시 `AGENCY`는 `zen_agency_shippers` 소속 화주 오더만 필터링 (`L398-406` — 목표: 2단계 `tracking_no` 검색 결과 병합에도 `AGENCY` 소속 화주 필터 적용·대리점 본인 화주 포함 정렬 대상, `DEF-150` 참조)
 - **Input**: `query: string` (공백 제거 후 빈 문자열이면 즉시 `[]` 반환, `L371-372`)
 - **Output**: `Promise<Array<Record<string, unknown>>>` (`ups-actual-charges.ts:453`)
 - **오류**: 권한 불충족 시 `Error(permErr)` throw (`L369`); 오더 검색 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ORDER_SEARCH' }))` throw (`L391-394`, 트래킹 번호 조회 에러는 `logger.error`만 기록 후 비차단 진행 `L416-418`)
