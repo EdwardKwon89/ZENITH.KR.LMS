@@ -4,7 +4,7 @@
 |:-----|:-----|
 | 이슈 | [#1451](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1451) (TASK-B-377 구현) · 담당 Mike(Jaison 배정, JSJung 지시) · 검증 Jaison · p1 |
 | 브랜치 | `feature/teamb-task-b402-iss1451-cost-display-impl` (base `origin/TeamB_Dev` `b9e0254f1`) |
-| 상태 | 🔄 진행 중 (`status:in-progress` 전환 2026-11-27 14:23 KST) |
+| 상태 | ✅ PR-A 완료 → `status:review` (PR #1586, 2026-11-28 15:50 KST) |
 | 선행 | `[설계 확정]`(Aiden·Edward, PR #1557 `dd6d9c801`) · B-382(#1511)·B-381 PR-3·4a·**4b(#1568, 13:42 병합)** 병합 · Aiden `status:ready` 부여(14:16) |
 | 문서 기준 | `TeamB_Dev`의 설계 task file `:140` `[설계 확정]` 섹션 + §3-1·§5·§6·§8-1 |
 | 원칙 | R-21 §2(현재 정책의 역할별 결과를코드 주석·문서·PR에 쓰지 않음) · R-14(마이그레이션 적용은 Aiden만 — 본 Task는 파일 작성·로컬 검증까지) · 새 커밋(force-push 금지) |
@@ -40,13 +40,35 @@ date                              # Thu Nov 27 14:23:17 KST 2026
 
 ## [DoD]
 
-- [ ] PR-A 범위 ①~⑦ 전부 반영(각 항목 위치·결과 기재)
-- [ ] 새 테스트가 **수정 전 코드에서 실패**하는지 확인·보고
-- [ ] 반환값 불변(가드 추가 외 기존 동작 회귀 없음) + `npm run build` · `npm run test:regression` 전체 PASS
-- [ ] Ds-11 갱신 · regression-items 등재 · `check:lrtm` OK
-- [ ] `gh pr checks` 출력 그대로 인용 · R-21 §2 준수 · 보고는 지시·코멘트를 읽은 뒤 + 직전 재조회
+- [x] PR-A 범위 ①~⑦ 전부 반영(각 항목 위치·결과 기재 — 아래 [작업 결과])
+- [x] 새 테스트가 **수정 전 코드에서 실패**하는지 확인·보고(src·messages만 stash → unit import fail·렌더 2 failed·integration import fail 확인 후 복원)
+- [x] 반환값 불변 + `npm run build` exit 0 · `npm run test:regression` **314파일/2,386테스트 PASS** (2026-11-28 15:30 KST, exit 0)
+- [x] Ds-11 §4.3 갱신 · regression-items 등재(TC-402-01~20) · `check:ds11`/`check:lrtm` OK
+- [x] R-21 §2 준수 · 보고는 지시·코멘트 읽은 뒤 + 직전 재조회 (`gh pr checks`는 아래 인용)
 
 ## [작업 결과]
 
-- 커밋: `04801f569`
-- PR: `<PLACEHOLDER_PR>`
+- **커밋**: 착수 `04801f569` · 정정 `1c7cb3dc7` · **구현 커밋 `7a6669b4a`**(25파일: src 12 + messages 4 + docs 5 + tests 4)
+- **PR**: [#1586](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1586) — base `TeamB_Dev`, `Refs #1451`, 라벨 `status:review` (2026-11-28 15:50 KST)
+- **범위 ①~⑦ 위치·결과**:
+  - ① `src/app/actions/finance/ups-actual-cost.ts` — `GET_UPS_ACTUAL_COST_ROLES`(admin 3 + SUB_ADMIN) 가드, `logger.warn` + `permission_denied`
+  - ② `src/app/actions/finance/additional-charges.ts`(신규) — 소유·admin·최신 version·DTO 항목만(`line_no/name/amount/currency/tier`)·원가 미반환·실패 시 `logger.warn/error`
+  - ③ `src/lib/finance/settlement/cost-type-labels.ts` audience(`admin`/`neutral`) + `messages/{ko,en,zh,ja}.json` Finance 2키
+  - ④ `StatementDetail.tsx`(3경로 공통) 조정 행(안2·0원 비표시·음수·행합=line_total) + 부가운임 sub-rows · `statement-excel*.ts`(요약 +1행·상세 +3열·동적 printArea)
+  - ⑤ `orders/[orderId]/ups-detail/page.tsx` select `invoice_id`만
+  - ⑥ `Ds_11_04` §4.3 `getOrderAdditionalCharges` 항목 · `regression-items/TASK-B-402`(TC-402-01~20) · 부록A v1.1 · TC-360-31 printArea 정정
+  - ⑦ 테스트 22건: 단위 9(`task-b402-cost-display`) + 렌더 2(`statement-detail`) + Excel 1(`task-b360-excel-data`) + 실DB 10(`task-b402-additional-charges-rls`)
+- **수정 전 실패 확인**: src·messages stash + 신규 소스 격리 → unit import fail / 렌더 2 failed / integration import fail (전부 기대대로, 복원 OK)
+- **전체 회귀**: `npm run test:regression` **314 passed / 2,386 tests PASS**, `npm run build` exit 0, `check:ds11`·`check:lrtm` OK, tsc src·내 테스트 0건
+- **공유 DB 인시던트(외부 원인)**: 검증 중 Dave TASK-B-403(#1579) 미커밋 마이그레이션이 로컬 DB에 선적용되어 `get_next_order_sequence` NULL 통과 로직이 거부로 바뀌며 `task-b349/346`·`task-b360-excel-export` 등 기존 실DB 테스트가 본 변경과 무관하게 실패. A/B 쿼리로 원인 규명 → R-08-2 공식 해소(`supabase db reset`)로 복구 → 전체 회귀 GREEN → **Dave 마이그레이션 재적용으로 그의 작업 복원**(CI fresh DB 무관).
+- **`gh pr checks`(2026-11-28 15:51 KST, Regression Tests만 진행 중)**:
+```
+Task File Check (advisory, non-blocking)	pass	8s
+Type Check (advisory, non-blocking)	pending
+Dependency Audit (advisory, non-blocking)	pass	10s
+Docs Sync Check (advisory, non-blocking)	pass	14s
+Evidence Escape Check (advisory, non-blocking)	pass	14s
+Vendor Integrity (advisory, non-blocking)	pass	14s
+LRTM Sync Check (advisory, non-blocking)	pass	12s
+Regression Tests	pending
+```
