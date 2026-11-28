@@ -50,19 +50,39 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1490](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1490) | [Aiden 요청] 공개 저장소 문서의 노출 기재 정리 — Team B 소유 파일 (IS #1487 후속) | b | p1 | ready | jungjs | 2026-11-24 |
-| [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | draft | 미배정 | 2026-11-24 |
-| [#1463](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1463) | [Team B] TASK-B-382: MANAGER의 UPS 정산마감 관련 테이블 RLS 정책 정렬 (규칙 1 이행, 설계 의견부터) | b | p2 | ready | jungjs | 2026-11-24 |
-| [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | open | 미배정 | 2026-11-24 |
-| [#1453](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1453) | [Team B] TASK-B-379: 청구 금액 함수 base 테이블 의존 제거 + 입고 실측 스냅샷 갱신 주체 정리 (#1449 C, 설계 의견부터) | b | p2 | open | 미배정 | 2026-11-23 |
-| [#1451](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1451) | [Team B] TASK-B-377: UPS 원가 열람 admin 전용 정렬 + 화주·대리점 부가운임 항목별 표시·라벨 중립화 (#1449 A·#1442 대체, 설계 의견부터) | b | p1 | draft | 미배정 | 2026-11-24 |
-| [#1449](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1449) | [Aiden → Team B] 통합(#1448) 전 필수 조치 3건 — UPS 실비 원가 테이블 권한 정렬·채번 함수 권한·청구 금액 함수 base 의존 제거 | b | p1 | open | jungjs | 2026-11-23 |
+| [#1595](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1595) | [Team B] TASK-B-408: 12/2 시연 계정 가입 절차서·로컬 리허설 (가입 담당 Mike, 실가입은 지시 후) | b | p1 | rework | jungjs | 2026-11-28 |
+| [#1592](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1592) | [Team B] TASK-B-407: 12/2 시연용 UPS 오더 구성안 — 케이스표·로컬 흐름 확인 (EPIC #1364) | b | p1 | review | jungjs | 2026-11-28 |
+| [#1589](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1589) | [Team B] TASK-B-406: TASK-B-381 task file R-21 §2 해당 서술 정리 (통합 #1448 전, 대상은 비공개 전달) | b | p1 | review | jungjs | 2026-11-28 |
+| [#1587](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1587) | [Team B] TASK-B-405: 12/2 시연 최소 점검 증거 — 원가 비노출 경로별 확인(11곳)·금액 샘플 대조 (EPIC #1364) | b | p1 | review | jungjs | 2026-11-28 |
+| [#1582](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1582) | [Team B] TASK-B-404: develop→TeamB_Dev 동기화·충돌 해소 + 마이그레이션 적용 계획서 갱신 (12/2 시연 통합 준비) | b | p1 | review | jungjs | 2026-11-28 |
+| [#1579](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1579) | [Aiden → Team B] RPC 호출 권한·호출자 검증 정렬 — 원격 시연 배포 전 핵심 조치 (IMP-221 1단계, p1) | b | p1 | review | 미배정 | 2026-11-28 |
+| [#1573](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1573) | [Team B] TASK-B-401: UPS 오더 수정 모드 화주명 자동 모드 오인·'내 정보 사용' 전환 시 화주 정보 소실 방지 (IMP-220, B-399 PR2 배포 전 처리) | b | p2 | open | 미배정 | 2026-11-27 |
+| [#1566](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1566) | [Team B] TASK-B-399: UPS 오더 발송인 입력 방식별 shipper_company 처리 — 내 정보 사용=화주명·수기입력=필수 입력 컨트롤 (#1552 변경) | b | p1 | review | jungjs | 2026-11-27 |
+| [#1562](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1562) | [Team B] TASK-B-398: SHXK createorder 사전검증 보강·거절 문구 사용자 매핑 (IS #1560 채택, #1552 후속) | b | p2 | open | 미배정 | 2026-11-27 |
+| [#1560](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1560) | [IMP 제안] SHXK 거절 사유 원문 가시화 — createorder 실패 원인을 화면·사전검증에서 확인 가능하게 (DEF-B-172 후속) | b | p3 | open | 미배정 | 2026-11-27 |
+| [#1552](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1552) | [Aiden → Team B] DEF: SHXK createorder 발송인 회사명 누락 거절(`发件人公司不能为空`, FXUPS 추정) — B-345 이후 재발 (DEF-B-054 재현) | b | p1 | review | 미배정 | 2026-11-27 |
+| [#1546](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1546) | [Team B] TASK-B-393: 롤백 계획서 검증 질의의 공허한 참 정정·§4 M4-b 문구 모순 (EPIC #1364, B-392 후속) | b | p2 | review | 미배정 | 2026-11-26 |
+| [#1542](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1542) | [IMP 제안] agent-worktree-init.sh를 워크트리 안에서 실행하면 중첩 워크트리 경로 생성 | - | - | - | 미배정 | 2026-11-26 |
+| [#1539](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1539) | [Team B] TASK-B-392: M4·M4-b·M5 롤백 재리허설 — 정정 SQL 왕복·M5 실제 run 테이블 실측 (EPIC #1364, B-390·B-391 후속) | b | p2 | review | 미배정 | 2026-11-26 |
+| [#1537](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1537) | [Team B] TASK-B-391: TASK-B-389 계획서 정정 7건 (M4·M4-b·M5 롤백, B-390 리허설 후속) | b | p2 | review | 미배정 | 2026-11-26 |
+| [#1532](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1532) | [Team B] TASK-B-390: B-381 데이터 작업(M4·M4-b·M5) 롤백 로컬 리허설 (EPIC #1364, TASK-B-389 후속) | b | p2 | review | 미배정 | 2026-11-25 |
+| [#1529](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1529) | [Team B] TASK-B-389: B-381 데이터 작업(M4·M4-b·M5) 롤백 계획 작성 (EPIC #1364, 문서) | b | p2 | review | 미배정 | 2026-11-25 |
+| [#1528](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1528) | [Team B] TASK-B-388: 롤백 통합본 미실측 항목 로컬 실측 (EPIC #1364, TASK-B-387 후속) | b | p2 | review | jungjs | 2026-11-25 |
+| [#1524](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1524) | [Team B] TASK-B-387: 청구서관리 마이그레이션 적용 순서·롤백 로컬 왕복 리허설 (EPIC #1364) | b | p2 | review | 미배정 | 2026-11-25 |
+| [#1516](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1516) | [Team B] TASK-B-386: E2E_B374_Result JSON 증적 R-21 점검·처리 (IS #1490 후속) | b | p3 | review | 미배정 | 2026-11-24 |
+| [#1513](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1513) | [Team B] TASK-B-385: E2E 증적 출력 경로를 저장소 밖으로 전환 (IS #1490 후속, R-13/R-21 정합, 설계 의견부터) | b | p2 | review | jungjs | 2026-11-25 |
+| [#1475](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1475) | [Team B] TASK-B-383: 청구서 조회 정책에 역할 조건 추가 — 플랫폼 조직 전 역할의 청구서 조회 차단 (DEF-B-171) | b | p2 | review | jungjs | 2026-11-25 |
+| [#1463](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1463) | [Team B] TASK-B-382: MANAGER의 UPS 정산마감 관련 테이블 RLS 정책 정렬 (규칙 1 이행, 설계 의견부터) | b | p2 | review | jungjs | 2026-11-24 |
+| [#1459](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1459) | [Team B] TASK-B-381: UPS 정산마감 부가운임의 화주·대리점 청구 자동 반영 (규칙 4, 설계 의견부터) | b | p1 | review | jungjs | 2026-11-27 |
+| [#1453](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1453) | [Team B] TASK-B-379: 청구 금액 함수 base 테이블 의존 제거 + 입고 실측 스냅샷 갱신 주체 정리 (#1449 C, 설계 의견부터) | b | p2 | open | jungjs | 2026-11-26 |
+| [#1451](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1451) | [Team B] TASK-B-377: UPS 원가 열람 admin 전용 정렬 + 화주·대리점 부가운임 항목별 표시·라벨 중립화 (#1449 A·#1442 대체, 설계 의견부터) | b | p1 | review | 미배정 | 2026-11-28 |
+| [#1449](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1449) | [Aiden → Team B] 통합(#1448) 전 필수 조치 3건 — UPS 실비 원가 테이블 권한 정렬·채번 함수 권한·청구 금액 함수 base 의존 제거 | b | p1 | open | jungjs | 2026-11-27 |
 | [#1428](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1428) | [보류] 회귀 테스트 2파일 DB 질의 방식 통일 (npx supabase db query → docker exec psql) | b | p4 | - | 미배정 | 2026-11-22 |
 | [#1371](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1371) | [Team B → Aiden] Gale(Gemini 4 Argon) 페르소나 등록 요청 — agent-worktree-init.sh 등 | a | p3 | open | 미배정 | 2026-11-18 |
 | [#1369](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1369) | [Team B] TASK-B-363: 청구서관리 ⑥ 레거시 병행 정책 반영 및 컷오버 — 기존 메뉴·UPS 인보이스 처리 | b | p2 | open | 미배정 | 2026-11-24 |
 | [#1368](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1368) | [Team B] TASK-B-362: 청구서관리 ⑤ 청구서 PDF 생성·다운로드 및 발행 이메일 | b | p2 | blocked | 미배정 | 2026-11-17 |
-| [#1364](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1364) | [Team B] EPIC: 청구서관리 — 오더정산·청구서 생성/관리 (추적용) | b | p2 | in-progress | 미배정 | 2026-11-24 |
-| [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) | [Aiden → Team B] DEF-151 UPS 요율 조회 액션 접근 가드 정렬 및 비관리자 화면 데이터 최소화 요청 | b | p1 | in-progress | 미배정 | 2026-11-24 |
+| [#1364](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1364) | [Team B] EPIC: 청구서관리 — 오더정산·청구서 생성/관리 (추적용) | b | p2 | in-progress | 미배정 | 2026-11-28 |
+| [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) | [Aiden → Team B] DEF-151 UPS 요율 조회 액션 접근 가드 정렬 및 비관리자 화면 데이터 최소화 요청 | b | p1 | review | jungjs | 2026-11-26 |
 | [#1356](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1356) | [Aiden → Team B] DEF-150 finance/UPS 실비·정산 액션 대리점 필터 누락·가드 공백 수정 요청 | b | p1 | in-progress | 미배정 | 2026-11-22 |
 | [#1346](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1346) | [Team A] TASK-1160: 231 PoC 단계 2 — 모듈 ①② 위험 3군 재현·실DB 편입 측정 (§10 #4·#6·#13·#16 확정 반영) | a | p3 | blocked | 미배정 | 2026-11-18 |
 | [#1319](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1319) | [Aiden] xlsx 소스 전환·P0 의존성 상향 — Team B 영향 의견 요청 (DEF-146 후속) | b | p2 | - | jungjs | 2026-11-18 |
@@ -73,8 +93,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 | [#1238](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1238) | 2026.10.12 오류사항 및 보완사항 | b | p2 | - | 미배정 | 2026-10-12 |
 | [#1218](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1218) | [Aiden] Stage-Gate Code Review — UPS 핵심 경로(오더등록~정산) 대상, 적절한 시점에 실시 | - | p3 | - | 미배정 | 2026-10-11 |
 | [#1189](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1189) | [Team B] TASK-B-323: Resend 이메일 도메인(zenith-lms.com) 미인증 — 알림메일 전량 발송 실패 (DEF-B-143, High) | b | p1 | - | jungjs | 2026-10-13 |
-| [#1185](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1185) | [Team B] TASK-B-322: 로그 커버리지 개선 ⑤— admin/auth.ts 예외 객체 폐기 패턴 수정 (5건) | b | p2 | - | 미배정 | 2026-08-23 |
-| [#1181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1181) | [Team B] TASK-B-319: 로그 커버리지 개선 ①— ups-labels.ts 실패 반환값 무기록 해소 (~40건) | b | p2 | - | 미배정 | 2026-08-23 |
+| [#1181](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1181) | [Team B] TASK-B-319: 로그 커버리지 개선 ①— ups-labels.ts 실패 반환값 무기록 해소 (~40건) | b | p2 | review | 미배정 | 2026-11-26 |
 | [#1177](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1177) | [Team A] TASK-1137: 동일 계정 동시 로그인 감지 및 처리(알림 + 기존유지/강제로그아웃 선택) | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1176](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1176) | [Team A] TASK-1136: Session Idle Timeout 관리자 설정 + 다음 로그인부터 적용 | a | p2 | - | 미배정 | 2026-08-20 |
 | [#1172](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1172) | [Team A] TASK-1134: 중복 Task 번호 CI/pre-commit 기계적 차단 (Issue #358 후속) | a | p4 | - | 미배정 | 2026-08-19 |
