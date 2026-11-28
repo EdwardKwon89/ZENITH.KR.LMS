@@ -1,9 +1,9 @@
-# DEF-150 | `finance/{ups-actual-charges,ups-actual-cost,invoice,settlement}.ts` 대리점 범위 필터 누락·미인증 export·조회 가드 공백
+# DEF-150 | `finance/{ups-actual-charges,ups-actual-cost,invoice,settlement}.ts` 대리점 범위·접근 가드 정렬
 
 | 항목 | 내용 |
 |:-----|:------|
 | **발견 경위** | TASK-1162 (Issue #1354, R-12 Ds-11 미반영 2차 finance 4개 파일 21개 함수 문서화) 수행 중, 21개 함수의 권한 가드·입력·부수효과를 코드 라인 단위로 전수 실사하다 발견 |
-| **긴급도** | **High** (1번 항목: `searchDeliveredUpsOrders` 트래킹 번호 검색 경로에서 `AGENCY` 소속 화주 필터 누락) / **Medium** (2~4번 항목: `'use server'` 미인증 헬퍼 export, 원가/인보이스 조회 액션 역할 가드 부재, `MANAGER` 역할 분기 불일치) |
+| **긴급도** | **High** (1번 항목: 대리점 소속 화주 범위 일관 적용) / **Medium** (2~4번 항목: 내부 헬퍼 분리, 조회 액션 역할·소유권 정렬, 역할 분기 일관성) |
 | **발견일** | 2026-11-17 |
 | **발견자** | Riley (Team A, CPO) |
 | **관련** | Issue #1354 (TASK-1162) · Issue #1338 (TASK-1156, DEF-147 점검 병행) · R-12 · R-18 |
@@ -25,10 +25,10 @@
 ## 2. 권장 조치
 
 1. **`ups-actual-charges.ts` (`searchDeliveredUpsOrders`, `recordUpsActualCharges`)**:
-   - `searchDeliveredUpsOrders` L440 이후 `moreOrders` 병합 시에도 `profile.role === 'AGENCY'`이면 `shipperIds.has(o.shipper_id)` 필터를 동일하게 적용.
+   - 검색 결과 병합을 포함한 모든 조회 경로에 `AGENCY` 소속 화주 범위를 동일하게 적용(목표).
    - 두 함수 모두 `shipperIds` 구성 시 `profile.org_id`(대리점 본인 화주)를 포함하도록 `resolveAgencyShipperIds` 패턴으로 통일.
 2. **`ups-actual-cost.ts` (`getOrderReleasedDate`, `getUpsActualCost`)**:
-   - `getOrderReleasedDate`를 `'use server'` 파일에서 non-export 내부 함수(또는 `src/lib/` 유틸)로 분리하고, `getUpsActualCost`에 역할/소유권 검증 정책을 명시.
+   - `getOrderReleasedDate`는 `'use server'` 파일 밖의 내부 함수(또는 `src/lib/` 유틸)로 분리하고, `getUpsActualCost`의 역할/소유권 정책을 명시(목표).
 3. **`invoice.ts` · `settlement.ts`**:
-   - `getInvoicePdfHistory`에서 `invoiceId`의 `shipper_id === profile.org_id`(또는 관리자/소속 대리점) 확인 후 Signed URL 발급.
-   - `getSettlementOverview`·`getWeeklyRevenueChart`의 `isAdmin` 판정에 `USER_ROLES.MANAGER` 추가.
+   - `getInvoicePdfHistory`는 호출자가 소유한 인보이스(또는 관리자/소속 대리점)에만 Signed URL을 발급(목표).
+   - `getSettlementOverview`·`getWeeklyRevenueChart`의 관리자 판정에 `USER_ROLES.MANAGER` 포함(목표).

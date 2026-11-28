@@ -3,7 +3,7 @@
 #### getAgencyOrgIdByShipper(shipperOrgId)
 - **Path**: `src/app/actions/agency/shipper-link.ts:6-17`
 - **설명**: 화주 조직 ID(`shipperOrgId`)로 연결된 활성 대리점 조직 ID(`zen_agency_shippers.agency_org_id`, `is_active = true`)를 단건 조회합니다.
-- **권한**: `validateUserAction()` (로그인 세션 검증 + 액션 내 소유권 가드 없음 — **단, 일반 세션 클라이언트라 `zen_agency_shippers` RLS 정책이 적용됨을 실DB로 확인**: 대리점/화주 각각 자기 연결은 반환, 타 대상은 `null` → **수정 불필요**, TASK-B-374 점검 결과 TC-374-06)
+- **권한**: `validateUserAction()` (목표 상태: 로그인 세션 검증 및 일반 세션 클라이언트 RLS 정책 적용 — **해소됨**)
 - **Input**: `shipperOrgId: string` (화주 조직 UUID)
 - **Output**: `Promise<string | null>` (연결된 `agency_org_id` 또는 `null`)
 - **오류**: 미인증/프로필 부재 시 `Error("Login required")` / `Error("Profile not found")` throw (`validateUserAction`); DB 조회 실패 시 `Error("대리점 조회 실패: ${error.message}")` throw (`shipper-link.ts:15`)
@@ -73,6 +73,7 @@
 #### recordUpsActualCharges — TASK-B-381 PR-4a에서 제거
 - 옛 실비 등록·조정 인보이스 경로(`zen_ups_actual_charges` 교체 저장, `UPS_ACTUAL_ADJUSTMENT` 반영, `createPostFinalizationAdjustment` 호출)는 **PR-4a에서 제거**되었습니다. `src` 참조 0건.
 - 현재 잔존 함수는 조회·대사·검색뿐이며, UPS 청구는 `finalizeUpsSettlement` run 경로만 사용합니다.
+- **권한(목표 상태)**: `AGENCY` 소속 화주 범위 적용 및 대리점 본인 화주(`profile.org_id`) 포함 정렬 대상, `DEF-150` 참조 — 옛 함수는 제거되어 이 경로는 잔존하지 않습니다.
 
 #### getUpsActualCharges(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-charges.ts:17-40`
@@ -93,7 +94,7 @@
 #### searchDeliveredUpsOrders(query)
 - **Path**: `src/app/actions/finance/ups-actual-charges.ts:110-189`
 - **설명**: 오더 번호(`order_no`) 또는 운송장 번호(`zen_tracking_configs.tracking_no`) 부분 일치(`ilike`)로 `IN_TRANSIT`·`DELIVERED` 상태의 UPS 오더 목록을 검색합니다.
-- **권한**: `validateUserAction()` + `assertAdminOnly(profile)` — **`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용**(TASK-B-372). 비관리자는 `Error(permission_denied)` throw. 1단계·2단계(tracking_no) 모두 admin client로 조회합니다.
+- **권한**: `validateUserAction()` + `assertAdminOnly(profile)` — **`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용**(TASK-B-372). 비관리자는 `Error(permission_denied)` throw. 1단계·2단계(tracking_no) 모두 admin client로 조회합니다. (목표: 2단계 `tracking_no` 검색 결과 병합에도 `AGENCY` 소속 화주 필터 적용·대리점 본인 화주 포함 정렬 대상, `DEF-150` 참조)
 - **Input**: `query: string` (공백 제거 후 빈 문자열이면 즉시 `[]` 반환, `L371-372`)
 - **Output**: `Promise<Array<Record<string, unknown>>>` (`ups-actual-charges.ts:188`)
 - **오류**: 권한 불충족 시 `Error(permErr)` throw (`L369`); 오더 검색 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ORDER_SEARCH' }))` throw (`L391-394`, 트래킹 번호 조회 에러는 `logger.error`만 기록 후 비차단 진행 `L416-418`)
@@ -114,7 +115,7 @@
 #### getUpsActualCost(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-cost.ts:72-91`
 - **설명**: 특정 오더(`orderId`)의 UPS 실제 원가 확정 기록(`zen_ups_actual_cost` + `entered_by_profile` 조인)을 단건 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-cost.ts:73`, 로그인 세션만 검증하며 `assertAdmin` 역할 가드 없음 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-cost.ts:73`, 목표: 관리자 전용 가드 정렬 대상 — `DEF-150` 참조)
 - **Input**: `orderId: string` (오더 UUID)
 - **Output**: `Promise<Record<string, unknown> | null>` (`ups-actual-cost.ts:90`)
 - **오류**: 미인증 시 `validateUserAction` 예외 throw; DB 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ACTUAL_COST_LOOKUP' }))` throw (`L86-89`)
@@ -125,7 +126,7 @@
 - **권한**: `validateUserAction()` + `assertAdmin(profile)` (동일 파일 `L770-772`)
 - **Input**: `filter: CostSettlementFilter` — `{ status: 'NOT_SETTLED' | 'SETTLED' | 'ALL', from: string, to: string, q?: string }`
 - **Output**: `Promise<CostSettlementListResult>` — `{ success, orders?: CostSettlementOrderRow[], total?: number, error?: string }` (`L761-767`)
-- **오류**: 권한 불충족(`permission_denied`), 기간 누락·역전(`generic{DATE_RANGE_INVALID}`, `L774-777`), 목록 조회 실패(`generic{ORDER_LIST_LOOKUP}`, `L789-792`), **보조 조회 실패는 fail-open 금지** — 배송완료일 `generic{HISTORY_LOOKUP}`, 원가 `generic{COST_LOOKUP}`, 레거시 인보이스 `generic{LEGACY_INVOICE_LOOKUP}`(`L801-814`), 예외 시 `generic{UNEXPECTED}`. 배송완료일(`order_status_history.next_status='DELIVERED'`)이 없거나 기간 밖인 오더는 결과에서 제외합니다(`L804-812`).
+- **오류**: 권한 불충족(`permission_denied`), 기간 미입력·역전(`generic{DATE_RANGE_INVALID}`, `L774-777`), 목록 조회 실패(`generic{ORDER_LIST_LOOKUP}`, `L789-792`), **보조 조회 실패는 fail-open 금지** — 배송완료일 `generic{HISTORY_LOOKUP}`, 원가 `generic{COST_LOOKUP}`, 레거시 인보이스 `generic{LEGACY_INVOICE_LOOKUP}`(`L801-814`), 예외 시 `generic{UNEXPECTED}`. 배송완료일(`order_status_history.next_status='DELIVERED'`)이 없거나 기간 밖인 오더는 결과에서 제외합니다(`L804-812`).
 
 #### unmarkOrderCostSettled(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-cost.ts` (`unmarkOrderCostSettled`)
