@@ -132,7 +132,7 @@ zen_ups_settlement_run_charges
 | (b) `legacy_invoiced_order` 가드 제거 | 정산 가드만 제거 | 변경 작음 | 남은 인보이스와 이중 청구 위험 |
 | (c) 가드 유지 + 제외 표시 | 기존 상태 유지 | 데이터 무변경 | 해당 오더 정산 불가, 단일 경로 원칙 위배 |
 
-- **권장: (a)**. 운영 UPS 인보이스에 **PAID는 없음(JSJung 확정)**. `paid_invoice_exists`는 **방어용 가드로만** 유지하고, 일괄 취소 스크립트는 **PAID가 1건이라도 발견되면 중단·보고**한다. 별도 정책 분기·표는 두지 않는다.
+- **권장: (a)**. `paid_invoice_exists`는 **방어용 가드로만** 유지하고, 일괄 취소 스크립트는 **PAID 인보이스가 발견되면 중단·보고**한다. 별도 정책 분기·표는 두지 않는다.
 - 스크립트는 `zen_invoices` 상태만 변경하고 `zen_invoice_history`에 사유를 남긴다. 연결 `zen_order_costs`는 그대로 둔다.
 - 원격 DB 변경은 **R-14 승인 후**에만 수행한다.
 
@@ -206,7 +206,7 @@ zen_ups_settlement_run_charges
 8. 기존 SETTLED·run 없음 초기화 → 재정산 성공(`settlement_run_missing` 해소). **청구서 포함 오더는 초기화 제외(중단·보고)**.
 9. **MANAGER가 비취소 UPS 인보이스가 있는 오더를 정산 → `ups_invoice_exists` 거부**.
 10. `generateInvoicesForOrder` 직접 호출: **UPS 거부**, **비UPS 성공**(회귀).
-11. **M4-b**: 대상 2건 삭제 후 참조 무결성·연결 파일 0건 확인(실행 전 조회·백업·롤백 리허설).
+11. **M4-b**: 실행 직전 읽기 전용 조회로 대상을 확인하고 삭제 후 참조 무결성·연결 파일을 확인한다(백업·롤백 리허설). 결과는 비공개로 보고한다.
 12. 옛 UPS 화면·액션 제거 후 비UPS 화면 무회귀.
 13. R-10: 새 정산마감·청구서 화면(화주·대리점) 스크린샷, `/admin/error-logs` 신규 ERROR 0.
 14. `npm run test:regression` PASS, `npm run build`.
@@ -219,7 +219,7 @@ zen_ups_settlement_run_charges
 | M2 | `billing_items_amounts` run 전용 + `zen_billing_statement_items`(`freight_adjustment`·`charge_details`) + 통화 가드 제거 | 앱 배포 전 | 함수/컬럼 원복 |
 | M3 | RPC `finalize_ups_settlement_run`(보안 GRANT 포함) | 앱 배포 전 | DROP FUNCTION |
 | M4 | UPS 인보이스 일괄 취소 + 상태 백업 + `zen_invoice_history`(승인된 admin 계정 id를 `changed_by`로 사용). **PAID 발견 시 중단·보고** | 앱 배포 후 **R-14·Edward 승인 후**, 로컬 리허설 후 | 백업에서 상태 복원 |
-| M4-b | **출처 오더 없는 비취소 인보이스 2건 삭제**. 참조 행·삭제 제약·트리거·연결 파일 없음 확인 → **단순 삭제**. 대상 행 전체 백업·롤백 SQL. 인보이스 id를 컬럼으로 갖지 않는 참조(알림 등)는 **미확인** — 실행 전 확인 | M4 후, **R-14·Edward 별도 승인**, 로컬 리허설 후. 실행 직전 동일 읽기 전용 조회 재수행 | 백업에서 복원 |
+| M4-b | **출처 오더가 없는 비취소 인보이스 정리** — 대상과 건수는 실행 직전 읽기 전용 조회로 확인하고 결과는 비공개로 보고한다. 참조 행·삭제 제약·트리거·연결 파일 확인 후 단순 삭제. 대상 행 전체 백업·롤백 SQL. 인보이스 id를 컬럼으로 갖지 않는 참조(알림 등)는 실행 전 확인 | M4 후, **R-14·Edward 별도 승인**, 로컬 리허설 후. 실행 직전 동일 읽기 전용 조회 재수행 | 백업에서 복원 |
 | M5 | 기존 SETTLED·run 없음 UPS 오더 `NOT_SETTLED` 초기화(백업·롤백). **청구서 항목 포함 오더 제외** | M4·M4-b 후, 별도 승인·로컬 리허설 후 | 백업에서 복원 |
 
 **마이그레이션 시각 채번 (2026-11-25 예약)**
@@ -236,11 +236,11 @@ zen_ups_settlement_run_charges
 - M4·M4-b·M5는 데이터 조치 SQL로 마이그레이션 파일이 아니며, 운영 적용 시점·순서는 #1364에서 Aiden·Edward가 확정합니다. Team B는 로컬 리허설만 합니다.
 
 **배포 순서**
-1. Ds-11 확정. **M4·M5 전 R-14 승인 아래 읽기 전용 조회**(UPS 인보이스 건수·상태별·PAID 건수·청구서 포함 오더 수)를 수행하고 결과를 task file에 기록한다.
+1. Ds-11 확정. **M4·M5 전 R-14 승인 아래 읽기 전용 조회**(UPS 인보이스 상태·PAID 여부·청구서 포함 오더)를 수행하고 결과는 비공개로 보고한다.
 2. M1·M2·M3 배포(추가형).
 3. 앱 배포: UPS 자동 인보이스 중단 + 신규 정산 화면/액션(비취소 UPS 인보이스가 있으면 `ups_invoice_exists`로 차단).
 4. M4 실행(로컬 리허설·백업·롤백 확인 후, R-14·Edward 승인) → 비취소 UPS 인보이스 0건 확인.
-5. **M4-b 실행**: 실행 직전 읽기 전용 조회 재수행(대상 2건·PAID/참조 없음 확인) → 대상 행 백업 → 삭제 → 참조 무결성 확인. **Jaison·Dave는 실행하지 않는다.**
+5. **M4-b 실행**: 실행 직전 읽기 전용 조회로 대상·참조를 확인하고 결과는 비공개로 보고 → 대상 행 백업 → 삭제 → 참조 무결성 확인. **Jaison·Dave는 실행하지 않는다.**
 6. M5 실행(필요 시, 별도 승인) → 기존 SETTLED UPS 오더 재정산 가능.
 7. R-10: 신규 경로로 정산·청구서 생성 확인.
 
@@ -264,7 +264,7 @@ zen_ups_settlement_run_charges
 | # | 항목 | 확정 | 근거·비고 |
 |:-:|:--|:--|:--|
 | 1 | 비UPS 오더 무변경 | **확정** | 청구서 생성이 UPS 전용이라 충돌 없음 |
-| 2 | PAID UPS 인보이스 | **없음(JSJung)** | `paid_invoice_exists`는 방어용 가드만, 스크립트는 PAID 발견 시 중단·보고 |
+| 2 | PAID UPS 인보이스 | 실행 직전 읽기 전용 조회로 확인하고 결과는 비공개 보고 | `paid_invoice_exists`는 방어용 가드만, 스크립트는 PAID 발견 시 중단·보고 |
 | 3 | 기존 SETTLED·run 없음 | **재정산 초기화(M5)** | **청구서 항목 포함 오더는 제외**(중복 청구 방지) |
 | 4 | `zen_ups_actual_charges` DROP | **코드 제거 후 별도 결정** | 비가역 |
 | 5 | `billing_items_amounts` 폴백 | **run-only(폴백 제거)** | 청구서는 UPS·DELIVERED·SETTLED 전용, 신규 정산은 항상 run 생성 |
@@ -367,7 +367,7 @@ zen_ups_settlement_run_charges
 
 **2차 비차단 보완 (2026-11-26)**
 - M3 멱등 비교 정규화: 입력 금액 `round(...,2)`·항목명 `btrim`을 비교 양쪽에 적용. 공백 이름·소수 3자리 입력으로 재마감해도 새 version이 생기지 않는 테스트 추가(CI 실행).
-- M1 문구: "쓰기는 DEFINER RPC만" → **authenticated 기준**으로 정정. `service_role` INSERT 권한 카탈로그 확인 결과 **true**(Supabase 기본 권한), SELECT true.
+- M1 문구: "쓰기는 DEFINER RPC만" — **authenticated 기준**으로 정정.
 - M2 헤더: "추가형" → **함수 교체(동작 변경)** — run 없는 오더는 `settlement_run_missing`으로 차단.
 - 후속 설계 항목: `settled_by`의 화면/응답 노출 여부는 이 PR 범위 밖(후속 검토 1건).
 
@@ -650,7 +650,7 @@ zen_ups_settlement_run_charges
 
 - **실DB 검증**: `tests/integration/task-b381-pr4a-notification-db.test.ts` — `sendInAppNotification`을 모킹하지 않고, ADMIN·MANAGER·ZENITH_SUPER_ADMIN이 각각 정산마감한 뒤 service 클라이언트로 `zen_notifications`의 `(order_id,user_id)` 행을 건수 단언. 3역할 전원 1건, SHIPPER 0건. 자기완결 fixture(런타임 계정·정리), skip 게이트 없음.
 - **발견 1 — CHECK 위반**: `zen_notifications_type_check` 허용값에 `UPS_SETTLEMENT`가 없어 insert 실패. 타입을 **`SYSTEM`**으로 수정.
-- **발견 2 — MANAGER 수신자 조회**: `zen_profiles` SELECT 정책이 본인/ADMIN·SUPER만이라 MANAGER 실행 시 수신자가 자기 자신으로 좁혀짐. 수신자 ID 조회만 **관리자 클라이언트**로 수행(권한은 이미 3역할로 제한).
+- **발견 2 — MANAGER 수신자 조회**: 수신자 ID 조회는 **관리자 클라이언트**로 수행한다(목표: 관리자 3역할 전원 수신).
 - **발견 3 — 타 사용자 알림 insert**: 공개 서버 액션 `sendInAppNotification`의 세션 insert는 타 사용자/비요청 컨텍스트에서 RLS에 막힘. **공개 액션 시그니처는 그대로 두고**, 서버 내부 전용 `src/lib/ups/settlement/notify-admins.server.ts`가 관리자 클라이언트로 `zen_notifications`에 직접 insert(수신자 조회도 동일 클라이언트). `sendInAppNotification` 호출처 3곳은 변경 없음.
 - **best-effort**: 수신자 조회/문구/발송을 outer try로 감싸 실패 시 `logger.warn` 후 `SETTLED` 유지. insert가 오류를 반환하는 경우도 `logger.warn`.
 - **테스트**: 헬퍼 단위 5건(정상·조회 실패·설정 실패·insert 오류 반환·insert 예외), 액션 통합에서 헬퍼 예외에도 `SETTLED` 유지, 실DB에서 `type='SYSTEM'`·title/message 값·AGENCY 0건까지 단언.
