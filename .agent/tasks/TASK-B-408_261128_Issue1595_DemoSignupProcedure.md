@@ -4,7 +4,7 @@
 |:-----|:-----|
 | 이슈 | [#1595](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1595) · 담당 Mike · 검증 Jaison · R-01 Aiden · p1 |
 | 브랜치 | `feature/teamb-task-b408-demo-signup` (base `origin/TeamB_Dev` `8979b24c9`) |
-| 상태 | 🔄 진행 중 (label `status:in-progress` — 착수 시점에 이미 부여됨) |
+| 상태 | ✅ PR-A 완료 → `status:review` (PR #1597, 2026-11-28 21:47 KST) |
 | 기한 | 리허설·절차서 12/1(화) 12:00 · **실제(운영) 가입은 지시 전까지 하지 않음** |
 | 산출물 | **task file 1개**(절차서·리허설 결과·외부 메일 점검표, 값 없음) |
 | 원칙 | R-21 §1·§2(계정·주소·비밀번호·조직명 실값 저장 금지, 결과는 단계 수·통과/실패·예/아니오만) · R-14(운영 접속은 Edward 승인 후) |
@@ -110,5 +110,8 @@ git checkout -b feature/teamb-task-b408-demo-signup origin/TeamB_Dev   # 8979b24
 
 ## [작업 결과]
 
-- 커밋: `<커밋 해시>`
-- PR: `<PR 번호>`
+- **커밋**: `dab160b01` (task file 1개, 114줄)
+- **PR**: [#1597](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1597) — base `TeamB_Dev`, `Refs #1595`, 라벨 `status:review`
+- **리허설**: 9단계 전부 통과 (§2) · **외부 메일**: 2경로 호출 실측(승인 0건·인증 0건) (§3)
+- **r21 사전 점검**: `branch origin/TeamB_Dev` → **A=0 / B=0**
+- **CI**: 8/8 pass (Regression Tests 8m59s) — `gh pr checks` 원문은 이슈 보고 코멘트에 인용
