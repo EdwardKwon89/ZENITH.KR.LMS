@@ -82,7 +82,7 @@ no checks reported on the 'TeamB_Dev' branch
 ```
 
 두 차례 모두 `exit 1`. **CI 통과를 주장하지 않습니다.** PR #1448은 base `develop` ← head `TeamB_Dev`, state `OPEN`, `mergeable=CONFLICTING`, `mergeStateStatus=DIRTY` (동기화 PR 병합 전 시점). 로컬 회귀 PASS는 CI 결과가 아닙니다.
-- 동기화 PR #1584의 CI는 `13:28:24 KST` 기준 **8개 검사 모두 `pending`**(Dependency Audit / Docs Sync / Evidence Escape / LRTM Sync / Regression Tests / Task File Check / Type Check / Vendor Integrity) — 아직 결과 확정 전. 완료 후 Jaison이 최종 확인.
+- 동기화 PR #1584의 CI — `2026-11-28 13:40:56 KST` 최종 확인, **8/8 pass**, `exit 0`. `Regression Tests` **pass(11m57s)**. 나머지 7건도 전부 pass(Dependency Audit / Docs Sync / Evidence Escape / LRTM Sync / Task File Check / Type Check / Vendor Integrity). 이는 **본 동기화 PR(head 브랜치)의 CI**이며, 통합 PR #1448의 CI가 아님(#1448은 여전히 `no checks reported`). 병합 후 #1448 재확인은 Jaison·Aiden.
 
 ### 4. 마이그레이션 적용 계획서 갱신 요지 (로컬 scratch에만 보관 / 커밋 없음 / 경로 미기재)
 
