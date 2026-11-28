@@ -68,7 +68,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 1. **GOV_COMMON.md Read**: 공통 규칙 숙지 (필수)
 2. **PATH 설정**: `export PATH=$PATH:/opt/homebrew/bin`
 3. **페르소나 식별**: 위 [페르소나 자동 식별](#-페르소나-자동-식별) 블록 기준 (R-16)
-4. **활성 태스크 확인**: `gh issue list --assignee <본인>` → 자신 담당 미완료 이슈(`status:open`·`status:draft`·`status:in-progress`) 파악 (R-16, R-17 v3.0)
+4. **활성 태스크 확인**: `gh issue list --assignee <본인>` → 자신 담당 미완료 이슈(`status:open`·`status:draft`·`status:ready`·`status:in-progress`) 파악 (R-16, R-17 v3.0)
 5. **역할 명세 확인**: 본 문서의 역할 정의 및 파일 소유권 Zone 숙지
 
 ---

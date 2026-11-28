@@ -32,7 +32,7 @@ tags: ["procedure"]
 | G1 | 릴리즈 PR(`develop→main`) CI | `gh pr checks <PR>` | Regression Tests `pass` (`pending`이면 대기, `fail`이면 §6-A) |
 | G2 | main 병합 완료 | `gh pr view <PR> --json state,mergeCommit` | `MERGED` + 병합 커밋 해시 **기록** |
 | G3 | develop·main 코드 동일 | `git diff --stat origin/main origin/develop` | 출력 없음 (해시만 다르고 트리는 같아야 함) |
-| G4 | 밀린 마이그레이션 | `supabase link --project-ref ayowrwmufagzstqiqrnj && supabase migration list` | 로컬·원격 열 불일치 없음. 있으면 **중단 후 209 §2 데이터 보전 절차** |
+| G4 | 밀린 마이그레이션 | `supabase link --project-ref <운영_프로젝트_ref> && supabase migration list` | 로컬·원격 열 불일치 없음. 있으면 **중단 후 209 §2 데이터 보전 절차** |
 | G5 | 롤백 대상 기록 | `vercel ls --prod` | 현재 Ready 인 프로덕션 배포 URL 1건을 보고에 기록 |
 
 ### 배포 전 기준선 (row count)
@@ -67,7 +67,7 @@ rm -f <scratch>/prod.env      # 키가 담긴 임시 파일은 즉시 삭제, �
 
 종료 코드: `0` 성공 / `1` 배포 전 게이트 실패 / `2` 환경 오류 / `3` 배포 후 검증 실패. 스크립트는 V1(Ready)·V2(alias)·V3(HTTP 200)만 검증하므로 **V4(row count)·V5(신규 ERROR)와 §1의 G4(마이그레이션)·row count 기준선은 직접 수행**한다. Edward의 배포 승인도 대체하지 않는다.
 
-> ⚠️ 검증 상태(2026-10-29): `--dry-run` 게이트 경로와 오류 종료 코드(1·2)는 실행해 검증했다. **실제 배포 경로(`vercel --prod` 실행·URL 파싱·V1~V3)는 아직 실배포로 검증되지 않았다** — 다음 배포 때 첫 실행 결과를 확인하고 이 문장을 갱신한다.
+> ✅ 검증 상태(2026-11-24, TASK-1175 / IMP-204): `--dry-run` 게이트·실배포(V1·V3) 동작 확인 및 V2(`alias` 확인) SIGPIPE 오탐은 코드 수정 완료(**수정 후 실배포 재검증은 다음 배포 때 확인**). V2는 `vercel inspect` 출력을 변수로 캡처한 뒤 검사하며, `vercel inspect` 비정상 종료 시 최대 3회 재시도 후 `inspect 실패`와 `alias 미연결`을 구분해 exit 3을 반환한다. `vercel inspect` 자체 실패로 중단된 경우에만 아래 §3 V2 명령(`vercel inspect <새 배포 URL>`)으로 수동 대체 확인한다.
 
 ### 2-B. 수동 절차 (스크립트를 쓸 수 없을 때)
 
@@ -151,8 +151,30 @@ vercel --prod --yes
 
 ---
 
+## 7. 긴급 수정(핫픽스) — develop에 운영 반영 보류 변경이 있을 때
+
+> ⚠️ **이 절차는 아직 실행해 본 적 없다**(2026-11-23 문서화). 첫 사용 시 결과로 이 절을 실측 기준으로 갱신한다.
+
+**적용 조건**: develop에 운영 반영이 보류된 변경(예: TeamB_Dev에서 통합된 미출시 기능)이 있어, 일반 릴리즈(`develop→main`)로는 긴급 수정만 단독 배포할 수 없을 때. 일반 릴리즈는 G3(develop·main 코드 동일)을 전제로 하므로, 보류 변경이 있으면 이 전제가 깨진다. **§0 대원칙(Edward의 명시적 지시)은 그대로 적용**한다.
+
+| 단계 | 내용 | 확인 |
+|:-:|:--|:--|
+| H1 | **격리 worktree에서 `origin/main` 기준 브랜치 생성**: `git fetch origin && git checkout -b hotfix/<요약> origin/main` | `git log -1 --format=%H` = `git rev-parse origin/main` |
+| H2 | **최소 변경만** 수정·테스트. 보류 변경(develop에만 있는 코드)을 가져오지 않는다 | `git diff --stat origin/main` 파일 목록이 수정 대상뿐 |
+| H3 | 마이그레이션 포함 시 **파일 단위 선적용**(209 §2). 타임스탬프가 보류 마이그레이션과 **순서 충돌**하지 않는지 Aiden이 사전 확인(운영 이력과 파일 순서가 뒤바뀌면 `migration repair` 필요 — 미검증) | `supabase migration list` |
+| H4 | **PR 대상은 `main`**. `pr-checks.yml`의 `branches`에 `main`이 있어 PR Checks가 실행되며, main 보호 규칙의 필수 체크는 `Regression Tests` | `gh pr checks <PR>` (G1과 동일 기준) |
+| H5 | 병합은 **Aiden 전속**(R-19) | G2와 동일 |
+| H6 | 배포: `./scripts/deploy-prod.sh --dry-run --allow-diverge --expect <병합 커밋>` → 출력된 main↔develop 코드 차이가 **"보류 중인 develop 변경 + 이번 핫픽스"뿐인지 보고에 인용**한 뒤 실제 배포(`--allow-diverge` 필수 — 이 경우 G3 차이는 의도된 것) | 스크립트 종료 코드·V1~V5 |
+| H7 | **같은 날 develop에 역병합**: 핫픽스 커밋을 `develop`에 반영(`git cherry-pick` PR 또는 `main→develop` 병합 PR). 하지 않으면 다음 일반 릴리즈(`develop→main`)에서 핫픽스가 되돌려질 수 있다 | develop에서 해당 수정 확인 |
+| H8 | 검증·롤백·보고는 §3·§4·§5와 동일. 롤백 대상은 G5에서 기록한 직전 Ready 배포 | V1~V5 |
+
+**사후 처리**: 핫픽스 사유를 DEF 또는 IMP로 기록(R-15·R-18). 보류 변경이 develop에 남아 있는 동안은 일반 릴리즈를 하지 않는다 — 일반 릴리즈 시점의 G3·G4와 보류 해제 조건은 별도로 확인한다.
+
+---
+
 ## 개정 이력
 
 | 버전 | 날짜 | 작성자 | 설명 |
 | :--- | :--- | :--- | :--- |
 | v1.0 | 2026-10-29 | Aiden | 최초 작성 — TASK-B-343 배포(PR #1272)의 실제 절차·장애 3건을 게이트화 (IMP-179) |
+| v1.1 | 2026-11-23 | Aiden | §7 긴급 수정(핫픽스) 절차 신설 — develop에 운영 반영 보류 변경이 있을 때의 main 기반 경로(TeamB_Dev 조건부 통합 대비, Edward 지시). 미실행 절차로 표기 |

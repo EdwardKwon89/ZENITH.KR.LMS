@@ -35,13 +35,13 @@ E2E-11 '오더 연계 QnA 라이프사이클' 테스트의 실패 원인을 분�
 ## 4. 증적 자료 (Screenshots)
 
 ````carousel
-![Step 1: QnA Submitted](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_11_Result/e2e_11_01_qna_submitted.png)
+![Step 1: QnA Submitted](file://~/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_11_Result/e2e_11_01_qna_submitted.png)
 <!-- slide -->
-![Step 2: Admin QnA List](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_11_Result/e2e_11_02_admin_qna_list.png)
+![Step 2: Admin QnA List](file://~/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_11_Result/e2e_11_02_admin_qna_list.png)
 <!-- slide -->
-![Step 3: Admin Answer Submitted](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_11_Result/e2e_11_03_admin_answer_submitted.png)
+![Step 3: Admin Answer Submitted](file://~/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_11_Result/e2e_11_03_admin_answer_submitted.png)
 <!-- slide -->
-![Step 4: Shipper Answer Visible](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_11_Result/e2e_11_04_shipper_answer_visible.png)
+![Step 4: Shipper Answer Visible](file://~/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_11_Result/e2e_11_04_shipper_answer_visible.png)
 ````
 
 ## 5. 결론

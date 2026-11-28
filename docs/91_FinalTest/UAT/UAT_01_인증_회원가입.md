@@ -25,10 +25,10 @@
 | 1 | /ko/register | 회원 유형 선택 | 유형: `법인 (기업)` 선택 | 법인 가입 Wizard 1단계 표시 | ☐ |
 | 2 | /ko/register | 조직 등록 방식 선택 → `신규 법인 등록` | 조직: `신규 법인 등록 (CREATE)` | 법인 정보 입력 폼 표시 | ☐ |
 | 3 | /ko/register | 법인 정보 + 운송사 선택 + 송화주 역할 확인 후 '다음' | 법인명: `(주)테스트물류` / 사업자번호: `123-45-67890` / 업태: `물류` / 종목: `운송` / 운송사: `[운송사명 선택]` / 역할: `송화주(SHIPPER)` | 개인 정보 입력 단계로 이동 | ☐ |
-| 4 | /ko/register | 대표자 개인 정보 입력 후 '다음' | 이름: `홍길동` / 이메일: `test_uat@zenith.kr` / 비밀번호: `password1234` / 전화번호: `010-1234-5678` | 서류 업로드(DOCS) 단계로 이동 / ⚠️ 비밀번호 입력란 한국어 안내 메시지 표시 확인 (DEF-004·005) / ⚠️ 비밀번호 표시·숨김 토글 버튼 존재 확인 (DEF-003 — 미구현 시 결함 기록) | ☐ |
+| 4 | /ko/register | 대표자 개인 정보 입력 후 '다음' | 이름: `홍길동` / 이메일: `test_uat@zenith.kr` / 비밀번호: `<로컬 시드 비밀번호>` / 전화번호: `010-1234-5678` | 서류 업로드(DOCS) 단계로 이동 / ⚠️ 비밀번호 입력란 한국어 안내 메시지 표시 확인 (DEF-004·005) / ⚠️ 비밀번호 표시·숨김 토글 버튼 존재 확인 (DEF-003 — 미구현 시 결함 기록) | ☐ |
 | 5 | /ko/register | 사업자등록증 파일 업로드 후 '제출' | 파일: `사업자등록증.pdf` (더미 파일) | "가입 신청이 완료되었습니다. 승인 후 로그인 가능합니다." 메시지 표시 | ☐ |
 | 6 | /ko/login | 가입 완료 후 자동 이동 확인 | — | ⚠️ 실제 동작: Logout 후 Login 화면으로 이동 (UAT-01-07은 `/register/pending` 기대 — 동작 불일치, DEF-006 참조) | ☐ |
-| 7 | /ko/login | 등록한 계정으로 로그인 시도 (PENDING 상태) | `test_uat@zenith.kr` / `password1234` | 로그인 성공 / "오더관리" 메뉴만 표출 / 다른 메뉴 클릭 시 심사중 안내 메시지 표출 / Logout 버튼 표시 | ☐ |
+| 7 | /ko/login | 등록한 계정으로 로그인 시도 (PENDING 상태) | `test_uat@zenith.kr` / `<로컬 시드 비밀번호>` | 로그인 성공 / "오더관리" 메뉴만 표출 / 다른 메뉴 클릭 시 심사중 안내 메시지 표출 / Logout 버튼 표시 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
@@ -61,12 +61,12 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/login | SHIPPER 계정으로 로그인 | `uat02_corp_shipper@zenith.kr` / `password1234` | 대시보드로 이동, SHIPPER 메뉴 표시 | ☐ |
-| 2 | /ko/login | 로그아웃 후 ADMIN 계정 로그인 | `admin@zenith.kr` / `password1234` | 대시보드로 이동, ADMIN 메뉴 표시 | ☐ |
-| 3 | /ko/login | 로그아웃 후 MASTER 계정 로그인 | `master@zenith.kr` / `password1234` | 대시보드로 이동, MASTER 메뉴 표시 | ☐ |
-| 4 | /ko/login | 로그아웃 후 MANAGER 계정 로그인 | `manager@zenith.kr` / `password1234` | 대시보드로 이동, MANAGER 메뉴 표시 | ☐ |
+| 1 | /ko/login | SHIPPER 계정으로 로그인 | `uat02_corp_shipper@zenith.kr` / `<로컬 시드 비밀번호>` | 대시보드로 이동, SHIPPER 메뉴 표시 | ☐ |
+| 2 | /ko/login | 로그아웃 후 ADMIN 계정 로그인 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | 대시보드로 이동, ADMIN 메뉴 표시 | ☐ |
+| 3 | /ko/login | 로그아웃 후 MASTER 계정 로그인 | `master@zenith.kr` / `<로컬 시드 비밀번호>` | 대시보드로 이동, MASTER 메뉴 표시 | ☐ |
+| 4 | /ko/login | 로그아웃 후 MANAGER 계정 로그인 | `manager@zenith.kr` / `<로컬 시드 비밀번호>` | 대시보드로 이동, MANAGER 메뉴 표시 | ☐ |
 | 5 | /ko/login | 잘못된 비밀번호 입력 | `admin@zenith.kr` / `wrongpassword` | "이메일 또는 비밀번호가 일치하지 않습니다." 오류 메시지 표시 | ☐ |
-| 6 | /ko/login | 존재하지 않는 이메일 입력 | `nonexist@test.com` / `password1234` | "이메일 또는 비밀번호가 일치하지 않습니다." 오류 메시지 표시 | ☐ |
+| 6 | /ko/login | 존재하지 않는 이메일 입력 | `nonexist@test.com` / `<로컬 시드 비밀번호>` | "이메일 또는 비밀번호가 일치하지 않습니다." 오류 메시지 표시 | ☐ |
 | 7 | /ko/login | 빈 필드 제출 | (공란) / (공란) | "이메일을 입력해주세요." / "비밀번호를 입력해주세요." 필드 레벨 오류 표시 | ☐ |
 
 ### 합격 기준
@@ -180,7 +180,7 @@
 | 3 | 이메일 | 재설정 메일 확인 | — | 재설정 링크가 포함된 이메일 수신 (발송까지 최대 1분) | ☐ |
 | 4 | 재설정 URL | 새 비밀번호 입력 후 '변경' 클릭 | 새 비밀번호: `newpass1234!` / 확인: `newpass1234!` | "비밀번호가 성공적으로 변경되었습니다." 메시지 표시 | ☐ |
 | 5 | /ko/login | 새 비밀번호로 로그인 | `admin@zenith.kr` / `newpass1234!` | 대시보드 정상 이동 | ☐ |
-| 6 | /ko/login | 복구: 기존 비밀번호로 재설정 | `admin@zenith.kr` / `password1234` (재설정 절차 1~4 반복) | 정상 복구 완료 | ☐ |
+| 6 | /ko/login | 복구: 기존 비밀번호로 재설정 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` (재설정 절차 1~4 반복) | 정상 복구 완료 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
@@ -211,9 +211,9 @@
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
 | 1 | /ko/register | 회원 유형 선택 | 유형: `개인` 선택 | 개인 가입 폼 표시 (법인 정보 입력 없음) | ☐ |
-| 2 | /ko/register | 개인 정보 입력 후 '가입' | 이름: `김개인` / 이메일: `personal_uat@zenith.kr` / 비밀번호: `password1234` / 전화번호: `010-4444-5555` | 가입 처리 즉시 완료, /ko/orders 페이지로 이동 | ☐ |
+| 2 | /ko/register | 개인 정보 입력 후 '가입' | 이름: `김개인` / 이메일: `personal_uat@zenith.kr` / 비밀번호: `<로컬 시드 비밀번호>` / 전화번호: `010-4444-5555` | 가입 처리 즉시 완료, /ko/orders 페이지로 이동 | ☐ |
 | 3 | /ko/orders | 주문 페이지 자동 이동 확인 | — | 대시보드가 아닌 /ko/orders 페이지로 이동 (승인 불필요) | ☐ |
-| 4 | /ko/login | 로그아웃 후 재로그인 | `personal_uat@zenith.kr` / `password1234` | 로그인 정상 가능, 개인회원 메뉴 표시 | ☐ |
+| 4 | /ko/login | 로그아웃 후 재로그인 | `personal_uat@zenith.kr` / `<로컬 시드 비밀번호>` | 로그인 정상 가능, 개인회원 메뉴 표시 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
@@ -246,9 +246,9 @@
 | 1 | /ko/register | 회원 유형 선택 | 유형: `법인 (기업)` 선택 | 법인 가입 Wizard 표시 | ☐ |
 | 2 | /ko/register | 조직 등록 방식 선택 → `기존 법인 합류` | 조직: `기존 법인 합류 (JOIN)` | 법인 검색 폼 표시 | ☐ |
 | 3 | /ko/register | 기존 법인 검색 후 선택 | 검색어: `테스트물류` → 조직 선택 | 선택한 조직 정보 표시 | ☐ |
-| 4 | /ko/register | 개인 정보 입력 후 '다음' | 이름: `이합류` / 이메일: `join_uat@zenith.kr` / 비밀번호: `password1234` | "가입 신청이 완료되었습니다." 메시지 표시 | ☐ |
+| 4 | /ko/register | 개인 정보 입력 후 '다음' | 이름: `이합류` / 이메일: `join_uat@zenith.kr` / 비밀번호: `<로컬 시드 비밀번호>` | "가입 신청이 완료되었습니다." 메시지 표시 | ☐ |
 | 5 | /ko/register/pending | 자동 이동 | — | 승인 대기 페이지 표시 (신규 법인 등록과 동일한 pending 페이지) | ☐ |
-| 6 | /ko/login | 승인 후 로그인 확인 | `join_uat@zenith.kr` / `password1234` | 로그인 정상 가능, 기존 조직에 연결됨 확인 | ☐ |
+| 6 | /ko/login | 승인 후 로그인 확인 | `join_uat@zenith.kr` / `<로컬 시드 비밀번호>` | 로그인 정상 가능, 기존 조직에 연결됨 확인 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
@@ -279,13 +279,13 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/orders | ADMIN 계정으로 로그인 후 /ko/orders 진입 | `admin@zenith.kr` / `password1234` | 오더 목록 페이지 정상 표시 | ☐ |
+| 1 | /ko/orders | ADMIN 계정으로 로그인 후 /ko/orders 진입 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | 오더 목록 페이지 정상 표시 | ☐ |
 | 2 | 브라우저 DevTools | Application → Cookies → `zen_last_activity` 확인 | — | Unix timestamp 값 저장 확인 (httpOnly·secure·sameSite lax) | ☐ |
 | 3 | /ko/orders | 30초 내 페이지 새로고침 (활동 유지) | — | `zen_last_activity` 갱신 → 새로운 timestamp로 변경 | ☐ |
 | 4 | — | 2분 대기 후 (SESSION_IDLE_TIMEOUT_MIN=2) 페이지 새로고침 | — | 자동 로그아웃 → `/ko/login?reason=timeout` 으로 redirect | ☐ |
 | 5 | /ko/login | URL 쿼리 파라미터 확인 | — | `reason=timeout` 파라미터 포함 확인 | ☐ |
 | 6 | 브라우저 DevTools | `zen_last_activity` 쿠키 존재 여부 확인 | — | 쿠키가 완전히 삭제됨 (`response.cookies.delete('zen_last_activity')`) | ☐ |
-| 7 | /ko/login | 다시 로그인 시도 | `admin@zenith.kr` / `password1234` | 정상 로그인, 새 `zen_last_activity` 쿠키 발급 | ☐ |
+| 7 | /ko/login | 다시 로그인 시도 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | 정상 로그인, 새 `zen_last_activity` 쿠키 발급 | ☐ |
 
 ### 합격 기준
 - [ ] 전 단계 ☑ 완료
@@ -316,10 +316,10 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/admin/members | ADMIN 로그인 → 회원 관리 페이지 진입 | `admin@zenith.kr` / `password1234` | 전체 회원 목록 표시 | ☐ |
+| 1 | /ko/admin/members | ADMIN 로그인 → 회원 관리 페이지 진입 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | 전체 회원 목록 표시 | ☐ |
 | 2 | /ko/admin/members | 대상 SHIPPER 계정의 '정지' 버튼 클릭 | — | "해당 회원을 이용 제한하시겠습니까?" 확인 대화상자 표시 | ☐ |
 | 3 | 확인 대화상자 | '확인' 클릭 | — | "이용 제한" confirm 실행 → 계정 status = SUSPENDED | ☐ |
-| 4 | /ko/login | 정지된 SHIPPER 계정으로 로그인 시도 | (해당 SHIPPER 이메일) / `password1234` | 로그인 직후 `/ko/suspended` 페이지로 redirect | ☐ |
+| 4 | /ko/login | 정지된 SHIPPER 계정으로 로그인 시도 | (해당 SHIPPER 이메일) / `<로컬 시드 비밀번호>` | 로그인 직후 `/ko/suspended` 페이지로 redirect | ☐ |
 | 5 | /ko/suspended | SUSPENDED 안내 페이지 UI 확인 | — | ShieldAlert 아이콘 + "계정이 일시 정지되었습니다" 문구 + support@zenith.kr 연락처 + 로그아웃 버튼 표시 (ZenCard 레이아웃) | ☐ |
 | 6 | /ko/suspended | 브라우저 URL에 `/ko/orders` 직접 입력 | — | `/ko/suspended` 유지 — authGuard SUSPENDED whitelist 불일치로 강제 redirect | ☐ |
 | 7 | /ko/suspended | URL에 `/ko/login` 직접 입력 | — | `/ko/login` 페이지로 정상 이동 (whitelist 허용) | ☐ |

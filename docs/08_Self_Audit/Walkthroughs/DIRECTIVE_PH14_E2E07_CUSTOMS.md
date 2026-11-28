@@ -60,7 +60,7 @@ E2E-06 PASS 검증 후 E2E-07 착수 준비 과정에서 **블로커**가 발견
 **계정 정보:**
 ```
 ADMIN_EMAIL = 'admin@zenith.kr'
-PASSWORD    = 'password1234'
+PASSWORD    = '<로컬 시드 비밀번호>'
 TEST_ORDER_ID = 'd197352a-ba9f-4640-9176-c50c852d8138'
 ```
 

@@ -4,16 +4,16 @@
 [     600ms] [ERROR] %o
 
 %s Error: invalid input syntax for type uuid: "ORD-2026-0002"
-    at getOrderDetails (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0bu72fb._.js?0:2029:27)
-    at  OrderDetailPage (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0pgu4oh._.js?1:529:19)
+    at getOrderDetails (about://React/Server/file://~/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0bu72fb._.js?0:2029:27)
+    at  OrderDetailPage (about://React/Server/file://~/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0pgu4oh._.js?1:529:19)
     at resolveErrorDev (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:1919:105)
     at processFullStringRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2434:29)
     at processFullBinaryRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2393:9)
     at processBinaryChunk (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2502:221)
     at progress (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2689:13) The above error occurred in the <OrderDetailPage> component. It was handled by the <ErrorBoundaryHandler> error boundary. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:1998
 [     615ms] [ERROR] Dashboard Runtime Error: Error: invalid input syntax for type uuid: "ORD-2026-0002"
-    at getOrderDetails (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0bu72fb._.js?0:2029:27)
-    at  OrderDetailPage (about://React/Server/file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0pgu4oh._.js?1:529:19)
+    at getOrderDetails (about://React/Server/file://~/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0bu72fb._.js?0:2029:27)
+    at  OrderDetailPage (about://React/Server/file://~/WorkSpace/ZENITH_LMS_001/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__0pgu4oh._.js?1:529:19)
     at resolveErrorDev (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:1919:105)
     at processFullStringRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2434:29)
     at processFullBinaryRow (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2393:9)

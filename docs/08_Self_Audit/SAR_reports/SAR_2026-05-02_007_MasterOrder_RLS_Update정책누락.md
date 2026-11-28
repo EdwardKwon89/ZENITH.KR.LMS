@@ -31,6 +31,6 @@
 - **보안 검토**: 모든 신규 테이블 또는 기존 테이블의 상태 변경 로직 추가 시, 반드시 권한별 RLS 정책을 선제적으로 검토(API-First Design 준수).
 
 ## 5. 관련 문서
-- [WBS_01_상세_공정표.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/01_WBS/WBS_01_%EC%83%81%EC%84%B8_%EA%B3%B5%EC%A0%95%ED%91%9C.md)
-- [TASK_BOARD.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/.agent/TASK_BOARD.md)
-- [20260502191116_fix_e2e_03_master_grouping_rls.sql](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/supabase/migrations/20260502191116_fix_e2e_03_master_grouping_rls.sql)
+- [WBS_01_상세_공정표.md](file://~/WorkSpace/ZENITH_LMS_001/docs/01_WBS/WBS_01_%EC%83%81%EC%84%B8_%EA%B3%B5%EC%A0%95%ED%91%9C.md)
+- [TASK_BOARD.md](file://~/WorkSpace/ZENITH_LMS_001/.agent/TASK_BOARD.md)
+- [20260502191116_fix_e2e_03_master_grouping_rls.sql](file://~/WorkSpace/ZENITH_LMS_001/supabase/migrations/20260502191116_fix_e2e_03_master_grouping_rls.sql)

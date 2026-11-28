@@ -235,7 +235,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/login | SHIPPER 계정 로그인 | uat02_corp_shipper@zenith.kr / password1234 | 대시보드 이동 | ☐ |
+| 1 | /ko/login | SHIPPER 계정 로그인 | uat02_corp_shipper@zenith.kr / <로컬 시드 비밀번호> | 대시보드 이동 | ☐ |
 | 2 | /ko/settlement | `/ko/settlement` 직접 URL 입력 접근 | 브라우저 주소창에 입력 | 권한 오류 메시지 표시 또는 `/ko/finance` 등 허용된 페이지로 리다이렉트 | ☐ |
 
 ### 테스트 절차 — 시나리오 B: SHIPPER의 Finance 데이터 범위
@@ -250,7 +250,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 6 | /ko/login | ADMIN 계정 로그인 | admin@zenith.kr / password1234 | 대시보드 이동 | ☐ |
+| 6 | /ko/login | ADMIN 계정 로그인 | admin@zenith.kr / <로컬 시드 비밀번호> | 대시보드 이동 | ☐ |
 | 7 | /ko/settlement | `/ko/settlement` 접속 | — | 정산 페이지 정상 표시 (전체 인보이스) | ☐ |
 | 8 | /ko/finance | Finance Dashboard 접속 | — | 전체 조직 인보이스 표시 | ☐ |
 

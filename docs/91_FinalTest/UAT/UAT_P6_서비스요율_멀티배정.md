@@ -23,9 +23,9 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/admin/rates | ADMIN 계정으로 운송 서비스 요율 관리 페이지 진입 | `admin@zenith.kr` / `password1234` | 요율 목록 및 새 요율 등록 버튼 표시 | ☐ |
+| 1 | /ko/admin/rates | ADMIN 계정으로 운송 서비스 요율 관리 페이지 진입 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | 요율 목록 및 새 요율 등록 버튼 표시 | ☐ |
 | 2 | /ko/admin/rates | 새 요율 등록 modal 오픈 및 데이터 입력 | Carrier: `E2E20 Carrier Corp`, Mode: `AIR`, Origin: `ICN`, Dest: `SIN`, Cost: `2.0`, Tiers: `[{ weight_min: 0, unit_price: 3.5 }]` | 요율 카드가 정상 저장 및 테이블에 리스트로 표출됨 | ☐ |
-| 3 | /ko/orders/new | SHIPPER 계정으로 로그인 후 신규 오더 양식 진입 (Step 1) | `test_shipper_e2e20@zenith.kr` / `password1234` | 오더 기본 정보 폼 노출 | ☐ |
+| 3 | /ko/orders/new | SHIPPER 계정으로 로그인 후 신규 오더 양식 진입 (Step 1) | `test_shipper_e2e20@zenith.kr` / `<로컬 시드 비밀번호>` | 오더 기본 정보 폼 노출 | ☐ |
 | 4 | /ko/orders/new | Step 1 입력 후 다음 단계 클릭 | Mode: `AIR`, Origin: `ICN`, Dest: `SIN`, Recipient Info, Weight: `100`, Item details | Step 2 (서비스 선택)으로 정상 전환 | ☐ |
 | 5 | /ko/orders/new | Step 2에서 서비스 조합 "항공 운송만" 선택 후 다음 단계 클릭 | 선택: `항공 운송만` | Step 3 (요율 확인)으로 정상 전환 | ☐ |
 | 6 | /ko/orders/new | Step 3에서 요율 정보 확인 후 제출 | 요율 선택: `E2E20 Carrier Corp` | 오더가 성공적으로 생성되고 오더 상세 화면(`/orders/[id]`)으로 리다이렉트됨 | ☐ |
@@ -58,7 +58,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/admin/customs-rates | CUSTOMS_BROKER 계정으로 통관 요율 관리 페이지 진입 | `test_broker_e2e20@zenith.kr` / `password1234` | 통관 요율 목록 및 본인 조직 정보 기본 셋팅 확인 | ☐ |
+| 1 | /ko/admin/customs-rates | CUSTOMS_BROKER 계정으로 통관 요율 관리 페이지 진입 | `test_broker_e2e20@zenith.kr` / `<로컬 시드 비밀번호>` | 통관 요율 목록 및 본인 조직 정보 기본 셋팅 확인 | ☐ |
 | 2 | /ko/admin/customs-rates | "새 요율 등록" 클릭하여 통관 요율 등록 | Country Code: `SG`, weight/kg: `1.5`, cbm: `15.0`, fixed: `25.0`, transit: `1` | 통관 요율 카드가 정상 등록 및 활성화 표시됨 | ☐ |
 | 3 | /ko/orders/new | SHIPPER 계정으로 로그인 후 신규 오더 위자드 진입 (Step 1) | `test_shipper_e2e20@zenith.kr` | 오더 기본 정보 폼 노출 | ☐ |
 | 4 | /ko/orders/new | Step 1 입력 후 다음 단계 클릭 | Mode: `AIR`, Origin: `ICN`, Dest: `SIN`, Recipient Info, Weight: `50` | Step 2 (서비스 선택)으로 정상 전환 | ☐ |
@@ -93,7 +93,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/admin/delivery-rates | DELIVERY_AGENT 계정으로 배송 요율 관리 페이지 진입 | `test_delivery_e2e20@zenith.kr` / `password1234` | 배송 요율 목록 및 Local / Total 탭 인터페이스 표시 | ☐ |
+| 1 | /ko/admin/delivery-rates | DELIVERY_AGENT 계정으로 배송 요율 관리 페이지 진입 | `test_delivery_e2e20@zenith.kr` / `<로컬 시드 비밀번호>` | 배송 요율 목록 및 Local / Total 탭 인터페이스 표시 | ☐ |
 | 2 | /ko/admin/delivery-rates | Local 탭에서 새 요율 등록 수행 | Country Code: `SG`, weight/kg: `0.8`, cbm: `8.0`, transit: `1` | Local 배송 요율 카드가 정상 등록 및 활성화됨 | ☐ |
 | 3 | /ko/admin/delivery-rates | Total 탭으로 전환 후 새 요율 등록 수행 | Mode: `AIR`, Origin: `ICN`, Dest: `SIN`, weight/kg: `5.0`, cbm: `20.0`, transit: `2` | Total 배송 요율 카드가 정상 등록 및 활성화됨 | ☐ |
 | 4 | /ko/orders/new | SHIPPER 계정으로 로그인 후 신규 오더 위자드 진입 (Step 1) | `test_shipper_e2e20@zenith.kr` | 오더 기본 정보 폼 노출 | ☐ |

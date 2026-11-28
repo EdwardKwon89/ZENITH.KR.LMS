@@ -1320,7 +1320,7 @@
 
 - **발견 경위**: Issue #31 (B_Kai 보고) — TASK-151 커밋이 Riley 브랜치(`feature/ups-spr07-riley-e2e-uat-spec`)에 오염된 사건에서 도출. Edward 확인 2026-06-18.
 - **현재 상태**:
-  - 모든 Agent가 동일 Local Workspace(`/Users/edward.kwon/WorkSpace/ZENITH_LMS_001`) 공유
+  - 모든 Agent가 동일 Local Workspace(`~/WorkSpace/ZENITH_LMS_001`) 공유
   - 착수 전 `git checkout feature/[본인 브랜치]` 단계가 R-17 절차에 명시되지 않음
   - 타 Agent 브랜치 checkout 상태에서 커밋 시 cross-branch 오염 발생 가능
 - **임시 조치**: TASK-156 발령 (B_Kai 브랜치 오염 복구), GOV_COMMON.md R-17 §0 신설
@@ -1736,7 +1736,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ## [IMP-157] createOrder()의 agency_org_id/예상운임 스냅샷 생성이 role==='AGENCY_SHIPPER' 문자열에만 의존 — **[2026-08-09 정정] 대리점 소속 화주뿐 아니라 비대리점 직접 화주 전체가 동일하게 누락됨(Critical), DEF-B-035/Issue 등록·TASK-B-258 배정**
 
-- **발견 경위**: JSJung 요청으로 "jungjs72@gmail.com 계정으로 입력된 오더가 agency@zenith.kr에서 검색이 안 됨" 재현·근본원인 분석 중 발견. `jungjs72@gmail.com`(role: `CORPORATE`)을 `agency@zenith.kr` 소속으로 `zen_agency_shippers`에 연결한 뒤 UPS 오더 3건(`ZEN-2026-000004/5/6`)을 등록했으나, 전부 `agency_org_id`가 NULL로 남아 대리점 세션(RLS 정책 `agency_shipper_select_own_orders`: `agency_org_id = 자기 org_id`)에서 조회 자체가 안 됨.
+- **발견 경위**: JSJung 요청으로 "화주 계정(`shipper-a@example.com`)으로 입력된 오더가 agency@zenith.kr에서 검색이 안 됨" 재현·근본원인 분석 중 발견. `shipper-a@example.com`(role: `CORPORATE`)을 `agency@zenith.kr` 소속으로 `zen_agency_shippers`에 연결한 뒤 UPS 오더 3건(`ZEN-2026-000004/5/6`)을 등록했으나, 전부 `agency_org_id`가 NULL로 남아 대리점 세션(RLS 정책 `agency_shipper_select_own_orders`: `agency_org_id = 자기 org_id`)에서 조회 자체가 안 됨.
 - **근본 원인**: `createOrder()`(`src/app/actions/operations/orders.ts:121-146`)가 `agency_org_id` 조회(121행)와 UPS 예상운임 스냅샷 생성(`saveOrderRateSnapshot()` 호출, 146행) 둘 다 `profile.role === USER_ROLES.AGENCY_SHIPPER`(문자열 완전일치)로만 게이트됨. 그러나 대리점 소속 여부는 role이 아니라 `zen_agency_shippers` 테이블(role 무관)로 관리되는 별개의 관계 — role이 `CORPORATE`/`INDIVIDUAL` 등이어도 실제로는 대리점에 소속될 수 있는데, 이 코드는 그 케이스를 전혀 감지하지 못함.
 - **부수 피해(더 심각)**: 같은 조건문 때문에 **UPS 예상운임 스냅샷(`zen_order_rate_snapshots`) 생성 자체가 통째로 스킵**됨 — role이 AGENCY_SHIPPER가 아닌 대리점 소속 화주가 등록한 UPS 오더는 예상운임이 전혀 계산되지 않은 채로 남음(ups-detail 화면 전체 공란, agency/shipper 인보이스용 platform breakdown 데이터 부재).
 - **[2026-08-09 정정 — 범위 확대, Critical로 재분류]**: JSJung의 "admin 매입/매출이 산정되고 있나요?" 질문에 답하며 재검토한 결과, 위 서술은 문제를 "대리점 소속인데 role이 다른 케이스"로만 좁게 기술하고 있었으나 **실제로는 훨씬 넓은 범위**를 덮는 문제임을 확인:
@@ -1835,7 +1835,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 
 ## [IMP-166] james 계정 복구 스크립트가 zen_sequences 카운터 미동기화 → 신규 오더 order_no 충돌 재발
 
-- **발견 경위**: 2026-08-17, PR#1155 검토 과정의 `supabase db reset`으로 로컬 DB가 초기화된 후 `scratch/restore-james-zen007-full.ts`로 james@sntl.co.kr + ZEN-2026-000007 오더를 복구. 이후 JSJung이 `/orders/new`에서 신규 오더 등록 시 `duplicate key value violates unique constraint "zen_orders_order_no_key"` 오류 보고. 원인: 복구 스크립트가 `zen_orders.order_no = 'ZEN-2026-000007'`을 직접 INSERT하지만, 채번 테이블 `zen_sequences`(prefix='ZEN', year='2026')의 `last_value`는 seed 값(6)에 머물러 있어, 다음 `get_next_order_sequence()` 호출 시 6→7로 증가하며 동일한 'ZEN-2026-000007'을 재발급 → 충돌.
+- **발견 경위**: 2026-08-17, PR#1155 검토 과정의 `supabase db reset`으로 로컬 DB가 초기화된 후 `scratch/restore-james-zen007-full.ts`로 `user-a@example.com` + ZEN-2026-000007 오더를 복구. 이후 JSJung이 `/orders/new`에서 신규 오더 등록 시 `duplicate key value violates unique constraint "zen_orders_order_no_key"` 오류 보고. 원인: 복구 스크립트가 `zen_orders.order_no = 'ZEN-2026-000007'`을 직접 INSERT하지만, 채번 테이블 `zen_sequences`(prefix='ZEN', year='2026')의 `last_value`는 seed 값(6)에 머물러 있어, 다음 `get_next_order_sequence()` 호출 시 6→7로 증가하며 동일한 'ZEN-2026-000007'을 재발급 → 충돌.
 - **현재 상태**: 즉시 조치 완료 — `zen_sequences` 테이블의 ZEN/2026 `last_value`를 7로 수동 보정. `restore-james-zen007-full.ts`에도 7단계(시퀀스 동기화: 복원한 order_no의 순번 이상으로 `zen_sequences.last_value`를 upsert)를 추가해 향후 이 스크립트를 재실행해도 동일 문제가 재발하지 않도록 수정함.
 - **임시 조치**: 스크립트 자체 수정으로 근본 해결(재현 시 별도 수동 조치 불필요).
 - **목표 구현**: (완료) — 스크립트가 이제 자동으로 시퀀스를 동기화하므로 추가 구현 불필요. 다만 이런 유형의 "특정 order_no를 직접 INSERT하는" 복구/시드 스크립트가 이 프로젝트에 더 있다면(예: `scripts/seed-local.ts`) 동일 패턴(시퀀스 카운터 동기화 누락)이 있는지 별도 점검 권장.
@@ -1913,7 +1913,7 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 ## [IMP-172] Vercel 함수 리전(iad1, 미동부)과 Supabase 리전(Seoul) 불일치 — 순차 DB 왕복마다 교차대륙 지연 누적
 
 - **발견 경위**: 2026-10-03, DEF-141(오더목록 Link 프리페치 폭주) 수정 배포 후 Aiden이 production 재실측 중 발견. prefetch 폭주는 완전히 해소됐으나(네트워크 캡처로 상세 prefetch 요청 0건 확인), 페이지 전환 자체는 여전히 **1.7~3.2초** 소요됨(수정 전 5초+ 대비 개선되었으나 완전 해소는 아님).
-- **현재 상태**: `vercel.json`/`next.config.*`에 `regions` 설정이 없어 Vercel 기본 리전(`iad1`, 미국 동부 Washington D.C.)에서 함수가 실행됨 — 반면 Supabase 프로젝트(`ayowrwmufagzstqiqrnj`)는 Seoul 리전. `getOrders()`(`src/app/actions/operations/orders.ts`)는 `validateUserAction()`(인증+프로필 조회) → `adminRepo.findSettingByKey("default_page_size")` → `orderRepo.findList()` 순으로 **최소 3회의 DB 왕복을 순차(직렬) 실행**하는데, 각 왕복마다 태평양 횡단 왕복지연(추정 400~500ms)이 그대로 누적됨. 별도 실측(동일 쿼리를 Supabase REST에 직접 호출)으로는 쿼리 자체가 0.1~0.6초로 빠른 것을 확인했으므로, 체감 지연의 상당 부분은 "쿼리 비용"이 아니라 "리전 간 왕복 횟수×지연"으로 추정됨.
+- **현재 상태**: `vercel.json`/`next.config.*`에 `regions` 설정이 없어 Vercel 기본 리전(`iad1`, 미국 동부 Washington D.C.)에서 함수가 실행됨 — 반면 운영 Supabase 프로젝트(식별자 비공개)는 Seoul 리전. `getOrders()`(`src/app/actions/operations/orders.ts`)는 `validateUserAction()`(인증+프로필 조회) → `adminRepo.findSettingByKey("default_page_size")` → `orderRepo.findList()` 순으로 **최소 3회의 DB 왕복을 순차(직렬) 실행**하는데, 각 왕복마다 태평양 횡단 왕복지연(추정 400~500ms)이 그대로 누적됨. 별도 실측(동일 쿼리를 Supabase REST에 직접 호출)으로는 쿼리 자체가 0.1~0.6초로 빠른 것을 확인했으므로, 체감 지연의 상당 부분은 "쿼리 비용"이 아니라 "리전 간 왕복 횟수×지연"으로 추정됨.
 - **임시 조치**: 없음 — DEF-141 수정(prefetch 차단)만으로 5초+ → 2~3초대 1차 개선 완료, 이번 세션 범위 밖이라 추가 조치 보류.
 - **목표 구현**: 검토 필요한 두 방향 — (A) `vercel.json`에 `"regions": ["icn1"]` 추가해 함수 실행 리전을 Supabase와 동일한 Seoul로 이동(단, Vercel Hobby 플랜의 리전 커스터마이징 지원 여부 확인 필요), (B) `getOrders()` 내부의 `validateUserAction()`/`findSettingByKey()`/`findList()` 호출을 가능한 범위에서 병렬화(`Promise.all`)하거나, `default_page_size` 설정을 요청마다 새로 조회하지 않도록 캐싱(예: 서버 모듈 레벨 캐시 또는 짧은 TTL).
 - **관련 파일**: `vercel.json`, `src/app/actions/operations/orders.ts`(`getOrders`), `src/lib/repositories/order.repository.ts`
@@ -2180,6 +2180,8 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `src/app/actions/finance/ups-actual-charges.ts`, `src/app/actions/misc/monitoring.ts`(`logClientError`), `GOV_COMMON.md` ZEN_A4
 - **예상 공수**: 0.3~0.5 MD (연동 지점 선정 + 중복/노이즈 정책 + 알림 확인 테스트)
 - **우선순위**: Medium — 기능 장애는 아니나 금전 정합성 영역의 침묵 실패 방지
+- **범위 보강(2026-11-26, Aiden)**: TASK-B-381 PR-2(PR #1544)가 추가한 `src/app/actions/finance/ups-settlement.ts`(정산마감 RPC 실패·통화 변환 실패·예외 경로)도 같은 금전 지점이며 4기준 중 ①금전·④사고 이력 2개 해당(핵심 지점)이다. PR-2는 `logger.error`까지만 구현하고 알림은 이 항목에서 함께 처리한다. 알림 수신자·문구는 새 정산마감 화면(PR-4a) 확정 후 설계.
+- **범위 보강 2(2026-11-26, Aiden — TASK-B-395/IS #1181 판정표·Edward 승인)**: `src/app/actions/operations/ups-labels.ts`의 SHXK 연동 실패 지점(`createorder` 거절·매핑 누락(도착국·운송방법 미확인)·헬퍼 DB 오류)도 같은 핵심 지점 후보다(침묵성 해당, DEF-B-142 전례, 2026-11-26 `createorder` 거절 사고 IS #1552 포함). 로그 보강은 TASK-B-395로 끝나고 **`logClientError(CRITICAL)` 알림은 이 항목에서 함께 처리**한다. 알림 대상·문구와 노이즈 정책(`PGRST116` 행 없음은 알림 제외)은 설계 시 정한다.
 
 
 ---
@@ -2312,3 +2314,216 @@ UPS 배송 확인 에러/예외 상태 코드(배송실패·반송·통관보류
 - **관련 파일**: `vitest.config.ts`, `package.json`, `tests/setup.ts`, `tests/unit/**`, `tests/integration/**`
 - **예상 공수**: 1~1.5 MD (분류 0.5 + 설정 0.2 + 안정성 검증 0.3~0.8)
 - **우선순위**: Low — 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단. 위험: DB 경합 오분류 시 간헐 실패가 생겨 오히려 신뢰도를 떨어뜨릴 수 있으므로 검증 설계 필수. 관련: #1427(Close), #1428(보류, 2번).
+
+---
+
+## [IMP-204] `deploy-prod.sh` V2(alias 확인) 오탐 — `pipefail`+`grep -q` SIGPIPE 패턴 수정, 211 런북 §2-A 실배포 검증 문장 갱신
+
+- **발견 경위**: 2026-11-23 운영 릴리즈(PR #1435, main `6e582047`)의 첫 실배포에서 `./scripts/deploy-prod.sh`가 10:11:02 KST exit 3("alias(zenith-lms-hazel.vercel.app)가 새 배포에 연결되지 않았습니다")으로 끝났다. 로그에는 `vercel inspect "$NEW_URL"`이 `Abort trap: 6`으로 비정상 종료한 직후였다. Edward 지시 하에 Aiden이 등록(R-15, Aiden 본인 발견).
+- **현재 상태**: 같은 명령을 직접 재실행하니 정상이었고 Aliases에 `zenith-lms-hazel.vercel.app`이 연결돼 있었다. 즉 **스크립트의 실패 판정이 오탐**이었다(배포·V1·V3은 정상). `scripts/deploy-prod.sh`는 `set -euo pipefail`(22행) 상태에서 `vercel inspect "$NEW_URL" 2>&1 | grep -q "$ALIAS_HOST" && … || die 3 …`(127~128행)를 쓴다. `grep -q`는 첫 일치에서 바로 종료해 파이프를 닫으므로 앞단 `vercel inspect`가 쓰기 중 비정상 종료할 수 있고, `pipefail`이 그 종료 코드를 파이프 전체의 실패로 올려 `||` 쪽(`die 3`)이 실행된다(**추정 — 유력, 재현은 하지 않음**). 설치된 Vercel CLI는 51.6.1이다. 211 런북 §2-A의 "실제 배포 경로(`vercel --prod` 실행·URL 파싱·V1~V3)는 아직 실배포로 검증되지 않았다"(2026-10-29) 문장은 이번 첫 실배포 결과가 반영되지 않았다.
+- **임시 조치**: 스크립트가 exit 3을 내면 배포 실패로 단정하지 않고, `vercel ls --prod`·`vercel inspect <URL>`(별도 실행)·`curl`로 V1~V3을 수동 확인한다. 2026-11-23은 이 방법으로 확인 후 진행했다.
+- **목표 구현**: ① V2 확인을 `out="$(vercel inspect "$NEW_URL" 2>&1)"; grep -q "$ALIAS_HOST" <<<"$out"`처럼 출력을 변수에 담은 뒤 검사하도록 바꿔 파이프 SIGPIPE를 제거. ② `vercel inspect` 자체가 실패(비정상 종료·타임아웃)한 경우와 "alias 미연결"을 구분하고, 실패 시 몇 회 재시도(예: 3회) 후 판정. ③ 같은 패턴(`| grep -q` + `pipefail`)이 `scripts/` 다른 스크립트에 있는지 전수 점검. ④ 211 §2-A 검증 상태 문장을 실배포 결과(2026-11-23: V1·V3 자동 통과, V2 오탐 → 수정 후 재검증 필요)로 갱신하고, 수정 후 다음 배포에서 정상 경로를 확인한 뒤 다시 갱신.
+- **관련 파일**: `scripts/deploy-prod.sh`, `docs/00_GUIDE/211_PRODUCTION_DEPLOY_RUNBOOK.md`
+- **예상 공수**: 0.2~0.3 MD (스크립트 수정 0.1 + 전수 점검 0.05 + 런북 갱신 0.05~0.1). 정상 경로 재검증은 다음 배포 때.
+- **처리 결과(2026-11-24, TASK-1175 / IS #1486 / PR #1495, 병합 `75823c24d`)**: **코드 수정 완료, 실배포 재검증은 다음 운영 배포 때.** `scripts/deploy-prod.sh` V2를 변수 캡처로 바꾸고 `vercel inspect` 실패와 alias 미연결을 구분(실패 시 3회 재시도)했다. 같은 패턴(`pipefail`+`| grep -q`)은 `scripts/agent-worktree-init.sh`에서 1곳 더 수정했고 나머지는 수정 불요로 판정했다. Aiden이 `verify_deploy`를 로컬 스텁으로 직접 재현했다: 정상 연결·alias 미연결·inspect 실패(3회 재시도)·일시 실패 후 성공은 의도대로 동작하고, 수정 전 코드는 inspect가 출력 직후 비정상 종료하면 alias가 연결돼 있어도 exit 3(오탐)을 냈다. 운영 배포는 수행하지 않았다. **다음 배포 때 V2가 오탐 없이 통과하는지 확인하고 이 항목을 종결한다.**
+- **우선순위**: High — 2026-11-23 하루에 3회 재발(10:11·20:59·23:29 KST, 매번 수동 확인으로 우회)해 2026-11-24 Edward 확정으로 Medium→High 상향, **다음 배포 전 처리 권장**. 원 사유: 오탐이 "배포 실패"로 오인돼 중복 배포나 불필요한 롤백으로 이어질 수 있는 배포 가드의 신뢰성 문제. 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단.
+
+---
+
+## [IMP-205] Vercel 함수 리전(`iad1`)과 운영 DB 리전(서울) 불일치로 인한 응답 지연 — **서울 전환 완료(2026-11-23), 잔여: 전후 정량 측정·외부 API 영향·DB 왕복 축소**
+
+- **발견 경위**: 2026-11-23 운영 릴리즈 검증 중 Edward가 "조회 속도가 매우 느리다"고 지적. Aiden이 설정·로그를 확인해 등록(R-15, Aiden 본인 발견).
+- **현재 상태**: 운영 Supabase(Zenith_LMS)는 **서울(ap-northeast-2)**, Vercel 서버 함수는 배포 빌드 출력상 **`iad1`(미국 동부)**이다. `vercel.json`(크론 3건만 있음)·코드(`preferredRegion` 등)에 리전 지정이 없어 Vercel 기본값을 쓰는 것으로 보인다. 2026-11-23 운영 로그에서 `validateUserAction`의 사용자 조회 약 0.2~0.7초, 프로필 조회 약 0.65~0.7초, 요율 조회 액션 시작~응답 약 2~3초가 관측됐다. 요청마다 DB를 순차로 여러 번 호출하는 구조라 미국 동부↔서울 왕복 지연이 누적되는 것으로 **추정**한다. **미확인**: 느린 화면이 어디인지, 이번 릴리즈 전후로 나빠졌는지(전후 비교 측정 없음), 지연 중 리전 불일치가 차지하는 비중. 2026-10월 오더 목록 개선(5초대 → 1.4~1.8초대, DEF-139~142) 당시에도 리전은 같았을 것으로 보이나(추정) 확인하지 않았다.
+- **조치 결과(2026-11-23, 확인함)**: Edward가 Vercel 대시보드에서 Function Region을 `icn1`로 변경했다(프로젝트 설정 저장 11:41:20 KST, 코드·`vercel.json` 무변경). **함정**: 설정 저장 전(11:38:51)에 만든 첫 재배포는 `regions: ["iad1"]` 그대로였다 — 설정 변경은 **이후에 만드는 배포부터** 적용된다. Aiden이 `vercel redeploy <이전 배포> --target production`(Edward 지시, 11:47)으로 새 배포 `zenith-q7tg319ll`을 만들자 `regions: ["icn1"]`, 빌드 목록 함수 `[icn1]`, 응답 헤더 `x-vercel-id: icn1::icn1::…`(전환 전 `icn1::iad1::…`)로 반영됐다. 공개 페이지 `/ko` 첫 바이트는 전환 전 0.35~0.50초(5회) → 전환 후 워밍업 이후 0.16~0.21초(앞 3회 0.43~0.46초는 콜드 스타트 추정, 소표본). Edward가 오더 화면 로드 시간이 "확실히 개선"됐다고 확인했다. 전환 후 DB 행 수·오류 로그 이상 없음, 롤백 대상 `zenith-5okz1sawm`(iad1, 코드 동일) 유지.
+- **미확인(잔여)**: ⓐ 로그 기반 전후 정량 비교 — `validateUserAction` 계측 로그를 Vercel CLI(최근 50~100건 제한)로 추출하지 못해 전환 후 숫자가 없다. ⓑ UPS·SHXK·Resend 등 외부 API 호출과 크론 3건(`pricing-schedule-apply`·`ups-tracking-poll`·`exchange-rate-sync`)의 전환 후 동작. ⓒ 전환 전 지연 중 리전이 차지한 비중은 수치로 확정하지 않았다(체감·공개 페이지 기준 개선만 확인).
+- **임시 조치**: 없음.
+- **목표 구현**: ① **측정 먼저** — 느린 화면(오더 목록·등록 2단계·로그인 등)별 서버 응답 시간과 DB 왕복 횟수를 로그로 측정해 기준선 작성. ② **함수 리전 서울 전환 검토** — 공식 문서상 기본 리전은 `iad1`, 프로젝트 기본 리전은 `vercel.json`/`vercel.ts`의 `regions`·대시보드 Functions Region·`vercel --regions`로 바꿀 수 있고, Hobby 플랜도 단일 리전은 지정할 수 있다고 안내돼 있다. 서울 리전 코드(`icn1`)가 함수 실행 리전 목록에 있는지와 현재 플랜의 제약은 **문서 검색으로 확인하지 못했으므로** 먼저 Preview 배포(`vercel --regions icn1`)로 검증한다. ③ 전환 시 **외부 API 호출 지연 변화** 확인 — UPS·SHXK·Resend 등 외부 호출은 서울에서 더 느려질 수 있다(미확인). 크론 3건은 `vercel.json`에 있으므로 `crons` 항목은 건드리지 않고 `regions`만 추가(Hobby 크론 제약 유의). ④ 리전과 무관한 보완 후보: 요청당 DB 왕복 줄이기(`validateUserAction`의 사용자·프로필 조회 통합, 독립 쿼리 병렬화). ⑤ 전환 후 전후 측정 비교, 이상 시 `regions` 제거 후 재배포 또는 이전 배포로 롤백.
+- **관련 파일**: `vercel.json`(또는 신규 `vercel.ts`), `src/lib/auth`·`validateUserAction` 구현부, 운영 Vercel 프로젝트 설정(Functions Region)
+- **예상 공수**: 측정 0.3 MD + 리전 전환 검증 0.3 MD(설정 변경 자체는 작으나 외부 API 영향 확인 필요) + 선택 보완 ④ 0.5~1 MD
+- **우선순위**: **Low~Medium(갱신)** — 핵심인 서울 전환은 2026-11-23 완료·체감 개선 확인. 남은 것은 ① 목표 ②의 전후 정량 측정, ③ 외부 API·크론 영향 확인(다음 크론 실행 결과 확인으로 대체 가능), ④ DB 왕복 축소(선택). 리전 설정이 코드가 아닌 **대시보드 프로젝트 설정에만 존재**하므로 211 런북에 "리전은 프로젝트 설정(Functions Region), 변경 후에는 새 배포가 필요"를 명시해야 한다(IMP-204의 런북 갱신과 함께 처리 가능). 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단.
+
+
+---
+
+## [IMP-206] 역할별 기능 허용 설정 기능 — 입고 실측 후 운임 스냅샷 재계산 허용 역할을 화면에서 선택 (Edward 지시 2026-11-23)
+
+- **발견 경위**: 2026-11-23 TeamB_Dev 통합 검토(PR #1448) 중 `canWriteOrderRateSnapshot`(`src/lib/orders/rate-snapshot-refresh.ts`)가 ADMIN·ZENITH_SUPER_ADMIN·화주 조직·배정 대리점만 스냅샷 쓰기를 허용해, 입고 실측을 저장하는 MANAGER·OPERATOR는 스냅샷 갱신이 건너뛰어짐(warn 로그만 남음). Edward 확인: 입고 실측은 MANAGER·OPERATOR 모두 수행하며, **허용 역할은 코드 상수가 아니라 역할 설정 기능에서 선택할 수 있는 것이 바람직함**.
+- **현재 상태**: `src/lib/auth/rbac.ts`는 역할별 메뉴 경로를 정적 매핑으로 정의한다(설정 저장소·관리 화면 없음). 기능 단위 허용 여부는 각 서버 액션 안의 하드코딩 역할 비교로 흩어져 있다.
+- **임시 조치**: 통합 전 필수 조치(Issue #1449 C와 묶음)에서 스냅샷 재계산 허용 판단을 한 함수에 모으고 MANAGER·OPERATOR를 추가하는 최소 변경만 한다(허용 역할 판단 지점 단일화 — 이 IMP가 그 지점을 설정값으로 대체).
+- **목표 구현**: ① 설계(R-11): "기능 키 × 역할" 허용 매트릭스 데이터 모델·API 명세(Ds-11) 확정, 기본값은 현행 하드코딩과 동일. ② 설정 저장(마이그레이션)·관리자 전용 편집 화면·변경 이력(감사). ③ 서버 액션이 허용 판단을 한 곳에서 조회(캐시 포함). ④ 첫 적용 대상은 "입고 실측 후 스냅샷 재계산". 가격 입력을 사람이 정하지 않고 서버가 DB 저장값으로 계산하는 구조는 유지, `is_manual` 수동 확정과 원가·수수료 열람은 설정 대상에서 제외(admin 고정).
+- **관련 파일**: `src/lib/auth/rbac.ts`, `src/lib/orders/rate-snapshot-refresh.ts`, `src/app/actions/operations/orders.ts`, `docs/02_Analysis/ds11/`, 신규 마이그레이션·관리 화면
+- **예상 공수**: 3~5 MD (설계 1 + 저장·API 1 + 화면 1 + 회귀·권한 테스트 1~2) — 추정
+- **우선순위**: Low~Medium — 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단. 선행 조건: #1449 C 완료(허용 판단 단일화). 관련: #1364, #1448.
+
+---
+
+## [IMP-207] 청구서 Excel 출력 조회의 `in()` URL 길이 제한 — 100~200건 청크 조회 (Team B 제안 IS #1418 1번 채택, IMP-197 연계)
+
+- **발견 경위**: PR #1411(청구서 Excel 출력) 승인 검토 중 Jaison이 병합 후 후속(비차단)으로 지정, Team B가 IS #1418로 건의. 2026-11-24 Aiden 채택(R-15). 같은 IS의 2번(날짜 달력 검증, nit)·3번(JSDoc 겹침, 미관)은 IMP 번호 없이 반려 — 해당 파일을 수정하는 Task에서 처리.
+- **현재 상태**: `src/lib/finance/billing/statement-excel-data.ts`(TeamB_Dev 소재, 통합 전 develop에는 없음)의 라벨·기준일·항목 조회가 청구서 항목 전체 order id를 한 번에 `.in('order_id', orderIds)`로 보낸다. UUID 37자 × N이라 수백 건 이상이면 프록시 URL 한도(대략 8~16KB)에 걸려 대형 청구서의 Excel 출력이 500으로 실패한다(데이터 정합성에는 영향 없음, 에러 로그 남음).
+- **임시 조치**: 없음(대리점 월 청구 수백 건 규모에서 막힐 수 있음).
+- **실측 근거(2026-11-24, D_Kai TASK-1172 로컬 재현 — IS #1458)**: 로컬 PostgREST에서 `.in('order_id', …)` UUID 개수를 늘려 GET 호출한 결과 **220개(요청 약 8.2KB)부터 HTTP 414**(300개 약 11.2KB도 414). 따라서 청크 크기는 **100개 이하(약 3.7KB)** 를 권장(200개는 한도 근접). 같은 계열: IMP-197(500건 상한 조회)도 같은 한도에 걸린다.
+- **목표 구현**: 100~200건 단위 청크 조회로 분할(또는 RPC 대체). TeamB_Dev 쪽 IMP-197(오더정산 목록의 `.in()`·500건 상한)과 같은 계열이므로 통합 시 상호 참조하고 청크 헬퍼를 공용화 검토.
+- **관련 파일**: `src/lib/finance/billing/statement-excel-data.ts`, `src/app/actions/finance/billing-statements.ts`
+- **예상 공수**: 0.3 MD (청크 헬퍼 + 테스트)
+- **우선순위**: Medium — 실사용 규모에서 대형 청구서 출력 불가. 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단. 관련: IS #1418, IMP-197(TeamB_Dev).
+
+---
+
+## [IMP-208] 오더정산 S2 — 요율 스냅샷 없는 기존 오더의 시스템 등록값 대체 소스 (Team B 제안 IS #1432 채택)
+
+- **발견 경위**: Dave가 TASK-B-369(IS #1425) 오더정산 S2 구현 중 건의(IS #1432). 2026-11-24 Aiden 채택(R-15).
+- **현재 상태**: 시스템 청구·부피중량은 `zen_order_rate_snapshots.metadata.platform`에서만 읽는다. 스냅샷이 없는 과거 오더는 시스템 값이 `—`로 표시되어 "시스템 등록값 vs UPS 청구서값" 대비 목적이 약해진다. 화면은 정상 동작한다.
+- **임시 조치**: 스냅샷 값이 없으면 `—` 표시.
+- **목표 구현**: 스냅샷 우선, 없으면 `zen_order_packages`(중량·치수)와 `zen_ups_products.volumetric_divisor`로 청구·부피중량을 계산하는 서버측 fallback(신규 조회 액션 또는 Ds-11 등재 헬퍼). 계산 규칙은 `src/lib/ups/pricing-engine.ts`가 단일 출처.
+- **관련 파일**: 오더정산 상세 페이지, `src/lib/ups/pricing-engine.ts`, `src/app/actions/finance/ups-actual-cost.ts`
+- **예상 공수**: 0.3~0.5 MD
+- **우선순위**: Low — 표시 보조 정보. 선행 조건: PR #1462(TASK-B-381) 구현 후 정산 화면 구조 확인. 본 사업 전 최소 발령 원칙에 따라 기록만. 관련: IS #1432.
+
+---
+
+## [IMP-209] 오더정산 관리자 역할 상수(`ADMIN_ROLES`) 공용 모듈 분리 (Team B 제안 IS #1433 채택, IMP-206 연계)
+
+- **발견 경위**: Dave가 TASK-B-369(IS #1425) 리뷰 반영 중 건의(IS #1433). 2026-11-24 Aiden 채택(R-15).
+- **현재 상태**: 오더정산 S1·S2 서버 페이지와 `ups-actual-cost.ts` 서버 액션이 `['ZENITH_SUPER_ADMIN','ADMIN','MANAGER']`를 각각 하드코딩한다(현재 값은 일치). 서버 액션 파일은 `'use server'`라 상수 export가 불가능하다. 한 곳만 바뀌면 페이지 접근과 액션 권한이 어긋날 수 있다.
+- **임시 조치**: 세 곳의 값을 수동으로 일치 유지.
+- **목표 구현**: `src/lib/auth/admin-roles.ts`(또는 rbac 인접)에 `ADMIN_ROLES`/`isAdminRole()` 단일 출처를 만들고 서버 액션·페이지 가드가 참조(기존 `assertAdmin` 동작 불변). PR #1476(TASK-B-373 PR-2)이 추출하는 요율 권한 공유 가드(`ups-rate-permissions.ts`)와 중복 정의되지 않도록 설계를 함께 정합하고, IMP-206(역할별 기능 허용 설정)의 선행 단계(허용 판단 단일화)로 삼는다.
+- **관련 파일**: `src/app/actions/finance/ups-actual-cost.ts`, `src/app/[locale]/(dashboard)/finance/order-settlement/page.tsx`, `.../[orderId]/page.tsx`, `src/lib/auth/rbac.ts`
+- **예상 공수**: 0.2 MD
+- **우선순위**: Low~Medium — 권한 불일치 재발 방지. 본 사업 전 최소 발령 원칙에 따라 기록만. 관련: IS #1433, IMP-206.
+
+---
+
+## [IMP-210] 오더정산 S2 — UPS 청구서 PDF 첨부 (WBS 2.6 선택 범위, Team B 제안 IS #1434 채택)
+
+- **발견 경위**: Dave가 TASK-B-369(IS #1425) WBS 2.6 선택 범위("UPS 청구서 PDF 첨부, 설계 Q8")를 화면·문구 범위 준수를 위해 미구현하고 건의(IS #1434). 2026-11-24 Aiden 채택(R-15).
+- **현재 상태**: S2 상세에서 UPS 청구서 번호·발행일만 입력하며 PDF 원본은 첨부·조회할 수 없다.
+- **임시 조치**: 없음.
+- **목표 구현**: 기존 `invoice-files` 업로드/다운로드 액션을 재사용해 S2에 PDF 첨부·미리보기·다운로드 영역 추가. 권한·Storage RLS 경로 확인 필요.
+- **관련 파일**: `src/app/actions/finance/invoice-files.ts`, `src/components/finance/order-settlement/OrderSettlementDetail.tsx`, Storage 정책
+- **예상 공수**: 0.3~0.5 MD
+- **우선순위**: Low — 선택 범위(증빙 편의). 선행 조건: PR #1462(TASK-B-381) 이후 정산 화면 구조 확정. 본 사업 전 최소 발령 원칙에 따라 기록만. 관련: IS #1434.
+
+---
+
+## [IMP-211] 화주 등급·할인율 수정(`updateAgencyShipperGrade`) 경로의 역마진 가드 — IMP-155 후속 (Team B 제안 IS #1467 채택)
+
+- **발견 경위**: IS #1349(DEF-149 §1.1) Jaison 지시에 따라 TASK-B-374가 실측한 범위 한계를 Team B가 IS #1467로 건의. 2026-11-24 Aiden 채택(R-15), 우선순위는 Team B 제안(p3)에서 Medium으로 상향.
+- **현재 상태**: `validateAgencyReverseMargin(supabase, agencyOrgId, zoneId, shipperDiscountRate)`는 zone 단위 정책(`zen_agency_pricing_policies`)의 `discount_rate`와 비교하므로 `zone_id`가 필수다. `updateAgencyShipperGrade(id, grade, discountRate)`는 등급·할인율만 받아 zone 컨텍스트가 없어 이 함수를 호출할 수 없고, zone 요율 설정 경로(`zone-discounts.ts:65`)에만 가드가 적용돼 있다. 즉 **등급·할인율 변경 경로는 IMP-155의 역마진 가드를 우회**한다. TASK-B-374는 소유권 가드만 구현했다.
+- **임시 조치**: 없음(운영자 주의에 의존).
+- **목표 구현**: 설계 의견 선행. 선택지 — ① 해당 대리점의 활성 정책 전체를 조회해 `discountRate <= min(policy.discount_rate)`를 검증(권장, 정책 없으면 종전대로 허용), ② zone 정책 미보유 시 명시적 기본 상한을 정책 테이블에 추가(설계 변경), ③ `discountRate` 변경분만 검증 범위로 한정. 정책 행이 전부 없는 대리점과 일부 zone만 보유한 대리점의 기대 동작은 설계에서 확인.
+- **관련 파일**: `src/lib/ups/discount-guard.ts`, `src/app/actions/agency/zone-discounts.ts`, `updateAgencyShipperGrade`(`src/app/actions/agency/shippers.ts`)
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 가격을 정하는 경로의 가드 누락(금전적 영향). 본 사업 전 최소 발령 원칙에 따라 기록만, 발령은 별도 판단. 관련: IS #1467, IMP-155, IS #1349.
+
+---
+
+## [IMP-212] 청구서 번호 채번 함수(`next_billing_statement_seq`) 후속 — 월 순번 상한 소진·허용 역할의 직접 호출 한계 (PR #1474 검토 후속, Aiden 발견)
+
+- **발견 경위**: 2026-11-23 PR #1474(TASK-B-378, 채번 함수 역할 검사·GRANT 정렬) 검토 중 Aiden이 발견, 두 항목을 후속으로 남김. 2026-11-24 Edward 승인으로 등록(R-15, Aiden 본인 발견).
+- **현재 상태**: ① 월 순번이 10,000번째에서 절단되어 `statement_no` UNIQUE 충돌로 청구서 생성이 실패한다(PR #1474가 동작을 실측해 테스트로 고정만 함). ② 역할 검사만으로는 "청구서 생성 RPC 경로에서만 실행"이 보장되지 않는다(허용 역할의 직접 호출 한계, 공개 저장소라 상세 미기재).
+- **임시 조치**: 없음(현재 운영에는 청구서 생성 구조가 적용되지 않음).
+- **목표 구현**: ① 번호 폭 확장 또는 상한 도달 시 명시적 오류·모니터링 — 결함(DEF)으로 별도 등록해 처리(DEF 채번은 열린 PR 브랜치 합산 후 확정, DEF-B-172는 다른 건이 사용). ② 직접 호출 가드(생성 RPC가 설정한 호출 출처 확인 등) 후속 설계. 청구서관리 구현 마무리 시점에 함께 판단.
+- **관련 파일**: `supabase/migrations/20261123120000_task_b378_billing_seq_role_check.sql`(TeamB_Dev 소재), `tests/unit/migrations/taskb359-billing-statement-db.test.ts`, IS #1452, PR #1474
+- **예상 공수**: 0.5 MD (추정, 설계 후 확정)
+- **우선순위**: Medium — 상한은 장기 규모에서 발생, 직접 호출 한계는 청구서관리 운영 전 판단 필요. 관련: IS #1452(TASK-B-378), PR #1474.
+
+---
+
+## [IMP-213] RLS 미적용 테이블 정비 — DEF-B-050 후속(마이그레이션로 RLS 활성화·정책 정렬·잔여 백업 테이블 정리)
+
+- **발견 경위**: DEF-B-050(RLS 미적용 테이블 5개)의 해소 여부를 Team A가 점검하다 저장소 마이그레이션 기준 일부가 미해소임을 확인(2026-11-24, PR #1501 검토 중 Jaison 지적 → Aiden 확인). 2026-11-24 Edward 지시로 **IMP로만 등록하고 본 사업 시작 시 처리**한다(R-15, Aiden 본인 발견).
+- **현재 상태**: DEF-B-050이 지목한 5개 테이블 중 `zen_invoice_history`는 TASK-1174(DEF-161)로 해소됐다. 나머지는 RLS 활성화·정책 정렬 마이그레이션이 저장소에 없다(백업 테이블 1개는 삭제 마이그레이션은 있으나 반영 확인 필요). 운영 반영 상태와 세부 권한 현황은 공개 저장소 기준에 따라 이 문서에 쓰지 않고 비공개로 보관한다.
+- **임시 조치**: 없음. 해당 테이블들의 접근 경로는 서버 코드(관리자 클라이언트) 중심이라 기능 영향은 확인되지 않았다.
+- **목표 구현**: ① 대상 테이블에 RLS 활성화 + 용도별 정책(참조 데이터는 로그인 사용자 조회·관리자 쓰기, 이력 테이블은 관리자 조회·서버 경로 쓰기) 정렬, 기본 거부(deny-by-default) ② 잔여 백업 테이블 정리 ③ 서버 코드가 쓰는 경로(관리자 클라이언트 등)가 RLS 변경의 영향을 받지 않는지 사전 확인 ④ TASK-1174 패턴(안전 정렬 마이그레이션 + 실DB 세션 테스트)을 재사용. 운영 반영은 211 런북과 Edward 명시 지시.
+- **관련 파일**: `.agent/defects/DEF-B-050_*`(Team B 소유), `supabase/migrations/`(신규), `docs/00_GUIDE/211_PRODUCTION_DEPLOY_RUNBOOK.md`
+- **예상 공수**: 0.5 MD (마이그레이션 + 실DB 세션 테스트, 설계 후 확정)
+- **우선순위**: High — 본 사업 시작 시 처리(Edward 결정, 발령 보류). 본 사업 전 최소 발령 원칙에 따라 기록만 한다. 관련: DEF-B-050, DEF-161, TASK-1174.
+
+## [IMP-214] 오더 상세(ups-detail) 화면 조회 구조 개선 — 순차 DB 왕복·권한 조회 중복 (운영 지연 조사 중 Aiden 발견, 2026-11-26)
+- **발견 경위**: 운영에서 운송요청 목록 → 오더 상세 진입이 체감 10초 이상 걸렸다. 같은 시점에 다른 메뉴 화면은 2초 안에 표출됐다(평상시보다 다소 느림). 별 조치 없이 정상화되어 일시적 네트워크·리전 지연이 계기로 추정되나(당시 로그 없음, 미확인), 상세 화면만 유독 크게 느려진 것은 호출 구조가 지연을 증폭시켰기 때문으로 추정한다. 서버 시간 실측은 1~2.5초(read-only 코드 분석·측정).
+- **현재 상태**: 서버 컴포넌트가 DB 왕복을 순차로 약 25회 수행하고, 권한 조회(`validateUserAction`)를 한 화면에서 약 6회 호출한다. 운영 로그에 `[DEBUG] validateUserAction` 출력이 있고 개인 식별 정보가 포함된다(R-21 관점 정리 필요).
+- **임시 조치**: 없음(Edward 결정 2026-11-26 — IMP 등록만, 지금 조치하지 않음).
+- **목표 구현**: ① 순차 조회를 병렬화하고 화면에 불필요한 조회를 제거 ② 권한 조회를 요청당 1회로 공유(요청 단위 캐시) ③ 쿼리 단위 점검 — 실행 계획 확인, 필요 시 쿼리 통합·인덱스 추가(실측 후 판단) ④ `[DEBUG]` 로그 제거 ⑤ Vercel 함수 리전과 DB 리전 일치 여부 확인(읽기 전용) ⑥ 개선 전후 상세 화면 소요 시간 비교.
+- **관련 파일**: `src/app/[locale]/(dashboard)/orders/[orderId]/ups-detail/page.tsx`, `src/app/actions/operations/orders.ts`(Team B 소유 — 착수 시 소유 확인 후 Issue로 요청)
+- **예상 공수**: 1~2 MD (실측·설계 후 확정)
+- **우선순위**: Medium — 지금 조치하지 않음. 지연 재발 시 또는 본 사업 시작 시 재평가. 원격 DB 실측이 필요하면 R-14 승인 후 읽기 전용으로만.
+
+## [IMP-215] 화면·서버 액션 전반의 불필요한 다수 조회 점검 — 권한 조회 중복·순차 DB 왕복 (IMP-214 후속, Edward 지시 2026-11-26)
+- **발견 경위**: IMP-214(오더 상세 화면) 조사에서 한 화면이 권한 조회를 여러 번, DB 왕복을 순차로 여러 번 하는 구조가 확인되었다. 같은 패턴이 다른 화면·서버 액션에도 있는지 점검이 필요하다고 Edward가 지시했다. 다른 화면의 실태는 아직 조사하지 않았다(미확인, 추정 금지).
+- **현재 상태**: 전수 조사 전. 같은 시점에 다른 메뉴는 2초 안에 표출되어 상세 화면만 유독 느렸던 점으로 보아 화면별 편차가 클 것으로 예상될 뿐이다.
+- **임시 조치**: 없음(IMP 등록만, 지금 조치하지 않음).
+- **목표 구현**: ① 주요 화면(오더·정산·청구·UPS 상세·목록)의 페이지/서버 액션별 권한 조회 횟수와 순차 DB 왕복 수를 정적 분석으로 집계(읽기 전용, 코드 기준) ② 상위 N개 화면을 선별해 병렬화·요청당 권한 조회 공유 대상 후보표 작성 ③ 공통 헬퍼(요청 단위 캐시된 권한 조회 등)로 해소 가능한 항목은 한 번에 처리하도록 IMP-214와 설계 통합 ④ 실측이 필요한 구간만 R-14 승인 후 읽기 전용 측정 ⑤ 신규 화면 작성 시 재발 방지 점검 항목을 체크리스트(R-04)에 추가할지 판단.
+- **관련 파일**: `src/app/actions/**`(권한 조회 `validateUserAction` 호출 지점), `src/app/[locale]/(dashboard)/**`(서버 컴포넌트 페이지). 소유 팀은 `git log` 태그로 확인 후 Issue로 요청.
+- **예상 공수**: 조사 0.5~1 MD(정적 분석), 개선은 조사 결과 후 확정
+- **우선순위**: Medium — 지금 조치하지 않음. IMP-214와 함께 지연 재발 시 또는 본 사업 시작 시 재평가.
+
+## [IMP-216] 알림 테이블 쓰기 권한 정렬 — 서버 내부 발송만 허용 (TASK-B-381 PR-4a 검토 중 Aiden 발견, IMP-213 계열)
+- **발견 경위**: 2026-11-26, TASK-B-381 PR-4a(정산마감 알림 추가) 검토 중 알림 발송 경로를 대조하다 발견. **현재 상태·재현은 R-21에 따라 공개 저장소에 쓰지 않고 비공개로 Team B(JSJung·Jaison)에 전달한다.**
+- **현재 상태**: 상세 비공개(R-21).
+- **임시 조치**: 없음(Edward 결정 2026-11-26 — IMP로만 등록, 즉시 조치하지 않음. IMP-213과 같은 방침).
+- **목표 구현**: ① 알림 행 생성은 **서버 내부(service role)만** 가능하고 일반 로그인 사용자·anon의 직접 쓰기는 거부 ② 알림 발송 함수는 관리자 클라이언트로 수행하고 서버 내부 전용으로 분리하거나 호출자 권한을 확인 ③ 적용 순서: 발송 경로 전환(앱 배포) → 정책 변경(마지막), 호출처(관리자 회원 처리·모니터링·정산마감 알림) 동일 배포 단위로 확인 ④ 로컬 DB 실세션 테스트(비관리자 세션의 직접 쓰기 거부, 서버 발송 정상)와 롤백 SQL. 운영 반영은 211 런북과 Edward 명시 지시, 운영 DB 접근은 R-14.
+- **관련 파일**: `src/app/actions/misc/notifications.ts`, 알림 테이블 RLS 마이그레이션(신규), `docs/00_GUIDE/211_PRODUCTION_DEPLOY_RUNBOOK.md`
+- **예상 공수**: 0.5 MD (경로 전환 + 마이그레이션 + 실세션 테스트, 설계 후 확정)
+- **우선순위**: Medium — 본 사업 시작 시 처리(Edward 결정, 발령 보류). 로컬 재현 결과에 따라 재평가. 관련: IMP-213, TASK-B-381 PR-4a(PR #1553).
+
+## [IMP-217] UPS 정산 원가 요약 `baseRawKrw` 값 정정 — +7% 가산 전 원금액을 담도록 (Riley 독립 검토 시범에서 지적, Aiden 코드 확인, 2026-11-26)
+- **발견 경위**: 2026-11-26 독립 검토 시범(Riley 읽기 전용 검토)에서 TASK-B-381 PR-2(PR #1544, 병합됨) 코드의 지적 1건을 Aiden이 코드로 확인했다. 시범에서 나온 다른 지적은 확인하지 못했거나 기존 구현과 같은 동작이라 등록하지 않는다.
+- **현재 상태**: `src/lib/ups/settlement/build.ts`의 원가 요약에서 `baseRawKrw`에 `computed.base.krw`를 대입한다. `computed.base.krw`는 기본운임에 원가 가산율(+7%)을 반영한 값(`actual-cost.ts`의 `baseKrw`)이라 이름이 뜻하는 "가산 전 환산 원금액"과 다르다. 2026-11-26 `origin/TeamB_Dev`와 PR #1553 head 기준 src에서 이 값을 읽는 곳은 없다(`git grep`: 대입 1, 타입 선언 1, 단위 테스트 입력값 1). 화면·금액·DB에 영향은 없다(추정, DB 저장 여부는 코드상 참조 없음으로만 확인).
+- **임시 조치**: 없음. 이 값을 읽는 코드(화면·PDF·감사 로그 등)가 생기기 전에 정정한다.
+- **목표 구현**: ① `baseRawKrw`를 가산 전 환산 원금액(`computed.base.krw - computed.base.surchargeAmountKrw`와 같은 값)으로 정정 ② 단위 테스트에서 이 필드의 값을 단언(현재는 입력 상수만 있고 계산 값을 단언하지 않음) ③ 같은 요약의 다른 금액 필드와 이름·의미 일치 여부 점검.
+- **관련 파일**: `src/lib/ups/settlement/build.ts`, `src/lib/ups/settlement/types.ts`, `tests/unit/ups/settlement-build.test.ts` (Team B 소유 — 착수 시 소유 확인 후 Issue로 요청)
+- **예상 공수**: 0.1 MD
+- **우선순위**: Low — 이 값을 읽는 코드가 추가되기 전까지 지금 조치하지 않음(Edward 결정 2026-11-26, IMP로 등록).
+
+## [IMP-218] `SUB_ADMIN`(Master Agency) 원가·수익 열람 범위 재판단 및 계정·권한 관리 역할 분리 — 본 사업 시 (TASK-B-377 설계 검토 중 Edward 결정, 2026-11-27)
+- **발견 경위**: 2026-11-27, TASK-B-377 설계 갱신본(PR #1557) 검토 중 `SUB_ADMIN`의 원가·수익 열람 범위가 확정 규칙 1·4(admin 3역할)와 다른 점이 확인되었다. Edward가 Pilot 단계에서는 `SUB_ADMIN`의 업무 기능(자신의 원가 별도 관리, 자신의 수익금 조회)을 현행대로 유지하기로 결정하고, 본 사업에서 유지 여부와 범위를 별도로 판단하기로 했다. 같은 논의에서 계정·권한 관리 역할 분리(2단계 처리) 아이디어가 나왔다.
+- **현재 상태**: 상세 비공개(R-21). Pilot 단계 예외로 현행 유지(Edward 결정 2026-11-27).
+- **임시 조치**: Pilot 동안 현행 유지. 설계 문서에는 목표 상태와 결정 이력만 기재한다.
+- **목표 구현**: ① `SUB_ADMIN`의 원가·수익 열람 범위를 **본인이 관리하는 Sub-Agency 한정**으로 할지 재판단하고, 한정하는 경우 서버 액션과 DB 정책에 범위 조건을 적용한다(Issue #605의 범위 제한 확장). 자신의 원가 별도 관리·자신의 수익금 조회 기능은 유지한다. ② **계정 생성·권한 관리 역할을 업무 역할과 분리**하고 요청·승인 2단계(maker-checker)를 적용한다: 부여 가능 역할 상한(ADMIN·SUPER_ADMIN 제외), 자기 권한 변경 금지, ADMIN 권한 변경은 상위 역할 승인, 변경 감사 로그. ③ 적용 순서는 앱 반영 → 정책 변경(마지막)으로 하고, 호출처(수익 집계·UPS 요율 관리·원가 조회 액션)를 같은 배포 단위로 확인한다. 로컬 DB 실세션 테스트(역할별 허용/거부 매트릭스)와 롤백 SQL을 포함한다. 운영 반영은 211 런북과 Edward 명시 지시, 운영 DB 접근은 R-14.
+- **관련 파일**: `src/lib/auth/rbac.ts`, `src/app/actions/finance/order-revenue-cost.ts`, `src/app/actions/ups/`(요율 관리), 원가 테이블 RLS 마이그레이션(신규), TASK-B-377 설계 task file
+- **예상 공수**: 설계 1~2 MD (본 사업 설계 시 확정)
+- **우선순위**: Medium — 본 사업 시작 시 처리(Edward 결정 2026-11-27). 관련: TASK-B-377(PR #1557), IMP-213, IMP-216, 확정 규칙 1·4의 Pilot 예외.
+
+## [IMP-219] 채번 체계를 GitHub Issue 번호 기반으로 전환 검토 — TASK·DEF 별도 순번과 채번 스크립트 폐지 (IS #1564 채택 대체, Edward 결정 2026-11-27)
+- **발견 경위**: 2026-11-27, Team B가 `next-task-number.sh`·`next-def-number.sh`가 작업 중인 자기 파일까지 세어 번호가 건너뛴다는 IMP 제안(IS #1564)을 올렸다. Edward가 "복수 팀 참여 프로젝트에서는 별도 채번 기능 자체가 불필요하다"고 판단해, 스크립트를 고치는 대신 채번 체계 전환을 검토하기로 했다.
+- **현재 상태**: TASK·DEF가 Issue 번호와 별개의 팀별 순번(`TASK-NNN`/`TASK-B-NNN`/`DEF-B-NNN`)을 쓰고 이를 세는 스크립트에 의존한다. 번호 충돌·혼선 이력: Issue #358(2026-07), 2026-11-27 `TASK-B-394` 중복·`TASK-B-396/397` 혼선, IS #1564의 자기 파일 포함 결함.
+- **임시 조치**: 스크립트는 수정하지 않는다. Team B·Team A는 번호 확정 시 `origin` 기준 원격 브랜치와 Issue 제목 조회로 확인하는 현행 절차를 유지한다.
+- **목표 구현**: ① 신규 Task·DEF의 식별자를 **Issue 번호**로 한다(R-17은 이미 Task 발령을 Issue 생성으로 정하므로 번호가 항상 먼저 존재하고 GitHub이 유일성을 보장). 팀 구분은 `team:a`/`team:b` 라벨로 한다. ② 변경 범위: GOV R-17·R-19 조문, task file·defect 파일 명명 규칙, `next-task-number.sh`·`next-def-number.sh` 폐지, CI Task File Check, 회귀 항목·LRTM 명명, WBS 표기. ③ 기존 `TASK-*`·`DEF-*` 번호 이력은 유지하고 전환일 이후 신규 건부터 적용한다(Team A·B 동시 적용, 진행 중 PR 도중에는 전환하지 않음). IMP 번호는 Aiden 단독 채번(R-15)을 유지한다.
+- **관련 파일**: `GOV_COMMON.md`(R-17·R-19), `scripts/next-task-number.sh`, `scripts/next-def-number.sh`, `.github/workflows/pr-checks.yml`(Task File Check), `docs/00_GUIDE/105_MULTITEAM_GOVERNANCE.md`
+- **예상 공수**: 1~2 MD (영향 점검 후 확정)
+- **우선순위**: Low — 통합·배포 안정 후 별도 판단(Edward 결정 2026-11-27). 관련: IS #1564, Issue #358.
+
+## [IMP-220] UPS 오더 수정 모드에서 화주명 자동 모드 판정이 `affiliation` 미로드 시 빈 값으로 오인되는 문제 (IS #1570 채택, TASK-B-399 설계 검토 중 발견)
+- **발견 경위**: 2026-11-27, TASK-B-399(IS #1566) 설계 검토에서 Aiden R-01 필수 2로 지적했고, Jaison이 "본 Task 밖 IMP 분리"를 승인했다. Baker가 IS #1570으로 건의했고 Edward가 2026-11-27 등록을 승인했다.
+- **현재 상태**: 수정 모드(`orderId` 있음)는 신규 등록용 `affiliation` 자동완성을 건너뛰어 `affiliation`이 비어 있다. `autoShipperName`은 `affiliation`이 없으면 선택된 화주(`shipper_id`)와 일치하는 조직명으로 폴백한다(`OrderRegistrationForm.tsx:285-287`). 이 상태에서 ① 저장된 화주명이 이 폴백 값과 다르거나 폴백 값이 비면(화주 목록에서 `shipper_id`가 일치하지 않는 경우 등) **manual 모드로 열리고**(`:492-498`), ② "내 정보 사용"으로 전환하면 `restoreAutoShipperInfo()`(`:300-322`)가 화주명은 `autoShipperName`(폴백)으로 채우지만 담당자·이메일·연락처·주소·사업자번호는 `affiliation`이 비어 있어 **빈 값으로 복원**된다. UPS 모드는 화주 연락처가 필수 검증이라(`src/lib/validation/order.ts:218-224`) 연락처가 빈 채로는 저장이 차단되고, 비UPS 모드는 선택 항목이라 빈 값으로 저장될 수 있다(코드 읽기 결론, 실행 미확인). 화주 배지의 `Checking...` 잔존은 같은 원인 계열이라는 Team B 보고가 있다(Aiden 미확인). 발생은 사용자의 모드 전환 조작이 있을 때이며 재입력으로 복구할 수 있다. 실제 발생 빈도는 운영 데이터를 조회하지 않아 미확인이다(R-14).
+- **임시 조치**: TASK-B-399 PR2는 신규 `shipper_company` 컨트롤을 저장값으로 복원하고 저장 전 SHXK 등록은 auto 규칙으로 계속한다. 이 결함 자체는 B-399 범위가 아니다(중복 수정 금지).
+- **목표 구현**: 수정 모드 초기화 시 저장된 화주명·조직 정보를 기반으로 `autoShipperName`을 계산해(조직 정보 로드 완료 대기 포함) 모드 오인을 방지하고, 수정 모드에서 "내 정보 사용"으로 전환할 때 저장값이 빈 값으로 덮이지 않게 한다. 화주 배지도 저장값·조직 정보로 결정한다.
+- **관련 파일**: `src/components/orders/OrderRegistrationForm.tsx`(`:280-322`, `:451-503`), `src/lib/orders/edit-defaults.ts`(`:73-94`), TASK-B-399 task file
+- **예상 공수**: 0.5 MD
+- **우선순위**: Medium — 금액·보안과 무관하고 사용자 조작이 있어야 발생하나, TASK-B-399 설계 확정(ⓐ: `shipper_company`가 NULL인 기존 오더도 수정 시 입력 강제)으로 기존 오더 다수가 manual로 열려 "내 정보 사용" 전환 유인이 커질 수 있으므로(추정) **B-399 PR2 배포 전에 처리**를 권고한다(Edward 승인 2026-11-27). 관련: IS #1570, IS #1566, TASK-B-399.
+
+## [IMP-221] SECURITY DEFINER RPC의 실행 권한·호출자 검증 정렬 — public 스키마 RPC 전수 점검(TASK-B-399 PR1 검토 중 확인, Aiden 본인 발견)
+- **발견 경위**: 2026-11-27, TASK-B-399 PR1 R-01 검토 중 Aiden이 RPC의 호출 권한 구조를 확인했다. 같은 날 로컬 마이그레이션 적용 DB의 카탈로그를 읽기 전용으로 조회해 범위를 확인했다(등록 시점에는 R-14 로컬 범위만 조회했고 운영 DB는 조회하지 않았다). Edward 위임(2026-11-27 15:19, 권고안 승인 위임)으로 **IMP로만 등록**하며 우선순위·시점은 Edward가 확정한다(R-15).
+- **현재 상태**: 세부(대상 함수·권한 현황·운영 반영 여부)는 공개 저장소 기준(R-21 §2)에 따라 이 문서에 쓰지 않고 비공개로 보관한다. 운영 DB 상태는 2026-11-27 Edward 승인(R-14, 읽기 전용 카탈로그 조회)으로 확인했으며 결과는 비공개로 전달한다.
+- **임시 조치**: 없음. 이 RPC들의 호출 경로는 서버 코드 중심이라 정상 사용에는 기능 영향이 확인되지 않았다. 신규·변경 RPC(B-381 계열)는 마이그레이션에서 권한을 명시적으로 회수하고 카탈로그 테스트로 고정하는 패턴을 이미 쓴다(TeamB_Dev 기준, develop 미반영).
+- **목표 구현**: ① `public` 스키마 SECURITY DEFINER RPC 전수 점검표 작성(비공개) ② RPC마다 EXECUTE를 필요한 역할로만 명시 부여(불필요한 기본 부여는 회수) ③ 호출자 신원은 서버에서 확정(`auth.uid()` 등)하고, 호출자가 인자로 넘기는 사용자·조직 식별자는 신뢰하지 않거나 서버 확정값과 일치를 검증 ④ B-381 M1~M3의 권한 회수·`RPC 보안 카탈로그` 테스트 패턴(TeamB_Dev 기준)을 재사용하고 신규 RPC마다 같은 카탈로그 테스트와 실세션 허용·거부 테스트, 롤백 SQL(권한 원복)을 요구 ⑤ 서버 코드가 쓰는 클라이언트(세션/관리자) 영향 점검 — RPC를 '서버 내부 전용'과 '인증 세션 허용 + 함수 내 신원 검증'으로 분류하는 기준을 먼저 정한 뒤, 앱 영향 없는 순서로 단계 적용하고 권한 회수는 마지막 ⑥ 운영 반영은 211 런북과 Edward R-14 승인.
+- **관련 파일**: `supabase/migrations/`(신규), 기존 `public` 스키마 RPC 마이그레이션(세부 비공개), `docs/00_GUIDE/211_PRODUCTION_DEPLOY_RUNBOOK.md`
+- **예상 공수**: 점검 0.5 MD + 마이그레이션·실DB 세션 테스트 1~2 MD (설계 후 확정)
+- **우선순위**: High — **즉시 대응(Edward 승인 2026-11-27)**: 원격 시연 배포(목표 11/30, 늦어도 12/2) 전에 핵심 조치(목표 구현 ②③ 중 비공개 점검표의 우선 대상)와 ⑤⑥(앱 영향 점검·단계 적용, 211 런북·R-14 운영 반영)을 처리한다. 나머지 전수 점검(①④와 나머지 대상의 ②③)은 이 건 범위로 이어서 진행한다(IMP-213과 달리 본 사업 시작을 기다리지 않음). 관련: IMP-213, DEF-B-050.
+
+---
+
+## [IMP-222] Open 우선 진행 기간에 이연한 점검·보완 항목 모음 — 본 사업 확정 시 리팩토링·보완 (Edward 승인 2026-11-27, Team B 건의)
+- **발견 경위**: 2026-11-27, Team B가 "정산 기능을 엄격하게 점검하느라 고객에게 기준 기능을 오래 보여주지 못해 협의가 어렵다"며 기능 Open을 우선하고 점검·보완은 본 사업 확정 시 진행하자고 건의했다. Edward가 구두 건의를 접수해 2026-11-27 17:38 KST에 "최소 점검만 하고 나머지는 이연(B안)"과 "이연 항목은 한 건으로 묶어 기록"을 승인했다(R-15, Aiden 등록).
+- **현재 상태**: Open 우선 기간에는 차단 기준을 원가 비노출·금액 정확성·운영 DB 변경 안전(분리·롤백·승인)·통합 충돌/CI·공개 기재 기준(R-21)으로 한정하고, 그 밖의 검토 지적은 비차단 권고로 분류해 이 건에 모은다. 아래는 2026-11-27 시점 이연 대상이며, 이후 이연되는 항목은 Aiden이 이 건에 추가 기록한다.
+- **임시 조치**: 차단 기준 항목은 종전대로 검토하고 병합 전 확인한다. 이연 항목은 해당 PR·Issue 코멘트에 '이연(IMP-222)'로 표기한다.
+- **목표 구현(이연 항목 — 본 사업 확정 시 일괄 처리)**:
+  1. 테스트 품질 보강 — 단언 강화(값 단언, 실패 대조군, 항상 참인 단언 제거)와 권한 매트릭스 확대. 해당 PR의 비차단 권고분.
+  2. 문서 정확성·명세 동기화 — task file·회귀 항목 문구, Ds-11 반영 내용 정확성(2단계 점검 포함).
+  3. 검토에서 나온 비차단 권고 사항 전반(코드 정리, 명칭·표기, 로그 보강 등).
+  4. IS #1449 C(TASK-B-379, 청구 금액 산출 함수의 요율 스냅샷 원본 테이블 직접 의존 제거) — **조건부 이연**: 원본 테이블 정책 교체(안전 뷰 전환 잔여 작업)를 함께 보류하는 동안만 이연할 수 있다. 정책 교체를 실행하기 전에는 반드시 먼저 처리한다.
+  5. 별도 번호로 이미 기록된 이연 후보와 연계: IMP-220(TASK-B-401, B-399 PR2 배포 전 처리 조건은 유지), IS #1560(TASK-B-398). IMP-221은 즉시 대응으로 확정되어 이연 대상이 아니다.
+- **관련 파일**: `scratch/post_launch_improvements.md`, IS #1364, IS #1449, IS #1453
+- **예상 공수**: 항목 확정 후 산정(이연 항목이 누적되므로 현 시점 미정)
+- **우선순위**: Medium — 이연 항목 자체는 차단 기준 밖이다. 단 4번은 위 조건을 지키지 않으면 운영 반영 전 필수로 되돌아간다. **시점은 본 사업 확정 시**(Edward 승인).
