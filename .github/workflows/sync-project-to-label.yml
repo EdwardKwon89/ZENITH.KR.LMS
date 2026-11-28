@@ -9,6 +9,7 @@ name: "[Sync] Project Status → Issue Label"
 #   Rework      → status:rework
 #   Blocked     → status:blocked
 #   Done        → status:done
+#   (status:draft·status:ready 는 Project에서 Open으로 표시되므로 역동기화 대상이 아님 — 수동 전체 재동기화 시 건드리지 않음)
 #
 # 트리거: workflow_dispatch (수동 전체 재동기화)
 #

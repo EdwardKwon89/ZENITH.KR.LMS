@@ -131,7 +131,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/login | SHIPPER 계정 로그인 | uat02_corp_shipper@zenith.kr / password1234 | 대시보드 이동 | ☐ |
+| 1 | /ko/login | SHIPPER 계정 로그인 | uat02_corp_shipper@zenith.kr / <로컬 시드 비밀번호> | 대시보드 이동 | ☐ |
 | 2 | /ko/tracking | 추적 대시보드 접속 | — | 통계 카드 + 추적 데이터 테이블 표시 | ☐ |
 | 3 | /ko/tracking | 테이블 데이터 확인 | — | SHIPPER 본인 조직의 오더에 대한 추적 데이터만 표시 (타 조직 오더 미노출) | ☐ |
 
@@ -139,7 +139,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 4 | /ko/login | ADMIN 계정 로그인 | admin@zenith.kr / password1234 | 대시보드 이동 | ☐ |
+| 4 | /ko/login | ADMIN 계정 로그인 | admin@zenith.kr / <로컬 시드 비밀번호> | 대시보드 이동 | ☐ |
 | 5 | /ko/tracking | 추적 대시보드 접속 | — | 통계 카드 + 추적 데이터 테이블 표시 | ☐ |
 | 6 | /ko/tracking | 테이블 데이터 확인 | — | ADMIN은 전체 조직의 모든 추적 데이터 표시 (SHIPPER보다 많은 데이터 건수) | ☐ |
 | 7 | /ko/tracking | 'Sync All API' 버튼 확인 | — | ADMIN 전용 동기화 버튼 표시 (SHIPPER는 미노출) | ☐ |

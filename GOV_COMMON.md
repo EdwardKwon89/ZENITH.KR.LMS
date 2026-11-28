@@ -110,9 +110,15 @@ CI는 매 실행마다 `supabase db reset`으로 스키마+SQL 시드를 완전�
 **(2026-11-18, v3.10 — IMP-186(B) / TASK-1150)**: `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md`는 자동 생성되는 **추적 인덱스**(수동 편집 금지)이며, 구 단일 맵(§1~§92)은 `lrtm-archive/` 읽기 전용 아카이브로 고정되었다. 개별 Task PR에서는 `regression-items/TASK-*.md` 파일 1개만 추가하며, `npm run check:lrtm`(`scripts/check-lrtm-sync.mjs`)으로 유령 경로(0건)·신규 미등재 Vitest 파일(래칫 `scripts/lrtm-sync-baseline.json`)·`tests/e2e/` 수동 표기(`CI 미실행`/`수동`)를 검증한다. 인덱스 본문은 자동 갱신 Action 도입 전까지 Aiden이 병합 시점에 `npm run build:lrtm`으로 수동 재생성한다.
 
 ### R-10 | 기능-UI 결합 검증 의무
-백엔드 로직(API/RPC)의 완성이 '완료'를 의미하지 않습니다. 해당 기능을 최종 사용자가 호출하고 결과를 확인할 수 있는 **물리적 UI가 완비**되고 실구동이 확인된 경우에만 WBS를 완료로 변경할 수 있습니다. 완료 보고 시 반드시 UI 구동 증적(스크린샷/녹화)을 포함해야 합니다.
+백엔드 로직(API/RPC)의 완성이 '완료'를 의미하지 않습니다. 해당 기능을 최종 사용자가 호출하고 결과를 확인할 수 있는 **물리적 UI가 완비**되고 실구동이 확인된 경우에만 WBS를 완료로 변경할 수 있습니다. 완료 보고 시 UI 구동 증적(스크린샷/녹화)을 **확보**하고, 보고서에는 증적의 **존재 여부·요약 수치·확인 일시**만 적습니다. 원본은 저장소 밖에 두고 **기존 비공개 채널(Edward 경유)** 로 검토자에게 전달합니다(R-13·R-21 §3). 위치·경로는 쓰지 않고 `증적: 비공개 보관` 한 줄로 갈음합니다.
 
 **(2026-10-01, v3.6)** 서버 액션/API 라우트를 포함하는 변경은 UI 구동 확인과 함께 `/admin/error-logs`(Admin 계정, production — TASK-1141/IMP-169 Option C 적용 이후 `logger.error()` 전체가 이 화면에 자동 반영됨)에서 severity=ERROR 기준으로 해당 기능 관련 **신규 오류가 없는지** 확인하고, 완료 보고에 "에러 로그 확인 — 無" 한 줄을 포함한다. 만약 확인 과정에서 담당 Task 범위 밖의 오류를 발견하면 즉시 수정하지 말고 **R-18 절차(DEF 등록 후 보고)**를 따른다. 본인이 수정해 해소된 기존 오류 행은 화면에서 **"Resolved" 처리**해 중복 보고를 방지한다.
+
+**(2026-11-25, v3.14) 증적 파기**: 전달한 원본 증적은 **검토 완료 후 즉시 파기**합니다.
+- **검토 완료**: Aiden이 R-01 검토 코멘트에서 증적을 확인했다고 게시한 시점. 그 전에는 파기하지 않습니다.
+- **대상·보고**: 실행 주체의 저장소 밖 보관본과 전달 사본. 보고는 `파기 완료` 한 줄(경로·내용 비기재).
+- **예외**: 결함(DEF)·보안 건의 재현 근거는 즉시 파기하지 않고 Aiden·Edward가 건별로 보관 여부를 지정합니다.
+- **적용 범위**: 새로 생기는 증적. 기존 비공개 보관본은 소급 파기하지 않습니다.
 
 ### R-11 | API 설계 우선 원칙
 모든 기능 개발 시 코드 구현보다 **API 명세(`Ds-11`) 및 데이터 모델 설계**를 최우선으로 완료하고 사용자의 승인을 득해야 합니다. 명세 미확정 상태의 구현은 금지됩니다.
@@ -132,11 +138,14 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 - **문서 링크**: 문서를 이동·삭제·아카이브할 때는 참조를 `grep`으로 전수 점검한다. `scripts/check-doc-links.mjs`(`npm run check:doc-links`)가 baseline 밖의 **신규 깨진 상대 링크**를 경고한다(근거: GH#206 #13 아카이브 때 "깨지는 링크 없음"으로 확인했으나 4곳이 누락됨).
 
 ### R-13 | 테스트 결과물 관리 의무
-모든 테스트 결과(로그, 스크린샷 등)는 ROOT 폴더가 아닌 지정된 `docs/` 하부 폴더에 저장합니다.
-- **E2E 테스트**: `docs/99_Manual/E2E_NN_Result/`
+모든 테스트 결과(로그, 스크린샷 등)는 ROOT 폴더가 아닌 지정된 위치에 저장합니다.
+- **E2E 테스트**: 요약 문서(`.md`)와 수치는 `docs/99_Manual/E2E_NN_Result/`에 두고, **원본 증적(스크린샷·JSON·Excel·녹화 등)은 저장소 밖에 출력**합니다(R-21 §3). 출력 위치는 공통 헬퍼 `tests/e2e/evidence-dir.ts`(TASK-B-385로 도입)가 환경변수 `E2E_EVIDENCE_DIR`(미설정 시 사용자 홈 하위 영속 기본 위치)로 정하며, 저장소 내부 경로이면 실행이 실패합니다. 위치·경로는 저장소·Issue·PR·task file에 쓰지 않습니다.
 - **회귀 테스트**: `docs/08_Self_Audit/Regression_Results/`
 - **서버 로그**: `docs/archive/logs/`
 - **기타 임시 파일**: `scratch/`
+- **재유입 방지(3층, v3.14)**: ① 헬퍼 런타임 가드(차단) ② `npm run check:evidence`(`scripts/check-evidence-escape.mjs`, PR Checks advisory, 기준 SHA 대비 diff) ③ `.gitignore`(원본 증적 확장자 단위, 요약 `.md`는 보호)
+- **과도기(2026-11-25 ~ 전환 완료 시까지)**: 헬퍼로 전환되지 않은 기존 spec은 종전 경로로 출력될 수 있으나 그 결과로 생긴 **원본 증적 파일은 커밋하지 않습니다**. 신규 spec은 헬퍼를 사용합니다. 이미 추적 중인 증적(2026-11-25 기준 465건)은 이연합니다. 헬퍼 도입 전에는 이 과도기 규정만 적용합니다.
+- **전환 예외(R-19)**: 타 팀 소유 spec의 헬퍼 전환은 증적 경로 상수 한 줄과 import 교체만 허용하는 Aiden 승인 예외로 진행합니다(로직·단언·검증 변경 금지, PR 본문에 예외 승인 기록).
 
 ### R-14 | E2E 테스트 환경 표준
 모든 E2E 테스트 및 개발은 **로컬 Supabase 환경**을 원칙으로 수행합니다. 원격(Cloud) Supabase 접속이 필요한 경우에는 반드시 사용자에게 승인을 득한 후 실시합니다.
@@ -155,6 +164,7 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 세션 최초 시작 시 반드시 `gh issue list --assignee <본인>` (또는 `--label team:a`/`team:b`)으로 본인에게 할당된 미완료 이슈를 확인한다.
 - `status:blocked` 라벨 이슈: 전제조건 미충족 — 착수 금지
 - `status:draft` 라벨 이슈: Aiden 설계 확정 대기 중 — 구현 착수 금지, 추가 대기
+- `status:ready` 라벨 이슈: **착수 가능** — 설계 확정(또는 불요)·블로커 해소·담당자 지정이 끝난 착수 대기 상태 **(v3.12)**. 착수 시 담당 Agent가 `status:in-progress`로 전환한다
 - 이슈 상태와 상세 파일(`.agent/tasks/`) 내용이 불일치하면 착수 전 Aiden에게 보고하고 정정 지시를 기다린다. (SAR-2026-05-13-001 반영 및 신규 오케스트레이션 체계 확장)
 - **(2026-08-14, R-17 v3.0)** 신규 Task는 GitHub Issue 생성으로 발령되며, 그 이슈의 라벨·assignee가 유일한 진실 공급원이다. `.agent/ACTIVE_TASK.md`는 GitHub Action이 관리하는 열람용 자동 미러일 뿐 — 착수 확인은 이 파일이 아니라 `gh issue list`로 직접 한다.
 - **(2026-10-01, v3.6)** 착수 전 `/admin/error-logs`(Admin 계정, production)에서 담당 기능 관련 키워드로 검색해 이미 조용히 실패 중인 기존 결함이 있는지 먼저 확인한다 — DEF-B-149가 도입 시점부터 약 4개월간 아무도 발견 못 한 채 방치됐던 사례(logger.error는 쌓이지만 화면엔 안 뜨던 이중 파이프라인 문제, TASK-1141/IMP-169로 해소) 재발 방지. 발견한 오류가 담당 Task 범위 밖이면 R-18 절차(DEF 등록 후 보고)를 따르고, 범위 안이면 수정 완료 후 해당 행을 "Resolved" 처리한다.
@@ -164,9 +174,25 @@ API 사양 변경 시 반드시 `Ds-11_API_상세_명세서.md`를 선제적으�
 
 **전체 흐름**:
 ```
-status:open → [status:draft → (Aiden 확정)] → status:in-progress → status:review → (머지) → Close
-                   ↑선택적                        ↑구현                ↑보고           ↑Aiden 단독
+status:open → [status:draft → (Aiden 확정)] → status:ready → status:in-progress → status:review → (머지) → Close
+                   ↑선택적                      ↑착수 대기      ↑구현                ↑보고           ↑Aiden 단독
 ```
+
+**상태 정의 (v3.12, 2026-11-24 — `status:ready` 신설)**:
+
+| 상태 | 의미 | 부여·전환 주체 |
+|:--|:--|:--|
+| `status:open` | 미착수. 상태 라벨이 없으면 open으로 간주 | 발령자 |
+| `status:draft` | 설계 의견 제출, Aiden 설계 확정 대기 — **착수 금지** | 담당 Agent 부여 / **제거는 Aiden 전속** |
+| `status:ready` | **착수 가능** — 설계 확정(또는 불요 판단)·블로커 해소·담당자 지정 완료, 구현 전 | **Aiden 부여**(draft 확정 시·blocked 해제 시). 단순 Task는 open 상태에서 바로 착수 가능 |
+| `status:in-progress` | 구현 중 | 담당 Agent(착수 시) |
+| `status:review` | 완료 보고·검토 요청 | 담당 Agent(PR 생성과 함께) |
+| `status:rework` | 반려 후 재작업 | Aiden |
+| `status:blocked` | 전제조건 미충족 — **착수 금지** | 해제는 Aiden 전속 |
+| Close (`status:done`) | 완료 | PR 머지 시 자동. Aiden·Edward 전속 |
+
+- `status:draft`·`status:ready`는 Project 상태 필드에서 **Open**으로 표시된다(`[Sync] Issue Label → Project Status`).
+- 착수 가능한 라벨은 `status:ready` 또는 `status:open`(단순 Task)이며, `status:draft`·`status:blocked`는 착수할 수 없다.
 
 **Task 발령 절차**:
 - 신규 Task는 **GitHub Issue 생성**으로 발령한다. Team A는 Aiden, Team B는 JSJung·Jaison(R-19)이 발령 주체.
@@ -200,11 +226,11 @@ status:open → [status:draft → (Aiden 확정)] → status:in-progress → sta
 3. 상세 파일을 Issue 본문을 기반으로 신규 생성(목표·DoD·전제조건 기재)하고 복잡도 판단 후 진행 방식 결정:
    - **단순 Task** (구현 방향 자명): 착수 직행
    - **복잡 Task** (대안 복수·설계 결정 필요): 아래 설계 의견 절차로 진행
-4. **[GitHub Issue 라벨 갱신]** `gh issue edit #NNN --add-label status:in-progress --remove-label status:open` 실행.
+4. **[GitHub Issue 라벨 갱신]** `gh issue edit #NNN --add-label status:in-progress --remove-label status:open --remove-label status:ready` 실행(해당 라벨이 있는 쪽을 제거).
 
 **설계 의견 절차** (선택적, 복잡 Task 시):
 1. 상세 파일 `[설계 의견]` 섹션에 제안 방안·근거·리스크 작성, `gh issue edit #NNN --add-label status:draft` 실행
-2. Aiden 검토 후 `[설계 확정]` 섹션 기록 + `status:draft` 제거·`status:in-progress` 부여 (Aiden 전속)
+2. Aiden 검토 후 `[설계 확정]` 섹션 기록 + `status:draft` 제거·**`status:ready` 부여** (Aiden 전속, v3.12 — 이후 담당 Agent가 착수 시 `status:in-progress`로 전환)
 3. 착수 승인 전까지 구현 코드 작성 금지
 
 **완료 보고 절차** (커밋 순서 엄수 — R-17 v3.0):
@@ -234,12 +260,25 @@ status:open → [status:draft → (Aiden 확정)] → status:in-progress → sta
 **파일 조작 규칙**:
 - 상세 파일(`.agent/tasks/TASK-XXX_*.md`)은 담당 Agent만 수정 가능 (단, `[설계 확정]`·`[Aiden 검토]` 섹션은 Aiden 전속)
 - `.agent/ACTIVE_TASK.md`는 GitHub Action이 관리하는 열람 전용 자동 미러다 — 어떤 Agent도 수기 편집 금지(팀별 수기 상세 표는 2026-08-14부로 폐지)
-- 전제조건 블로커 해제(`status:blocked` 제거) 및 설계 착수 승인 전환은 Aiden 전속
+- 전제조건 블로커 해제(`status:blocked` 제거, 해제 시 `status:ready` 또는 `status:open` 부여) 및 설계 착수 승인 전환은 Aiden 전속
 
 **아카이브 규칙**:
 - 완료(Close)된 Issue의 상세 파일은 주 단위로 Aiden이 `.agent/archive/TASK_LOG_YYMMWW.md`로 이관 후 삭제
 
 **구 파일 참조 금지**: `TASK_BOARD.md`·`ACTIVE_AGENT.md`·`HANDOFF_BOX.md`·`scratch/IMP_PROGRESS.md`는 폐기됨. Task 상태의 단일 출처는 GitHub Issue/PR(`gh issue list`·`gh pr list`)이며, `.agent/tasks/`는 DoD·커밋 이력 상세 기록용으로만 사용한다.
+
+### R-21 | 공개 저장소 기재 기준 (2026-11-24 신설)
+
+> 이 저장소는 **Public**이다(유료 플랜·private 전환은 본 사업 시 재검토). 문서·코드·로그·task file·커밋 메시지·Issue·PR 본문·코멘트 등 **저장소에 올라가는 모든 텍스트**에 적용한다. 올라간 내용은 수정·삭제해도 이력에 남는다.
+
+1. **쓰지 않는다**: ① 자격 증명(계정+비밀번호 병기, 토큰·키·서명 URL) ② 실사용자·고객 식별 정보(이메일·성명·전화·주소·사업자번호) ③ 운영 프로젝트 식별자 ④ 작업자 로컬 절대경로(사용자명 포함). 시드·픽스처는 **가상 값**(`example.test` 등)으로 만들고, 시드 계정의 값은 문서에 쓰지 않고 시드 스크립트를 참조한다.
+2. **보안 관련 서술은 목표 상태로만 쓴다**: 현재 코드·정책의 역할별 결과·가드 여부·재현 절차·호출 형태·응답 값은 쓰지 않는다. 쓰는 것은 **목표 상태(변경 후 허용/거부 표)·판정 기준·해소 여부 한 단어(`해소됨`/`미해소`)** 뿐이다. 변경 전 실측은 "실측 완료, 상세 비공개" 한 줄로 대체하고, 상세는 **비공개 채널(Edward 경유)** 로 전달한다. 운영 DB 조회 결과도 저장소에 쓰지 않는다.
+3. **현재 접근 결과를 보여주는 증적**(스크린샷·로그·JSON)은 저장소에 두지 않고 비공개 보관한다. 파일명·제목에도 현재 취약 상태를 드러내지 않는다. 원본 증적의 출력·전달·파기는 R-10·R-13을 따른다.
+4. **정정 방식**: 이미 올린 코멘트·PR 본문은 **수정하지 말고 삭제 후 요약 재게시**한다(수정 이력이 남기 때문). **이력 재작성(force-push)은 하지 않는다.** 병합은 Squash(제목·본문 직접 작성)로 하고 병합 후 작업 브랜치를 삭제한다. 닫힌 PR의 참조 이력은 남는 한계를 인지한다.
+5. **점검 보고 형식**: 전/후 `grep` 대조표에는 **명령 형태와 건수만** 쓴다. 일치한 값과 패턴 문자열은 쓰지 않는다(패턴 파일은 저장소 밖 비공개 경로).
+6. **소유 경계**: 정리는 소유 팀이 한다(R-19). 소유가 애매하면 수정하지 말고 질문 목록으로 Aiden에게 올린다.
+
+> **근거**: 2026-11-23~24 병합 브랜치 문서 공개 노출 감사(IS #1487)에서 자격 증명 병기, 실사용자 식별 정보, 운영 식별자, 현재 취약 상태·재현 서술, 작업자 로컬 경로가 광범위하게 확인되어 IS #1489·#1490·#1494·#1498로 정리했다. 재발 방지를 위해 규칙으로 승격한다(자동 점검 도입은 본 사업 시점에 IMP로 판단).
 
 ### R-20 | 영향도 분석 GitNexus 우선 원칙 (2026-07-29 신설)
 
@@ -426,4 +465,4 @@ PreToolUse GitNexus Hook에서 `Bash`가 제외되었습니다. 아래 경우는
 
 ## 📝 개정 이력
 
-> 최신 버전: **v3.11** (2026-11-20) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)
+> 최신 버전: **v3.14** (2026-11-25) | 전체 이력: [docs/00_GUIDE/GOV_CHANGELOG.md](docs/00_GUIDE/GOV_CHANGELOG.md)

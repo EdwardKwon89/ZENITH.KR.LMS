@@ -1,5 +1,5 @@
 > vitest run
- RUN  v4.1.4 /Users/edward.kwon/WorkSpace/ZENITH_LMS_001
+ RUN  v4.1.4 ~/WorkSpace/ZENITH_LMS_001
 stdout | tests/integration/tracking-business-qa.test.ts > QA-02 Tracking Business Integration > should preserve raw JSON logs in zen_tracking_raw_logs
 [TRACKING_MANAGER] Found config for 3ff5b116-29cd-4d90-8dd0-0e99c36a2155: provider_type=API
 [MOCK_CARRIER] Attempting to insert raw log for order 3ff5b116-29cd-4d90-8dd0-0e99c36a2155
@@ -148,24 +148,24 @@ Config Seed Error: {
 (Use `node --trace-warnings ...` to show where the warning was created)
 stderr | tests/integration/finance.test.ts > ZENITH Finance Integration: WBS 3.2 Integrity Test > Scenario 1: Auto-Invoicing on Order Release > TC-F.1: [Success] 오더가 RELEASED 상태가 될 때 정산서가 자동 생성되어야 함
 [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at Module.updateOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/orders.ts:442:11)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at Module.updateOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/app/actions/orders.ts:442:11)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:71:22
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:71:22
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 stderr | tests/integration/finance.test.ts > ZENITH Finance Integration: WBS 3.2 Integrity Test > Scenario 4: Multi-Currency & Security Expansion (TC-F.4~6) > TC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)
 [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
-    at cookies (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
-    at createClient (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
-    at triggerStatusChangeNotification (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
-    at Module.updateOrderStatus (/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/orders.ts:442:11)
+    at throwForMissingRequestStore (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/app-render/work-unit-async-storage.external.js:75:33)
+    at cookies (~/WorkSpace/ZENITH_LMS_001/node_modules/next/dist/server/request/cookies.js:126:67)
+    at createClient (~/WorkSpace/ZENITH_LMS_001/src/utils/supabase/server.ts:5:29)
+    at triggerStatusChangeNotification (~/WorkSpace/ZENITH_LMS_001/src/app/actions/notifications.ts:45:26)
+    at Module.updateOrderStatus (~/WorkSpace/ZENITH_LMS_001/src/app/actions/orders.ts:442:11)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at /Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:133:22
-    at file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+    at ~/WorkSpace/ZENITH_LMS_001/tests/integration/finance.test.ts:133:22
+    at file://~/WorkSpace/ZENITH_LMS_001/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
 (node:88171) Warning: `--localstorage-file` was provided without a valid path
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:88189) Warning: `--localstorage-file` was provided without a valid path

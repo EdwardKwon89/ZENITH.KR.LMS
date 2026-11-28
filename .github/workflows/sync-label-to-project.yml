@@ -9,6 +9,7 @@ name: "[Sync] Issue Label → Project Status"
 #   status:review      → Review
 #   status:rework      → Rework
 #   status:blocked     → Blocked
+#   status:ready       → Open   (v3.12, draft와 동일하게 Project에서는 Open으로 표시)
 #   status:done        → Done
 #   (레이블 없음 + opened) → Open
 #
@@ -66,6 +67,7 @@ jobs:
           elif 'status:rework'    in labels: print('rework')
           elif 'status:in-progress' in labels: print('in-progress')
           elif 'status:blocked'   in labels: print('blocked')
+          elif 'status:ready'     in labels: print('open')
           elif 'status:open'      in labels: print('open')
           elif 'status:draft'     in labels: print('open')
           elif action == 'opened':           print('open')   # 신규 이슈 기본값

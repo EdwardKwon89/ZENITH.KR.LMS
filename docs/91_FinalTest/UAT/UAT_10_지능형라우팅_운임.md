@@ -23,11 +23,11 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/orders | ADMIN 계정 로그인 후 오더 목록 진입 | `admin@zenith.kr` / `password1234` | 오더 목록 정상 표시 | ☐ |
+| 1 | /ko/orders | ADMIN 계정 로그인 후 오더 목록 진입 | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | 오더 목록 정상 표시 | ☐ |
 | 2 | /ko/orders/[id] | ICN→SIN 구간 오더 선택 → 상세 페이지 진입 | — | 오더 상세 정보 표시 | ☐ |
 | 3 | /ko/orders/[id] | Route Optimization 섹션에서 '경로 계산하기' 버튼 클릭 후 완료 대기 | — | 전체 운송사 후보 **비교 테이블** 표시 — 직항/경유 그룹 분리, 각 행에 운송사·경로·비용·소요일·추천 배지 | ☐ |
 | 4 | Supabase Studio | `SELECT recommended_for FROM zen_route_options WHERE order_id = '[orderId]'` | — | DB: `recommended_for` 컬럼에 `["COST"]`·`["TIME"]`·`["BALANCED"]` 값 정상 저장 확인 | ☐ |
-| 5 | /ko/logout → /ko/login | SHIPPER 계정으로 로그인 후 동일 오더 진입 | `uat02_corp_shipper@zenith.kr` / `password1234` | SHIPPER도 경로 옵션 전체 후보 비교 조회 가능 (데이터 동일) | ☐ |
+| 5 | /ko/logout → /ko/login | SHIPPER 계정으로 로그인 후 동일 오더 진입 | `uat02_corp_shipper@zenith.kr` / `<로컬 시드 비밀번호>` | SHIPPER도 경로 옵션 전체 후보 비교 조회 가능 (데이터 동일) | ☐ |
 | 6 | — | SHIPPER 계정으로 타 조직 오더 URL 직접 입력 시도 | `/ko/orders/[otherOrgOrderId]` | 접근 차단 (403 또는 메인 리다이렉트) | ☐ |
 
 ### 합격 기준
@@ -97,7 +97,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/admin/rates | ADMIN 로그인 후 Rates 페이지 진입 (Rate Cards 탭) | `admin@zenith.kr` / `password1234` | 요율 카드 목록 표시 (ZENITH_AIR AIR, ZENITH_SEA SEA 시드 2건) | ☐ |
+| 1 | /ko/admin/rates | ADMIN 로그인 후 Rates 페이지 진입 (Rate Cards 탭) | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | 요율 카드 목록 표시 (ZENITH_AIR AIR, ZENITH_SEA SEA 시드 2건) | ☐ |
 | 2 | /ko/admin/rates | Surcharges 탭 클릭 | — | 할증 목록 표시 (ZENITH_AIR FSC 15%, ZENITH_SEA SSC $50) | ☐ |
 | 3 | /ko/orders | ICN→SIN 구간, 중량 200kg 오더 선택 | — | 오더 상세 페이지 진입 | ☐ |
 | 4 | /ko/orders/[id] | '경로 계산하기' 클릭 후 비교 테이블 각 행의 총비용(total_cost) 확인 | — | 각 행에 `총비용(total_cost)` 필드 표시 | ☐ |
@@ -137,7 +137,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/admin/rates | ADMIN 로그인 후 Rates 페이지 진입 (Surcharges 탭 통합) | `admin@zenith.kr` / `password1234` | Rate Cards 탭 + Surcharges 탭 표시, 목록에 시드 요율 2건 표시 | ☐ |
+| 1 | /ko/admin/rates | ADMIN 로그인 후 Rates 페이지 진입 (Surcharges 탭 통합) | `admin@zenith.kr` / `<로컬 시드 비밀번호>` | Rate Cards 탭 + Surcharges 탭 표시, 목록에 시드 요율 2건 표시 | ☐ |
 | 2 | Rate Cards 탭 | 목록 컬럼 확인 | — | Carrier·Mode·Currency·Tiers·Carrier Cost·Margin Rate·Platform Fee Rate·Valid From·Valid Until·Status·Actions(Edit/Delete) 표시 | ☐ |
 | 3 | Rate Cards 탭 | 'Add Rate Card' 버튼 클릭 | — | 신규 등록 폼 오픈 (Carrier·Mode·Currency·Tiers·Carrier Cost·Margin Rate·Platform Fee Rate·Valid From·Valid Until) | ☐ |
 | 4 | 신규 폼 | Carrier 선택: ZENITH_AIR, Mode: AIR, Currency: USD | ZENITH_AIR·AIR·USD | 필드 정상 입력 가능 | ☐ |

@@ -1,5 +1,5 @@
 > vitest run
-[1m[30m[46m RUN [49m[39m[22m [36mv4.1.4 [39m[90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001[39m
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.4 [39m[90m~/WorkSpace/ZENITH_LMS_001[39m
 [90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration
 [22m[39m[QA-02] Starting beforeAll setup...
 [90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration
@@ -162,64 +162,64 @@
 (Use `node --trace-warnings ...` to show where the warning was created)
 [90mstderr[2m | tests/integration/finance.test.ts[2m > [22m[2mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22m[2mScenario 1: Auto-Invoicing on Order Release[2m > [22m[2mTC-F.1: [Success] 오더가 RELEASED 상태가 될 때 정산서가 자동 생성되어야 함
 [22m[39m[ERROR] [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
-    at cookies [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
-    at createClient [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:7:29[90m)[39m
-    at triggerStatusChangeNotification [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/misc/notifications.ts:47:46[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/operations/orders.ts:366:13
+    at throwForMissingRequestStore [90m(~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
+    at cookies [90m(~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
+    at createClient [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:7:29[90m)[39m
+    at triggerStatusChangeNotification [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/misc/notifications.ts:47:46[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/operations/orders.ts:366:13
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
     at async Promise.all (index 2)
-    at Module.updateOrderStatus [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/operations/orders.ts:356:3[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:71:22
-    at [90mfile:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
+    at Module.updateOrderStatus [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/operations/orders.ts:356:3[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:71:22
+    at [90mfile://~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
 [90mstderr[2m | tests/integration/finance.test.ts[2m > [22m[2mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22m[2mScenario 4: Multi-Currency & Security Expansion (TC-F.4~6)[2m > [22m[2mTC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)
 [22m[39m[ERROR] [ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
-    at cookies [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
-    at createClient [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:7:29[90m)[39m
-    at triggerStatusChangeNotification [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/misc/notifications.ts:47:46[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/operations/orders.ts:366:13
+    at throwForMissingRequestStore [90m(~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
+    at cookies [90m(~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
+    at createClient [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:7:29[90m)[39m
+    at triggerStatusChangeNotification [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/misc/notifications.ts:47:46[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/operations/orders.ts:366:13
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
     at async Promise.all (index 2)
-    at Module.updateOrderStatus [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/operations/orders.ts:356:3[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:133:22
-    at [90mfile:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
+    at Module.updateOrderStatus [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/operations/orders.ts:356:3[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:133:22
+    at [90mfile://~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
 [90mstderr[2m | tests/unit/logistics/voc.test.ts[2m > [22m[2mVOC Action Unit Tests[2m > [22m[2mshould throw error when user tries to create VOC for an order they do not own
 [22m[39m[ERROR] [DEBUG] UNAUTHORIZED: order.shipper_id(other-org-id) !== profile.org_id(test-org-id)
 [90mstderr[2m | tests/unit/logistics/voc.test.ts[2m > [22m[2mVOC Action Unit Tests[2m > [22m[2mshould throw error when user tries to create VOC for an order they do not own
 [22m[39m[ERROR] [Action Error] Error: UNAUTHORIZED: Access denied to this order
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/misc/voc.ts:85:11
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/misc/voc.ts:85:11
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
-    at Module.<anonymous> [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/unit/logistics/voc.test.ts:107:20
-    at [90mfile:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
+    at Module.<anonymous> [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39mtests/unit/logistics/voc.test.ts:107:20
+    at [90mfile://~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
 [90mstderr[2m | tests/unit/member/grade-promotion.test.ts[2m > [22m[2mGrade Promotion Unit Tests[2m > [22m[2mMember Actions[2m > [22m[2mshould prevent promotion request if one is pending
 [22m[39m[ERROR] [Action Error] Error: 이미 대기 중인 승급 신청이 있습니다.
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/admin/member.ts:169:11
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/admin/member.ts:169:11
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
-    at Module.<anonymous> [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/unit/member/grade-promotion.test.ts:140:22
-    at [90mfile:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
+    at Module.<anonymous> [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39mtests/unit/member/grade-promotion.test.ts:140:22
+    at [90mfile://~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
 [90mstderr[2m | tests/unit/rates/rates.test.ts[2m > [22m[2mRates Actions Unit Tests[2m > [22m[2mTC-RATES-01: should restrict createRateCard to ADMIN or MANAGER
 [22m[39m[ERROR] [Action Error] Error: 요율 등록 권한이 없습니다.
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/admin/rates.ts:21:11
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/admin/rates.ts:21:11
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
-    at Module.<anonymous> [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/unit/rates/rates.test.ts:42:20
+    at Module.<anonymous> [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39mtests/unit/rates/rates.test.ts:42:20
 [90mstderr[2m | tests/unit/rates/rates.test.ts[2m > [22m[2mRates Actions Unit Tests[2m > [22m[2mTC-RATES-03: should restrict deleteRateCard to ADMIN only
 [22m[39m[ERROR] [Action Error] Error: 요율 삭제 권한은 관리자(ADMIN)만 가능합니다.
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/admin/rates.ts:107:11
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/admin/rates.ts:107:11
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
-    at Module.<anonymous> [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/unit/rates/rates.test.ts:66:20
+    at Module.<anonymous> [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39mtests/unit/rates/rates.test.ts:66:20
 (node:76082) Warning: `--localstorage-file` was provided without a valid path
 (Use `node --trace-warnings ...` to show where the warning was created)
 [90mstderr[2m | tests/unit/member/corporate.test.ts[2m > [22m[2mCorporate Actions Unit Tests[2m > [22m[2mTC-MEM-04: should return error if unauthorized role tries to update org info
 [22m[39m[ERROR] [Action Error] Error: 조직 정보를 수정할 권한이 없습니다.
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/admin/corporate.ts:46:11
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/admin/corporate.ts:46:11
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
-    at Module.<anonymous> [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/unit/member/corporate.test.ts:75:20
+    at Module.<anonymous> [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/lib/actions/wrapper.ts:13:20[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39mtests/unit/member/corporate.test.ts:75:20
 (node:76137) Warning: `--localstorage-file` was provided without a valid path
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:76138) Warning: `--localstorage-file` was provided without a valid path

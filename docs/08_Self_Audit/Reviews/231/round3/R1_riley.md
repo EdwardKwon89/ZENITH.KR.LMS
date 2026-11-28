@@ -2,16 +2,16 @@
 # 문서 231 (v0.4) 3차 교차 검증 의견 — Riley (CPO·CIO)
 
 > **검토자**: Riley (CPO(Chief Product Officer, 최고제품책임자)·CIO(Chief Information Officer, 최고정보책임자) 겸임)
-> **검토 대상**: [231_TEST_COVERAGE_STRATEGY_GUIDE.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/231_TEST_COVERAGE_STRATEGY_GUIDE.md) v0.4 및 복원된 [riley_review.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Reviews/231/riley_review.md)
+> **검토 대상**: [231_TEST_COVERAGE_STRATEGY_GUIDE.md](file://~/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/231_TEST_COVERAGE_STRATEGY_GUIDE.md) v0.4 및 복원된 [riley_review.md](file://~/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Reviews/231/riley_review.md)
 
 ---
 
 ## 점검 1. 복원된 Riley 의견의 반영표 대조 (우선)
 
-- **결론**: 복원된 [riley_review.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Reviews/231/riley_review.md#L1-L188)(188줄, **확인**)와 231 부록 C(`L446-483`)의 `(R)`·`(R·B)` 표기 **22개 행**을 전수 대조한 결과, 20개 행은 본문 반영이 정확하나 **축소·누락 1건(부록 C #26)**과 **반영표 출처 미분리 4건(부록 C #12·#21·#24·#29)**이 남아 있다.
+- **결론**: 복원된 [riley_review.md](file://~/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Reviews/231/riley_review.md#L1-L188)(188줄, **확인**)와 231 부록 C(`L446-483`)의 `(R)`·`(R·B)` 표기 **22개 행**을 전수 대조한 결과, 20개 행은 본문 반영이 정확하나 **축소·누락 1건(부록 C #26)**과 **반영표 출처 미분리 4건(부록 C #12·#21·#24·#29)**이 남아 있다.
 - **근거**:
   1. **[축소·누락] 부록 C #26 vs §10 #2 (`shxk-limits.ts` 누락)**:
-     - Riley 원문([riley_review.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Reviews/231/riley_review.md#L79) §2.6 ③)은 PoC(Proof of Concept, 개념 증명) 모듈 ③을 `label-mapping.ts` + `validate-payload.ts` + **`shxk-limits.ts` 3개 파일**로 제안했고 §8.2 표(`L331`)에는 3개 파일이 모두 반영되었으나, **§10 미결 사항 #2(`L398`)는 모듈 ②만 적고 모듈 ①(3파일)·③(3파일)의 파일 특정 확정 대상을 생략**하여 §8.2와 범위가 어긋난다(**확인**).
+     - Riley 원문([riley_review.md](file://~/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Reviews/231/riley_review.md#L79) §2.6 ③)은 PoC(Proof of Concept, 개념 증명) 모듈 ③을 `label-mapping.ts` + `validate-payload.ts` + **`shxk-limits.ts` 3개 파일**로 제안했고 §8.2 표(`L331`)에는 3개 파일이 모두 반영되었으나, **§10 미결 사항 #2(`L398`)는 모듈 ②만 적고 모듈 ①(3파일)·③(3파일)의 파일 특정 확정 대상을 생략**하여 §8.2와 범위가 어긋난다(**확인**).
   2. **[반영표 불일치] 부록 C #12·#21·#24·#29 병합 표기 미분해**:
      - 부록 C(`L459, L468, L471, L476`)는 한 행 안에 `(R) ... / (B) ...` 두 의견을 슬래시로 묶어 두었는데, 후술할 부록 E #14(`L516`)에서는 `"#12·#21·#24·#29 분해"`를 완료했다고 기재해 표 실제 상태와 다르다(**확인**).
   3. **(참고 — 정상 반영 확인)**: #1(§1.1-5 계층 단절), #3(D3-A/D3-B 분리), #4(하류 제약 기준), #6(D5 복합 상태), #7·#8(D2 수치 불변식·멀티패키지·3자리 국가코드·레거시 재통과), #10(§4.7 D9 8개 항목 신설), #13·#14(커버 맵 10~15개 상한·PR 직접 편집 금지), #19(301 Gate 2 후보안), #20(명세 부재 시 선갱신), #23(§4.8 에러 코드 단언), #28(D3-B 미니 PoC), #32~#36은 원문 왜곡 없이 본문에 정확히 반영되었다(**확인**).
@@ -46,10 +46,10 @@
      - 반면 **§7 말미(`L307`)**는 `"규칙 1·2·5·6·7·8의 규정 편입은 PoC 성과 확인 후"`, **§10 #14(`L410`)**는 `"v0.4 제안은 'PoC와 병행, 필수화는 PoC 후' — 운영 중 Task 부담 우려"`라고 적어 한 문서 안에서 의무화 시점이 충돌한다(**확인**).
      - **Pilot 운영 부담 관점**: 현재 LMS는 Pilot 운영 중으로 긴급 핫픽스·단순 UI 결함(위험 기준 0개)이 수시 발생한다. 위험 판정 **0개**인 Task에까지 매번 7행짜리 `[테스트 설계]` 표(`L220-230`) 작성을 강제하면 R-17 착수 부담이 과도하다.
   2. **[사실·규정 대조] GOV_COMMON R-11·R-14·R-17 및 301·305 대조 결과**:
-     - **R-17 착수 절차([GOV_COMMON.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/GOV_COMMON.md#L184-L193) `L184-193`)**: 현행 R-17은 복잡 Task일 때만 `[설계 의견]` 섹션을 쓰고 `status:draft`로 Aiden 승인을 받으며, 완료 시 `check-R17-DoD`(`L198`)가 task file 필수 섹션을 검사한다(**확인**). §4.9 시점 ②(`L215`)가 도입하는 `[테스트 설계]` 섹션이 단순 Task에도 필수인지, `status:draft` 게이트를 타는지, `check-R17-DoD` 검사 대상인지 정의되어 있지 않다.
-     - **R-11·R-12([GOV_COMMON.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/GOV_COMMON.md#L115-L120) `L115-120`)**: §4.9 시점 ①(`L214`)은 `"설계·명세 확정(R-11)"`을 트리거로 삼았으나, R-11이 지칭하는 `Ds-11`은 현 저장소에 존재하지 않는다(§4.4 `L172` 확인). 따라서 LMS에서는 시점 ①의 실질적 산출물 위치를 명시해야 한다.
-     - **R-14([GOV_COMMON.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/GOV_COMMON.md#L128-L130)) 및 301 QAM 2.1([301_QUALITY_ASSURANCE_MANUAL.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/301_QUALITY_ASSURANCE_MANUAL.md#L19-L24))**: §1.3(`L52`)의 로컬 Supabase 원칙(R-14)과 §4.9(`L243`)의 Corporate/Personal 이원화 및 Negative Test(301 QAM 2.1) 인용은 원문과 정확히 일치한다(**확인**).
-     - **305 베이스라인([305_NEW_PROJECT_BASELINE_GUIDE.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/305_NEW_PROJECT_BASELINE_GUIDE.md#L31-L59) `L31, L55-59`)**: §9(`L389`)는 `"305 베이스라인(거버넌스 R-00~R-20 이식표)에 포함하는 방안"`을 언급했는데, 실제 305에서 방법론 문서 이식표는 **§1.1(`L37`)**, R-규정 이식표는 **§1.2(`L55`)**이며, 특히 **305 §1.6(`L31`)은 "이 프로젝트에서 실제로 적용해 본 결과가 의미 있었는가로 검증한 뒤에만 채택"하도록 규정**하고 있다(**확인**). 즉 LMS PoC 검증 전에 305 본표에 정식 편입하면 305 §1.6 원칙과 충돌한다.
+     - **R-17 착수 절차([GOV_COMMON.md](file://~/WorkSpace/ZENITH_LMS_001/GOV_COMMON.md#L184-L193) `L184-193`)**: 현행 R-17은 복잡 Task일 때만 `[설계 의견]` 섹션을 쓰고 `status:draft`로 Aiden 승인을 받으며, 완료 시 `check-R17-DoD`(`L198`)가 task file 필수 섹션을 검사한다(**확인**). §4.9 시점 ②(`L215`)가 도입하는 `[테스트 설계]` 섹션이 단순 Task에도 필수인지, `status:draft` 게이트를 타는지, `check-R17-DoD` 검사 대상인지 정의되어 있지 않다.
+     - **R-11·R-12([GOV_COMMON.md](file://~/WorkSpace/ZENITH_LMS_001/GOV_COMMON.md#L115-L120) `L115-120`)**: §4.9 시점 ①(`L214`)은 `"설계·명세 확정(R-11)"`을 트리거로 삼았으나, R-11이 지칭하는 `Ds-11`은 현 저장소에 존재하지 않는다(§4.4 `L172` 확인). 따라서 LMS에서는 시점 ①의 실질적 산출물 위치를 명시해야 한다.
+     - **R-14([GOV_COMMON.md](file://~/WorkSpace/ZENITH_LMS_001/GOV_COMMON.md#L128-L130)) 및 301 QAM 2.1([301_QUALITY_ASSURANCE_MANUAL.md](file://~/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/301_QUALITY_ASSURANCE_MANUAL.md#L19-L24))**: §1.3(`L52`)의 로컬 Supabase 원칙(R-14)과 §4.9(`L243`)의 Corporate/Personal 이원화 및 Negative Test(301 QAM 2.1) 인용은 원문과 정확히 일치한다(**확인**).
+     - **305 베이스라인([305_NEW_PROJECT_BASELINE_GUIDE.md](file://~/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/305_NEW_PROJECT_BASELINE_GUIDE.md#L31-L59) `L31, L55-59`)**: §9(`L389`)는 `"305 베이스라인(거버넌스 R-00~R-20 이식표)에 포함하는 방안"`을 언급했는데, 실제 305에서 방법론 문서 이식표는 **§1.1(`L37`)**, R-규정 이식표는 **§1.2(`L55`)**이며, 특히 **305 §1.6(`L31`)은 "이 프로젝트에서 실제로 적용해 본 결과가 의미 있었는가로 검증한 뒤에만 채택"하도록 규정**하고 있다(**확인**). 즉 LMS PoC 검증 전에 305 본표에 정식 편입하면 305 §1.6 원칙과 충돌한다.
 - **수정 제안**:
   - **§1.3(`L52`)·§8.6(`L366-367`) 통일**: LMS에서의 §4.9 적용을 `"PoC 기간에는 PoC 대상 모듈 및 위험 기준 ≥1개 Issue에 시범 적용하고, 전 Issue 필수화 여부는 PoC 후 확정(§10 #14)"`로 §10 #14와 일관되게 맞춘다.
   - **§4.9 위험 판정 0개 간소화(`L238`)**: 충족 기준 **0개**인 변경은 7행 표 전체 대신 task file 내 한 줄(`"[테스트 설계] 위험 기준 0개 — 해당 차원: D9(단순 문구), 기존 회귀 보강"`)로 갈음할 수 있게 예외를 명시한다.
@@ -60,11 +60,11 @@
 ## 점검 4. 역할별 확인 (Riley — CPO·CIO 관점)
 
 - **결론**:
-  1. **§8.6 MLFF BOS(Multi-Lane Free Flow Back Office System, 다차로 무정차 통행료 징수 백오피스 시스템) 주요 차원 및 과금·정산 최상위 깊이**: [riley_review.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Reviews/231/riley_review.md#L174) §7.1 #7에서 제안한 **`D1(과금 분기)·D2(차량/태그 비정상 입력)·D6(정산 정합성)·D7(동시 통과 멱등성)` 중심 및 과금·정산 최상위 깊이**와 정확히 일치한다(**확인**). 다만 MLFF BOS는 노변 기지국(RSU)·차량 번호판 인식기(ANPR)·외부 결제망(PG/카드사/은행) 연동이 필수이므로 **외부 연동 스키마 계약인 `D4`를 부차원으로 함께 명시**하는 것이 아키텍처(CIO) 관점에서 더 안전하다.
+  1. **§8.6 MLFF BOS(Multi-Lane Free Flow Back Office System, 다차로 무정차 통행료 징수 백오피스 시스템) 주요 차원 및 과금·정산 최상위 깊이**: [riley_review.md](file://~/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Reviews/231/riley_review.md#L174) §7.1 #7에서 제안한 **`D1(과금 분기)·D2(차량/태그 비정상 입력)·D6(정산 정합성)·D7(동시 통과 멱등성)` 중심 및 과금·정산 최상위 깊이**와 정확히 일치한다(**확인**). 다만 MLFF BOS는 노변 기지국(RSU)·차량 번호판 인식기(ANPR)·외부 결제망(PG/카드사/은행) 연동이 필수이므로 **외부 연동 스키마 계약인 `D4`를 부차원으로 함께 명시**하는 것이 아키텍처(CIO) 관점에서 더 안전하다.
   2. **§4.9 시나리오 단위 사전 도출의 CPO 오너 배정 현실성**: **마일스톤·신규 도메인(PRD·UAT 계획서) 수준에서는 현실적이고 301 QAM Gate 1과 정합적이나, 개별 소규모 결함/기능 Issue마다 CPO가 사전 개입하는 것은 병목이 된다.**
 - **근거**:
-  - [301_QUALITY_ASSURANCE_MANUAL.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/301_QUALITY_ASSURANCE_MANUAL.md#L39) §3 Gate 1은 `"설계(Plan): 이원화 시나리오가 포함된 UAT 계획서 승인"`을 규정하고, [103_AGENT_ROLES_SPEC.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/103_AGENT_ROLES_SPEC.md)(역할 명세)상 PRD·UAT 시나리오 확정은 CPO(Riley) 소관이다(**확인**).
-  - 그러나 [GOV_COMMON.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/GOV_COMMON.md#L156) R-17상 일상적인 GitHub Issue는 Aiden(Team A)과 JSJung·Jaison(Team B)이 발령하고 구현 에이전트가 즉시 착수한다(**확인**). 모든 개별 Issue의 E2E 시나리오 도출까지 CPO 사전 승인을 기다리게 하면 R-17 리드타임이 지연된다.
+  - [301_QUALITY_ASSURANCE_MANUAL.md](file://~/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/301_QUALITY_ASSURANCE_MANUAL.md#L39) §3 Gate 1은 `"설계(Plan): 이원화 시나리오가 포함된 UAT 계획서 승인"`을 규정하고, [103_AGENT_ROLES_SPEC.md](file://~/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/103_AGENT_ROLES_SPEC.md)(역할 명세)상 PRD·UAT 시나리오 확정은 CPO(Riley) 소관이다(**확인**).
+  - 그러나 [GOV_COMMON.md](file://~/WorkSpace/ZENITH_LMS_001/GOV_COMMON.md#L156) R-17상 일상적인 GitHub Issue는 Aiden(Team A)과 JSJung·Jaison(Team B)이 발령하고 구현 에이전트가 즉시 착수한다(**확인**). 모든 개별 Issue의 E2E 시나리오 도출까지 CPO 사전 승인을 기다리게 하면 R-17 리드타임이 지연된다.
 - **수정 제안**:
   - **§4.9(`L245`) 역할 분담 이원화**: `"마일스톤·신규 화면의 마스터 시나리오 목록(PRD·UAT 계획서, docs/99_Manual/E2E_SCENARIOS.md) 오너는 CPO이며, 개별 Issue 착수 시점(시점 ②)에는 담당 에이전트가 마스터 시나리오와 §4.7 8개 체크리스트를 기반으로 task file [테스트 설계]에 E2E 케이스를 도출하고 PR 리뷰에서 검증받는다"`로 구체화한다.
   - **§8.6(`L369`)**: MLFF BOS 주요 차원에 `D1·D2·D6·D7 (+ 외부 정산망 연동 시 D4)`를 병기한다.
