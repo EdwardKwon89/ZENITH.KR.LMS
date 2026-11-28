@@ -69,7 +69,7 @@ ls .agent/tasks | grep -i "TASK-B-374"   # → 없음 (신규 생성)
 
 ### 착수 절차 실측 (R-17)
 ```bash
-① pwd                                  → /Users/am/Documents/workspace/SNTL_LMS/ZENITH_LMS-worktrees/mike
+① pwd                                  → <로컬 워크트리>
 ② git branch --show-current            → feature/teamb-task-b374-iss1349-def149-agency-shippers
    (origin/TeamB_Dev `83bb486f1` = PR #1445 병합본에서 생성)
 ③ ls .agent/tasks | grep -i TASK-B-374 → 없음 (신규 생성 · next-task-number 미사용 — 이슈 확정번호 TASK-B-374)

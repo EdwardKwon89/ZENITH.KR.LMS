@@ -29,8 +29,8 @@ vi.mock('@/lib/auth/guards', () => ({
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: any) => fn }));
+vi.mock('@/utils/supabase/server', () => ({ createAdminClient: vi.fn(async () => mockSupabase) }));
 vi.mock('@/lib/finance/exchange-rate', () => ({ getExchangeRate: vi.fn() }));
-vi.mock('@/app/actions/ups/freight', () => ({ estimateUpsFreight: vi.fn() }));
 vi.mock('@/app/actions/finance/settlement', () => ({ createPostFinalizationAdjustment: vi.fn() }));
 vi.mock('@/lib/logistics/status-machine', () => ({ canChangeStatus: vi.fn() }));
 vi.mock('@/app/actions/misc/notifications', () => ({ triggerStatusChangeNotification: vi.fn() }));
@@ -39,8 +39,7 @@ import { validateUserAction } from '@/lib/auth/guards';
 import { logger } from '@/lib/logger';
 import { getExchangeRate } from '@/lib/finance/exchange-rate';
 import { canChangeStatus } from '@/lib/logistics/status-machine';
-import { recordUpsActualCost, getUpsActualCost } from '@/app/actions/finance/ups-actual-cost';
-import { recordUpsActualCharges } from '@/app/actions/finance/ups-actual-charges';
+import { getUpsActualCost } from '@/app/actions/finance/ups-actual-cost';
 import { manuallySetOrderDeliveredAction } from '@/app/actions/operations/tracking';
 
 const ORDER_ID = 'order-b352';
@@ -57,70 +56,6 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(getExchangeRate).mockResolvedValue(150 as any);
   vi.mocked(canChangeStatus).mockReturnValue({ allowed: true } as any);
-});
-
-describe('recordUpsActualCost — DB 원문 은닉 + 로케일 문장 (TASK-B-352)', () => {
-  it('upsert 실패 → generic(ko)+코드, DB 원문 미포함, logger.error(에러 객체)', async () => {
-    mockUser();
-    const dbError = { message: 'DB_SECRET_ACTUAL_COST_9f3' };
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') {
-        return createChainableMock({
-          id: ORDER_ID,
-          order_no: 'ZEN-1',
-          status: 'DELIVERED',
-          transport_mode: 'UPS',
-          shipper_id: 'shipper-1',
-          agency_org_id: 'agency-1',
-          recipient_country_code: 'US',
-          ups_product_code: 'WW_SAVER_NONDOC',
-          ups_product_id: 'prod-1',
-          incoterms: 'DDU',
-          created_at: '2026-07-01T00:00:00.000Z',
-          snapshot: [{ metadata: {} }],
-        });
-      }
-      if (table === 'zen_ups_actual_cost') return createChainableMock(null, dbError);
-      return createChainableMock();
-    });
-
-    const result = await recordUpsActualCost(ORDER_ID, { baseFreightHkd: 100 });
-
-    expect(result.success).toBe(false);
-    expect(result.error).toBe('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: ACTUAL_COST_SAVE)');
-    expect(result.error).not.toContain('DB_SECRET_ACTUAL_COST_9f3');
-    expect(logger.error).toHaveBeenCalledWith(
-      'recordUpsActualCost: zen_ups_actual_cost upsert failed',
-      dbError,
-    );
-  });
-});
-
-describe('recordUpsActualCharges — DB 원문 은닉 + 로케일 문장 (TASK-B-352)', () => {
-  it('기존 요금 삭제 실패 → generic(ko)+코드, DB 원문 미포함, logger.error(에러 객체)', async () => {
-    mockUser();
-    const dbError = { message: 'DB_SECRET_CHARGE_DELETE_77a' };
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'zen_orders') {
-        return createChainableMock({ status: 'IN_TRANSIT', transport_mode: 'UPS', shipper_id: 'shipper-1' });
-      }
-      if (table === 'zen_invoices') return createChainableMock([]);
-      if (table === 'zen_ups_actual_charges') return createChainableMock(null, dbError);
-      return createChainableMock();
-    });
-
-    const result = await recordUpsActualCharges(ORDER_ID, [
-      { chargeType: 'BASE', amount: 10, currency: 'USD' },
-    ]);
-
-    expect(result.success).toBe(false);
-    expect(result.error).toBe('요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. (코드: CHARGES_DELETE)');
-    expect(result.error).not.toContain('DB_SECRET_CHARGE_DELETE_77a');
-    expect(logger.error).toHaveBeenCalledWith(
-      'recordUpsActualCharges: zen_ups_actual_charges delete failed',
-      dbError,
-    );
-  });
 });
 
 describe('manuallySetOrderDeliveredAction — DB 원문 은닉 + 로케일 문장 (TASK-B-352)', () => {

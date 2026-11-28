@@ -8,11 +8,12 @@
  * 실행 전제: TASK-B-024 (OutboundProcessForm UPS UI) 머지 완료
  */
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import { getServiceClient } from './test-utils';
 import fs from 'fs';
 import path from 'path';
 
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_26_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_26_Result');
 const SUPABASE_URL = 'http://127.0.0.1:54321';
 const MANAGER_EMAIL = 'manager@zenith.kr';
 const MANAGER_PASSWORD = 'password1234';

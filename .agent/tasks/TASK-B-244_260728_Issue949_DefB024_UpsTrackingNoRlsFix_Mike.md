@@ -83,7 +83,7 @@ WHERE tc.order_id = o.id
   1. 화주 role(예: CORPORATE 또는 AGENCY_SHIPPER) 세션으로 `createOrder()`를 실제 호출(또는 동등한 RLS 시뮬레이션: `SET LOCAL role/request.jwt.claims`)해 UPS 오더 생성 후 `zen_tracking_configs.tracking_no`가 실제로 `NULL`인지 실측 — 서비스 롤 교체 전 코드로 되돌리면 이 테스트가 정확히 FAIL하는지 반드시 재현 확인
   2. 기존 DEF-B-007 관련 테스트(있다면)가 리팩터링 후에도 그대로 PASS하는지 확인
 - [ ] `npm run build` · `npm run test:regression` 직접 실행 후 정확한 결과 기재
-- [ ] **R-10 필수**: 로컬에서 화주 role 계정(예: `jungjs@aventusm.com` 또는 개인 CORPORATE 계정)으로 로그인 → 신규 UPS 오더 실제 등록 → `/ko/tracking` 페이지에서 Tracking Number가 빈 값(또는 "-")으로 나오는지(가짜 "ZN-" 값이 아님) 스크린샷으로 확인. **이번 Task는 R-10 생략 시 반려 처리됩니다 — Mike는 R-10 증적 누락이 이미 4회 누적된 상태입니다.**
+- [ ] **R-10 필수**: 로컬에서 화주 role 계정(예: `user@example.test` 또는 개인 CORPORATE 계정)으로 로그인 → 신규 UPS 오더 실제 등록 → `/ko/tracking` 페이지에서 Tracking Number가 빈 값(또는 "-")으로 나오는지(가짜 "ZN-" 값이 아님) 스크린샷으로 확인. **이번 Task는 R-10 생략 시 반려 처리됩니다 — Mike는 R-10 증적 누락이 이미 4회 누적된 상태입니다.**
 
 ## 완료 보고 절차 (R-17 준수)
 

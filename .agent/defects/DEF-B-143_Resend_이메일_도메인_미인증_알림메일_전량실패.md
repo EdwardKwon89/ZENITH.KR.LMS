@@ -6,7 +6,7 @@
   statusCode: 403
   message: "The zenith-lms.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"
   ```
-  - 2026-08-11, 2026-08-19 두 차례 창고 출고(`/warehouse/outbound`) 상태변경 알림 이메일(오더 ZEN-2026-000011, 수신자 james@sntl.co.kr)이 이 사유로 실패
+  - 2026-08-11, 2026-08-19 두 차례 창고 출고(`/warehouse/outbound`) 상태변경 알림 이메일(오더 ZEN-2026-000011, 수신자 user@example.test)이 이 사유로 실패
   - `src/lib/notifications/email.ts`를 사용하는 모든 이메일 발송 경로(회원가입 확인메일, 화주 계정 발급, 인보이스 발행 알림, 입고 실측 통보 등)가 동일하게 실패할 가능성
 - **영향 범위**:
   - 즉시: 위 발송 대상 알림 이메일 미수신 (기능 자체는 애플리케이션 로직상 정상 동작 — Resend API 호출만 403으로 거부됨)

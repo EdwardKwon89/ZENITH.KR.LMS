@@ -37,6 +37,9 @@ interface OrderFinanceSummaryProps {
   incidentFees?: any[];
   isAdmin: boolean;
   canManageFinance?: boolean;
+  transportMode?: string | null;
+  /** [설계 확정] 비관리자 표시 원천 — run 부가운임 항목 DTO(원가 미반환) */
+  additionalCharges?: { items: { lineNo: number; name: string; amount: number; currency: string; tier: string }[] } | null;
 }
 
 export default function OrderFinanceSummary({ 
@@ -45,9 +48,12 @@ export default function OrderFinanceSummary({
   initialInvoice,
   incidentFees = [],
   isAdmin,
-  canManageFinance
+  canManageFinance,
+  transportMode,
+  additionalCharges = null
 }: OrderFinanceSummaryProps) {
   const canManage = canManageFinance !== undefined ? canManageFinance : isAdmin;
+  const isUps = transportMode === 'UPS';
   const t = useTranslations('Finance');
   const te = useTranslations('Errors');
   const [costs, setCosts] = useState<CostItem[]>(initialCosts);
@@ -82,7 +88,7 @@ export default function OrderFinanceSummary({
   };
 
   const handleGenerateInvoice = async () => {
-    if (!isAdmin || invoice) return;
+    if (!isAdmin || invoice || isUps) return;
 
     setIsInvoicing(true);
     try {
@@ -140,10 +146,25 @@ export default function OrderFinanceSummary({
         </div>
 
         <div className="space-y-4">
-          {costs.length > 0 ? (
+          {!isAdmin && additionalCharges ? (
+            additionalCharges.items.length > 0 ? (
+              additionalCharges.items.map((c) => (
+                <div key={`${c.tier}-${c.lineNo}`} className="flex justify-between items-center text-slate-400 text-sm">
+                  <span>{t('additionalCharge')} · {c.name}</span>
+                  <span className="text-white font-mono">
+                    {c.currency} {c.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="py-4 text-center text-slate-500 text-xs italic">
+                {t('additionalCharge')} —
+              </div>
+            )
+          ) : costs.length > 0 ? (
             costs.map((item) => (
               <div key={item.id} className="flex justify-between items-center text-slate-400 text-sm">
-                <span>{getCostTypeLabel(item.cost_type)}</span>
+                <span>{getCostTypeLabel(item.cost_type, isAdmin ? 'admin' : 'neutral')}</span>
                 <span className="text-white font-mono">
                   {item.currency} {Number(item.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
@@ -229,12 +250,14 @@ export default function OrderFinanceSummary({
           )}
 
           <div className="pt-6 border-t border-slate-700 flex justify-between items-center">
+            {isAdmin && (
             <div>
               <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Estimated</p>
               <span className="text-3xl font-black text-blue-400 font-mono tracking-tighter">
                 ${totalEst.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
             </div>
+            )}
             {invoice ? (
               <div className="bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-xl flex items-center gap-2">
                 <CheckCircle2 className="w-3 h-3 text-green-400" />
@@ -244,7 +267,13 @@ export default function OrderFinanceSummary({
           </div>
         </div>
 
-        {canManage && !invoice && (
+        {canManage && !invoice && isUps && (
+          <p className="w-full mt-8 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+            UPS 오더는 자동 인보이스 대신 정산마감 화면에서 청구합니다.
+          </p>
+        )}
+
+        {canManage && !invoice && !isUps && (
           <button 
             onClick={handleGenerateInvoice}
             disabled={isInvoicing || costs.length === 0}

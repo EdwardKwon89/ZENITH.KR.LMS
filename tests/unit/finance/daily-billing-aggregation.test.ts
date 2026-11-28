@@ -271,7 +271,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
               id: 'ord-1',
               order_no: 'ORD-001',
               status: 'DELIVERED',
-              transport_mode: 'UPS',
+              transport_mode: 'AIR',
               recipient_country_code: 'US',
               created_at: '2026-07-23T10:00:00Z',
               shipper_id: 'shipper-1',
@@ -315,7 +315,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
               id: 'ord-2',
               order_no: 'ORD-002',
               status: 'SHIPPED',
-              transport_mode: 'UPS',
+              transport_mode: 'AIR',
               recipient_country_code: 'KR',
               created_at: '2026-07-25T14:00:00Z',
               shipper_id: 'shipper-2',
@@ -529,7 +529,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
         }
         if (table === 'zen_orders') {
           return createChainableMock([
-            { id: 'ord-agency-1', order_no: 'ORD-AGENCY-001', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'US', created_at: '2026-07-27T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
+            { id: 'ord-agency-1', order_no: 'ORD-AGENCY-001', status: 'DELIVERED', transport_mode: 'AIR', recipient_country_code: 'US', created_at: '2026-07-27T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
           ]);
         }
         if (table === 'zen_order_costs') {
@@ -839,7 +839,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       });
 
       const ordersChain = createChainableMock([
-        { id: 'order-1', order_no: 'ZEN-001', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
+        { id: 'order-1', order_no: 'ZEN-001', status: 'DELIVERED', transport_mode: 'AIR', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
       ]);
       const invoicesChain = createChainableMock([
         {
@@ -877,7 +877,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       });
 
       const ordersChain = createChainableMock([
-        { id: 'order-2', order_no: 'ZEN-002', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주B' } },
+        { id: 'order-2', order_no: 'ZEN-002', status: 'DELIVERED', transport_mode: 'AIR', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주B' } },
       ]);
       const invoicesChain = createChainableMock([
         {
@@ -915,7 +915,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       });
 
       const ordersChain = createChainableMock([
-        { id: 'order-3', order_no: 'ZEN-003', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주C' } },
+        { id: 'order-3', order_no: 'ZEN-003', status: 'DELIVERED', transport_mode: 'AIR', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주C' } },
       ]);
       const invoicesChain = createChainableMock([
         {
@@ -951,7 +951,7 @@ describe('화주별 일별/주별/월별 청구 집계 및 최종 운임 확정 
       });
 
       const ordersChain = createChainableMock([
-        { id: 'order-1', order_no: 'ZEN-001', status: 'DELIVERED', transport_mode: 'UPS', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
+        { id: 'order-1', order_no: 'ZEN-001', status: 'DELIVERED', transport_mode: 'AIR', recipient_country_code: 'USA', created_at: '2026-07-29T10:00:00Z', shipper_id: 'shipper-1', shipper: { name: '화주A' } },
       ]);
       const invoicesChain = createChainableMock([
         {

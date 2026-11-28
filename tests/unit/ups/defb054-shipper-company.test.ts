@@ -4,19 +4,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 //
 // 1. lookupOrderPackages()의 shipper_org join select에 name(조직명)이 포함되는지 확인
 //    (실제 registerUpsOrder 경유 — select 문자열 캡처)
-// 2. 실제 createorder 전송 payload에 shipper_company 키가 없는지 확인 (mock SHXK 호출)
+// 2. 실제 createorder 전송 payload의 shipper_company가 환경변수 값인지 확인 (mock SHXK 호출)
 //
-// ⚠️ TASK-B-342 (Issue #1263, JSJung 2026-10-22 결정): shipper_company는 회사 기본값 고정이었으나,
-// ⚠️ TASK-B-345 (Issue #1277, JSJung 2026-11-12 결정): shipper_company 키 자체를 전송하지 않는다.
-//    아래 기대값은 TASK-B-345 사양(키 부재).
+// ⚠️ TASK-B-345 (Issue #1277): shipper_company 키 자체를 전송하지 않았으나,
+// ⚠️ TASK-B-397 (Issue #1552, JSJung 2026-11-27 결정): 환경변수 값으로 다시 전송한다.
+//    아래 기대값은 테스트 더미 값 기준이다.
 //
 // 되돌리기 검증: name 누락 시 select 캡처 테스트가 실패하고,
-// shipper_company 를 다시 배선하면(키 추가) payload 테스트가 not.toHaveProperty 로 실패함을 보장한다.
+// shipper_company 매핑을 제거하면 payload 테스트가 toHaveProperty 로 실패함을 보장한다.
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
-vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR' }));
+vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR', SHXK_SHIPPER_COMPANY: 'TEST SHIPPER CO' }));
 vi.mock('@/lib/shxk/client', () => ({ callShxk: vi.fn() }));
 
 const mockPlaceShxkOrder = vi.fn();
@@ -175,7 +175,7 @@ describe('DEF-B-054: shipper_company 필드 미전달 (Issue #1067)', () => {
     expect(orderSelect).toMatch(/shipper_org:zen_organizations!shipper_id/);
   });
 
-  it('registerUpsOrder가 createorder payload에 shipper_company 키를 전송하지 않는다 (TASK-B-345 갱신)', async () => {
+  it('registerUpsOrder가 createorder payload에 shipper_company를 환경변수 값으로 전송한다 (TASK-B-397 갱신)', async () => {
     const { chain } = createMockSupabase();
     mockValidateUserAction.mockResolvedValue({
       supabase: chain,
@@ -187,7 +187,7 @@ describe('DEF-B-054: shipper_company 필드 미전달 (Issue #1067)', () => {
 
     expect(mockPlaceShxkOrder).toHaveBeenCalledTimes(1);
     const payload = mockPlaceShxkOrder.mock.calls[0][0];
-    expect(payload.shipper).not.toHaveProperty('shipper_company');
+    expect(payload.shipper).toHaveProperty('shipper_company', 'TEST SHIPPER CO');
     expect(payload.shipper.shipper_name).toBeDefined();
     expect(payload.shipping_method).toBe('FXUPS');
   });

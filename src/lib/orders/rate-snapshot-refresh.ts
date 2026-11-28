@@ -1,5 +1,7 @@
 import { logger } from '@/lib/logger';
-import type { EstimateUpsFreightInput, UpsFreightEstimate } from '@/app/actions/ups/freight';
+import { createAdminClient } from '@/utils/supabase/server';
+import { USER_ROLES } from '@/lib/auth/rbac';
+import type { EstimateUpsFreightInput, UpsFreightEstimate } from '@/lib/ups/estimate-core';
 
 /**
  * TASK-B-339 (Issue #1254 / 결함 ③): UPS 오더 수정 후 운임 스냅샷 갱신.
@@ -30,15 +32,45 @@ interface RateSnapshotRow {
   is_manual?: boolean;
 }
 
+export interface RateSnapshotActor {
+  id?: string;
+  role?: string | null;
+  org_id?: string | null;
+  status?: string | null;
+}
+
+interface RateSnapshotOrderOwner {
+  shipper_id?: string | null;
+  agency_org_id?: string | null;
+}
+
+/**
+ * TASK-B-370 (Issue #1420): 스냅샷 쓰기 소유 검증.
+ * 기존 base table RLS와 동일 범위 — ADMIN 전체, 화주 org, 배정 대리점.
+ * 이 검증을 통과한 호출만 service_role(admin client)로 쓰기를 수행한다.
+ */
+export function canWriteOrderRateSnapshot(
+  profile: RateSnapshotActor | null | undefined,
+  order: RateSnapshotOrderOwner | null | undefined,
+): boolean {
+  if (!profile || !order) return false;
+  if (profile.status && profile.status !== 'ACTIVE') return false;
+  if (profile.role === USER_ROLES.ADMIN || profile.role === USER_ROLES.ZENITH_SUPER_ADMIN) return true;
+  if (!profile.org_id) return false;
+  return order.shipper_id === profile.org_id || order.agency_org_id === profile.org_id;
+}
+
 interface RefreshUpsRateSnapshotParams {
   supabase: any;
   orderId: string;
+  profile: RateSnapshotActor;
   estimateFn: (args: EstimateUpsFreightInput) => Promise<UpsFreightEstimate>;
 }
 
 export async function refreshUpsRateSnapshot({
   supabase,
   orderId,
+  profile,
   estimateFn,
 }: RefreshUpsRateSnapshotParams): Promise<void> {
   const { data: order, error: orderError } = (await supabase
@@ -50,6 +82,14 @@ export async function refreshUpsRateSnapshot({
   if (orderError || !order) {
     logger.warn(
       `[RATE_SNAPSHOT_REFRESH] 오더 조회 실패로 스냅샷 갱신 생략: orderId=${orderId}, error=${orderError?.message ?? 'not found'}`
+    );
+    return;
+  }
+
+  // 소유 검증 없이는 service_role 쓰기를 수행하지 않는다.
+  if (!canWriteOrderRateSnapshot(profile, order)) {
+    logger.warn(
+      `[RATE_SNAPSHOT_REFRESH] 스냅샷 쓰기 권한 없음 — 갱신 생략: orderId=${orderId}, user=${profile.id ?? 'unknown'}`
     );
     return;
   }
@@ -127,7 +167,7 @@ export async function refreshUpsRateSnapshot({
   });
 
   const { data: existingSnapshot, error: snapReadError } = (await supabase
-    .from('zen_order_rate_snapshots')
+    .from('zen_order_rate_snapshots_safe')
     .select('id, is_manual')
     .eq('order_id', orderId)
     .maybeSingle()) as QueryResult<{ id: string; is_manual: boolean | null } | null>;
@@ -153,8 +193,9 @@ export async function refreshUpsRateSnapshot({
     metadata: estimate as unknown as Record<string, unknown>,
   };
 
+  const adminClient = await createAdminClient();
   if (existingSnapshot?.id) {
-    const { error: updateError } = await supabase
+    const { error: updateError } = await adminClient
       .from('zen_order_rate_snapshots')
       .update(snapshotRow)
       .eq('order_id', orderId);
@@ -164,7 +205,7 @@ export async function refreshUpsRateSnapshot({
     return;
   }
 
-  const { error: insertError } = await supabase
+  const { error: insertError } = await adminClient
     .from('zen_order_rate_snapshots')
     .insert({ order_id: orderId, ...snapshotRow });
   if (insertError) {

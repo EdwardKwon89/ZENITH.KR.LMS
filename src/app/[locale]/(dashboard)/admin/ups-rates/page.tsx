@@ -1,23 +1,38 @@
-import { requireAuth } from '@/lib/auth/guards';
+import { requireAuth, checkPermission } from '@/lib/auth/guards';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import { getUpsZones, getUpsProducts, getUpsBaseRates, getUpsFuelSurcharge, getUpsOtherCharges, getUpsWeightTierRates, getUpsFreightMinimums, getUpsSurgeFees } from '@/app/actions/ups/rates';
+import { USER_ROLES } from '@/lib/auth/rbac';
+import { hasAdminOrManagerRole } from '@/lib/auth/ups-rate-permissions';
+import { getUpsZones, getUpsProducts, getUpsBaseRates, getUpsOtherCharges, getUpsWeightTierRates, getUpsFreightMinimums, getUpsSurgeFees } from '@/app/actions/ups/rates';
 import UpsRatesClient from './ups-rates-client';
 
 export default async function UpsRatesPage() {
   const { profile } = await requireAuth();
+  if (!profile || !checkPermission(profile.role, '/admin/ups-rates')) redirect('/');
+
+  const isSubAdmin = profile.role === USER_ROLES.SUB_ADMIN;
+  const hasFullRateAccess = hasAdminOrManagerRole(profile.role);
+  if (!hasFullRateAccess && !isSubAdmin) redirect('/');
+
   const supabase = await createClient();
 
-  const zones = await getUpsZones();
-  const products = await getUpsProducts();
-  const baseRates = await getUpsBaseRates();
-  const fuelSurcharges = await supabase
-    .from('zen_ups_fuel_surcharges')
-    .select('*, product:product_id(product_code, product_name)')
-    .order('effective_week', { ascending: false });
-  const otherCharges = await getUpsOtherCharges();
-  const weightTierRates = await getUpsWeightTierRates();
-  const freightMinimums = await getUpsFreightMinimums();
-  const surgeFees = await getUpsSurgeFees();
+  // 기본요율(원가 Matrix)은 SUB_ADMIN까지 허용, 나머지 5종 원가 데이터는 admin 3역할에만 전달한다.
+  const [zones, products, baseRates] = await Promise.all([
+    getUpsZones(),
+    getUpsProducts(),
+    getUpsBaseRates(),
+  ]);
+
+  const fuelSurcharges = hasFullRateAccess
+    ? (await supabase
+        .from('zen_ups_fuel_surcharges')
+        .select('*, product:product_id(product_code, product_name)')
+        .order('effective_week', { ascending: false })).data ?? []
+    : [];
+  const otherCharges = hasFullRateAccess ? await getUpsOtherCharges() : [];
+  const weightTierRates = hasFullRateAccess ? await getUpsWeightTierRates() : [];
+  const freightMinimums = hasFullRateAccess ? await getUpsFreightMinimums() : [];
+  const surgeFees = hasFullRateAccess ? await getUpsSurgeFees() : [];
 
   const { data: agencyPolicies } = await supabase
     .from('zen_agency_pricing_policies')
@@ -45,14 +60,16 @@ export default async function UpsRatesPage() {
         zones={zones}
         products={products}
         baseRates={baseRates}
-        fuelSurcharges={fuelSurcharges?.data ?? []}
+        fuelSurcharges={fuelSurcharges}
         otherCharges={otherCharges}
         agencyPolicies={agencyPolicies ?? []}
         agencies={orgs ?? []}
         weightTierRates={weightTierRates}
         freightMinimums={freightMinimums}
         surgeFees={surgeFees}
-        userRole={profile?.role || 'GUEST'}
+        userRole={profile.role || 'GUEST'}
+        restrictToBaseRates={!hasFullRateAccess}
+        fetchRates={getUpsBaseRates}
       />
     </div>
   );

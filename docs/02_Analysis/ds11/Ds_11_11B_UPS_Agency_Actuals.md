@@ -70,48 +70,47 @@
 
 ### 11.13 UPS 실비 청구·대사 Actions (`src/app/actions/finance/ups-actual-charges.ts` — TASK-1162 / Issue #1354)
 
-#### recordUpsActualCharges(orderId, charges)
-- **Path**: `src/app/actions/finance/ups-actual-charges.ts:27-277`
-- **설명**: UPS 오더(`IN_TRANSIT` 또는 `DELIVERED`)의 추가 실비 청구 항목(`zen_ups_actual_charges`)을 전체 교체 저장하고, 예상 비용 대비 차액(`adjustmentAmount`)을 `zen_order_costs`(`UPS_ACTUAL_ADJUSTMENT`) 및 연결 인보이스(`zen_invoices.total_amount`)에 반영합니다 (마감된 인보이스가 있으면 `createPostFinalizationAdjustment`로 추가 인보이스 발행).
-- **권한**: `validateUserAction()` + `assertAdminOrAgency(profile)` (`src/app/actions/finance/ups-actual-charges.ts:20-25, 32-34`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`·`AGENCY` 허용) + `AGENCY`인 경우 `zen_agency_shippers` 활성 연결 화주 소속 검증 (`L54-65` — 목표: 대리점 본인 화주(`profile.org_id`) 포함 정렬 대상, `DEF-150` 참조)
-- **Input**: `orderId: string` (오더 UUID), `charges: UpsActualChargeInput[]` (`Array<{ chargeType: string, amount: number, currency: string, upsInvoiceNo?: string, upsInvoiceDate?: string, notes?: string }>`, `L8-15`)
-- **Output**: `Promise<{ success: boolean; adjustmentAmount?: number; error?: string }>` (`ups-actual-charges.ts:30, 146, 272`)
-- **오류**: 권한 불충족(`permission_denied`, `L24`), 오더 미존재(`order_not_found`, `L45`), 비UPS 오더(`not_ups_order`, `L50`), 타 대리점 화주 오더(`shipper_scope_denied`, `L63`), 상태 부적합(`ups_actual_charge_status_invalid`, `L69`), 실비 삭제/삽입·조정 비용 반영·인보이스 금액 갱신·마감 후 조정 실패 또는 예외 발생 시 `logger.error` 기록 후 `{ success: false, error: await trError('generic', { code: ... }) }` 반환
-- **부수효과**: `zen_ups_actual_charges` 기존 행 삭제 후 재삽입(`L78-112`), 마감 인보이스 존재 시 `createPostFinalizationAdjustment` 호출(`L133-146`), 미마감 시 `zen_order_costs`(`UPS_ACTUAL_ADJUSTMENT`) upsert/삭제 및 `zen_invoices.total_amount` 갱신(`L150-266`), `revalidatePath(\`/orders/\${orderId}\`)`·`revalidatePath(\`/(dashboard)/orders/\${orderId}\`)`·`revalidatePath('/admin/ups-actual-charges')` (`L268-270`)
+#### recordUpsActualCharges — TASK-B-381 PR-4a에서 제거
+- 옛 실비 등록·조정 인보이스 경로(`zen_ups_actual_charges` 교체 저장, `UPS_ACTUAL_ADJUSTMENT` 반영, `createPostFinalizationAdjustment` 호출)는 **PR-4a에서 제거**되었습니다. `src` 참조 0건.
+- 현재 잔존 함수는 조회·대사·검색뿐이며, UPS 청구는 `finalizeUpsSettlement` run 경로만 사용합니다.
+- **권한(목표 상태)**: `AGENCY` 소속 화주 범위 적용 및 대리점 본인 화주(`profile.org_id`) 포함 정렬 대상, `DEF-150` 참조 — 옛 함수는 제거되어 이 경로는 잔존하지 않습니다.
 
 #### getUpsActualCharges(orderId)
-- **Path**: `src/app/actions/finance/ups-actual-charges.ts:279-299`
+- **Path**: `src/app/actions/finance/ups-actual-charges.ts:17-40`
 - **설명**: 특정 UPS 오더(`orderId`)에 등록된 실비 청구 항목 목록(`zen_ups_actual_charges` + `entered_by_profile` 조인)을 등록일 오름차순으로 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-charges.ts:280`, 목표: 역할·소유권 가드 정렬 대상 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` + `assertAdminOnly(profile)` — **`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용**(TASK-B-372). 비관리자는 `Error(permission_denied)` throw. 조회는 admin client 사용.
 - **Input**: `orderId: string` (오더 UUID)
-- **Output**: `Promise<Array<Record<string, unknown>>>` (`ups-actual-charges.ts:298`)
+- **Output**: `Promise<Array<Record<string, unknown>>>` (`ups-actual-charges.ts:39`)
 - **오류**: 미인증 시 `validateUserAction` 예외 throw; DB 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ACTUAL_CHARGES_LOOKUP' }))` throw (`L293-296`)
 
 #### getUpsChargeReconciliation(orderId)
-- **Path**: `src/app/actions/finance/ups-actual-charges.ts:301-364`
+- **Path**: `src/app/actions/finance/ups-actual-charges.ts:42-108`
 - **설명**: 특정 UPS 오더(`orderId`)의 예상 비용 합계(`zen_order_costs`), 실제 청구 합계(`estimated + zen_ups_actual_charges`), 차액(`variance`), 통화 및 인보이스 마감 여부를 대사하여 반환합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/finance/ups-actual-charges.ts:302`, 목표: 역할·소유권 가드 정렬 대상 — `DEF-150` 참조)
+- **권한**: `validateUserAction()` + `assertAdminOnly(profile)` — **`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용**(TASK-B-372). 비관리자는 `Error(permission_denied)` throw. 조회는 admin client 사용.
 - **Input**: `orderId: string` (오더 UUID)
-- **Output**: `Promise<{ estimated: number; estimatedBreakdown: Array<{ costType: string; amount: number; currency: string }>; actual: number; variance: number; currency: string; isFinalized: boolean; invoiceNo: string | null; invoiceDate: string | null }>` (`ups-actual-charges.ts:354-363`)
+- **Output**: `Promise<{ estimated: number; estimatedBreakdown: Array<{ costType: string; amount: number; currency: string }>; actual: number; variance: number; currency: string; isFinalized: boolean; invoiceNo: string | null; invoiceDate: string | null }>` (`ups-actual-charges.ts:98-108`)
 - **오류**: 예상 비용 조회 실패(`ESTIMATED_COST_LOOKUP`, `L311-314`) 또는 실비 조회 실패(`ACTUAL_CHARGES_LOOKUP`, `L333-336`) 시 `logger.error` 후 `Error(await trError('generic', ...))` throw
 
 #### searchDeliveredUpsOrders(query)
-- **Path**: `src/app/actions/finance/ups-actual-charges.ts:366-454`
+- **Path**: `src/app/actions/finance/ups-actual-charges.ts:110-189`
 - **설명**: 오더 번호(`order_no`) 또는 운송장 번호(`zen_tracking_configs.tracking_no`) 부분 일치(`ilike`)로 `IN_TRANSIT`·`DELIVERED` 상태의 UPS 오더 목록을 검색합니다.
-- **권한**: `validateUserAction()` + `assertAdminOrAgency(profile)` (`src/app/actions/finance/ups-actual-charges.ts:367-369`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`·`AGENCY` 허용) + 1단계(`order_no`) 검색 시 `AGENCY`는 `zen_agency_shippers` 소속 화주 오더만 필터링 (`L398-406` — 목표: 2단계 `tracking_no` 검색 결과 병합에도 `AGENCY` 소속 화주 필터 적용·대리점 본인 화주 포함 정렬 대상, `DEF-150` 참조)
+- **권한**: `validateUserAction()` + `assertAdminOnly(profile)` — **`ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용**(TASK-B-372). 비관리자는 `Error(permission_denied)` throw. 1단계·2단계(tracking_no) 모두 admin client로 조회합니다. (목표: 2단계 `tracking_no` 검색 결과 병합에도 `AGENCY` 소속 화주 필터 적용·대리점 본인 화주 포함 정렬 대상, `DEF-150` 참조)
 - **Input**: `query: string` (공백 제거 후 빈 문자열이면 즉시 `[]` 반환, `L371-372`)
-- **Output**: `Promise<Array<Record<string, unknown>>>` (`ups-actual-charges.ts:453`)
+- **Output**: `Promise<Array<Record<string, unknown>>>` (`ups-actual-charges.ts:188`)
 - **오류**: 권한 불충족 시 `Error(permErr)` throw (`L369`); 오더 검색 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ORDER_SEARCH' }))` throw (`L391-394`, 트래킹 번호 조회 에러는 `logger.error`만 기록 후 비차단 진행 `L416-418`)
 
 ### 11.14 UPS 실제 원가 확정·정산 마감 Actions (`src/app/actions/finance/ups-actual-cost.ts` — TASK-1162 / Issue #1354)
 
+> **TASK-B-381 PR-4a(#1459) 변경**: `recordUpsActualCost`·`previewUpsActualCost`·`recordActualCostAndFinalize`·`markOrderCostSettled`·`recordUpsActualCharges`는 제거되었습니다. UPS 정산마감은 `Ds_11_11B §11.20`의 `finalizeUpsSettlement` 단일 경로를 사용합니다. 아래에는 잔존 액션만 기재합니다.
+
+
 #### getOrderReleasedDate(supabase, orderId, fallbackCreatedAt?)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:56-69`
+- **Path**: `src/lib/orders/order-released-date.ts:6-27` — **서버 액션이 아닌 내부 헬퍼**(TASK-B-372 / DEF-150 §1.2로 `'use server'` 파일에서 이동)
 - **설명**: `order_status_history`에서 오더(`orderId`)가 `RELEASED` 상태로 전환된 최신 시각(없으면 `fallbackCreatedAt` 또는 당일)을 `YYYY-MM-DD` 문자열로 반환합니다.
-- **권한**: 서버 내부 헬퍼 정리 대상 (`DEF-150` 참조 — 비공개 Advisory 관리)
+- **권한**: 서버 액션 export가 아니므로 클라이언트에서 직접 호출할 수 없습니다. 호출자(`ups-actual-cost.ts`·오더정산 상세 서버 페이지)가 `validateUserAction()`/`requireAuth()`로 인증한 뒤 전달한 `supabase`(사용자 세션)로 실행됩니다.
 - **Input**: `supabase: any` (SupabaseClient), `orderId: string`, `fallbackCreatedAt?: string`
-- **Output**: `Promise<string>` (`YYYY-MM-DD`, `ups-actual-cost.ts:68`)
-- **오류**: 별도 에러 throw 없이 조회 결과가 없으면 `fallbackCreatedAt` 또는 현재 UTC 날짜(`YYYY-MM-DD`) 반환 (`L66-68`)
+- **Output**: `Promise<string>` (`YYYY-MM-DD`)
+- **오류**: 별도 에러 throw 없이 조회 결과가 없으면 `fallbackCreatedAt` 또는 현재 UTC 날짜(`YYYY-MM-DD`) 반환
 
 #### getUpsActualCost(orderId)
 - **Path**: `src/app/actions/finance/ups-actual-cost.ts:72-91`
@@ -121,31 +120,104 @@
 - **Output**: `Promise<Record<string, unknown> | null>` (`ups-actual-cost.ts:90`)
 - **오류**: 미인증 시 `validateUserAction` 예외 throw; DB 조회 실패 시 `logger.error` 후 `Error(await trError('generic', { code: 'ACTUAL_COST_LOOKUP' }))` throw (`L86-89`)
 
-#### recordUpsActualCost(orderId, input)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:156-400`
-- **설명**: UPS 오더(`IN_TRANSIT` 또는 `DELIVERED`)의 실제 원가(HKD 항목 합계 및 출고일 기준 HKD→KRW 환산 원가)를 `zen_ups_actual_cost`에 Upsert하고, 실측 중량/부피 입력 시 `estimateUpsFreight()`를 재호출해 대리점·화주 인보이스 금액을 연동 재계산합니다 (Issue #1009).
-- **권한**: `validateUserAction()` + `assertAdmin(profile)` (`src/app/actions/finance/ups-actual-cost.ts:44-48, 161-163`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용)
-- **Input**: `orderId: string`, `input: UpsActualCostInput` (`{ upsInvoiceNo?, upsInvoiceDate?, actualWeightKg?, actualLengthCm?, actualWidthCm?, actualHeightCm?, baseFreightHkd?, baseFreightCurrency?, fuelSurchargeHkd?, surgeFeeHkd?, otherChargesHkd?, notes? }`, `L10-23`)
-- **Output**: `Promise<UpsActualCostResult>` (`{ success: boolean, error?: string, releasedDate?: string, appliedExchangeRate?: number, hkdTotal?: number, totalCostKrw?: number, recalc?: { weightOrDimsChanged, newAgencyTotal, newShipperTotal, agencyDelta, shipperDelta } }`, `L25-39, 388-395`)
-- **오류**: 권한 불충족(`permission_denied`, `L163`), 오더 미존재(`order_not_found`, `L187`), 비UPS 오더(`not_ups_order`, `L191`), 상태 부적합(`ups_actual_cost_status_invalid`, `L195`), DB upsert/update/인보이스 조정 실패 또는 예외 시 `logger.error` 후 `{ success: false, error: await trError('generic', { code: ... }) }` 반환
-- **부수효과**: `zen_ups_actual_cost` upsert 및 환율·KRW 원가 업데이트(`L205-240`), 중량/치수 변경 시 `zen_order_costs`(`UPS_ACTUAL_COST_ADJ`) 델타 반영 및 미마감 `zen_invoices` 총액 갱신 또는 마감 인보이스 `createPostFinalizationAdjustment` 호출(`L254-382`), `revalidatePath(\`/orders/\${orderId}\`)`·`revalidatePath(\`/(dashboard)/orders/\${orderId}\`)`·`revalidatePath('/admin/ups-actual-charges')` (`L384-386`)
+#### getOrdersForCostSettlement(filter)
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts:768-851`
+- **설명**: 오더정산 대상 목록을 조회합니다(TASK-B-366 / Issue #1376). `DELIVERED` + `UPS` 오더를 대상으로 정산상태(`NOT_SETTLED`/`SETTLED`/`ALL`), 배송완료일 기간(`from`~`to`), 오더번호 검색어(`q`)로 필터링하고, 각 행에 배송완료일·정산상태·정산일시·UPS 청구서번호·실제원가 입력 여부를 담아 반환합니다. 기존 오더별 인보이스(`zen_invoices.metadata.source_order_id`)가 있는 오더는 목록에 **표시하되** `legacyInvoiced=true`·`excludedReason='LEGACY_INVOICED'`로 정산 대상에서 제외합니다.
+- **권한**: `validateUserAction()` + `assertAdmin(profile)` (동일 파일 `L770-772`)
+- **Input**: `filter: CostSettlementFilter` — `{ status: 'NOT_SETTLED' | 'SETTLED' | 'ALL', from: string, to: string, q?: string }`
+- **Output**: `Promise<CostSettlementListResult>` — `{ success, orders?: CostSettlementOrderRow[], total?: number, error?: string }` (`L761-767`)
+- **오류**: 권한 불충족(`permission_denied`), 기간 미입력·역전(`generic{DATE_RANGE_INVALID}`, `L774-777`), 목록 조회 실패(`generic{ORDER_LIST_LOOKUP}`, `L789-792`), **보조 조회 실패는 fail-open 금지** — 배송완료일 `generic{HISTORY_LOOKUP}`, 원가 `generic{COST_LOOKUP}`, 레거시 인보이스 `generic{LEGACY_INVOICE_LOOKUP}`(`L801-814`), 예외 시 `generic{UNEXPECTED}`. 배송완료일(`order_status_history.next_status='DELIVERED'`)이 없거나 기간 밖인 오더는 결과에서 제외합니다(`L804-812`).
 
-#### previewUpsActualCost(orderId, input)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:403-469`
-- **설명**: DB 저장 없이 UPS 오더(`orderId`)의 출고일 기준 HKD→KRW 적용 환율, 원가 합계 및 중량/치수 변경에 따른 대리점·화주 매출 재계산 결과(`recalc`)를 미리보기로 산출해 반환합니다.
-- **권한**: `validateUserAction()` + `assertAdmin(profile)` (`src/app/actions/finance/ups-actual-cost.ts:408-410`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용)
-- **Input**: `orderId: string`, `input: UpsActualCostInput`
-- **Output**: `Promise<UpsActualCostResult>` (`ups-actual-cost.ts:464`)
-- **오류**: 권한 불충족(`permission_denied`, `L410`), 오더 미존재(`order_not_found`, `L433`), 비UPS 오더(`not_ups_order`, `L437`), 예외 발생 시 `logger.error` 후 `{ success: false, error: await trError('generic', { code: 'UNEXPECTED' }) }` 반환 (`L465-468`)
-
-#### recordActualCostAndFinalize(orderId, input)
-- **Path**: `src/app/actions/finance/ups-actual-cost.ts:472-618`
-- **설명**: 개별 UPS 오더(`IN_TRANSIT` 또는 `DELIVERED`)의 통화별 기본운임(`+7%` 원가 할증 반영)·유류할증·급증수수료·기타부가운임을 KRW 기준으로 `zen_ups_actual_cost` 및 `zen_ups_actual_other_charges`에 저장하고, `input.invoiceId`가 있으면 `finalizeInvoice()`를 호출해 인보이스를 즉시 마감합니다 (TASK-B-317 / Issue #1158).
-- **권한**: `validateUserAction()` + `assertAdmin(profile)` (`src/app/actions/finance/ups-actual-cost.ts:485-488`: `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`만 허용)
-- **Input**: `orderId: string`, `input: UpsActualCostInput & { baseFreightKrw?, fuelSurchargeKrw?, surgeFeeKrw?, otherChargesKrw?, otherCharges?: Array<{ name: string, amount: number, currency: string }>, invoiceId?: string, reason?: string }` (`L474-482`)
-- **Output**: `Promise<UpsActualCostResult & { finalized?: boolean }>` (`ups-actual-cost.ts:483, 606-613`)
-- **오류**: 프로필 부재(`profile_not_found`), 권한 불충족(`permission_denied`), 오더 미존재(`order_not_found`), 비UPS 오더(`not_ups_order`), 상태 부적합(`billing_finalize_status_invalid`, `L510`), 원가 upsert 실패(`ACTUAL_COST_SAVE`, `L559`), 기타부가운임 저장 실패(`OTHER_CHARGES_SAVE`, `L585`), 예외 발생 시 `logger.error` 후 `{ success: false, error }` 반환 (`invoiceId` 마감 실패 시에는 `logger.warn` 기록 후 `finalized: false`, `success: true`로 비차단 반환 `L595-600`)
-- **부수효과**: `zen_ups_actual_cost` upsert(`L534-555`), `zen_ups_actual_other_charges` 기존 삭제 후 재삽입(`L563-588`), `input.invoiceId` 존재 시 `finalizeInvoice()` 호출(`L592-601`), `revalidatePath('/(dashboard)/finance/daily-billing', 'page')` 및 `revalidatePath(\`/(dashboard)/orders/\${orderId}\`, 'page')` (`L603-604`)
+#### unmarkOrderCostSettled(orderId)
+- **Path**: `src/app/actions/finance/ups-actual-cost.ts` (`unmarkOrderCostSettled`)
+- **설명**: UPS 오더의 오더정산을 되돌립니다(TASK-B-367 / Issue #1377, TASK-B-382 / Issue #1463). `cost_settlement_status`를 `NOT_SETTLED`로, `cost_settled_at`·`cost_settled_by`를 `NULL`로 복원합니다. **포함 여부는 `zen_billing_statement_order_included` RPC(SECURITY DEFINER, boolean 전용)로만 확인**하며, 상태 무관(tier 무관)으로 청구서에 포함된 오더는 `statement_includes_order`로 거부합니다. user-session client(`validateUserAction().supabase`)만 사용해 RLS를 우회하지 않고, 청구서 항목 테이블을 직접 조회하지 않습니다.
+- **권한**: `validateUserAction()` + `assertAdmin(profile)` (동일 파일의 `ADMIN_ROLES` = `ZENITH_SUPER_ADMIN`·`ADMIN`·`MANAGER`). RPC는 `authenticated` 세션으로 호출하고, 함수 내부에서 동일한 3역할을 재검사합니다.
+- **Input**: `orderId: string`
+- **Output**: `Promise<{ success: boolean, error?: string }>`
+- **오류**: 권한 불충족(`permission_denied`), 오더 미존재(`order_not_found`), 정산 상태가 `SETTLED`가 아님(`not_found`), **포함 확인 RPC 오류·비정상 반환은 `generic{STATEMENT_ITEM_LOOKUP}`로 실패 처리(fail-closed — "청구서 없음"으로 오인 금지)**, 청구서 포함 오더(`statement_includes_order`), 조건부 UPDATE 실패(`generic{UNMARK_UPDATE}`), 조건부 UPDATE 영향 행 0건(동시 되돌리기 경합, `not_found`), 예외 시 `logger.error` + `generic{UNEXPECTED}`. 실패 분기마다 `logger.warn`/`logger.error`가 원본 오류와 함께 기록됩니다.
+- **부수효과**: `zen_billing_statement_order_included(p_order_id)` RPC 호출, `zen_orders` 조건부 UPDATE(`WHERE id=$1 AND cost_settlement_status='SETTLED'`, 영향 행 0이면 실패), `revalidatePath(\`/(dashboard)/orders/\${orderId}\`, 'page')`·`revalidatePath('/admin/ups-actual-charges')`
+- **제약**: "청구서 포함 확인 → UPDATE" 사이에 항목이 삽입될 수 있는 TOCTOU 경합은 **DB 트리거 방어를 IMP로 건의**(R-15 — IMP-198에 덧붙이지 않고 신규 번호 부여). #1475 병합 전/후 모두 MANAGER의 포함 오더 해제가 거부되어야 합니다.
 
 ---
+
+
+### 11.19 UPS 정산 run 저장소·정산마감 RPC (TASK-B-381 / Issue #1459)
+
+#### 테이블 3종 (append-only)
+- **Path**: `supabase/migrations/20261126090000_task_b381_ups_settlement_run.sql`
+- `zen_ups_settlement_runs` — `order_id`(FK, CASCADE) · `version` · `charge_weight_kg` · `currency='KRW'` · `source='UPS_SETTLEMENT'` · `settled_at` · `settled_by`(FK, **RESTRICT**) · `created_at`, `UNIQUE(order_id, version)`
+- `zen_ups_settlement_run_amounts` — `run_id`(FK) · `tier`(`ADMIN_TO_AGENCY`|`SHIPPER`) · `base_freight` · `fuel_surcharge` · `surge_fee` · `other_charges` · `freight_adjustment` · `settlement_charges_total` · `line_total`, `PK(run_id, tier)`
+- `zen_ups_settlement_run_charges` — `run_id` · `tier` · `line_no` · `name`(같은 이름 중복 허용) · `amount` · `currency`, `UNIQUE(run_id, tier, line_no)`
+- **권한**: `REVOKE ALL` 대상은 **PUBLIC·anon·authenticated**, `GRANT SELECT` 대상은 **authenticated·service_role**입니다. 쓰기는 RPC만. RLS SELECT는 tier별 정책으로 제한됩니다(세부 역할별 결과는 공개 문서에 기재하지 않음).
+- **불변성**: 3테이블 `BEFORE UPDATE/DELETE` 트리거(`zen_ups_settlement_run_immutable`) — append-only(재정산은 새 version).
+- **주의**: 오더 삭제 CASCADE는 불변 트리거로 차단된다. `settled_by`는 감사 목적 `ON DELETE RESTRICT`.
+
+#### RPC `finalize_ups_settlement_run(p_order_id uuid, p_charge_weight_kg numeric, p_amounts jsonb, p_charges jsonb)`
+- **Path**: `supabase/migrations/20261126092000_task_b381_finalize_ups_settlement_run.sql`
+- **권한**: `SECURITY DEFINER`, `SET search_path = public`, `REVOKE PUBLIC/anon` → `GRANT authenticated`. 함수 내부 `auth.uid()` 기준 **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**만, actor 파라미터 없음.
+- **동작**: 오더 `FOR UPDATE` 잠금 → UPS·`DELIVERED`·미정산 확인 → 비취소/PAID 인보이스 방어(`ups_invoice_exists`·`paid_invoice_exists`) → payload 불변식(`line_total`=4개 합+조정+부가항목 합, 부가항목 합=항목 합, tier 2개) → **같은 입력은 새 version 없이 반환**(오더가 `NOT_SETTLED`면 인보이스 방어 후 `SETTLED` 복구) → 새 version이면 run+amounts+charges 저장 + 오더 `SETTLED`를 한 트랜잭션으로 수행.
+- **Input**: `p_amounts` 배열 2건(`tier`·4개 금액·`freight_adjustment`·`settlement_charges_total`·`line_total`), `p_charges` 배열(`tier`·`line_no`·`name`·`amount`)
+- **Output**: `TABLE(run_id uuid, version integer)`
+- **오류**: `profile_not_found`·`permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`·`ups_invoice_exists`·`paid_invoice_exists`·`invalid_run_payload`
+- **부수효과**: `zen_ups_settlement_runs`/`_amounts`/`_charges` INSERT, `zen_orders.cost_settlement_*` UPDATE
+
+#### 변경 RPC `billing_items_amounts(p_order_ids uuid[], p_tier text)`
+- **Path**: `supabase/migrations/20261126091000_task_b381_billing_items_amounts.sql`
+- **변경**: **최신 run만** 사용(레거시 `zen_order_costs`/스냅샷 폴백 제거). 반환 컬럼 7→**10**(`freight_adjustment`·`settlement_charges_total`·`charge_details` 추가). tier 매핑: `ADMIN_TO_AGENCY`→`ADMIN_TO_AGENCY`, 그 외→`SHIPPER`.
+- **오류**: `settlement_run_missing`(run 없음)·`settlement_run_incomplete`(tier 금액 행 없음)
+- **출력**: `order_id`·`charge_weight_kg`·4개 금액·`freight_adjustment`·`settlement_charges_total`·`line_total`·`charge_details`(jsonb)
+
+#### 변경 RPC `create_billing_statement_with_items(...)`
+- **Path**: 동일 M2 파일
+- **변경**: `zen_billing_statement_items`에 `freight_adjustment`·`charge_details` 컬럼 반영, **비KRW 원장 통화 가드 제거**(run은 KRW 고정·원장 미사용). 그 외 로직 불변.
+
+#### 컬럼 추가
+- `zen_billing_statement_items.freight_adjustment numeric(14,2) NOT NULL DEFAULT 0`
+- `zen_billing_statement_items.charge_details jsonb NOT NULL DEFAULT '[]'::jsonb`
+
+### 11.20 UPS 정산마감 서버 액션 (TASK-B-381 PR-2 / Issue #1459)
+
+- **Path**: `src/app/actions/finance/ups-settlement.ts` (`'use server'`), 계산·payload 헬퍼 `src/lib/ups/settlement/{types,build}.ts` (`build.ts`는 `server-only`, 액션 아님)
+- **공통 계약**: `UpsSettlementInput` — `orderId`, 실측 중량/치수, `baseFreight`·`fuelSurcharge`·`surgeFee`(금액+통화), `otherCharges[]`(이름·금액·통화), `upsInvoiceNo`·`upsInvoiceDate`, `notes`. 반환 `UpsSettlementActionResult` — `{ success, error?, preview?, runId?, version? }`
+- **공통 권한**: `validateUserAction()` + `hasAdminOrManagerRole(profile.role)` — **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**만. 그 외 `permission_denied`. 계산·저장·RPC는 세션 클라이언트(user-session RLS)만 사용하며, **정산 완료 알림 헬퍼만** 수신자 조회·insert에 관리자 클라이언트를 사용합니다(권한은 이미 3역할로 제한).
+- **공통 오류 문구**: `messages/{ko,en,zh,ja}.json`의 `Errors` 키로 반환한다(`ups_invoice_exists`·`paid_invoice_exists`·`settlement_run_missing`·`currency_conversion_failed`·`ups_estimate_unavailable`·`rpc_failed` 신규).
+
+#### previewUpsSettlement(input)
+- **설명**: DB 쓰기 없이 정산마감 결과를 미리 계산합니다. 출고확정일(`getOrderReleasedDate`) 기준 환율로 원가를 산출하고, `estimateUpsFreightCore`로 대리점·화주 2 tier의 run 금액·부가항목 payload를 만듭니다. `zen_order_costs`는 갱신하지 않으며 `UPS_ACTUAL_COST_ADJ` 델타도 만들지 않습니다(§2-1 4단계).
+- **Input**: `UpsSettlementInput`
+- **Output**: `Promise<UpsSettlementActionResult>` — `preview.releasedDate`·`chargeWeightKg`·`cost`(원가 요약)·`amounts[2]`·`charges[]`
+- **오류**: `permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`(SETTLED 오더의 미리보기 거부)·`currency_conversion_failed`·`ups_estimate_unavailable`·`rpc_failed`
+- **부수효과**: 조회만 (DB 변경 없음)
+
+#### saveUpsSettlementDraft(input)
+- **설명**: 임시저장 — `zen_ups_actual_cost` upsert + `zen_ups_actual_other_charges` 기존 행 삭제 후 재삽입만 수행합니다. run 생성·오더 `SETTLED` 전환은 하지 않습니다.
+- **Input**: `UpsSettlementInput`
+- **Output**: `Promise<UpsSettlementActionResult>` — `{ success: true }`
+- **오류**: `permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`·`currency_conversion_failed`·`rpc_failed`
+- **부수효과**: `zen_ups_actual_cost`/`zen_ups_actual_other_charges` 쓰기, `revalidatePath`(오더 상세·`/finance/daily-billing`)
+
+#### finalizeUpsSettlement(input)
+- **설명**: 정산마감 — 비취소/PAID 인보이스 선확인(보조) → 원가 저장 → run payload 계산 → `finalize_ups_settlement_run` RPC 1회로 run+amounts+charges+오더 `SETTLED`를 한 트랜잭션에서 처리합니다. **이미 `SETTLED`인 오더는 원가를 덮어쓰지 않고 RPC에 위임**하며, 같은 입력이면 기존 run을 멱등 반환하고 다른 입력이면 RPC가 `already_settled`로 거부합니다(§2-9).
+- **Input**: `UpsSettlementInput`
+- **Output**: `Promise<UpsSettlementActionResult>` — `{ success: true, runId, version }`
+- **오류**: `permission_denied`·`order_not_found`·`not_ups_order`·`ups_actual_cost_status_invalid`·`already_settled`·`ups_invoice_exists`·`paid_invoice_exists`·`currency_conversion_failed`·`ups_estimate_unavailable`·`rpc_failed`(RPC 원문 오류 미노출, 코드만 매핑). 인보이스 선확인 조회 자체가 실패하면 **fail-closed**(`rpc_failed`)로 원가 선저장을 하지 않습니다.
+- **관측성**: RPC 실패 시 `logger.error`를 **반환 이전에** 호출하고 오더·오류코드·원가 KRW 합계·부가항목 건수만 기록합니다(청구서 번호·거래처 값 비노출, R-21).
+- **부수효과**: 원가 저장(미정산 오더만) → RPC 호출 → `notifyUpsSettlementAdmins`(관리자 인앱 알림, **멱등 재호출 시에도 발송**) → `revalidatePath` 3곳(오더 상세·`/finance/daily-billing`·`/finance/statements`)
+
+#### 내부 헬퍼 `notifyUpsSettlementAdmins` (서버 액션 아님) — TASK-B-381 PR-4a
+- **Path**: `src/lib/ups/settlement/notify-admins.server.ts` (`server-only`)
+- **설명**: 정산마감 성공 후 ADMIN·MANAGER·ZENITH_SUPER_ADMIN **전원**에게 인앱 알림을 남깁니다. 수신자 조회·`zen_notifications` insert는 관리자 클라이언트로 수행합니다. 문구는 **요청 로케일 1개**로 생성해 **수신자 전원에게 같은 문구**를 보내며, 문구 로드 실패 시 영문 폴백으로 insert를 계속합니다(`UpsSettlementNotify` 4개 로케일 키).
+- **권한**: 서버 액션이 아니며 클라이언트에서 호출할 수 없습니다. 호출은 `finalizeUpsSettlement` 내부 1곳.
+- **Input**: `{ orderNo: string; orderId: string }` / **Output**: `Promise<void>`
+- **오류**: 수신자 조회·문구·insert 오류/예외는 모두 `logger.warn`만 남기고 throw하지 않습니다(best-effort). 정산 결과(`SETTLED`)는 유지됩니다.
+
+#### 내부 헬퍼 (서버 액션 아님)
+- `computeSettlementCost(supabase, order, input)` — `src/lib/ups/settlement/build.ts`
+  - 출고확정일 기준 **통화별 환율을 `zen_exchange_rates`에서 직접 조회**하고, 유효 환율이 없으면 `getExchangeRate`의 최후 fallback(1350)을 쓰지 않고 `SettlementCurrencyError`를 던집니다(→ `currency_conversion_failed`). `computeUpsActualCostKrw`(기본운임 +7%)로 원가·계산 스냅샷을 만듭니다.
+  - **Input**: 세션 client, `{ id, created_at }`, `UpsSettlementInput` / **Output**: `{ summary, amounts }`
+- `buildSettlementPreview(supabase, order, input, cost)` — 동일 파일
+  - `estimateUpsFreightCore`로 대리점·화주 tier 금액을 만들고, `freight_adjustment = target − (base+fuel+surge+other)`, `settlement_charges_total` = 항목별 2자리 반올림 합, `line_total = 4개 합 + 조정 + 부가항목 합`을 계산합니다(같은 부가항목을 양 tier에 적용).
+  - **target 폴백**: 기존 `recomputeRevenue`와 동일하게 대리점 `agencyCostPrice <= 0`이면 플랫폼 합계를 target으로 씁니다(0원 target·과대 음수 조정 방지). 화주는 `finalFreight`, 없으면 플랫폼 합계입니다.
+  - **중량 폴백**: 기존 경로와 동일하게 `actualWeightKg ?? snapshot.platform.chargeableWeightKg`.
+  - **오류**: 상품을 찾을 수 없거나 도착국이 없으면 `SettlementEstimateError`(→ `ups_estimate_unavailable`). 스냅샷 합계로 조용히 폴백하지 않습니다.
 

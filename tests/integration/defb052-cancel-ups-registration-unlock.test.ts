@@ -41,7 +41,7 @@ vi.mock('@/lib/shxk/order', () => ({
   removeorder: mockRemoveorder,
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }));
-vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR' }));
+vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR', SHXK_SHIPPER_COMPANY: 'TEST SHIPPER CO' }));
 vi.mock('@/lib/ups/label-mapping', () => ({
   buildCreateOrderPayload: vi.fn(),
   determineOrderCargotype: vi.fn(),

@@ -4,13 +4,14 @@
 //  · 실제 브라우저 로그인(page.goto) + 실DB fixture(b371-fixture, seed-local 비의존)
 //  · 로그 확인: `/admin/error-logs`의 원천인 `zen_error_logs`에 신규 ERROR가 없는지 실측 (R-10)
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import fs from 'fs';
 import {
   seedFixture, cleanupFixture, serviceClient, psql, ACCOUNTS, PASSWORD, IDS,
 } from './b371-fixture';
 import { loginAs } from './b371-login';
 
-const DIR = 'docs/99_Manual/E2E_B374_Result';
+const DIR = evidenceDir('E2E_B374_Result');
 
 test.describe('TASK-B-374: 대리점 화주 관리 UI 구동 (R-10 증적)', () => {
   test.beforeAll(async () => {

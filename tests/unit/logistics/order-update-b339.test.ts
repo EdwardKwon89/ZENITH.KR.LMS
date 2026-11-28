@@ -101,9 +101,6 @@ vi.mock('@/app/actions/master', () => ({ generateOrderNo: vi.fn(), generateMaste
 vi.mock('@/app/actions/operations/inventory', () => ({
   syncInventoryFromOrder: (...args: any[]) => syncInventoryFromOrderMock(...args),
 }));
-vi.mock('@/app/actions/ups/freight', () => ({
-  estimateUpsFreight: vi.fn().mockResolvedValue({ platform: { totalSellingPrice: 1, currency: 'USD' } }),
-}));
 vi.mock('@/lib/orders/ups-product-guard', () => ({
   assertActiveUpsProduct: (...args: any[]) => assertActiveUpsProductMock(...args),
 }));

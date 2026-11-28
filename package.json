@@ -23,7 +23,8 @@
     "check:audit": "node scripts/check-audit.mjs",
     "check:vendor": "node scripts/check-vendor.mjs",
     "build:lrtm": "node scripts/build-lrtm-index.mjs",
-    "check:lrtm": "node scripts/check-lrtm-sync.mjs"
+    "check:lrtm": "node scripts/check-lrtm-sync.mjs",
+    "check:evidence": "node scripts/check-evidence-escape.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
@@ -36,6 +37,7 @@
     "clsx": "^2.1.1",
     "country-state-city": "^3.2.1",
     "date-fns": "^4.1.0",
+    "exceljs": "4.4.0",
     "framer-motion": "^12.38.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",

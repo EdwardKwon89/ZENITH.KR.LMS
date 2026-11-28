@@ -25,7 +25,6 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
-import BillingConfirmModal from './BillingConfirmModal';
 import { useTranslations } from 'next-intl';
 
 interface ShipperDailyBillingClientProps {
@@ -45,7 +44,6 @@ function BillingGroupTable({
   periodType,
   onToggleExpand,
   onBatchFinalize,
-  onBillingConfirm,
   canFinalize,
 }: {
   groups: ShipperDailyBillingGroup[];
@@ -57,7 +55,6 @@ function BillingGroupTable({
   periodType: 'daily' | 'weekly' | 'monthly';
   onToggleExpand: (g: ShipperDailyBillingGroup) => void;
   onBatchFinalize: (g: ShipperDailyBillingGroup) => void;
-  onBillingConfirm: (order: ShipperDailyOrderRow) => void;
   canFinalize: boolean;
 }) {
   return (
@@ -240,13 +237,10 @@ function BillingGroupTable({
                                           청구완료
                                         </span>
                                       ) : ord.invoiceNo ? (
-                                        <button
-                                          onClick={() => onBillingConfirm(ord)}
-                                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900 transition-colors cursor-pointer"
-                                        >
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
                                           <FileText className="w-3 h-3 text-blue-600" />
                                           청구확정
-                                        </button>
+                                        </span>
                                       ) : (
                                         <span className="text-[11px] text-slate-400">미발행</span>
                                       )}
@@ -298,18 +292,6 @@ export default function ShipperDailyBillingClient({
     surgeFeeKrw: number;
     otherChargesKrw: number;
   }>({ open: false, group: null, reason: '청구 집계 최종 운임 마감', baseFreightKrw: 0, fuelSurchargeKrw: 0, surgeFeeKrw: 0, otherChargesKrw: 0 });
-
-  // TASK-B-317: 개별 오더 청구확정 팝업 상태
-  const [billingConfirmModal, setBillingConfirmModal] = useState<{
-    open: boolean;
-    orderId: string;
-    orderNo: string;
-    invoiceId?: string;
-    baseFreight?: number;
-    fuelSurcharge?: number;
-    surgeFee?: number;
-    otherCharges?: number;
-  }>({ open: false, orderId: '', orderNo: '' });
 
   const isAgencyView = role === 'AGENCY';
   const isShipperView = role === 'SHIPPER';
@@ -416,25 +398,6 @@ export default function ShipperDailyBillingClient({
       surgeFeeKrw: group.totalSurgeFee,
       otherChargesKrw: group.totalOtherCharge || 0,
     });
-  };
-
-  // TASK-B-317: 개별 오더 청구확정 핸들러
-  const handleBillingConfirm = (order: ShipperDailyOrderRow) => {
-    setBillingConfirmModal({
-      open: true,
-      orderId: order.orderId,
-      orderNo: order.orderNo,
-      invoiceId: order.invoiceId,
-      baseFreight: order.baseFreight,
-      fuelSurcharge: order.fuelSurcharge,
-      surgeFee: order.surgeFee,
-      otherCharges: order.otherCharge,
-    });
-  };
-
-  const handleBillingConfirmSuccess = () => {
-    // 성공 시 목록 새로고침
-    fetchSummary();
   };
 
   const handleConfirmFinalize = async () => {
@@ -623,7 +586,6 @@ export default function ShipperDailyBillingClient({
                 periodType={periodType}
                 onToggleExpand={toggleExpand}
                 onBatchFinalize={handleBatchFinalize}
-                onBillingConfirm={handleBillingConfirm}
                 canFinalize={!isShipperView}
               />
             )}
@@ -651,7 +613,6 @@ export default function ShipperDailyBillingClient({
                 periodType={periodType}
                 onToggleExpand={toggleExpand}
                 onBatchFinalize={handleBatchFinalize}
-                onBillingConfirm={handleBillingConfirm}
                 canFinalize={!isShipperView}
               />
             )}
@@ -682,26 +643,11 @@ export default function ShipperDailyBillingClient({
               periodType={periodType}
               onToggleExpand={toggleExpand}
               onBatchFinalize={handleBatchFinalize}
-              onBillingConfirm={handleBillingConfirm}
               canFinalize={!isShipperView}
             />
           )}
         </div>
       )}
-
-      {/* TASK-B-317: 개별 오더 청구확정 팝업 */}
-      <BillingConfirmModal
-        open={billingConfirmModal.open}
-        orderId={billingConfirmModal.orderId}
-        orderNo={billingConfirmModal.orderNo}
-        invoiceId={billingConfirmModal.invoiceId}
-        initialBaseFreight={billingConfirmModal.baseFreight}
-        initialFuelSurcharge={billingConfirmModal.fuelSurcharge}
-        initialSurgeFee={billingConfirmModal.surgeFee}
-        initialOtherCharges={billingConfirmModal.otherCharges}
-        onClose={() => setBillingConfirmModal({ open: false, orderId: '', orderNo: '' })}
-        onSuccess={handleBillingConfirmSuccess}
-      />
 
       {/* 그룹 일괄 마감 팝업 */}
       {finalizeModal.open && finalizeModal.group && (
@@ -729,9 +675,6 @@ export default function ShipperDailyBillingClient({
                   className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-white"
                   placeholder="0"
                 />
-                <span className="text-[10px] text-slate-400 mt-1 block">
-                  +7% = ₩{Math.round(finalizeModal.baseFreightKrw * 1.07).toLocaleString()}
-                </span>
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">

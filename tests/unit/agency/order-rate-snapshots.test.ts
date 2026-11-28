@@ -78,11 +78,16 @@ describe('TC-P7-ORDER-SNAPSHOT-02: orderRegistrationSchema — incoterms DDU 허
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { saveOrderRateSnapshot } from '@/app/actions/operations/orders';
-import { estimateUpsFreight } from '@/app/actions/ups/freight';
 
-vi.mock('@/app/actions/ups/freight', () => ({
-  estimateUpsFreight: vi.fn(),
+const adminMocks = vi.hoisted(() => ({
+  insert: vi.fn(),
+  from: vi.fn(),
 }));
+vi.mock('@/utils/supabase/server', () => ({
+  createAdminClient: vi.fn().mockResolvedValue({ from: adminMocks.from }),
+}));
+
+const mockEstimateFn = vi.fn();
 
 describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimateUpsFreight 호출 + 스냅샷 INSERT 검증', () => {
   const mockProduct = { id: 'prod-1111-2222' };
@@ -102,8 +107,9 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
     vi.clearAllMocks();
 
     mockInsertTable = {
-      insert: vi.fn().mockReturnThis(),
+      insert: adminMocks.insert.mockReturnValue({ error: null }),
     };
+    adminMocks.from.mockReturnValue(mockInsertTable);
 
     mockSupabase = {
       from: vi.fn((table: string) => {
@@ -121,8 +127,12 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
             maybeSingle: vi.fn().mockResolvedValue({ data: mockPort, error: null }),
           };
         }
-        if (table === 'zen_order_rate_snapshots') {
-          return mockInsertTable;
+        if (table === 'zen_orders') {
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            maybeSingle: vi.fn().mockResolvedValue({ data: { shipper_id: 'agency-org-001', agency_org_id: mockAgencyOrgId }, error: null }),
+          };
         }
         if (table === 'zen_agency_shippers') {
           return {
@@ -135,7 +145,7 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
       }),
     };
 
-    (estimateUpsFreight as any).mockResolvedValue(mockEstimate);
+    mockEstimateFn.mockResolvedValue(mockEstimate);
   });
 
   it('정상 입력: 제품 존재 + 포트 존재 → estimateUpsFreight 호출 + 스냅샷 INSERT', async () => {
@@ -153,12 +163,12 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
       validated,
       profile,
       agencyOrgId: mockAgencyOrgId,
-      estimateFn: estimateUpsFreight,
+      estimateFn: mockEstimateFn,
     });
 
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_ups_products');
     expect(mockSupabase.from).toHaveBeenCalledWith('zen_ports');
-    expect(estimateUpsFreight).toHaveBeenCalledWith({
+    expect(mockEstimateFn).toHaveBeenCalledWith({
       productId: mockProduct.id,
       destCountryCode: mockPort.country_code,
       actualWeightKg: 5,
@@ -169,8 +179,8 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
       agencyOrgId: mockAgencyOrgId,
       shipperOrgId: profile.org_id,
     });
-    expect(mockSupabase.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
-    expect(mockInsertTable.insert).toHaveBeenCalledWith({
+    expect(adminMocks.from).toHaveBeenCalledWith('zen_order_rate_snapshots');
+    expect(adminMocks.insert).toHaveBeenCalledWith({
       order_id: mockOrderId,
       applied_unit_price: 150.00,
       applied_currency: 'USD',
@@ -195,9 +205,9 @@ describe('TC-P7-ORDER-SNAPSHOT-03: saveOrderRateSnapshot — DB 조회 + estimat
       orderId: mockOrderId,
       validated: { ups_product_code: 'UNKNOWN', packages: [{ packing_unit: 'BOX', packing_count: 1, gross_weight: 10 }], dest_port_id: 'x' } as any,
       profile: { org_id: 'a', role: 'AGENCY_SHIPPER' },
-      estimateFn: estimateUpsFreight as any,
+      estimateFn: mockEstimateFn,
     });
 
-    expect(estimateUpsFreight).not.toHaveBeenCalled();
+    expect(mockEstimateFn).not.toHaveBeenCalled();
   });
 });

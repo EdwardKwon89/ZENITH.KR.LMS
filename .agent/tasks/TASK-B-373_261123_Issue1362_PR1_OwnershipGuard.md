@@ -32,6 +32,7 @@
 | `tests/unit/agency/other-charges-actions.test.ts` | 기존 mock 체인에 선조회·조건부 UPDATE 반영(레거시 단위 테스트 유지) |
 | `docs/02_Analysis/ds11/Ds_11_11A_UPS_Rates.md` | 11.3 3개 액션 권한·소유권 검증 |
 | `docs/08_Self_Audit/Checklists/regression-items/TASK-B-373_Issue1362_other-charges-ownership.md` | 회귀 항목 9건 + RST 3건 |
+| `docs/02_Analysis/evidence/task-b373/r10-*.png` | R-10 UI 증적 3장(목록·수정 후·비활성화 후) |
 | `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` | `npm run build:lrtm` 자동 갱신 |
 
 - `git diff --stat origin/TeamB_Dev...HEAD` — 최종 커밋 후 PR에 기재.
@@ -60,6 +61,12 @@
 - `npm run build`: **성공** (라우트 테이블 정상 출력).
 - `npm run check:ds11`: **OK** — 허용 목록 밖 신규 미반영 0건.
 - `npm run build:lrtm` / `check:lrtm`: **OK**(유령 경로 0, 허용 목록 밖 신규 미등재 0, 신규 항목 24건).
+- **R-10 UI 구동 증적**: 대리점 계정 실제 로그인 → `/ko/agency/other-charges` 목록·수정 저장·비활성화 확인.
+  - `docs/02_Analysis/evidence/task-b373/r10-list.png`
+  - `docs/02_Analysis/evidence/task-b373/r10-after-edit.png`
+  - `docs/02_Analysis/evidence/task-b373/r10-after-deactivate.png`
+  - DB 반영: `selling_price=1234`, `cost_price=987`, `is_active=false` 실측. 변경 후 `zen_error_logs` 신규 ERROR **0건**.
+  - 임시 Playwright 실행 파일은 증적 후 삭제(커밋하지 않음).
 
 ## 5. [작업 결과]
 

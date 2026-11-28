@@ -60,7 +60,7 @@ vi.mock('@/lib/params/service', () => ({
 }));
 
 import { validateUserAction, validateAdminAction } from '@/lib/auth/guards';
-import { generateInvoicesForOrder, finalizeInvoice, updatePaymentStatus, calculateSettlementAction, createPostFinalizationAdjustment, rejectInvoice } from '@/app/actions/finance/settlement';
+import { generateInvoicesForOrder, finalizeInvoice, updatePaymentStatus, calculateSettlementAction, rejectInvoice } from '@/app/actions/finance/settlement';
 
 describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
   beforeEach(() => {
@@ -393,66 +393,6 @@ describe('Agency 정산 권한 검증 단위 테스트 (Issue #603)', () => {
       const res = await finalizeInvoice('inv-nonexistent');
       expect(res.success).toBe(false);
       expect(res.error).toContain('인보이스를 찾을 수 없습니다.');
-    });
-  });
-
-  describe('createPostFinalizationAdjustment (TASK-194-C)', () => {
-    it('마감 후 조정 시 신규 추가 인보이스 발행', async () => {
-      (validateAdminAction as any).mockResolvedValue({
-        supabase: mockSupabase,
-        user: { id: 'admin-usr-1' },
-        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
-      });
-
-      let callCount = 0;
-      mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'zen_invoices') {
-          callCount++;
-          if (callCount === 1) {
-            // 원 인보이스 조회
-            return createChainableMock({ id: 'inv-orig', shipper_id: 'shipper-1', metadata: { source_order_id: 'ord-1' }, invoice_no: 'INV-20260721-0001' });
-          }
-          if (callCount === 2) {
-            // 신규 인보이스 생성
-            return createChainableMock({ id: 'inv-new', invoice_no: 'INV-20260721-0002' });
-          }
-          // total_amount 갱신
-          return createChainableMock();
-        }
-        if (table === 'zen_orders') {
-          return createChainableMock({ order_no: 'ORD-2026-001' });
-        }
-        if (table === 'zen_order_costs') {
-          // linkAdjustmentCosts: 연결할 비용 없음
-          return createChainableMock([]);
-        }
-        return createChainableMock();
-      });
-
-      const { createPostFinalizationAdjustment } = await import('@/app/actions/finance/settlement');
-      const res = await createPostFinalizationAdjustment('ord-1', 50, 'USD', 'admin-usr-1', 'inv-orig');
-      expect(res.success).toBe(true);
-      expect(res.adjustmentAmount).toBe(50);
-    });
-
-    it('조정 금액 0일 때 인보이스 미생성', async () => {
-      (validateAdminAction as any).mockResolvedValue({
-        supabase: mockSupabase,
-        user: { id: 'admin-usr-1' },
-        profile: { id: 'admin-usr-1', role: USER_ROLES.ADMIN },
-      });
-
-      mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'zen_invoices') {
-          return createChainableMock({ id: 'inv-orig', shipper_id: 'shipper-1', metadata: {}, invoice_no: 'INV-001' });
-        }
-        return createChainableMock();
-      });
-
-      const { createPostFinalizationAdjustment } = await import('@/app/actions/finance/settlement');
-      const res = await createPostFinalizationAdjustment('ord-1', 0, 'USD', 'admin-usr-1', 'inv-orig');
-      expect(res.success).toBe(true);
-      expect(res.adjustmentAmount).toBe(0);
     });
   });
 

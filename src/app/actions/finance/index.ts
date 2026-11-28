@@ -32,7 +32,17 @@ export {
 } from './invoice-files';
 
 export {
-  recordUpsActualCharges,
+  getOrdersForCostSettlement,
+  unmarkOrderCostSettled,
+} from './ups-actual-cost';
+
+export {
+  previewUpsSettlement,
+  saveUpsSettlementDraft,
+  finalizeUpsSettlement,
+} from './ups-settlement';
+
+export {
   getUpsActualCharges,
   getUpsChargeReconciliation,
   searchDeliveredUpsOrders,

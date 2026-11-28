@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import { getServiceClient } from './test-utils';
 import fs from 'fs';
 import path from 'path';
@@ -12,7 +13,7 @@ import path from 'path';
 // 사전 조건: ① dev 서버(baseURL) 실행 ② iss1071 마이그레이션 적용(AGENCY SELECT RLS).
 
 const BASE = process.env.PW_BASE_URL || 'http://localhost:3010';
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_285_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_285_Result');
 const AGENCY_EMAIL = 'r10-285-agency@zenith.kr';
 const AGENCY_PASSWORD = 'password1234';
 const AGENCY_ORG_NAME = 'R10-285 Agency';

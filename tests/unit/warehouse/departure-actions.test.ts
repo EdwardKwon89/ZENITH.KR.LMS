@@ -9,7 +9,7 @@ vi.mock('next-intl/server', () => ({
   getTranslations: vi.fn().mockImplementation(() => (key: string) => (koMessages as any).Errors?.[key] ?? key),
 }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() } }));
-vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR' }));
+vi.mock('@/lib/shxk/config', () => ({ SHXK_SHIPPER_NAME: 'SNTL', SHXK_SHIPPER_COUNTRY: 'KR', SHXK_SHIPPER_COMPANY: 'TEST SHIPPER CO' }));
 vi.mock('@/lib/shxk/client', () => ({ callShxk: vi.fn() }));
 vi.mock('@/lib/shxk/order', () => ({
   createorder: vi.fn(),

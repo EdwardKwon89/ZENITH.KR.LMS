@@ -2,7 +2,7 @@ import { requireAuth, checkPermission } from '@/lib/auth/guards';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { getAgencyOtherCharges } from '@/app/actions/agency/other-charges';
-import { getUpsOtherCharges } from '@/app/actions/ups/rates';
+import { getPublicOtherCharges } from '@/app/actions/ups/rates-public';
 import { AgencyOtherChargesClient } from './agency-other-charges-client';
 
 export default async function AgencyOtherChargesPage() {
@@ -11,7 +11,7 @@ export default async function AgencyOtherChargesPage() {
 
   const [charges, allOtherCharges] = await Promise.all([
     getAgencyOtherCharges(profile.org_id),
-    getUpsOtherCharges(),
+    getPublicOtherCharges(),
   ]);
 
   return (

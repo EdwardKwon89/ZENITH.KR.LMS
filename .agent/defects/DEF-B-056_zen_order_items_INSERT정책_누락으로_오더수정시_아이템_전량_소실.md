@@ -45,7 +45,7 @@ VALUES (...);
 ## 재현 절차
 
 1. `ZEN-REPRO-001`(WAREHOUSED+UPS) 오더 + 패키지 + 아이템 1건을 직접 DB에 생성
-2. 실제 dev 서버(port 3000, TeamB_Dev HEAD)에서 `james@sntl.co.kr`로 로그인 후 `/ko/orders/<id>/edit` 접속 → 폼에 아이템이 정확히 로드됨(`packages.0.items.0.item_name = 'Repro Test Item'`) 확인 — **읽기 경로는 정상**
+2. 실제 dev 서버(port 3000, TeamB_Dev HEAD)에서 `user@example.test`로 로그인 후 `/ko/orders/<id>/edit` 접속 → 폼에 아이템이 정확히 로드됨(`packages.0.items.0.item_name = 'Repro Test Item'`) 확인 — **읽기 경로는 정상**
 3. `SET ROLE authenticated` + JWT claim 시뮬레이션으로 `zen_order_items` 직접 DELETE 시도 → `DELETE 0`(no-op) 확인, 아이템은 그대로 남음
 4. 같은 세션에서 `zen_order_packages` 직접 DELETE 시도 → `DELETE 1`(성공) 확인 직후 연결된 아이템이 FK CASCADE로 0건이 됨을 확인
 5. 별도로 동일 세션에서 `zen_order_items` 직접 INSERT 시도 → `ERROR: new row violates row-level security policy` 확인

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { evidenceDir } from './evidence-dir';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -9,7 +10,7 @@ import path from 'path';
 
 dotenv.config({ path: '.env.local' });
 
-const SCREENSHOT_DIR = 'docs/99_Manual/E2E_270_Result';
+const SCREENSHOT_DIR = evidenceDir('E2E_270_Result');
 const AGENCY_EMAIL = 'r10_agency_270@zenith.kr';
 const AGENCY_PASSWORD = 'password1234';
 
