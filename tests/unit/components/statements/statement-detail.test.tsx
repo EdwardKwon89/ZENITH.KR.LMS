@@ -42,6 +42,7 @@ vi.mock('next-intl', () => {
     colSubtotal: '소계', colBilledTarget: '청구대상', colPeriodRound: '기간/차수',
     totalLabel: '합계 {amount}원', itemCount: '오더 {count}건', billedBizNoLabel: '사업자번호',
     view: '보기', actionFailed: '요청을 처리하지 못했습니다.', excel: 'Excel 저장',
+    additionalCharge: '부가운임', freightAdjustment: '운임 조정분',
   };
   return {
     useTranslations: () => (key: string, params?: Record<string, unknown>) => {
@@ -62,7 +63,7 @@ function detail(overrides: Partial<Detail> = {}): Detail {
     periodYear: 2026, periodMonth: 10, roundNo: 1, periodFrom: '2026-10-01', periodTo: '2026-10-31',
     totalAmount: 100000, status: 'DRAFT', issuerOrgId: 'issuer1', scope: 'MINE',
     createdAt: '2026-10-01T00:00:00Z',
-    items: [{ orderId: 'o1', orderNo: 'ORD-1', chargeWeightKg: 10, baseFreight: 90000, fuelSurcharge: 5000, surgeFee: 0, otherCharges: 5000, lineTotal: 100000 }],
+    items: [{ orderId: 'o1', orderNo: 'ORD-1', chargeWeightKg: 10, baseFreight: 90000, fuelSurcharge: 5000, surgeFee: 0, otherCharges: 5000, freightAdjustment: 0, chargeDetails: [], lineTotal: 100000 }],
     ...overrides,
   };
 }
@@ -173,5 +174,45 @@ describe('S5 청구서 상세 — 권한별 작업 영역 (TASK-B-361)', () => {
     fireEvent.click(dialog.getByRole('button', { name: '취소 확정' }));
     await waitFor(() => expect(m.cancel).toHaveBeenCalledWith('st-1'));
     await waitFor(() => expect(m.push).toHaveBeenCalledWith('/ko/finance/statements'));
+  });
+});
+
+describe('TASK-B-402 (B-377): 조정 행·부가운임 표시 — 설계 §5·Edward 결정 (0원 비표시·음수 부호·항목명)', () => {
+  it('TC-402-01: 부가운임 항목명·금액과 음수 조정 행(안2)을 렌더하고 구성요소와 소계를 함께 보여준다', () => {
+    const d = detail({
+      items: [{
+        orderId: 'o2', orderNo: 'ORD-2', chargeWeightKg: 5,
+        baseFreight: 90000, fuelSurcharge: 5000, surgeFee: 0, otherCharges: 5000,
+        freightAdjustment: -1500,
+        chargeDetails: [{ line_no: 1, name: '긴급할증', amount: 500, currency: 'KRW' }],
+        lineTotal: 99500,
+      }],
+    });
+    render(<StatementDetail detail={d} basePath="/finance/statements" locale="ko" />);
+    // 부가운임 항목(항목명 · 금액)
+    expect(screen.getByText(/부가운임 · 긴급할증/)).toBeInTheDocument();
+    expect(screen.getByText('500')).toBeInTheDocument();
+    // 조정 행 = 안2 라벨 + 음수 부호 표기
+    expect(screen.getByText('운임 조정분')).toBeInTheDocument();
+    expect(screen.getByText('-1,500')).toBeInTheDocument();
+    // 구성요소(기본운임)와 소계(line_total)가 함께 표시됨 — 행 합 = line_total의 근거값
+    expect(screen.getByText('90,000')).toBeInTheDocument();
+    expect(screen.getByText('99,500')).toBeInTheDocument();
+  });
+
+  it('TC-402-02: 조정 0원이면 조정 행 비표시(Edward 결정), 부가운임 항목은 유지된다', () => {
+    const d = detail({
+      items: [{
+        orderId: 'o3', orderNo: 'ORD-3', chargeWeightKg: 5,
+        baseFreight: 90000, fuelSurcharge: 5000, surgeFee: 0, otherCharges: 5000,
+        freightAdjustment: 0,
+        chargeDetails: [{ line_no: 1, name: '기타항목', amount: 1000, currency: 'KRW' }],
+        lineTotal: 101000,
+      }],
+    });
+    render(<StatementDetail detail={d} basePath="/finance/statements" locale="ko" />);
+    expect(screen.queryByText('운임 조정분')).not.toBeInTheDocument(); // 0원 비표시
+    expect(screen.getByText(/부가운임 · 기타항목/)).toBeInTheDocument();
+    expect(screen.getByText('101,000')).toBeInTheDocument();
   });
 });

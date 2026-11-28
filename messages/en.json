@@ -752,7 +752,9 @@
     "active_invoice": "Active Invoice",
     "download_invoice_pdf": "Download Invoice PDF",
     "pdf_generating": "Generating PDF...",
-    "pdf_generate_error": "Failed to generate PDF."
+    "pdf_generate_error": "Failed to generate PDF.",
+    "additionalCharge": "Additional Charges",
+    "freightAdjustment": "freight adjustment"
   },
   "Statistics": {
     "dashboard_title": "Statistics Dashboard",

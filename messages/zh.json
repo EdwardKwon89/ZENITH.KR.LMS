@@ -1,4 +1,8 @@
 {
+  "Finance": {
+    "additionalCharge": "附加运费",
+    "freightAdjustment": "运费调整"
+  },
   "Statements": {
     "title": "账单管理",
     "newTitle": "创建账单",

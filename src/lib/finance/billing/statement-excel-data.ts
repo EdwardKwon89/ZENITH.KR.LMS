@@ -56,6 +56,12 @@ export interface StatementExportRow {
   fuelSurcharge: number;
   surgeFee: number;
   otherCharges: number;
+  /** [설계 확정] 부가운임 항목(run 스냅샷) — 항목명 표시용 */
+  chargeDetails: { name?: string; amount?: number }[];
+  /** [설계 확정] 부가운임 합(= Σ charge_details) */
+  additionalCharges: number;
+  /** [설계 확정] 조정 행 — 0원이면 비표시, 음수 가능 */
+  freightAdjustment: number;
   lineTotal: number;
 }
 
@@ -66,6 +72,10 @@ export interface StatementExportTotals {
   fuelSurcharge: number;
   surgeFee: number;
   otherCharges: number;
+  /** [설계 확정] 부가운임 합(Σ charge_details) */
+  additionalCharges: number;
+  /** [설계 확정] 조정 합(0원이면 요약에서 비표시) */
+  freightAdjustment: number;
   lineTotal: number;
 }
 
@@ -186,7 +196,7 @@ async function loadStatementItems(
     supabase
       .from('zen_billing_statement_items')
       .select(
-        'order_id, charge_weight_kg, base_freight, fuel_surcharge, surge_fee, other_charges, line_total, ' +
+        'order_id, charge_weight_kg, base_freight, fuel_surcharge, surge_fee, other_charges, freight_adjustment, charge_details, line_total, ' +
         'order:zen_orders!order_id(order_no, recipient_name, recipient_country_code, shipper_name, ' +
         'shipper:zen_organizations!shipper_id(name))',
       )
@@ -289,6 +299,8 @@ export function totalsOf(rows: StatementExportRow[]): StatementExportTotals {
     fuelSurcharge: won(centsOf((r) => r.fuelSurcharge)),
     surgeFee: won(centsOf((r) => r.surgeFee)),
     otherCharges: won(centsOf((r) => r.otherCharges)),
+    additionalCharges: won(centsOf((r) => r.additionalCharges)),
+    freightAdjustment: won(centsOf((r) => r.freightAdjustment)),
     lineTotal: won(centsOf((r) => r.lineTotal)),
   };
 }
@@ -349,6 +361,11 @@ function toItemRow(
     fuelSurcharge: Number(item.fuel_surcharge ?? 0),
     surgeFee: Number(item.surge_fee ?? 0),
     otherCharges: Number(item.other_charges ?? 0),
+    chargeDetails: Array.isArray(item.charge_details) ? item.charge_details : [],
+    additionalCharges: Array.isArray(item.charge_details)
+      ? (item.charge_details as Array<{ amount?: number }>).reduce((sum, c) => sum + Number(c.amount ?? 0), 0)
+      : 0,
+    freightAdjustment: Number(item.freight_adjustment ?? 0),
     lineTotal: Number(item.line_total ?? 0),
   };
 }

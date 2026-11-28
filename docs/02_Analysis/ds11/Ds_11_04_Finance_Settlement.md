@@ -229,7 +229,7 @@
 
 #### GET /api/finance/statements/[id]/export (청구서 Excel 출력)
 - **Path**: `src/app/api/finance/statements/[id]/export/route.ts` (빌더: `src/lib/finance/billing/statement-excel*.ts`)
-- **설명**: 청구서 `.xlsx` 다운로드(WBS 4.6) — **Route Handler**(서버 액션은 파일을 반환하지 않는다, An_17 부록 A §2). 시트1 `청구서`(A4 세로 요약) + 시트2 `오더별 상세`(A4 가로, tier별 11/12열 + No) — 양식은 `An_17_부록A_청구서_Excel_출력양식_설계.md` v1.0. 금액·중량은 저장값만 쓰고 **출력 직전 항목 합 = 헤더 `total_amount` 검증**(불일치 시 파일 미생성). 라이브러리 `exceljs@4.4.0`(JSJung 승인 2026-11-21).
+- **설명**: 청구서 `.xlsx` 다운로드(WBS 4.6) — **Route Handler**(서버 액션은 파일을 반환하지 않는다, An_17 부록 A §2). 시트1 `청구서`(A4 세로 요약) + 시트2 `오더별 상세`(A4 가로, tier별 14/15열 + No — B-402 부가운임 3열 포함) — 양식은 `An_17_부록A_청구서_Excel_출력양식_설계.md` v1.1. 금액·중량은 저장값만 쓰고 **출력 직전 항목 합 = 헤더 `total_amount` 검증**(불일치 시 파일 미생성). 라이브러리 `exceljs@4.4.0`(JSJung 승인 2026-11-21).
 - **권한**: 인증된 세션 + **`getBillingStatementDetail`과 동일한 RLS 3경로** — 안 보이면 404(존재 비노출). 미인증 401.
 - **Input**: URL param `id` (uuid)
 - **Output**: 200 `.xlsx` (`Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `Cache-Control: no-store`, `Content-Disposition` RFC 5987)
@@ -241,6 +241,15 @@
 - **설명**: 수기 화주명 정규화 — RPC `billed_key`의 ADHOC 규칙과 동일(공백 압축·양끝 제거·소문자). 후보 매칭(`listBillableOrders` ADHOC 필터)과 자동완성 집계(`listAdhocShipperNames`)에서 공용.
 - **Input**: `name: string` / **Output**: `string` (순수 함수, DB 접근 없음)
 - **분리 사유**: `'use server'` 파일은 **async 함수만 export** 가능 — 이 함수를 그대로 export하면 클라이언트 컴포넌트가 파일을 import하는 순간 `npm run build`가 실패(DEF-B-162). **규칙·시그니처 무변경**, 호출 코드 3곳은 import로 전환.
+
+#### getOrderAdditionalCharges(orderId)
+- **Path**: `src/app/actions/finance/additional-charges.ts` (TASK-B-402 / Issue #1451 — **신규**)
+- **설명**: 부가운임 표시용 가드 조회 — 최신 `version`의 `zen_ups_settlement_run`에서 `run_charges` 항목(`line_no`·`name`·`amount`·`currency`·`tier`)만 반환(**원가 컬럼 미조회·미반환**). 재마감은 새 `version`을 만들므로 항상 최신 run 기준. 정산 전(run 없음)은 `success` + 빈 `items`(정상 케이스, 오류 아님).
+- **권한**: `ADMIN`·`MANAGER`·`ZENITH_SUPER_ADMIN`은 전체 tier, `SHIPPER`는 자기 화주 + `SHIPPER` tier, `AGENCY`는 자기 소속 화주(`agency_org_id` 또는 활성 `zen_agency_shippers` 링크) + `ADMIN_TO_AGENCY` tier — 그 외 `permission_denied`(`logger.warn`). 오더가 RLS로 안 보이면 `order_not_found`(존재 비노출).
+- **Input**: `orderId: string`
+- **Output**: `Promise<{ success: boolean; items: { lineNo: number; name: string; amount: number; currency: string; tier: string }[]; version?: number; error?: string }>`
+- **오류**: `profile_not_found`, `order_not_found`, `permission_denied`, `generic{ORDER_LOOKUP|RUN_LOOKUP|CHARGES_LOOKUP|ADDITIONAL_CHARGES}` — DB·조회 실패는 전부 `logger.error`(오류 객체 전달)
+- **부수효과**: 조회만 (DB 변경 없음)
 
 ### 4.4 UPS 정산마감 — `src/app/actions/finance/ups-settlement.ts` (TASK-B-381 PR-2 / Issue #1459)
 

@@ -18,6 +18,7 @@ import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
 import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
 import { getDeclarations } from '@/app/actions/customs';
+import { getOrderAdditionalCharges } from '@/app/actions/finance/additional-charges';
 import { getOrderRateSnapshot } from '@/app/actions/operations';
 import { getOrderEditScope } from '@/lib/logistics/status-machine';import type { OrderStatus } from '@/types/orders';
 import { resolveConsigneeStreet, resolveShipperStreet, resolveRegionName, resolveCountryName } from '@/lib/ups/label-mapping'; // TASK-B-305, TASK-B-307
@@ -100,6 +101,9 @@ export default async function OrderDetailPage({
       .maybeSingle();
     canManageFinance = !!agencyLink;
   }
+
+  // [설계 확정] 비관리자 표시 원천은 run 부가운임 단일 원천(원가 계열 미전달)
+  const additionalCharges = isAdmin ? null : await getOrderAdditionalCharges(orderId);
 
   const rawLogsData = isAdmin ? await getTrackingRawLogs(orderId) : { logs: [] };
   const rawLogs = rawLogsData?.logs || [];
@@ -583,7 +587,8 @@ export default async function OrderDetailPage({
           {/* 4. Finance Summary */}
           <OrderFinanceSummary 
             orderId={orderId}
-            initialCosts={costs || []}
+            initialCosts={isAdmin ? (costs || []) : []}
+            additionalCharges={additionalCharges}
             initialInvoice={invoice || null}
             incidentFees={incidentFees || []}
             isAdmin={isAdmin}

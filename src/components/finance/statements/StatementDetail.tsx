@@ -23,6 +23,7 @@ export interface StatementDetailProps {
 
 export default function StatementDetail({ detail, error, basePath, locale }: StatementDetailProps) {
   const t = useTranslations('Statements');
+  const tf = useTranslations('Finance'); // [설계 확정] 부가운임·조정 행 라벨(4로케일)
   const router = useRouter();
   const [current, setCurrent] = useState<StatementDetailType | null>(detail);
   const [issueOpen, setIssueOpen] = useState(false);
@@ -98,15 +99,30 @@ export default function StatementDetail({ detail, error, basePath, locale }: Sta
           </thead>
           <tbody>
             {current.items.map((item) => (
-              <tr key={item.orderId} className="border-b last:border-0">
-                <td className="py-2 px-1 font-mono">{item.orderNo ?? '—'}</td>
-                <td className="py-2 px-1">{item.chargeWeightKg}</td>
-                <td className="py-2 px-1">{formatKrw(item.baseFreight)}</td>
-                <td className="py-2 px-1">{formatKrw(item.fuelSurcharge)}</td>
-                <td className="py-2 px-1">{formatKrw(item.surgeFee)}</td>
-                <td className="py-2 px-1">{formatKrw(item.otherCharges)}</td>
-                <td className="py-2 px-1">{formatKrw(item.lineTotal)}</td>
-              </tr>
+              <React.Fragment key={item.orderId}>
+                <tr className="border-b">
+                  <td className="py-2 px-1 font-mono">{item.orderNo ?? '—'}</td>
+                  <td className="py-2 px-1">{item.chargeWeightKg}</td>
+                  <td className="py-2 px-1">{formatKrw(item.baseFreight)}</td>
+                  <td className="py-2 px-1">{formatKrw(item.fuelSurcharge)}</td>
+                  <td className="py-2 px-1">{formatKrw(item.surgeFee)}</td>
+                  <td className="py-2 px-1">{formatKrw(item.otherCharges)}</td>
+                  <td className="py-2 px-1">{formatKrw(item.lineTotal)}</td>
+                </tr>
+                {/* [설계 확정] 부가운임 항목(항목명·금액) + 조정 행 — 구성요소 합이 소계(line_total)와 정합 */}
+                {(item.chargeDetails ?? []).map((cd, ci) => (
+                  <tr key={`cd-${ci}`} className="text-slate-400">
+                    <td className="py-1 px-1 pl-10" colSpan={6}>{tf('additionalCharge')} · {String(cd.name ?? '—')}</td>
+                    <td className="py-1 px-1 text-right">{formatKrw(Number(cd.amount ?? 0))}</td>
+                  </tr>
+                ))}
+                {(item.freightAdjustment ?? 0) !== 0 && (
+                  <tr className="text-slate-400">
+                    <td className="py-1 px-1 pl-10" colSpan={6}>{tf('freightAdjustment')}</td>
+                    <td className="py-1 px-1 text-right">{formatKrw(item.freightAdjustment)}</td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
           </tbody>
           <tfoot>

@@ -38,6 +38,8 @@ interface OrderFinanceSummaryProps {
   isAdmin: boolean;
   canManageFinance?: boolean;
   transportMode?: string | null;
+  /** [설계 확정] 비관리자 표시 원천 — run 부가운임 항목 DTO(원가 미반환) */
+  additionalCharges?: { items: { lineNo: number; name: string; amount: number; currency: string; tier: string }[] } | null;
 }
 
 export default function OrderFinanceSummary({ 
@@ -47,7 +49,8 @@ export default function OrderFinanceSummary({
   incidentFees = [],
   isAdmin,
   canManageFinance,
-  transportMode
+  transportMode,
+  additionalCharges = null
 }: OrderFinanceSummaryProps) {
   const canManage = canManageFinance !== undefined ? canManageFinance : isAdmin;
   const isUps = transportMode === 'UPS';
@@ -143,10 +146,25 @@ export default function OrderFinanceSummary({
         </div>
 
         <div className="space-y-4">
-          {costs.length > 0 ? (
+          {!isAdmin && additionalCharges ? (
+            additionalCharges.items.length > 0 ? (
+              additionalCharges.items.map((c) => (
+                <div key={`${c.tier}-${c.lineNo}`} className="flex justify-between items-center text-slate-400 text-sm">
+                  <span>{t('additionalCharge')} · {c.name}</span>
+                  <span className="text-white font-mono">
+                    {c.currency} {c.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="py-4 text-center text-slate-500 text-xs italic">
+                {t('additionalCharge')} —
+              </div>
+            )
+          ) : costs.length > 0 ? (
             costs.map((item) => (
               <div key={item.id} className="flex justify-between items-center text-slate-400 text-sm">
-                <span>{getCostTypeLabel(item.cost_type)}</span>
+                <span>{getCostTypeLabel(item.cost_type, isAdmin ? 'admin' : 'neutral')}</span>
                 <span className="text-white font-mono">
                   {item.currency} {Number(item.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
@@ -232,12 +250,14 @@ export default function OrderFinanceSummary({
           )}
 
           <div className="pt-6 border-t border-slate-700 flex justify-between items-center">
+            {isAdmin && (
             <div>
               <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Estimated</p>
               <span className="text-3xl font-black text-blue-400 font-mono tracking-tighter">
                 ${totalEst.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
             </div>
+            )}
             {invoice ? (
               <div className="bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-xl flex items-center gap-2">
                 <CheckCircle2 className="w-3 h-3 text-green-400" />
