@@ -74,14 +74,15 @@
 - 로컬 전체 회귀 1차(`12:54:55 KST` 시작, `773.61s`): **실패** — `Test Files 5 failed | 310 passed | 1 skipped (316)`, `Tests 39 failed | 2329 passed | 1 expected fail | 41 skipped (2410)`. 원인은 병합 코드가 아니라 **로컬 DB 정합성**이었습니다(아래 발견 이슈).
 - 로컬 DB 재생성 후 실패 5개 파일 재실행(`13:10:59 ~ 13:12:32 KST`): **5 files / 106 tests 전부 PASS**, exit 0.
 - 로컬 전체 회귀 2차(`13:12:40 ~ 13:26:10 KST`, `808.39s`, exit 0): **PASS** — `Test Files 315 passed | 1 skipped (316)`, `Tests 2393 passed | 1 expected fail | 16 skipped (2410)`. (1차 실패분 포함 전 파일 재실행 결과이며, CI 결과가 아님.)
-- CI — 통합 PR #1448, `2026-11-28 12:57:42 KST` 실행 원문:
+- CI — 통합 PR #1448, `2026-11-28 12:57:42 KST` 및 동기화 PR 생성 후 `13:28:24 KST` **두 차례 동일 원문**:
 
 ```
 $ gh pr checks 1448 --repo EdwardKwon89/ZENITH.KR.LMS
 no checks reported on the 'TeamB_Dev' branch
 ```
 
-`exit 1`. **CI 통과를 주장하지 않습니다.** PR #1448은 base `develop` ← head `TeamB_Dev`, state `OPEN`, `mergeable=CONFLICTING`, `mergeStateStatus=DIRTY` (동기화 PR 병합 전 시점). 로컬 회귀 PASS는 CI 결과가 아닙니다.
+두 차례 모두 `exit 1`. **CI 통과를 주장하지 않습니다.** PR #1448은 base `develop` ← head `TeamB_Dev`, state `OPEN`, `mergeable=CONFLICTING`, `mergeStateStatus=DIRTY` (동기화 PR 병합 전 시점). 로컬 회귀 PASS는 CI 결과가 아닙니다.
+- 동기화 PR #1584의 CI는 `13:28:24 KST` 기준 **8개 검사 모두 `pending`**(Dependency Audit / Docs Sync / Evidence Escape / LRTM Sync / Regression Tests / Task File Check / Type Check / Vendor Integrity) — 아직 결과 확정 전. 완료 후 Jaison이 최종 확인.
 
 ### 4. 마이그레이션 적용 계획서 갱신 요지 (로컬 scratch에만 보관 / 커밋 없음 / 경로 미기재)
 
@@ -103,7 +104,7 @@ no checks reported on the 'TeamB_Dev' branch
 
 - PR #1575(B-399) 병합 **안 함** — #1582 지시로 통합 이후 보류.
 - 운영 반영 여부 확인표·적용 결과는 저장소·Issue에 **미기재**(R-21), 운영 DB 접속·호출 **0건**(R-14). 절대경로·계정·운영 식별자 미기재.
-- PR: (생성 후 기재)
+- PR: [#1584](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1584) — base `TeamB_Dev`, head `feature/teamb-task-b404-sync-develop`, state `OPEN`, `Refs #1582`, `Closes` 없음(이슈 지시). 병합은 Jaison·Aiden 권한.
 
 ## DoD
 
