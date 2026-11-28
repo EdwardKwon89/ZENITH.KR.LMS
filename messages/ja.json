@@ -1,4 +1,8 @@
 {
+  "Finance": {
+    "additionalCharge": "追加運賃",
+    "freightAdjustment": "運賃調整分"
+  },
   "Statements": {
     "title": "請求書管理",
     "newTitle": "請求書作成",

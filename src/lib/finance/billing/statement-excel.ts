@@ -40,6 +40,8 @@ export const EXCEL_LABELS = {
   fuelSurcharge: '유류할증료',
   surgeFee: '할증료(서지)',
   otherCharges: '기타 비용',
+  additionalCharges: '부가운임',
+  freightAdjustment: '운임 조정분',
   supplyTotal: '공급가액 합계',
   vatNote: '※ 부가가치세 별도 (세금계산서는 별도 발행)',
   itemCount: (n: number) => `오더 건수 ${n}건`,
@@ -64,6 +66,9 @@ export const EXCEL_LABELS = {
     fuelSurcharge: '유류할증료',
     surgeFee: '할증료',
     otherCharges: '기타',
+    chargeItems: '부가운임 항목',
+    additionalCharges: '부가운임',
+    freightAdjustment: '운임 조정분',
     lineTotal: '합계',
   },
 } as const;
@@ -93,6 +98,9 @@ const BASE_DETAIL_COLUMNS: DetailColumn[] = [
   { key: 'fuelSurcharge', width: 14, align: 'right', numFmt: MONEY_FMT },
   { key: 'surgeFee', width: 14, align: 'right', numFmt: MONEY_FMT },
   { key: 'otherCharges', width: 14, align: 'right', numFmt: MONEY_FMT },
+  { key: 'chargeItems', width: 24, align: 'left' },
+  { key: 'additionalCharges', width: 13, align: 'right', numFmt: MONEY_FMT },
+  { key: 'freightAdjustment', width: 13, align: 'right', numFmt: MONEY_FMT },
   { key: 'lineTotal', width: 15, align: 'right', numFmt: MONEY_FMT, bold: true },
 ];
 const SHIPPER_COLUMN: DetailColumn = { key: 'shipperName', width: 16, align: 'left' };
@@ -259,7 +267,7 @@ function summaryPartyBlock(ws: ExcelJS.Worksheet, header: StatementExportHeader)
   put(ws, 'B11', [issuer.contactName, issuer.contactPhone].filter(Boolean).join(' / '), 'value');
 }
 
-function summaryAmountBlock(ws: ExcelJS.Worksheet, data: StatementExportData): void {
+function summaryAmountBlock(ws: ExcelJS.Worksheet, data: StatementExportData): number {
   const { totals } = data;
   ws.mergeCells('A13:F13');
   put(ws, 'A13', L.summaryHead, 'blockHead');
@@ -272,7 +280,10 @@ function summaryAmountBlock(ws: ExcelJS.Worksheet, data: StatementExportData): v
     [L.fuelSurcharge, totals.fuelSurcharge],
     [L.surgeFee, totals.surgeFee],
     [L.otherCharges, totals.otherCharges],
+    [L.additionalCharges, totals.additionalCharges],
   ];
+  // [설계 확정] 조정 행은 0원이면 비표시(음수는 부호 표기 그대로)
+  if (totals.freightAdjustment !== 0) lines.push([L.freightAdjustment, totals.freightAdjustment]);
   lines.forEach(([label, amount], i) => {
     const row = 15 + i;
     put(ws, `A${row}`, label, 'value');
@@ -280,43 +291,48 @@ function summaryAmountBlock(ws: ExcelJS.Worksheet, data: StatementExportData): v
     put(ws, `B${row}`, amount, 'money', MONEY_FMT);
   });
 
-  put(ws, 'A20', L.supplyTotal, 'totalLabel');
-  ws.mergeCells('B20:C20');
-  put(ws, 'B20', totals.lineTotal, 'totalMoney', MONEY_FMT);
-  ws.mergeCells('A21:F21');
-  put(ws, 'A21', L.vatNote, 'note');
+  // 구성 행과 공급가액 사이 빈 줄 — 행 수에 따라 동적 주소
+  const supplyRow = 15 + lines.length + 1;
+  put(ws, `A${supplyRow}`, L.supplyTotal, 'totalLabel');
+  ws.mergeCells(`B${supplyRow}:C${supplyRow}`);
+  put(ws, `B${supplyRow}`, totals.lineTotal, 'totalMoney', MONEY_FMT);
+  const vatRow = supplyRow + 1;
+  ws.mergeCells(`A${vatRow}:F${vatRow}`);
+  put(ws, `A${vatRow}`, L.vatNote, 'note');
+  return supplyRow;
 }
 
-function summaryFooterBlock(ws: ExcelJS.Worksheet, data: StatementExportData): void {
+function summaryFooterBlock(ws: ExcelJS.Worksheet, data: StatementExportData, startRow: number): void {
   const { header, totals } = data;
-  ws.mergeCells('A23:C23');
-  put(ws, 'A23', L.itemCount(totals.itemCount), 'meta');
-  ws.mergeCells('D23:F23');
-  put(ws, 'D23', L.totalWeight(totals.chargeWeightKg), 'meta');
+  ws.mergeCells(`A${startRow}:C${startRow}`);
+  put(ws, `A${startRow}`, L.itemCount(totals.itemCount), 'meta');
+  ws.mergeCells(`D${startRow}:F${startRow}`);
+  put(ws, `D${startRow}`, L.totalWeight(totals.chargeWeightKg), 'meta');
 
-  put(ws, 'A24', L.statusLabel, 'label');
-  ws.mergeCells('B24:F24');
+  const statusRow = startRow + 1;
+  put(ws, `A${statusRow}`, L.statusLabel, 'label');
+  ws.mergeCells(`B${statusRow}:F${statusRow}`);
   const statusText = L.statusText[header.status] ?? header.status;
   const extra =
     header.status === 'CLOSED' && header.paidDate
       ? ` — ${L.paidInfo(header.paidDate, Number(header.paidAmount ?? 0).toLocaleString('ko-KR'))}`
       : '';
-  put(ws, 'B24', `${statusText}${extra}`, 'value');
+  put(ws, `B${statusRow}`, `${statusText}${extra}`, 'value');
 }
 
-function buildSummarySheet(wb: ExcelJS.Workbook, data: StatementExportData): ExcelJS.Worksheet {
+function buildSummarySheet(wb: ExcelJS.Workbook, data: StatementExportData): { ws: ExcelJS.Worksheet; lastRow: number } {
   const ws = wb.addWorksheet(SHEET_SUMMARY, {
     views: [{ showGridLines: false }],
     headerFooter: { oddFooter: '&C페이지 &P / &N' },
   });
   summaryHeaderRows(ws, data);
   summaryPartyBlock(ws, data.header);
-  summaryAmountBlock(ws, data);
-  summaryFooterBlock(ws, data);
+  const supplyRow = summaryAmountBlock(ws, data);
+  summaryFooterBlock(ws, data, supplyRow + 3);
   for (const [col, width] of [['A', 16], ['B', 18], ['C', 12], ['D', 14], ['E', 16], ['F', 16]] as const) {
     ws.getColumn(col).width = width;
   }
-  return ws;
+  return { ws, lastRow: supplyRow + 4 };
 }
 
 // ───────────────────────────────────────────── 시트 ② 오더별 상세 (§4)
@@ -348,6 +364,9 @@ function detailCellValue(row: StatementExportRow, col: DetailColumn, index: numb
     case 'fuelSurcharge': return row.fuelSurcharge;
     case 'surgeFee': return row.surgeFee;
     case 'otherCharges': return row.otherCharges;
+    case 'chargeItems': return (row.chargeDetails ?? []).map((c) => String(c.name ?? '').trim()).filter(Boolean).join(' · ');
+    case 'additionalCharges': return row.additionalCharges;
+    case 'freightAdjustment': return row.freightAdjustment === 0 ? null : row.freightAdjustment; // [설계 확정] 0원 비표시(음수는 부호 표기)
     case 'lineTotal': return row.lineTotal;
     default: return '';
   }
@@ -361,6 +380,9 @@ function totalCellValue(totals: StatementExportData['totals'], col: DetailColumn
     case 'fuelSurcharge': return totals.fuelSurcharge;
     case 'surgeFee': return totals.surgeFee;
     case 'otherCharges': return totals.otherCharges;
+    case 'chargeItems': return '';
+    case 'additionalCharges': return totals.additionalCharges;
+    case 'freightAdjustment': return totals.freightAdjustment === 0 ? null : totals.freightAdjustment;
     case 'lineTotal': return totals.lineTotal;
     default: return '';
   }
@@ -426,9 +448,7 @@ const PRINT_MARGINS: ExcelJS.Margins = {
   left: 0.4, right: 0.4, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3,
 };
 const FOOTER = '&C페이지 &P / &N';
-const SUMMARY_LAST_ROW = 24;
-
-function applySummaryPrintSetup(ws: ExcelJS.Worksheet, statementNo: string): void {
+function applySummaryPrintSetup(ws: ExcelJS.Worksheet, statementNo: string, lastRow: number): void {
   ws.pageSetup = {
     ...ws.pageSetup,
     paperSize: 9,
@@ -439,7 +459,7 @@ function applySummaryPrintSetup(ws: ExcelJS.Worksheet, statementNo: string): voi
     margins: PRINT_MARGINS,
     horizontalCentered: true,
     showGridLines: false,
-    printArea: `A1:F${SUMMARY_LAST_ROW}`,
+    printArea: `A1:F${lastRow}`,
   };
   ws.headerFooter = { oddHeader: `&R${statementNo}`, oddFooter: FOOTER };
   ws.views = [{ showGridLines: false }];
@@ -502,9 +522,9 @@ export function contentDisposition(filename: string): string {
 
 export async function buildStatementWorkbook(data: StatementExportData): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
-  const summary = buildSummarySheet(wb, data);
+  const { ws: summary, lastRow: summaryLastRow } = buildSummarySheet(wb, data);
   const detail = buildDetailSheet(wb, data);
-  applySummaryPrintSetup(summary, data.header.statementNo);
+  applySummaryPrintSetup(summary, data.header.statementNo, summaryLastRow);
   applyDetailPrintSetup(detail.ws, data.header.statementNo, detail.lastRow, detail.lastCol);
   const buffer = await wb.xlsx.writeBuffer();
   return Buffer.from(buffer as ArrayBuffer);

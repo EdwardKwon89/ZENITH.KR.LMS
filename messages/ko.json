@@ -1248,6 +1248,8 @@
     "active_invoice": "활성 인보이스",
     "download_invoice_pdf": "인보이스 PDF 출력",
     "pdf_generating": "PDF 생성 중...",
-    "pdf_generate_error": "PDF 생성에 실패했습니다."
+    "pdf_generate_error": "PDF 생성에 실패했습니다.",
+    "additionalCharge": "부가운임",
+    "freightAdjustment": "운임 조정분"
   }
 }

@@ -6,6 +6,8 @@ import { logger } from '@/lib/logger';
 import { trError } from '@/lib/i18n/action-error';
 
 const ADMIN_ROLES = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER'] as const;
+// [설계 확정] §8-2 허용 집합: admin 3역할 + `SUB_ADMIN`(Pilot 예외 — Edward 2026-11-27).
+const GET_UPS_ACTUAL_COST_ROLES = ['ZENITH_SUPER_ADMIN', 'ADMIN', 'MANAGER', 'SUB_ADMIN'] as const;
 
 /** TASK-B-352: 권한 실패는 throw 대신 로케일 문장을 반환한다(사용자 도달 경로). */
 async function assertAdmin(profile: { role: string } | null): Promise<string | null> {
@@ -21,7 +23,11 @@ function toNum(v: unknown): number {
 
 /** 기존 실제 원가 확정 기록 조회 */
 export async function getUpsActualCost(orderId: string) {
-  const { supabase } = await validateUserAction();
+  const { supabase, profile } = await validateUserAction();
+  if (!profile || !GET_UPS_ACTUAL_COST_ROLES.some((r) => r === profile.role)) {
+    logger.warn(`[getUpsActualCost] Denied for role: ${profile?.role ?? 'unknown'}`);
+    throw new Error(await trError('permission_denied'));
+  }
   const { data, error } = await supabase
     .from('zen_ups_actual_cost')
     .select(`

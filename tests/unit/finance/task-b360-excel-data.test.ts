@@ -173,3 +173,48 @@ describe('PostgREST 1,000행 잘림 방지 (PR #1411 🟠3 페이징·상한)', 
     expect(res.ok).toBe(true); // 500(1페이지) + 3(2페이지) = 503행 수집 후 종료
   });
 });
+
+describe('TASK-B-402 (B-377): 조정·부가운임 필드의 매핑과 행합 정합 (설계 §5 — 저장값 사용·역산 금지)', () => {
+  it('행의 구성요소 합(base+fuel+surge+other+부가합+조정)이 line_total과 일치하고 totals에도 반영된다', async () => {
+    const rows = [
+      {
+        ...itemRow('a', 10, 20, 0.1),
+        freight_adjustment: -1.5,
+        charge_details: [{ line_no: 1, name: '긴급할증', amount: 1.5, currency: 'KRW' }],
+        line_total: 30, // 10 + 20 + 0 + 0 + 1.5(부가합) + (-1.5)(조정)
+      },
+      {
+        ...itemRow('b', 0, 0, 0.2),
+        freight_adjustment: 0,
+        charge_details: [],
+        line_total: 0,
+      },
+    ];
+    const sb = makeSupabase({
+      ...HANDLERS_BASE,
+      zen_billing_statement_items: () => ({ data: rows, error: null }),
+      zen_billing_statements: () => ({ data: { ...HEADER, total_amount: 30 }, error: null }),
+    });
+    const { loadStatementExport } = await import('@/lib/finance/billing/statement-excel-data');
+    const res = await loadStatementExport(sb, 'stmt-1');
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+
+    const [r0, r1] = res.data.rows;
+    expect(r0.freightAdjustment).toBe(-1.5);
+    expect(r0.additionalCharges).toBe(1.5); // Σ charge_details
+    expect(r0.chargeDetails).toHaveLength(1);
+    expect(r0.chargeDetails[0].name).toBe('긴급할증');
+    expect(r1.freightAdjustment).toBe(0);
+    expect(r1.additionalCharges).toBe(0);
+
+    // 행합 = line_total (표시 구성요소의 합이 저장 합계와 일치 — 역산하지 않는 근거)
+    const sum = Math.round((r0.baseFreight + r0.fuelSurcharge + r0.surgeFee + r0.otherCharges + r0.additionalCharges + r0.freightAdjustment) * 100) / 100;
+    expect(sum).toBe(r0.lineTotal);
+
+    expect(res.data.totals.additionalCharges).toBe(1.5);
+    expect(res.data.totals.freightAdjustment).toBe(-1.5);
+    // §1-1 검증 유지: 항목 line_total 합 = 헤더 total_amount
+    expect(res.data.totals.lineTotal).toBe(30);
+  });
+});

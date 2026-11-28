@@ -69,7 +69,7 @@ export default async function UpsOrderDetailPage({ params }: UpsOrderDetailPageP
   // Fetch Finance Costs & Invoice
   const { data: costs } = await supabase
     .from('zen_order_costs')
-    .select('id, cost_type, total_amount, currency, invoice_id')
+    .select('invoice_id') // [설계 확정] 원가 계열 컬럼 미조회 — 링크 파악만(원가 미반환)
     .eq('order_id', orderId);
 
   const linkedInvoiceId = costs?.find((c: any) => c.invoice_id)?.invoice_id ?? null;

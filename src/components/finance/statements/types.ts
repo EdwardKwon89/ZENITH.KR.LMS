@@ -42,6 +42,13 @@ export interface StatementListRow {
   createdAt: string;
 }
 
+export interface StatementChargeDetail {
+  line_no?: number;
+  name?: string;
+  amount?: number;
+  currency?: string;
+}
+
 export interface StatementItemRow {
   orderId: string;
   orderNo: string | null;
@@ -50,6 +57,10 @@ export interface StatementItemRow {
   fuelSurcharge: number;
   surgeFee: number;
   otherCharges: number;
+  /** [설계 확정] 조정 행 — target − 구성합(음수 가능), 0원이면 비표시 */
+  freightAdjustment: number;
+  /** [설계 확정] 부가운임 항목(run 스냅샷) — 항목명·금액 표시 */
+  chargeDetails: StatementChargeDetail[];
   lineTotal: number;
 }
 
