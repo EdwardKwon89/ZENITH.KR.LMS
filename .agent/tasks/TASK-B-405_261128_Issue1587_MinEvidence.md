@@ -4,7 +4,7 @@
 |:--|:--|
 | **Issue** | #1587 (EPIC #1364, Aiden §2-7) |
 | **브랜치** | `feature/teamb-task-b405-min-evidence` |
-| **PR** | #PR (base `TeamB_Dev`, `Refs #1587`) |
+| **PR** | #1588 (base `TeamB_Dev`, `Refs #1587`) |
 | **착수** | 2026-11-28 16:45 KST |
 | **성격** | 증거 수집·검증, 프로덕션 코드 변경 0 (PR #1586 병합분 기준) |
 
