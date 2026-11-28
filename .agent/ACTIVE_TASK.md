@@ -50,7 +50,7 @@ Task 상세(DoD·커밋 해시·작업 결과)는 `.agent/tasks/TASK-XXX_*.md`�
 <!-- GH_ISSUES_SYNC:START -->
 | # | 제목 | 팀 | 우선순위 | 상태 | 담당 | 갱신일 |
 |:-:|:-----|:--:|:-------:|:----|:-----|:-------|
-| [#1592](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1592) | [Team B] TASK-B-407: 12/2 시연용 UPS 오더 구성안 — 케이스표·로컬 흐름 확인 (EPIC #1364) | b | p1 | in-progress | jungjs | 2026-11-28 |
+| [#1592](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1592) | [Team B] TASK-B-407: 12/2 시연용 UPS 오더 구성안 — 케이스표·로컬 흐름 확인 (EPIC #1364) | b | p1 | review | jungjs | 2026-11-28 |
 | [#1589](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1589) | [Team B] TASK-B-406: TASK-B-381 task file R-21 §2 해당 서술 정리 (통합 #1448 전, 대상은 비공개 전달) | b | p1 | review | jungjs | 2026-11-28 |
 | [#1587](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1587) | [Team B] TASK-B-405: 12/2 시연 최소 점검 증거 — 원가 비노출 경로별 확인(11곳)·금액 샘플 대조 (EPIC #1364) | b | p1 | review | jungjs | 2026-11-28 |
 | [#1582](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1582) | [Team B] TASK-B-404: develop→TeamB_Dev 동기화·충돌 해소 + 마이그레이션 적용 계획서 갱신 (12/2 시연 통합 준비) | b | p1 | review | jungjs | 2026-11-28 |
