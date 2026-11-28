@@ -14,6 +14,24 @@
 | `create_billing_statement` | `p_tier, p_period_year, p_period_month, p_billed_org_id?, p_billed_name?, p_billed_biz_no?, p_period_from?, p_period_to?` | `TABLE (stmt_id, stmt_no, stmt_round)` | **(TASK-B-359 / Issue #1365)** 월 차수 청구서 채번+헤더 INSERT 원자 RPC. 발행자는 `auth.uid()` 도출(인자 없음, SECURITY INVOKER=RLS 최종 방어), `pg_advisory_xact_lock`으로 차수 경쟁 직렬화 + `UNIQUE(issuer,billed_key,년,월,차수)` 보조, seq는 `next_billing_statement_seq` 원자 증분(내부 역할 검사 포함 — TASK-B-378) → `ST-YYYYMM-NN-SSSS`. DRAFT·항목 0건으로 생성. 오류: `profile_not_found`·`create_not_allowed`(role)·`invalid_tier`·`invalid_period`·`target_org_not_found`·`target_not_linked`(대리점 비연결 ORG)·`adhoc_name_required`·`adhoc_requires_agency_issuer`(조건 6) |
 | `next_billing_statement_seq` | `p_year, p_month` | `integer` | **(TASK-B-359 / TASK-B-378 #1452)** 월 내 청구서 seq 원자 증분 — 유일한 카운터 접근 경로(SECURITY DEFINER, `search_path` 고정). 카운터 테이블 `zen_billing_statement_seq`는 RLS 활성+정책 없음(직접 접근 차단). **(TASK-B-378)** 함수 내부 역할 검사를 청구서 생성 RPC 2종과 동일하게 정렬 — `zen_profiles` via `auth.uid()`, 허용 `ADMIN`·`ZENITH_SUPER_ADMIN`·`AGENCY`, 아니면 `profile_not_found`·`create_not_allowed: role=%` throw. GRANT도 두 RPC와 동일(`REVOKE FROM PUBLIC, anon, dashboard_user` / `GRANT authenticated, service_role`, dashboard_user는 방어적 명시·관측값 변화 없음). 오류: `invalid_period`·`profile_not_found`·`create_not_allowed` |
 
+### 7.1 실행 권한·호출자 검증 정렬 (TASK-B-403 / Issue #1579)
+
+대상 RPC는 **인증된 호출자만 실행**하며, 역할을 확인할 수 없는 호출은 거부한다. 허용 역할 규칙은 기존과 동일하다. 호출자가 사용자·조직 식별자를 인자로 넘기는 RPC의 인자 신원 검증 강화는 후속 단계다.
+
+| 함수명 | 실행 권한 | 호출자 검증 |
+| :--- | :--- | :--- |
+| `approve_organization` | `authenticated`, `service_role` | `COALESCE(get_my_role(), '')` 기준 관리자 계열 확인(서버 내부 키 예외) |
+| `reject_organization` | `authenticated`, `service_role` | 동일 |
+| `request_organization_supplement` | `authenticated`, `service_role` | 동일 |
+| `get_next_order_sequence` | `authenticated`, `service_role` | `COALESCE(get_my_role(), '')` 기준 기존 허용 역할 확인(서버 내부 키 예외) |
+| `create_order_atomic` | `authenticated`, `service_role` | 비인증 호출 거부(서버 내부 키 예외, 인자 신원 검증은 후속) |
+| `create_order_services_atomic` | `authenticated`, `service_role` | 비인증 호출 거부(서버 내부 키 예외, 인자 신원 검증은 후속) |
+| `dissolve_master_order_atomic` | `authenticated`, `service_role` | 비인증 호출 거부(서버 내부 키 예외, 인자 신원 검증은 후속) |
+
+- `service_role`(서버 내부 신뢰 키)과 DB 슈퍼유저 세션은 역할 확인 예외로 두어 기존 서버 내부 호출 동작을 유지한다.
+- 마이그레이션: `supabase/migrations/20261128090000_task_b403_rpc_execute_privileges.sql` (신규 1건, 롤백 SQL 주석 포함)
+- 오류: 권한 없음(`permission denied`), 역할 미확인·비허용(`Access Denied`)
+
 ---
 
 
