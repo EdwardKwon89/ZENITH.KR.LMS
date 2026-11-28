@@ -297,7 +297,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/login | MANAGER 계정 로그인 | manager@zenith.kr / password1234 | 대시보드 이동 | ☐ |
+| 1 | /ko/login | MANAGER 계정 로그인 | manager@zenith.kr / <로컬 시드 비밀번호> | 대시보드 이동 | ☐ |
 | 2 | /ko/orders | 오더 목록 접속 | — | 오더 테이블 정상 표시 | ☐ |
 | 3 | /ko/orders | PENDING 오더 상태 배지 클릭 | — | StatusChangeModal에 MANAGER 허용 상태(WAREHOUSED·PACKED 등)만 표시 | ☐ |
 | 4 | /ko/orders | MANAGER가 WAREHOUSED 상태로 전환 | 'WAREHOUSED' 선택 → '변경' 클릭 | 상태 변경 성공, 토스트 표시 | ☐ |
@@ -307,7 +307,7 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 6 | /ko/login | ADMIN 계정 로그인 | admin@zenith.kr / password1234 | 대시보드 이동 | ☐ |
+| 6 | /ko/login | ADMIN 계정 로그인 | admin@zenith.kr / <로컬 시드 비밀번호> | 대시보드 이동 | ☐ |
 | 7 | /ko/orders | ADMIN이 CANCELED·RETURNED·HELD 전이 | 상태 배지 클릭 → 각 전이 실행 | ADMIN은 모든 상태 전이 가능 | ☐ |
 
 ### 합격 기준
@@ -379,11 +379,11 @@
 
 | 순서 | 화면·URL | 수행 액션 | 입력 데이터 | 기대 결과 | 확인 |
 |:---:|:---------|:---------|:-----------|:---------|:----:|
-| 1 | /ko/login | 화주(SHIPPER) 계정으로 로그인 | shipper@zenith.kr / password1234 | 로그인 성공 후 화주 대시보드로 이동 | ☐ |
+| 1 | /ko/login | 화주(SHIPPER) 계정으로 로그인 | shipper@zenith.kr / <로컬 시드 비밀번호> | 로그인 성공 후 화주 대시보드로 이동 | ☐ |
 | 2 | /ko/orders/new | 신규 오더 등록 페이지 접속 및 특수화물 라디오 그룹 확인 | — | 특수화물 유형 라디오 옵션 5종(일반화물, 위험물, 냉동화물, 고가화물, 중고화물)이 노출되고 '일반화물'이 선택되어 있음 | ☐ |
 | 3 | /ko/orders/new | 특수화물 유형을 '위험물'로 선택하고 오더 생성 정보 입력 후 '등록' 클릭 | 수하인 정보, 패키지 정보 등 | 오더 생성 완료 토스트 메시지 표시 후 오더 상세 페이지로 이동 | ☐ |
 | 4 | /ko/orders/[id] | 오더 상세 페이지에서 특수화물 유형 표시 확인 | — | '특수화물' 항목에 '위험물 (DANGEROUS)' 또는 이에 상응하는 특수화물 라벨이 정상적으로 표시됨 | ☐ |
-| 5 | /ko/login | 플랫폼 관리자(ADMIN) 계정으로 세션 전환 | admin@zenith.kr / password1234 | 관리자 로그인 완료 | ☐ |
+| 5 | /ko/login | 플랫폼 관리자(ADMIN) 계정으로 세션 전환 | admin@zenith.kr / <로컬 시드 비밀번호> | 관리자 로그인 완료 | ☐ |
 | 6 | /ko/orders | 오더 목록 페이지에서 특수화물 필터 기능 테스트 | 필터: '위험물' 선택 | DB `special_cargo_type`이 'DANGEROUS'인 오더만 필터링되어 출력됨 | ☐ |
 
 ### 합격 기준

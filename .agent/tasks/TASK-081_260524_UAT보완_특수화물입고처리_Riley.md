@@ -80,9 +80,9 @@ UAT Sprint(TASK-058~064) 완료 후 갭 분석 후속으로 구현된 IMP-076(�
 
 - **대상 시나리오**: UAT-02-10, UAT-04-05 (총 2개 케이스)
 - **작성 파일**:
-  - [UAT_02_오더관리.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/91_FinalTest/UAT/UAT_02_오더관리.md)
-  - [UAT_04_창고_재고.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/91_FinalTest/UAT/UAT_04_창고_재고.md)
-  - [UAT_MASTER.md](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/91_FinalTest/UAT/UAT_MASTER.md)
+  - [UAT_02_오더관리.md](file://~/WorkSpace/ZENITH_LMS_001/docs/91_FinalTest/UAT/UAT_02_오더관리.md)
+  - [UAT_04_창고_재고.md](file://~/WorkSpace/ZENITH_LMS_001/docs/91_FinalTest/UAT/UAT_04_창고_재고.md)
+  - [UAT_MASTER.md](file://~/WorkSpace/ZENITH_LMS_001/docs/91_FinalTest/UAT/UAT_MASTER.md)
 - **커밋 해시**: `e0599b5`
 
 ---

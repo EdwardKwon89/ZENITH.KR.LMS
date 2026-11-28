@@ -39,9 +39,6 @@ vi.mock('@/lib/auth/guards', () => ({ validateUserAction: mockValidateUserAction
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: any) => fn }));
 vi.mock('@/app/actions/master', () => ({ generateOrderNo: vi.fn(), generateMasterOrderNo: vi.fn() }));
 vi.mock('@/app/actions/operations/inventory', () => ({ syncInventoryFromOrder: vi.fn().mockResolvedValue(undefined) }));
-vi.mock('@/app/actions/ups/freight', () => ({
-  estimateUpsFreight: vi.fn().mockResolvedValue({ platform: { totalSellingPrice: 1, currency: 'USD' } }),
-}));
 vi.mock('@/lib/orders/ups-product-guard', () => ({ assertActiveUpsProduct: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/lib/orders/ups-registration', () => ({ hasActiveUpsLabel: vi.fn().mockResolvedValue(false) }));
 vi.mock('@/lib/orders/rate-snapshot-refresh', () => ({ refreshUpsRateSnapshot: vi.fn().mockResolvedValue(undefined) }));

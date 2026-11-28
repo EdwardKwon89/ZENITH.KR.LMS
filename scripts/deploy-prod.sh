@@ -124,8 +124,24 @@ verify_deploy() {
     sleep 10
   done
   case "$status" in *Ready*) info "V1 빌드 Ready" ;; *) die 3 "배포가 Ready 가 되지 않았습니다: $NEW_URL" ;; esac
-  vercel inspect "$NEW_URL" 2>&1 | grep -q "$ALIAS_HOST" && info "V2 alias($ALIAS_HOST) 연결 확인" \
-    || die 3 "alias($ALIAS_HOST)가 새 배포에 연결되지 않았습니다"
+  local inspect_out="" inspect_rc=1 attempt
+  for attempt in 1 2 3; do
+    if inspect_out="$(vercel inspect "$NEW_URL" 2>&1)"; then
+      inspect_rc=0
+      break
+    else
+      inspect_rc=$?
+    fi
+    [ "$attempt" -lt 3 ] && sleep "${DEPLOY_INSPECT_RETRY_DELAY:-2}"
+  done
+  if [ "$inspect_rc" -ne 0 ]; then
+    die 3 "vercel inspect 실패(exit $inspect_rc, 3회 재시도): $NEW_URL"
+  fi
+  if grep -q "$ALIAS_HOST" <<<"$inspect_out"; then
+    info "V2 alias($ALIAS_HOST) 연결 확인"
+  else
+    die 3 "alias($ALIAS_HOST)가 새 배포에 연결되지 않았습니다"
+  fi
   local code; code="$(curl -s -o /dev/null -w '%{http_code}' -L "https://$ALIAS_HOST")"
   [ "$code" = "200" ] && info "V3 HTTP 200" || die 3 "HTTP $code (환경변수 확인 — 209 §3)"
 }

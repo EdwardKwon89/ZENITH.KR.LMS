@@ -59,8 +59,8 @@ SELECT COUNT(*) FROM zen_ups_zone_countries;
 
 | 계정 | 확인 |
 |:-----|:----:|
-| `admin@zenith.kr` / `password1234` | |
-| `uat02_corp_shipper@zenith.kr` / `password1234` | |
+| `admin@zenith.kr` / `<로컬 테스트 비밀번호>` | |
+| `uat02_corp_shipper@zenith.kr` / `<로컬 테스트 비밀번호>` | |
 | AGENCY 계정 (UAT-17-03용 대리점 화주) | |
 | `.env.local` — `SHXK_APP_KEY`, `SHXK_APP_TOKEN` | |
 
@@ -122,9 +122,9 @@ _Aiden 전속_
   - 수정: `page.tsx:85` → `order.transport_mode === 'EXP'`
 
 ### §3 — 테스트 계정 ✅
-- `admin@zenith.kr` / `password1234` → ADMIN ✅
-- `uat02_corp_shipper@zenith.kr` / `password1234` → CORPORATE ✅
-- `agency@zenith.kr` / `password1234` → AGENCY ✅ (신규 생성)
+- `admin@zenith.kr` / `<로컬 테스트 비밀번호>` → ADMIN ✅
+- `uat02_corp_shipper@zenith.kr` / `<로컬 테스트 비밀번호>` → CORPORATE ✅
+- `agency@zenith.kr` / `<로컬 테스트 비밀번호>` → AGENCY ✅ (신규 생성)
 - `103_AGENT_ROLES_SPEC.md` 갱신 완료
 - ⚠️ `SHXK_APP_KEY` / `SHXK_APP_TOKEN`: `.env.local`에 미설정 (JSJung 등록 예정)
 

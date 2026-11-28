@@ -5,8 +5,8 @@
 | **Issue** | [#1362](https://github.com/EdwardKwon89/ZENITH.KR.LMS/issues/1362) — DEF-151 (Aiden 발령, Jaison 배정: Dave) |
 | **담당(Worker)** | Dave (Team B) |
 | **검증(Auditor)** | Jaison / **확정: Aiden** |
-| **상태** | 📝 설계 의견 7차 — **JSJung ③ 확정 반영, 설계 확정 요청** (`status:draft`) — 구현 금지 |
-| **브랜치** | `feature/teamb-task-b373-iss1362-def151-ups-rates-cost` (base `origin/TeamB_Dev` a4a6d3101) |
+| **상태** | 🔔 PR-2 구현 완료 — 검토 대기 |
+| **브랜치** | PR-1 `feature/teamb-task-b373-iss1362-def151-ups-rates-cost`(병합) · PR-2 `feature/teamb-task-b373-iss1362-pr2-guard-dto` (base `origin/TeamB_Dev` 병합본) |
 | **공개 저장소 주의** | 노출 경위·재현 절차는 본문에 쓰지 않고 "도달 가능/불가 + 결과표 + 코드 위치"만 기재 |
 
 ## 0. 범위
@@ -285,6 +285,17 @@
 | **유지되는 전제** | 구현 순서 B-382 → B-373 PR-2 → B-381(core import 기준, Jaison이 JSJung 확인). 병합은 Squash(제목·본문 직접 작성), 구현은 별도 PR. 공개 기재 기준(목표 상태·판정 기준만) 유지 |
 | **상태 라벨** | IS #1362 `status:in-progress`(PR-1 병합분). PR-2 착수 전 담당자 지정 필요 |
 
+### [설계 확정 갱신] 견적 경로의 AGENCY 소속 처리 (Aiden 전속, 2026-11-25)
+
+| 항목 | 내용 |
+|:--|:--|
+| **갱신 일시** | 2026-11-25 (PR #1519 R-01 재검토 중 JSJung 업무 사실 반영) |
+| **근거** | JSJung 업무 사실(대리점의 UPS 대리 등록은 화주 정보를 임의로 작성할 수 있고 소속 검사를 하지 않음) — [PR #1519 Jaison 코멘트](https://github.com/EdwardKwon89/ZENITH.KR.LMS/pull/1519#issuecomment-7154930292) |
+| **갱신 범위** | **견적 경로(`estimateUpsFreight` 세션 진입점)의 AGENCY 분기만.** 본문 §2-3A (2)의 "AGENCY: 자기 소속 검증(PR-1 패턴)·소속이 아니면 거부" 서술은 이 갱신으로 **대체**한다. PR-1의 부가요금 등 소유권 가드(PR #1469·#1478)는 변경 없음 |
+| **목표 상태(견적, AGENCY)** | ① 대리점은 항상 본인 요율(본인 org 기준)로 견적을 받는다. 입력 `shipperOrgId`가 본인 org이거나 소속이 아니거나 비어 있어도 **오류 없이 결과가 반환**된다. ② 입력 `shipperOrgId`가 **실제로 본인 소속으로 확인되는 경우에만** 화주 단계(할인 등)를 포함한다. 소속이 확인되지 않거나 확인 조회가 실패하면 **화주 단계를 제외**하고 계산하며(거부하지 않음) 조회 실패는 `logger.error`로 남긴다. ③ 소속이 아닌 화주 조직의 정보(타 대리점의 할인율 등)는 어떤 경우에도 응답에 포함되지 않는다. ④ 폼이 본인 org를 넘기는 입력과 임의 작성 화주(소속 아님) 입력 각각에 대해 변경 전과 같은 견적이 반환됨을 실세션으로 확인한다 |
+| **유지되는 항목** | 화주 계열·OPERATOR의 소속 확정은 변경 없음(서비스 롤 조회, 조회 오류·다중 소속은 fail-closed 예외). 관리자 범위, DTO 필드 범위(원가 관리자 한정), 코어 분리, 기타 역할 거부는 그대로 |
+| **검증 기준** | 소속 거부 단언(미소속 화주·조회 오류의 예외 기대)을 목표 상태(오류 없이 반환·화주 단계 제외·`logger.error`)로 수정하고 되돌리기 실측을 포함한다. 소속이 아닌 화주 지정 입력에서 화주 단계 필드가 응답에 없음을 단언한다 |
+
 ## 4. [작업 결과]
 
 - 설계 의견 + 실측(6종×5역할, 소유권 허용/거부, RLS 정의, 호출처 전수). 공개 문서에는 허용/거부 결과만 기재.
@@ -294,3 +305,122 @@
 - 범위 확장 점검에서 별도 보안 Task 대상 1건 발견 — 상세는 비공개 보고(공개 문서 미기재).
 - PR: #1476 (draft, `Refs #1362`).
 - **커밋 해시**: `3183626b7` (8차 내용 커밋). 해시 갱신 커밋 별도.
+
+
+## 5. PR-2 구현 결과 (2026-11-25)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b373-iss1362-pr2-guard-dto` |
+| **PR** | #1519 (`TeamB_Dev` 대상·Squash) |
+| **마이그레이션** | **없음** |
+
+### 1. 요율 조회 6종 가드 (C안)
+- 기본요율: ADMIN·MANAGER·ZENITH_SUPER_ADMIN·**SUB_ADMIN**
+- 나머지 5종(유류·부가·급증·구간·최소): ADMIN·MANAGER·ZENITH_SUPER_ADMIN
+- 거부 시 `permission_denied` + warn 로그
+- 공용 가드 `src/lib/auth/ups-rate-permissions.ts`로 통합(기존 mutation·schedule 로컬 함수 대체)
+- **`getAgencyPricingPolicies`**: `requireAdminManagerOrSubAdmin` 가드 적용 + 허용/거부 테스트 추가(설계 Low 2건)
+
+### 2. 비관리자 화면 데이터 최소화
+- `/agency/other-charges`: 공개 판매가 조회로 전환
+- `/admin/ups-rates`: SUB_ADMIN은 Zone·제품·기본요율·대리점 정책 탭만 노출, 나머지 원가 데이터는 서버에서 미전달
+- 기본요율 Matrix: 관리자 액션 직접 import 제거 → 서버 주입 `fetchRates` 사용
+
+### 3. 견적 응답 DTO (확정 B안)
+- 전체 계산을 `src/lib/ups/estimate-core.ts`(server-only)로 분리
+- 세션 진입점은 **역할·소속으로 범위 결정 후 DTO 반환**
+- 내부 서버 호출자(오더 등록·스냅샷 갱신·실비 재계산)는 core 직접 사용
+- 원가 계열은 관리자에게만, 소속 화주에게는 플랫폼 판매가(1단계) 미전달
+
+**역할별 범위(구현 확정)**
+
+| 역할 | 범위 | 원가 |
+|:--|:--|:--:|
+| ADMIN·MANAGER·ZENITH_SUPER_ADMIN | 입력 범위 전체 | 포함 |
+| AGENCY | 자기 단계 + **소속 확인된** 화주 단계(미확인·조회 오류는 화주 단계만 제외, **거부 없음**) | 미포함 |
+| SHIPPER·CORPORATE·AGENCY_SHIPPER | 세션 org 기준(소속 화주면 자기 청구 단계만) | 미포함 |
+| INDIVIDUAL(org 없음) | 플랫폼 판매가만 | 미포함 |
+| OPERATOR | 입력 화주 기준(내부 운영), 소속 규칙 동일. 요율 조회 정책이 없어 **코어 계산만 서비스 롤** 사용 | 미포함 |
+| SUB_ADMIN·CARRIER·CUSTOMS_BROKER·DELIVERY_AGENT·USER | 견적 화면 경로 없음 → `permission_denied` | — |
+
+- **소속 확정**: 세션 RLS에 의존하지 않고 **서비스 롤로 소속 ID만 조회**(`src/lib/ups/estimate-scope.ts`).
+- **화주 계열·OPERATOR fail-closed**: 소속 조회 오류·다중 소속은 소속 미확정으로 **예외**(비소속 폴백 없음).
+- **대리점(AGENCY)**: 대리 등록은 화주를 임의 작성할 수 있으므로 **소속이 아니어도 거부하지 않는다**. 본인 org·빈 값은 화주 지정이 아니며, 실제 소속 확인 시에만 화주 단계를 포함한다. 조회 오류는 `logger.error` 후 화주 단계만 제외한다(설계 확정 갱신, Aiden 2026-11-25).
+- 소속 화주의 **부가항목 행**은 화주 청구 단계와 동일 금액(할인 미적용)이라 표시 동일성을 위해 포함한다(설계 DTO 표의 "부가항목(판매) 포함" 충족).
+
+### 4. Low
+- `getAgencyPricingPolicies` 관리자급 가드 + 테스트
+- `getPublicWeightTierRates` 기준일 유효기간 필터 + 테스트
+
+### 5. 테스트·검증
+
+| 항목 | 결과 |
+|:--|:--|
+| 신규 단위 | **49/49 PASS** (가드 27 · 범위 13 · DTO 5 · 공개구간 2 · 표시 동일성 2) |
+| 실세션 통합(RLS) | **16/16 PASS** — 로컬 시드 DB에서 `RUN_B373_SESSION_TESTS=1` + 계정 env로 실행(CI skip) |
+
+**R-21 §1 — 자격 증명·식별자 하드코딩 0건**
+
+| 항목 | 추가 줄 건수 | 방식 |
+|:--|:--:|:--|
+| 비밀번호 리터럴 | **0** | `B373_TEST_PASSWORD` 환경변수(저장소 밖) |
+| 계정 이메일 | **0** | `B373_*_EMAIL` 환경변수 |
+| 조직 UUID 리터럴 | **0** | 로그인 프로필·`zen_agency_shippers` 런타임 조회 |
+| 확인 명령 | `git diff --unified=0 -- tests/integration/task-b373-estimate-scope-session.test.ts \| grep '^+' \| grep -cE '<pattern>'` → 각 0 |
+
+- 실행: `source <비공개 env>; RUN_B373_SESSION_TESTS=1 npx vitest run tests/integration/task-b373-estimate-scope-session.test.ts`
+| 전체 회귀 | **303 passed · 1 skipped(304 files) / 2,331 passed · 16 skipped** |
+| `npm run build` | SUCCESS |
+| `check:ds11`·`check:doc-links`·`check:lrtm` | 통과 |
+| `/admin/error-logs` 신규 ERROR | **0건**(실세션 페이지 방문 후 1시간 내 0) |
+
+**실세션(로그인·RLS) 견적 범위 확인** — `tests/integration/task-b373-estimate-scope-session.test.ts`
+
+| 역할 | 반환 단계 | 원가 | 전후 금액 |
+|:--|:--|:--:|:--|
+| 관리자 | 플랫폼+대리점+화주 | 포함 | 동일 |
+| 대리점(폼 입력=본인 org) | 플랫폼+대리점(화주 단계 없음) | 미포함 | 동일 |
+| 대리점(소속 화주 지정) | 플랫폼+대리점+화주 | 미포함 | 동일 |
+| 대리점(미소속 화주 지정) | 플랫폼+대리점(화주 단계 제외) | 미포함 | 동일 |
+| 대리점 소속 화주 | 화주 단계만 | 미포함 | 동일 |
+| 개인(비소속) | 플랫폼 판매가만 | 미포함 | 동일 |
+| OPERATOR(소속 화주 지정) | 화주 단계 | 미포함 | 변경 전 조회 불가 → 변경 후 반환(개선) |
+| SUB_ADMIN | 거부 | — | — |
+
+**mock 경로 분류 (설계 확정: 20개 전부 점검)**
+
+| 분류 | 파일 수 | 처리 |
+|:--|:--:|:--|
+| core mock으로 전환(실제 코어 호출 경로) | 4 | `inbound`·`task-b370`·`direct-shipper-ups-snapshot`·`ups-actual-cost` |
+| 불필요 mock 제거(스냅샷 갱신 자체를 mock하거나 경로 미도달) | 6 | `order-update-b339`·`task-b367`·`ups-product-guard`·`task-b352`·`task-b364`·`task-b366` — 제거 후 PASS 확인 |
+| 주입 함수로 대체(모듈 mock 제거) | 1 | `order-rate-snapshots` |
+| 세션 진입점 mock 유지(클라이언트 컴포넌트 테스트) | 9 | `order-registration-form-b301`·`defb058`·`edit-form-warehoused`·`iss1089/1091/1100/1102/1104`·`ups-product-code-select` |
+
+**R-10 표시 동일성·화면 확인**
+
+| 경로 | 결과 | 증적 |
+|:--|:--|:--|
+| 소속 화주(부가항목 행 포함) | 총액·항목 행·부피중량 동일 | 단위 표시 동일성 테스트 2건, 증적: 비공개 보관 |
+| 비소속 화주 | 총액·항목 행 동일 | 동일 |
+| 대리점·관리자 | DTO 값이 코어 계산값과 동일(원가 포함/미포함만 차이) | DTO 테스트 |
+| `/admin/ups-rates` 관리자 | 탭 9종 정상 | 실세션 스크린샷(비공개) |
+| `/admin/ups-rates` SUB_ADMIN | 탭 4종만 노출(원가 5종 미노출) | 실세션 스크린샷(비공개) |
+| `/agency/other-charges` | 페이지 정상 로드·pageerror 0 | 실세션 스크린샷(비공개) |
+| 오더 등록 화면 | 페이지 로드·pageerror 0 (견적 패널은 wizard 3단계에서 표시되어 자동 캡처 미수행) | 실세션 스크린샷(비공개) |
+| `estimated_cost` | 오더 등록 폼이 DTO 표시 금액을 제출 — 소속 화주·**대리점(폼 입력)**·관리자·개인은 **변경 전후 동일**, OPERATOR는 변경 전 요율 조회 불가 → 변경 후 반환(개선, JSJung 확인) | 실세션 통합 5건 |
+
+**되돌리기 검증**
+
+| RST | 되돌린 구현 | 결과 | 복구 |
+|:--|:--|:--|:--|
+| RST-4 | 원가 조회 가드 1종 제거 | 4 failed | 27/27 PASS |
+| RST-5 | 소속 화주 DTO에 플랫폼 판매가 허용 | 1 failed | 12/12 PASS |
+| RST-6 | 소속 조회 오류를 비소속으로 폴백 | 1 failed | 12/12 PASS |
+| RST-7 | `getAgencyPricingPolicies` 가드 제거 | 1 failed | 27/27 PASS |
+| RST-8 | OPERATOR 코어를 세션 클라이언트로 되돌림 | **2 failed**(실세션) | 16/16 PASS |
+| RST-9 | AGENCY 미소속 지정을 예외로 되돌림 | 단위 **2 failed**·실세션 **1 failed** | 13/13·16/16 PASS |
+
+- 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-373_Issue1362_ups-rates-guard-dto.md`
+- **비차단 이월**: 신규 오류 메시지 2종의 `trError` 키 통일(로케일 정합화), 다중 소속 실데이터 존재 여부는 Aiden·Edward 비공개 확인
+- **커밋 해시**: 코드 `0a7a798f07646a44618a2cfe1a4f1c226ddde769` / 문서 `0a7a798f07646a44618a2cfe1a4f1c226ddde769`

@@ -109,7 +109,7 @@
 | 생성 파일 목록 | - `src/lib/finance/settlement/slab-rate-calculator.ts`<br>- `src/lib/finance/settlement/cost-aggregator.ts`<br>- `src/lib/finance/settlement/settlement-validator.ts`<br>- `src/lib/finance/settlement/invoice-generator.ts`<br>- `src/lib/finance/settlement/settlement.ts`<br>- `src/lib/finance/settlement/index.ts` |
 | 각 파일 줄 수 | - `slab-rate-calculator.ts`: 22줄<br>- `cost-aggregator.ts`: 63줄<br>- `settlement-validator.ts`: 21줄<br>- `invoice-generator.ts`: 98줄<br>- `settlement.ts`: 152줄<br>- `index.ts`: 5줄 (전체 ZEN_A4 200줄 이하 기준 충족) |
 | gitnexus_impact 결과 | Target: `SettlementEngine`, Direction: `upstream`, Risk: `CRITICAL`<br>Direct Callers: `calculateSettlementAction`, `generateInvoicesForOrder`, `generateInvoice`<br>Affected Processes: `handleScan` (InventoryScanner.tsx), `handleUpdate` (StatusChangeModal.tsx), `generateInvoiceAction` (invoice.ts) |
-| 회귀 결과 | 전체 209개 테스트 통과 PASS ([REGRESSION_2026-05-20_TASK-035.log](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-20_TASK-035.log)) |
+| 회귀 결과 | 전체 209개 테스트 통과 PASS ([REGRESSION_2026-05-20_TASK-035.log](file://~/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/Regression_Results/REGRESSION_2026-05-20_TASK-035.log)) |
 | 코드 커밋 해시 | `965690356359d0f456205bae8ff9d519d8c3ccfa` |
 | 문서 커밋 해시 | `2c4f0cfd44dafab52c1a9664ed8ce1409c3ba9fc` |
 

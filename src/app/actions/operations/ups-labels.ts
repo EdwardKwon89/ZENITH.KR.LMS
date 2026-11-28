@@ -6,7 +6,7 @@ import { USER_ROLES } from '@/lib/auth/rbac';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createorder, getnewlabel, removeorder } from '@/lib/shxk/order';
 import {
-  SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY,
+  SHXK_SHIPPER_NAME, SHXK_SHIPPER_COUNTRY, SHXK_SHIPPER_COMPANY,
 } from '@/lib/shxk/config';
 import { buildCreateOrderPayload } from '@/lib/ups/label-mapping';
 import { validateShxkPayload, type ShxkPayloadShape } from '@/lib/shxk/validate-payload';
@@ -247,11 +247,12 @@ async function lookupOrderPackages(
 }
 
 async function resolveCountryCode(supabase: SupabaseClient, destPortId: string): Promise<string | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('zen_ports')
     .select('country_code')
     .eq('id', destPortId)
     .single();
+  if (error && error.code !== 'PGRST116') logger.error('resolveCountryCode: zen_ports select failed', error);  // PGRST116(행 없음)은 정상 업무 실패 — 호출부 warn에 맡김
   return data?.country_code ?? null;
 }
 
@@ -268,13 +269,14 @@ export async function resolveShxkCode(
   countryCode: string,
   incoterms: string,
 ): Promise<string | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('zen_ups_shxk_country_map')
     .select('shxk_code')
     .eq('product_code', productCode)
     .eq('country_code', countryCode)
     .eq('incoterms', incoterms)
     .single();
+  if (error && error.code !== 'PGRST116') logger.error('resolveShxkCode: zen_ups_shxk_country_map select failed', error);  // PGRST116(행 없음)은 정상 업무 실패 — 호출부 warn에 맡김
   return data?.shxk_code ?? null;
 }
 
@@ -287,6 +289,7 @@ async function placeShxkOrder(
   const payload = buildCreateOrderPayload(shxkCode, order, countryCode, packages, {
     name: SHXK_SHIPPER_NAME,
     country: SHXK_SHIPPER_COUNTRY,
+    company: SHXK_SHIPPER_COMPANY,
   });
 
   // TASK-B-277 (Issue #1052): SHXK 필수 필드 사전 검증 — 누락 시 API 호출 스킵하고 즉시 실패
@@ -747,7 +750,7 @@ async function fetchActiveLabelByOrder(
   supabase: SupabaseClient,
   orderId: string,
 ): Promise<{ id: string; reference_no: string; tracking_number: string | null } | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('zen_ups_labels')
     .select('id, reference_no, tracking_number')
     .eq('order_id', orderId)
@@ -755,6 +758,7 @@ async function fetchActiveLabelByOrder(
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
+  if (error) logger.error('fetchActiveLabelByOrder: zen_ups_labels select failed', error);  // maybeSingle — 행 없음은 오류가 아니므로 error 있을 때만
   return data;
 }
 
@@ -860,14 +864,21 @@ export async function previewShxkPayload(
       const countryCode = (order.recipient_country_code as string)
         || await resolveCountryCode(supabase, order.dest_port_id as string)
         || '';
-      if (!countryCode) return { success: false, error: await trError('destination_country_not_found') };
+      if (!countryCode) {
+        logger.warn(`previewShxkPayload: destination country code not found (order=${orderId})`);
+        return { success: false, error: await trError('destination_country_not_found') };
+      }
 
       const shxkCode = await resolveShxkCode(supabase, order.ups_product_code as string, 'KOR', order.incoterms as string);
-      if (!shxkCode) return { success: false, error: await trError('shipping_method_not_found') };
+      if (!shxkCode) {
+        logger.warn(`previewShxkPayload: shipping method not found (product=${order.ups_product_code}, incoterms=${order.incoterms})`);
+        return { success: false, error: await trError('shipping_method_not_found') };
+      }
 
       const payload = buildCreateOrderPayload(shxkCode, order, countryCode, packages, {
         name: SHXK_SHIPPER_NAME,
         country: SHXK_SHIPPER_COUNTRY,
+        company: SHXK_SHIPPER_COMPANY,
       });
       return { success: true, payload: payload as Record<string, unknown> };
     }
@@ -916,10 +927,16 @@ export async function triggerCreateOrderTest(
     const countryCode = (order.recipient_country_code as string)
       || await resolveCountryCode(supabase, order.dest_port_id as string)
       || '';
-    if (!countryCode) return { success: false, error: await trError('destination_country_not_found') };
+    if (!countryCode) {
+      logger.warn(`triggerCreateOrderTest: destination country code not found (order=${orderId})`);
+      return { success: false, error: await trError('destination_country_not_found') };
+    }
 
     const shxkCode = await resolveShxkCode(supabase, order.ups_product_code as string, 'KOR', order.incoterms as string);
-    if (!shxkCode) return { success: false, error: await trError('shipping_method_not_found') };
+    if (!shxkCode) {
+      logger.warn(`triggerCreateOrderTest: shipping method not found (product=${order.ups_product_code}, incoterms=${order.incoterms})`);
+      return { success: false, error: await trError('shipping_method_not_found') };
+    }
 
     const orderResult = await placeShxkOrder(shxkCode, order!, countryCode, packages);
     if ('error' in orderResult) {

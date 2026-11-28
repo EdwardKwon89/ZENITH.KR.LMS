@@ -42,7 +42,7 @@
 | TC-360-29 | `paidAt` 형식 검증 + `orderIds` 중복 제거 | `YYYY-MM-DD` 아니면 generic 거부(UPDATE 미도달), 중복 id는 Set으로 제거 후 RPC에 전달 | 동일 | CI (vitest) |
 
 | TC-360-30 | **Excel 인쇄 설정 재파싱 단언**(§8-1) — 생성 .xlsx를 exceljs로 다시 열어 시트1 `paperSize=9`+`portrait`+`fitToHeight=1`, 시트2 `paperSize=9`+`landscape`+`fitToHeight=0`, 여백(0.4/0.6/0.3)·가운데 맞춤·눈금선(시트1 화면·인쇄 숙김 / 시트2 화면 표시·인쇄 숙김)·3행 틀 고정 | 소스 문자열 검사 없이 파일 구조로만 단언 | `tests/integration/task-b360-excel-export.test.ts` | CI (vitest) |
-| TC-360-31 | `Print_Titles`(상세 3행 반복)·`Print_Area`(`A1:F24` / `A1:M<행>`)·머리글(`&R<번호>` / `&L<번호>&R오더별 상세`)·바닥글(`&C페이지 &P / &N`) | 재파싱 값 단언 | 동일 | CI (vitest) |
+| TC-360-31 | `Print_Titles`(상세 3행 반복)·`Print_Area`(`A1:F25` / `A1:P<행>` — B-402 후 요약 +1행·상세 +3열)·머리글(`&R<번호>` / `&L<번호>&R오더별 상세`)·바닥글(`&C페이지 &P / &N`) | 재파싱 값 단언 | 동일 | CI (vitest) |
 | TC-360-32 | 값 단언(§8-2) — 상세 행 수=항목 수, 합계 행=`total_amount`, 오더·금액 셀은 **숫자**, 기준일은 **날짜 값**+`yyyy-mm-dd`(KST 달력일), 수하인·도착국가 표시 | 저장값 그대로 출력 | 동일 | CI (vitest) |
 | TC-360-33 | 상세 4개 금액 열 합 = 요약 4개 금액(80,000/16,000/4,000/800 = 100,800) | 재계산 없이 저장값 대조(§1-1) | 동일 | CI (vitest) |
 | TC-360-34 | 권한(§8-3) — 발행자·Admin 감독·청구받은 화주(CLOSED) **200** / 타 대리점·DRAFT 청구받은 화주·비소속 화주 **404(미존재와 동일 바디)** / 미인증 **401** | **실제 authenticated JWT 세션**(service_role 미사용) | 동일 | CI (vitest) |

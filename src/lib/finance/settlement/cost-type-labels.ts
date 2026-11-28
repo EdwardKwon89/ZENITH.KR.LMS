@@ -8,6 +8,11 @@ const COST_TYPE_LABELS: Record<string, string> = {
   FREIGHT: '운임',
 };
 
-export function getCostTypeLabel(costType: string): string {
+/** [설계 확정] §5 — audience: 'admin'은 원문, 'neutral'(화주·대리점)은 중립 라벨 "부가운임".
+ *  locale 대응이 필요한 클라이언트는 `t('Finance.additionalCharge')`를 우선 사용한다. */
+export type CostLabelAudience = 'admin' | 'neutral';
+
+export function getCostTypeLabel(costType: string, audience: CostLabelAudience = 'admin'): string {
+  if (audience === 'neutral') return '부가운임';
   return COST_TYPE_LABELS[costType] || costType.replace(/_/g, ' ');
 }

@@ -1,16 +1,16 @@
 ## 11. UPS 특송 요금 관리 (Phase 7.1 — IMP-145 · Phase 7.2 — IMP-146)
 
 > **설계 문서**: An-14_Phase7_UPS요금관리_설계보완.md
-> **마지막 갱신**: 2026-07-15 (TASK-184, Issue #491 — 급증 긴급 수수료 §11.11 신규)
+> **마지막 갱신**: 2026-11-25 (TASK-B-373 PR-2 — 요율 조회 6종 역할 가드·견적 응답 DTO)
 > **Team B 인계 범위**: GH #181 (오더 등록 연동 + 정산)
 >
 > **핵심 계약**: `zen_agency_rate_overrides.cost_price`는 DB 트리거(`trg_agency_rate_override_calc_cost`)가 `base_rate.selling_price × (1 - policy.discount_rate)`로 **서버에서 자동 계산**한다. 클라이언트가 `cost_price` 값을 보내도 **무시**된다. Agency는 `selling_price`(마진 포함)만 입력할 수 있다.
 
 ### 11.1 요금 계산 API
 
-#### estimateUpsFreight(input) — Server Action
-- **Path**: `src/app/actions/ups/freight.ts`
-- **설명**: UPS 운송 요금을 3단계(Platform/Agency/Shipper)로 계산하여 반환. 오더 등록 화면에서 실시간 견적 표시용.
+#### estimateUpsFreight(input) — Server Action (세션 진입점)
+- **Path**: `src/app/actions/ups/freight.ts` (세션 진입점) · `src/lib/ups/estimate-core.ts` (전체 계산, server-only)
+- **설명**: UPS 운송 요금을 3단계(Platform/Agency/Shipper)로 계산합니다. **세션 역할·소속으로 계산 범위를 서버에서 결정**하고, 허용된 단계만 DTO로 반환합니다. 오더 등록 화면에서 실시간 견적 표시용이며, 내부 서버 호출자(오더·스냅샷·실비 재계산)는 코어를 직접 사용합니다.
 - **Input** (`EstimateUpsFreightInput`):
   - `productId: string` — UPS 제품 ID
   - `destCountryCode: string` — 목적지 국가코드 (ISO alpha-3)
@@ -23,20 +23,27 @@
   - `shipperOrgId?: string | null` — 화주 org_id (null이면 Shipper 단계 생략)
   - `referenceDate?: string` — 기준일자 (YYYY-MM-DD, 미전달 시 오늘)
   - `direction?: string` — **(GH#202 신규)** Zone 조회 방향. `'EXPORT' | 'IMPORT'`, 기본값 `'EXPORT'`. 내부적으로 `resolveZoneByCountry()`에 전달됨.
-- **Output** (`UpsFreightEstimate`):
-  - `platform: UpsFreightResult` — Platform 단계 (기준요금 + 유류할증 + OC)
-  - `agency: UpsAgencyFreightResult | null` — Agency 단계 (할인율 적용 + 마진)
-  - `shipper: UpsShipperFreightResult | null` — Shipper 단계 (화주 할인율 적용)
+- **Output** (`UpsFreightEstimate` DTO):
+  - `platform` — 중량·통화·breakdown. **원가 계열은 관리자에게만**, 플랫폼 판매가 계열은 관리자·대리점·비소속 화주에게만 포함(소속 화주는 미포함)
+  - `agency: UpsAgencyFreightResult | null` — 관리자·대리점(자기 단계)에만 포함
+  - `shipper: UpsShipperFreightResult | null` — 관리자·대리점(소속 화주 범위)·소속 화주에만 포함
 - **Output 상세** (`UpsFreightResult.breakdown`, GH#202/IMP-146 신규 필드 포함):
   - `fallbackApplied: boolean` — Zone이 정확매치가 아닌 EXPRESS/EXPORT fallback으로 결정됐는지 여부 (11.6 참조)
   - `dwbApplied: boolean`, `dwbOriginalWeightKg?`, `dwbOriginalSellingPrice?`, `dwbOriginalCostPrice?` — DWB 적용 여부 및 적용 전 원본값 (11.7 참조)
   - `freightMinApplied: boolean`, `freightMinOriginalSelling?`, `freightMinOriginalCost?` — Freight 최소운임 적용 여부 및 적용 전 원본값 (11.8 참조)
   - `surgeFeeId: string | null`, `surgeFeeSellingRatePerKg: number`, `surgeFeeSellingAmount: number`, `surgeFeeCostAmount: number` — 급증 긴급 수수료 적용 내역 (11.11 참조)
 
-**동작 분기**:
-- `agencyOrgId` 미전달 → Platform 단계만 계산, agency/shipper는 null
-- `agencyOrgId` 전달 + `shipperOrgId` 미전달 → Platform + Agency 단계 계산
-- `agencyOrgId` + `shipperOrgId` 전달 → 3단계 전부 계산
+**동작 분기 (서버가 세션으로 결정)**:
+- 관리자(ADMIN·MANAGER·ZENITH_SUPER_ADMIN): 입력 범위 그대로 계산, 원가 포함 전체 반환
+- 대리점(AGENCY): `agencyOrgId`는 세션 org로 고정. 본인 org·빈 값은 화주 지정이 아니며, **실제 소속 확인 시에만** 화주 단계를 포함한다. 미소속 지정·조회 오류는 **거부하지 않고 화주 단계만 제외**(조회 오류는 `logger.error`)
+- 화주 계열(SHIPPER·CORPORATE·AGENCY_SHIPPER): `shipperOrgId`는 세션 org로 고정, `agencyOrgId`는 서버가 소속 조회로 결정
+- INDIVIDUAL(org 없음): 플랫폼 판매가만
+- OPERATOR: 입력 화주 기준으로 계산하되 원가 미포함. 요율 조회 정책이 없어 **코어 계산만 서비스 롤** 사용(반환은 DTO로 최소화)
+- 소속 화주: 플랫폼 판매가(1단계) 미전달, 자기 청구 단계만. 부가항목 행은 화주 청구 단계와 동일 금액이라 포함
+- 비소속 화주: 플랫폼 판매가만 전달(대리점·화주 단계 없음)
+- 소속 확정은 세션 RLS에 의존하지 않고 서비스 롤로 소속 ID만 조회
+- 소속 조회 오류·다중 소속: **소속 미확정으로 거부(fail-closed)** — 비소속 폴백 없음
+- 견적 화면 경로가 없는 역할(SUB_ADMIN·CARRIER·CUSTOMS_BROKER·DELIVERY_AGENT·USER): `permission_denied`
 
 ### 11.2 Admin 요율 CRUD Actions
 
@@ -204,7 +211,7 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 #### getUpsBaseRates(filters?)
 - **Path**: `src/app/actions/ups/rates.ts:41-67`
 - **설명**: 기준일(`referenceDate`, 미전달 시 오늘 `YYYY-MM-DD`)에 유효하고 활성 상태(`is_active = true`)인 UPS 기준요금(`zen_ups_base_rates`, 판매가 `selling_price` 및 원가 `cost_price` 포함, `product`·`zone` 조인)을 `fetchAllRows`(1,000행 단위 페이지네이션, `weight_kg`·`id` 정렬)로 전수 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:46`, 액션 레벨 역할 가드 없음 — DB RLS `ups_base_rates_agency_select`·`ups_base_rates_shipper_select`가 활성 행 SELECT를 허용하므로 비관리자 직접 호출 시 `cost_price` 원가 컬럼 노출 가능, `DEF-151` 참조)
+- **권한**: `validateUserAction()` + `assertRatesReadAccess('base')` — **ADMIN·MANAGER·ZENITH_SUPER_ADMIN·SUB_ADMIN**만 허용, 그 외는 `permission_denied`(TASK-B-373 PR-2 / DEF-151)
 - **Input**: `filters?: { productId?: string; zoneId?: string; referenceDate?: string }` (모두 선택; `referenceDate`는 `YYYY-MM-DD`, 기본값 오늘)
 - **Output**: `Promise<UpsBaseRateWithRefs[]>` (`src/types/ups.ts:47-65`, 통화 기본 `'KRW'`, 중량 0.5kg 단위)
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; 페이지네이션 쿼리 실패 시 `fetchAllRows`에서 `Error(error?.message ?? 'query failed')` throw (`src/lib/ups/paginate-all.ts:19`)
@@ -212,7 +219,7 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 #### getUpsFuelSurcharge(productId?, referenceDate?)
 - **Path**: `src/app/actions/ups/rates.ts:69-85`
 - **설명**: 기준일(`referenceDate`, 기본값 오늘) 이전(`effective_week <= refDate`)의 가장 최근 UPS 유류할증료율(`zen_ups_fuel_surcharges`, `selling_rate`·`cost_rate` 비율 포함) 단건을 조회합니다 (`productId` 전달 시 해당 상품 또는 공통 `product_id IS NULL` 조건 매칭).
-- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:73`, 액션 레벨 역할 가드 없음 — DB RLS `ups_fuel_surcharges_authenticated_select`로 인증 사용자 전체 조회 허용되어 `cost_rate` 원가율 노출 가능, `DEF-151` 참조)
+- **권한**: `validateUserAction()` + `assertRatesReadAccess('admin')` — **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**만 허용(TASK-B-373 PR-2 / DEF-151)
 - **Input**: `productId?: string | null` (UPS 상품 UUID, 선택), `referenceDate?: string` (`YYYY-MM-DD`, 기본값 오늘)
 - **Output**: `Promise<UpsFuelSurcharge | null>` (`src/types/ups.ts:67-75`, `data?.[0] ?? null`)
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:83`)
@@ -220,7 +227,7 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 #### getUpsOtherCharges()
 - **Path**: `src/app/actions/ups/rates.ts:87-96`
 - **설명**: 활성 상태(`is_active = true`)인 UPS 공통 부가요금 목록(`zen_ups_other_charges`, `selling_price`·`cost_price`·`unit`·`fuel_surcharge_applicable` 포함)을 `charge_code` 오름차순으로 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:88`, 액션 레벨 역할 가드 없음 — `/agency/other-charges` 페이지에서도 호출되어 `cost_price`가 RSC payload에 포함됨, `DEF-151` 참조)
+- **권한**: `validateUserAction()` + `assertRatesReadAccess('admin')` — **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**만 허용. `/agency/other-charges`는 공개 판매가 조회(`getPublicOtherCharges`)로 전환(TASK-B-373 PR-2 / DEF-151)
 - **Input**: 없음 (`()`)
 - **Output**: `Promise<UpsOtherCharge[]>` (`src/types/ups.ts:77-89`, `data ?? []`, 통화 기본 `'KRW'`)
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:94`)
@@ -228,7 +235,7 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 #### getUpsSurgeFees()
 - **Path**: `src/app/actions/ups/rates.ts:99-108`
 - **설명**: Admin 관리 화면용으로 도착국별 UPS 급증 긴급 수수료 전체 이력(`zen_ups_surge_fees`, 과거 기간 포함, `selling_rate_per_kg`·`cost_rate_per_kg` 포함)을 `destination_country_code` 오름차순·`effective_from` 내림차순으로 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:100`, 액션 레벨 역할 가드 및 `is_active` 필터 없음 — DB RLS `ups_surge_fees_authenticated_select`가 `is_active = true` 행을 인증 사용자 전체에 허용하므로 비관리자 호출 시 `cost_rate_per_kg` 노출 가능, `DEF-151` 참조)
+- **권한**: `validateUserAction()` + `assertRatesReadAccess('admin')` — **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**만 허용(관리 이력 조회, TASK-B-373 PR-2 / DEF-151)
 - **Input**: 없음 (`()`)
 - **Output**: `Promise<UpsSurgeFee[]>` (`src/types/ups.ts:107-118`, `data ?? []`, kg당 단가, 통화 기본 `'KRW'`)
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:106`)
@@ -236,7 +243,7 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 #### getUpsWeightTierRates()
 - **Path**: `src/app/actions/ups/rates.ts:110-119`
 - **설명**: 활성 상태(`is_active = true`)인 20kg 초과 구간별 kg당 단가 요율 목록(`zen_ups_weight_tier_rates`, `price_per_kg_selling`·`price_per_kg_cost` 및 `product`·`zone` 조인 포함)을 `tier_min_kg` 오름차순으로 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:111`, 액션 레벨 역할 가드 없음 — DB RLS가 `AGENCY`·`CORPORATE`·`INDIVIDUAL`의 활성 행 SELECT를 허용하므로 비관리자 직접 호출 시 `price_per_kg_cost` 노출 가능, `DEF-151` 참조)
+- **권한**: `validateUserAction()` + `assertRatesReadAccess('admin')` — **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**만 허용(TASK-B-373 PR-2 / DEF-151)
 - **Input**: 없음 (`()`)
 - **Output**: `Promise<UpsWeightTierRateWithRefs[]>` (`src/types/ups.ts:275-290, 305-308`, `data ?? []`)
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:117`)
@@ -244,7 +251,7 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 #### getUpsFreightMinimums()
 - **Path**: `src/app/actions/ups/rates.ts:121-129`
 - **설명**: 활성 상태(`is_active = true`)인 Freight 상품 최소 청구 운임 목록(`zen_ups_freight_minimums`, `min_charge_selling`·`min_charge_cost` 및 `product`·`zone` 조인 포함)을 조회합니다.
-- **권한**: `validateUserAction()` (`src/app/actions/ups/rates.ts:122`, 액션 레벨 역할 가드 없음 — DB RLS가 `AGENCY`·`CORPORATE`·`INDIVIDUAL`의 활성 행 SELECT를 허용하므로 비관리자 직접 호출 시 `min_charge_cost` 노출 가능, `DEF-151` 참조)
+- **권한**: `validateUserAction()` + `assertRatesReadAccess('admin')` — **ADMIN·MANAGER·ZENITH_SUPER_ADMIN**만 허용(TASK-B-373 PR-2 / DEF-151)
 - **Input**: 없음 (`()`)
 - **Output**: `Promise<UpsFreightMinimumWithRefs[]>` (`src/types/ups.ts:292-303, 310-313`, `data ?? []`)
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates.ts:127`)
@@ -254,7 +261,7 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 #### upsertAgencyCostRate(data)
 - **Path**: `src/app/actions/ups/rates-mutation.ts:124-156`
 - **설명**: 기존 등록된 UPS 기준요금 행(`zen_ups_base_rates`, `product_id + zone_id + weight_kg + valid_from` 일치)을 찾아 원가(`cost_price`)와 `updated_at`만 수정합니다 (Issue #618, Master Agency `SUB_ADMIN` 원가 편집 지원).
-- **권한**: `validateUserAction()` + `requireAdminManagerOrSubAdmin(profile?.role)` (`rates-mutation.ts:17-21, 131-132`, 허용 역할: `ADMIN`, `MANAGER`, `ZENITH_SUPER_ADMIN`, `SUB_ADMIN`) + `createAdminClient()`(service_role로 `zen_ups_base_rates` RLS 우회 업데이트, `L134`)
+- **권한**: `validateUserAction()` + `requireAdminManagerOrSubAdmin(role)` — 공용 가드 `src/lib/auth/ups-rate-permissions.ts` (허용 역할: `ADMIN`, `MANAGER`, `ZENITH_SUPER_ADMIN`, `SUB_ADMIN`) + `createAdminClient()`(service_role로 `zen_ups_base_rates` RLS 우회 업데이트, `L134`)
 - **Input**: `data: { product_id: string; zone_id: string; weight_kg: number; valid_from: string; cost_price: number }`
 - **Output**: `Promise<void>`
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; 역할 불충족 시 `Error("Agency 원가 할인율 관리 권한이 없습니다.")` throw (`L19`); 대상 기준요금 미존재 또는 조회 실패 시 `Error("해당 기준요금을 찾을 수 없습니다. 기준요금이 먼저 등록되어야 합니다.")` throw (`L145-147`); DB 업데이트 실패 시 `Error(updateError.message)` throw (`L154`)
@@ -263,7 +270,7 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 #### getAgencyPricingPolicies(agencyOrgId?)
 - **Path**: `src/app/actions/ups/rates-mutation.ts:255-265`
 - **설명**: 활성 상태(`is_active = true`)인 대리점별 UPS Zone 할인율 정책 목록(`zen_agency_pricing_policies`, `agency:agency_org_id(name)`·`zone:zone_id(zone_code, zone_name)` 조인)을 `agency_org_id` 오름차순으로 조회합니다 (`agencyOrgId` 전달 시 해당 대리점으로 필터링).
-- **권한**: `validateUserAction()` (`rates-mutation.ts:256`, 액션 레벨 역할 가드 및 `agencyOrgId === profile.org_id` 소유권 검증 없음 — 일반 세션 클라이언트를 통해 DB RLS `agency_pricing_policies_admin_all`·`agency_pricing_policies_sub_admin_scoped`·`agency_pricing_policies_agency_select`에만 의존, `DEF-151` 참조)
+- **권한**: `validateUserAction()` + `requireAdminManagerOrSubAdmin(role)` — **ADMIN·MANAGER·ZENITH_SUPER_ADMIN·SUB_ADMIN**만 허용(TASK-B-373 PR-2). 행 범위는 DB RLS(`agency_pricing_policies_admin_all`·`agency_pricing_policies_sub_admin_scoped`·`agency_pricing_policies_agency_select`)가 담당
 - **Input**: `agencyOrgId?: string` (대리점 조직 UUID, 선택)
 - **Output**: `Promise<Array<Record<string, unknown>>>` (`zen_agency_pricing_policies` 행 + `agency`·`zone` 조인 배열, `data ?? []`)
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 조회 실패 시 `Error(error.message)` throw (`rates-mutation.ts:263`)
@@ -341,7 +348,7 @@ Team A가 제공하는 API 계약 — Team B가 오더 등록 화면 연동 시 
 
 #### getPublicWeightTierRates()
 - **Path**: `src/app/actions/ups/rates-public.ts:93-102`
-- **설명**: 원가(`price_per_kg_cost`) 컬럼을 제외하고 활성 상태(`is_active = true`)인 20kg 초과 중량 구간별 kg당 판매 단가 목록(`zen_ups_weight_tier_rates`, `price_per_kg_selling` 및 `product`·`zone` 조인)을 `tier_min_kg` 오름차순으로 조회합니다 (단, `getPublicBaseRates`와 달리 `valid_from`/`valid_until` 기준일 필터는 미적용 — `DEF-151` 참조).
+- **설명**: 원가(`price_per_kg_cost`) 컬럼을 제외하고 활성 상태(`is_active = true`)인 20kg 초과 중량 구간별 kg당 판매 단가 목록(`zen_ups_weight_tier_rates`, `price_per_kg_selling` 및 `product`·`zone` 조인)을 `tier_min_kg` 오름차순으로 조회합니다. 기준일(`valid_from <= refDate`, `valid_until is null or >= refDate`) 필터를 적용합니다(TASK-B-373 PR-2).
 - **권한**: `validateUserAction()` (`src/app/actions/ups/rates-public.ts:94`, 로그인 세션 검증 — DB RLS 적용)
 - **Input**: 없음 (`()`)
 - **Output**: `Promise<PublicWeightTierRate[]>` (`rates-public.ts:79-91`, `data ?? []`, `price_per_kg_cost` 미포함)

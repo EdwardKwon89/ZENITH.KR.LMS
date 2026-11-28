@@ -3,7 +3,7 @@ import { createOrder } from '@/app/actions/orders';
 import { validateUserAction } from '@/lib/auth/guards';
 import { generateOrderNo } from '@/app/actions/master';
 import { revalidatePath } from 'next/cache';
-import { estimateUpsFreight } from '@/app/actions/ups/freight';
+import { estimateUpsFreightCore } from '@/lib/ups/estimate-core';
 
 // ─── TASK-B-258 / Issue #1007 / DEF-B-035 회귀 테스트 ────────────────────────
 //
@@ -41,8 +41,8 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
-vi.mock('@/app/actions/ups/freight', () => ({
-  estimateUpsFreight: vi.fn(),
+vi.mock('@/lib/ups/estimate-core', () => ({
+  estimateUpsFreightCore: vi.fn(),
 }));
 
 const MOCK_ORDER_ID = 'new-order-id';
@@ -164,7 +164,7 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (estimateUpsFreight as any).mockResolvedValue({
+    (estimateUpsFreightCore as any).mockResolvedValue({
       platform: { totalSellingPrice: 100, currency: 'USD' },
       agency: null,
       shipper: null,
@@ -183,7 +183,7 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
 
     await createOrder(makeUpsPayload() as any);
 
-    expect(estimateUpsFreight).toHaveBeenCalled();
+    expect(estimateUpsFreightCore).toHaveBeenCalled();
     expect(mockAdminFrom).toHaveBeenCalledWith('zen_order_rate_snapshots');
     expect(mockAdminInsert).toHaveBeenCalledTimes(1);
   });
@@ -198,7 +198,7 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
 
     await createOrder(makeUpsPayload() as any);
 
-    expect(estimateUpsFreight).toHaveBeenCalled();
+    expect(estimateUpsFreightCore).toHaveBeenCalled();
     expect(mockAdminFrom).toHaveBeenCalledWith('zen_order_rate_snapshots');
     expect(mockAdminInsert).toHaveBeenCalledTimes(1);
   });
@@ -213,7 +213,7 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
 
     await createOrder(makeUpsPayload() as any);
 
-    expect(estimateUpsFreight).toHaveBeenCalledWith(expect.objectContaining({ agencyOrgId: 'agency-org-1' }));
+    expect(estimateUpsFreightCore).toHaveBeenCalledWith(expect.objectContaining({ agencyOrgId: 'agency-org-1' }), expect.anything());
     expect(mockAdminFrom).toHaveBeenCalledWith('zen_order_rate_snapshots');
     expect(mockAdminInsert).toHaveBeenCalledTimes(1);
   });
@@ -228,7 +228,7 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
 
     await createOrder(makeUpsPayload() as any);
 
-    expect(estimateUpsFreight).toHaveBeenCalledWith(expect.objectContaining({ agencyOrgId: 'agency-org-2' }));
+    expect(estimateUpsFreightCore).toHaveBeenCalledWith(expect.objectContaining({ agencyOrgId: 'agency-org-2' }), expect.anything());
     expect(mockAdminFrom).toHaveBeenCalledWith('zen_order_rate_snapshots');
     expect(mockAdminInsert).toHaveBeenCalledTimes(1);
   });
@@ -243,7 +243,7 @@ describe('TASK-B-258: 비대리점 직접 화주 UPS 오더 → 예상운임 스
 
     await createOrder(makeAirPayload() as any);
 
-    expect(estimateUpsFreight).not.toHaveBeenCalled();
+    expect(estimateUpsFreightCore).not.toHaveBeenCalled();
     expect(mockAdminFrom).not.toHaveBeenCalledWith('zen_order_rate_snapshots');
   });
 });

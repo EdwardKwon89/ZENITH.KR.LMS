@@ -23,7 +23,7 @@
 - **원칙**: **Orthogonal Separation** (진입로와 행위의 독립적 분리)
 - **조직 타입 (Org Type)**: `PLATFORM`, `SHIPPER`, `CARRIER`로 이문화된 멀티 테넌시 포털 구조.
 - **역할 (Role)**: 기능별 권한 맵(`PERMISSION_MAP`)에 따른 UI/API 제어.
-- **라우팅**: 고정된 경로가 아닌 `ORG_ROUTE_MAP` 설정 기반의 다이내믹 라우팅 엔진 적용 ([상세보기](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/302_OO_PERMISSION_ROUTING_GUIDE.md)).
+- **라우팅**: 고정된 경로가 아닌 `ORG_ROUTE_MAP` 설정 기반의 다이내믹 라우팅 엔진 적용 ([상세보기](file://~/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/302_OO_PERMISSION_ROUTING_GUIDE.md)).
 
 ---
 
@@ -49,9 +49,9 @@
 ---
 
 ## 🏛️ 관련 참조 문서 리스트
-1. [역할 및 권한 정의서](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/ROLE_DEFINITION.md)
-2. [객체 지향 권한 설계 상세](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/302_OO_PERMISSION_ROUTING_GUIDE.md)
-3. [UAT 결과 보고서 (Master Data)](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/UAT/UAT_1.2_Result_MasterData.md)
+1. [역할 및 권한 정의서](file://~/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/ROLE_DEFINITION.md)
+2. [객체 지향 권한 설계 상세](file://~/WorkSpace/ZENITH_LMS_001/docs/00_GUIDE/302_OO_PERMISSION_ROUTING_GUIDE.md)
+3. [UAT 결과 보고서 (Master Data)](file://~/WorkSpace/ZENITH_LMS_001/docs/08_Self_Audit/UAT/UAT_1.2_Result_MasterData.md)
 
 > [!IMPORTANT]
 > 본 가이드는 프로젝트 진행 상황에 따라 지속적으로 업데이트되며, 변경 시 Master와 ZEN_CEO의 상호 합의 하에 시행한다.

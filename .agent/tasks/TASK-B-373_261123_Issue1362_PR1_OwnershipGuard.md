@@ -33,6 +33,7 @@
 | `docs/02_Analysis/ds11/Ds_11_11A_UPS_Rates.md` | 11.3 3개 액션 권한·소유권 검증 |
 | `docs/08_Self_Audit/Checklists/regression-items/TASK-B-373_Issue1362_other-charges-ownership.md` | 회귀 항목 9건 + RST 3건 |
 | `docs/02_Analysis/evidence/task-b373/r10-*.png` | R-10 UI 증적 3장(목록·수정 후·비활성화 후) |
+| `docs/08_Self_Audit/Checklists/LIVE_REGRESSION_TEST_MAP.md` | `npm run build:lrtm` 자동 갱신 |
 
 - `git diff --stat origin/TeamB_Dev...HEAD` — 최종 커밋 후 PR에 기재.
 
@@ -59,7 +60,7 @@
 - `npm run test:regression`: **297파일 / 2,271케이스 전부 PASS** (exit 0, 683s).
 - `npm run build`: **성공** (라우트 테이블 정상 출력).
 - `npm run check:ds11`: **OK** — 허용 목록 밖 신규 미반영 0건.
-- `npm run check:lrtm`: **OK** — 지수 인덱스(`LIVE_REGRESSION_TEST_MAP.md`)는 **PR에서 제외**(Aiden이 병합 시 재생성). 인덱스 없이도 유령 경로 0·허용 목록 밖 신규 미등재 0.
+- `npm run build:lrtm` / `check:lrtm`: **OK**(유령 경로 0, 허용 목록 밖 신규 미등재 0, 신규 항목 24건).
 - **R-10 UI 구동 증적**: 대리점 계정 실제 로그인 → `/ko/agency/other-charges` 목록·수정 저장·비활성화 확인.
   - `docs/02_Analysis/evidence/task-b373/r10-list.png`
   - `docs/02_Analysis/evidence/task-b373/r10-after-edit.png`
@@ -73,6 +74,5 @@
 - 구현·테스트·Ds-11·회귀 항목 완료. **DB 마이그레이션 없음**, `shippers.ts` 무변경, 새 키 없음.
 - PR: #1478 — `Refs #1362`, base `TeamB_Dev`.
 - `git diff --stat`은 PR 코멘트 참조(마지막 커밋 후 산출).
-- `LIVE_REGRESSION_TEST_MAP.md`는 이 PR에서 **제외**(원상복구).
 - **발견 이슈**: 없음.
 - **주의**: PR-1은 `TeamB_Dev` 기준 최소 diff이며, Aiden이 211 런북 §7(main 기반 선반영)로 이식 검토.

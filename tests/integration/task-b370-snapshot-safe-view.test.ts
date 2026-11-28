@@ -13,8 +13,8 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 // CI Supabase 정책: 소문자·대문자·숫자·기호 각 1자 이상
 const PASSWORD = 'Password1234!';
 
-vi.mock('@/app/actions/ups/freight', () => ({
-  estimateUpsFreight: vi.fn(),
+vi.mock('@/lib/ups/estimate-core', () => ({
+  estimateUpsFreightCore: vi.fn(),
 }));
 
 import { refreshUpsRateSnapshot } from '@/lib/orders/rate-snapshot-refresh';
@@ -263,8 +263,8 @@ describe('TASK-B-370 쓰기 — 소유 검증 후 admin client', () => {
   it('실측 경로(applyPackageMeasurements): 소유 화주가 중량 변경 시 스냅샷 1행 UPDATE', async () => {
     resetSnapshot();
     resetPackage(5);
-    const freight = await import('@/app/actions/ups/freight');
-    (freight.estimateUpsFreight as any).mockResolvedValue({ platform: { totalSellingPrice: 401, currency: 'USD' } });
+    const freight = await import('@/lib/ups/estimate-core');
+    (freight.estimateUpsFreightCore as any).mockResolvedValue({ platform: { totalSellingPrice: 401, currency: 'USD' } });
 
     const result = await applyPackageMeasurements(
       sessions.shipperA!,
@@ -285,8 +285,8 @@ describe('TASK-B-370 쓰기 — 소유 검증 후 admin client', () => {
   it('실측 경로: 대리점 세션이 중량 변경 시 스냅샷 1행 UPDATE', async () => {
     resetSnapshot();
     resetPackage(5);
-    const freight = await import('@/app/actions/ups/freight');
-    (freight.estimateUpsFreight as any).mockResolvedValue({ platform: { totalSellingPrice: 402, currency: 'USD' } });
+    const freight = await import('@/lib/ups/estimate-core');
+    (freight.estimateUpsFreightCore as any).mockResolvedValue({ platform: { totalSellingPrice: 402, currency: 'USD' } });
 
     const result = await applyPackageMeasurements(
       sessions.agency!,
@@ -306,8 +306,8 @@ describe('TASK-B-370 쓰기 — 소유 검증 후 admin client', () => {
   it('실측 경로: 관리자 세션이 중량 변경 시 스냅샷 1행 UPDATE', async () => {
     resetSnapshot();
     resetPackage(5);
-    const freight = await import('@/app/actions/ups/freight');
-    (freight.estimateUpsFreight as any).mockResolvedValue({ platform: { totalSellingPrice: 403, currency: 'USD' } });
+    const freight = await import('@/lib/ups/estimate-core');
+    (freight.estimateUpsFreightCore as any).mockResolvedValue({ platform: { totalSellingPrice: 403, currency: 'USD' } });
 
     const result = await applyPackageMeasurements(
       sessions.admin!,
@@ -326,8 +326,8 @@ describe('TASK-B-370 쓰기 — 소유 검증 후 admin client', () => {
   it('실측 경로: 패키지를 읽을 수 있는 비소유 MANAGER 는 스냅샷을 덮어쓰지 않는다', async () => {
     resetSnapshot(111);
     resetPackage(5);
-    const freight = await import('@/app/actions/ups/freight');
-    (freight.estimateUpsFreight as any).mockResolvedValue({ platform: { totalSellingPrice: 404, currency: 'USD' } });
+    const freight = await import('@/lib/ups/estimate-core');
+    (freight.estimateUpsFreightCore as any).mockResolvedValue({ platform: { totalSellingPrice: 404, currency: 'USD' } });
 
     await applyPackageMeasurements(
       sessions.manager!,

@@ -104,6 +104,30 @@ function seedOrder(id: string, opts: {
           (gen_random_uuid(), '${id}', 'SURGE_FEE', ${opts.decimal ? '0' : '5000'}, 1, 'KRW', true, now()),
           (gen_random_uuid(), '${id}', 'OTHER_CHARGE', ${opts.decimal ? '0' : '1000'}, 1, 'KRW', true, now())
     ON CONFLICT DO NOTHING;
+    ALTER TABLE public.zen_ups_settlement_runs DISABLE TRIGGER USER;
+    DELETE FROM public.zen_ups_settlement_runs WHERE order_id = '${id}';
+    ALTER TABLE public.zen_ups_settlement_runs ENABLE TRIGGER USER;
+    WITH r AS (
+      INSERT INTO public.zen_ups_settlement_runs (order_id, version, charge_weight_kg, settled_at, settled_by)
+      VALUES ('${id}', 1, ${opts.weight ?? 5}, now(), '${admin.userId}')
+      RETURNING id
+    )
+    INSERT INTO public.zen_ups_settlement_run_amounts
+      (run_id, tier, base_freight, fuel_surcharge, surge_fee, other_charges,
+       freight_adjustment, settlement_charges_total, line_total)
+    SELECT r.id, v.tier, v.b, v.f, v.s, v.o, 0, 0, v.b + v.f + v.s + v.o
+    FROM r, (VALUES
+      ('ADMIN_TO_AGENCY',
+        ${opts.decimal === 'base' ? '10.10' : opts.decimal ? '0' : '80000'}::numeric,
+        ${opts.decimal === 'fuel' ? '20.20' : opts.decimal ? '0' : '16000'}::numeric,
+        ${opts.decimal ? '0' : '4000'}::numeric,
+        ${opts.decimal ? '0' : '800'}::numeric),
+      ('SHIPPER',
+        ${opts.decimal === 'base' ? '10.10' : opts.decimal ? '0' : '100000'}::numeric,
+        ${opts.decimal === 'fuel' ? '20.20' : opts.decimal ? '0' : '20000'}::numeric,
+        ${opts.decimal ? '0' : '5000'}::numeric,
+        ${opts.decimal ? '0' : '1000'}::numeric)
+    ) AS v(tier, b, f, s, o);
   `);
   if (opts.tracking) {
     psql(`
@@ -198,6 +222,13 @@ function purgeLeftover() {
   psql(`DELETE FROM public.zen_ups_labels WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.zen_order_packages WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.zen_order_costs WHERE order_id IN (${ids});`);
+  psql(`ALTER TABLE public.zen_ups_settlement_runs DISABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_amounts DISABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_charges DISABLE TRIGGER USER;`);
+  psql(`DELETE FROM public.zen_ups_settlement_runs WHERE order_id IN (${ids});`);
+  psql(`ALTER TABLE public.zen_ups_settlement_runs ENABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_amounts ENABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_charges ENABLE TRIGGER USER;`);
   psql(`DELETE FROM public.zen_order_rate_snapshots WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.order_status_history WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.zen_orders WHERE id IN (${ids});`);
@@ -347,8 +378,8 @@ function statementNoOf(id: string): string {
   return String(psql(`SELECT statement_no FROM public.zen_billing_statements WHERE id='${id}'`));
 }
 
-const HEADERS_WITH_SHIPPER = ['No', '오더번호', '운송장번호', '기준일', '화주명', '수하인', '도착국가', '청구중량(kg)', '기본운임', '유류할증료', '할증료', '기타', '합계'];
-const HEADERS_PLAIN = ['No', '오더번호', '운송장번호', '기준일', '수하인', '도착국가', '청구중량(kg)', '기본운임', '유류할증료', '할증료', '기타', '합계'];
+const HEADERS_WITH_SHIPPER = ['No', '오더번호', '운송장번호', '기준일', '화주명', '수하인', '도착국가', '청구중량(kg)', '기본운임', '유류할증료', '할증료', '기타', '부가운임 항목', '부가운임', '운임 조정분', '합계'];
+const HEADERS_PLAIN = ['No', '오더번호', '운송장번호', '기준일', '수하인', '도착국가', '청구중량(kg)', '기본운임', '유류할증료', '할증료', '기타', '부가운임 항목', '부가운임', '운임 조정분', '합계'];
 
 // ───────────────────────────────────────────── §8-1 인쇄 설정 (재파싱 단언)
 
@@ -406,8 +437,8 @@ describe('인쇄 설정 (부록A §8-1 — 생성 파일을 exceljs로 재파싱
 
     expect(s2.pageSetup.printTitlesRow).toBe('3:3');
     expect(s1.pageSetup.printTitlesRow).toBeFalsy();          // 요약은 제목행 반복 없음
-    expect(s1.pageSetup.printArea).toBe('A1:F24');            // 요약 6열 고정
-    expect(s2.pageSetup.printArea).toBe(`A1:M${lastRow}`);    // tier별 열 문자 = 배열에서 계산 (ADMIN_TO_AGENCY 13열=M)
+    expect(s1.pageSetup.printArea).toBe('A1:F25');            // 요약 6열 고정 (부가운임 행 +1)
+    expect(s2.pageSetup.printArea).toBe(`A1:P${lastRow}`);    // tier별 열 문자 = 배열에서 계산 (ADMIN_TO_AGENCY 16열=P)
     expect(lastRow).toBeGreaterThan(3);
 
     expect(s1.headerFooter?.oddHeader).toBe(`&R${no}`);
@@ -439,7 +470,7 @@ describe('값 단언 (부록A §8-2)', () => {
     expect(text(s2, addrOf(s2, '수하인', 4))).toBe('朴수하인');
     expect(text(s2, addrOf(s2, '도착국가', 4))).toBe('JP');
 
-    for (const key of ['청구중량(kg)', '기본운임', '유류할증료', '할증료', '기타', '합계']) {
+    for (const key of ['청구중량(kg)', '기본운임', '유류할증료', '할증료', '기타', '부가운임', '합계']) {
       const v = s2.getCell(addrOf(s2, key, 4)).value;
       expect(typeof v, `${key} 셀은 숫자여야 한다`).toBe('number');
     }
@@ -469,17 +500,18 @@ describe('값 단언 (부록A §8-2)', () => {
     expect(sumOf('기타')).toBe(800);
     expect(sumOf('합계')).toBe(100800);
 
-    // 요약 4개 금액(15~18행 B열) = 상세 열 합
+    // 요약 금액(15~19행 B열) = 상세 열 합 — 부가운임 19행, 조정 0원 비표시 → 공급가액 21행
     expect(s1.getCell('B15').value).toBe(sumOf('기본운임'));
     expect(s1.getCell('B16').value).toBe(sumOf('유류할증료'));
     expect(s1.getCell('B17').value).toBe(sumOf('할증료'));
     expect(s1.getCell('B18').value).toBe(sumOf('기타'));
-    expect(s1.getCell('B20').value).toBe(sumOf('합계')); // 공급가액 합계
-    expect(s1.getCell('B20').font.size).toBe(14);
-    expect(text(s1, 'A20')).toBe('공급가액 합계');
-    expect(text(s1, 'A21')).toContain('부가가치세 별도');
-    expect(text(s1, 'A23')).toContain('오더 건수 1건');
-    expect(text(s1, 'A24')).toBe('상태');
+    expect(s1.getCell('B19').value).toBe(sumOf('부가운임')); // 부가운임(항목 합)
+    expect(s1.getCell('B21').value).toBe(sumOf('합계')); // 공급가액 합계
+    expect(s1.getCell('B21').font.size).toBe(14);
+    expect(text(s1, 'A21')).toBe('공급가액 합계');
+    expect(text(s1, 'A22')).toContain('부가가치세 별도');
+    expect(text(s1, 'A24')).toContain('오더 건수 1건');
+    expect(text(s1, 'A25')).toBe('상태');
   });
 });
 
@@ -544,14 +576,14 @@ describe('tier별 상세 구성 (부록A §4·§8-5)', () => {
 
     const a2a = detailHeader(withShipper);
     const ship = detailHeader(plain);
-    expect(a2a.labels).toEqual(HEADERS_WITH_SHIPPER);   // 13열 (No 포함) = 지정 12열 + No
-    expect(ship.labels).toEqual(HEADERS_PLAIN);         // 12열 (No 포함) = 지정 11열 + No
-    expect(a2a.labels.length - 1).toBe(12);             // 부록A "총 12열" (No 제외 계수)
-    expect(ship.labels.length - 1).toBe(11);            // 부록A "열 11개" (No 제외 계수)
+    expect(a2a.labels).toEqual(HEADERS_WITH_SHIPPER);   // 16열 (No 포함) = 지정 15열 + No
+    expect(ship.labels).toEqual(HEADERS_PLAIN);         // 15열 (No 포함) = 지정 14열 + No
+    expect(a2a.labels.length - 1).toBe(15);             // 부록A "총 15열" (No 제외 계수 — B-402 부가운임 3열 포함)
+    expect(ship.labels.length - 1).toBe(14);            // 부록A "열 14개" (No 제외 계수)
 
     // 열 문자는 열 정의 배열 길이에서 계산 (하드코딩 없음)
-    expect(withShipper.pageSetup.printArea).toMatch(new RegExp(`^A1:M\\d+$`));  // 13열 → M
-    expect(plain.pageSetup.printArea).toMatch(new RegExp(`^A1:L\\d+$`));        // 12열 → L
+    expect(withShipper.pageSetup.printArea).toMatch(new RegExp(`^A1:P\\d+$`));  // 16열 → P
+    expect(plain.pageSetup.printArea).toMatch(new RegExp(`^A1:O\\d+$`));        // 15열 → O
 
     // 화주명 값은 오더의 화주 조직명
     expect(text(withShipper, addrOf(withShipper, '화주명', 4))).toMatch(/^excel360_shipper_/);
@@ -604,12 +636,12 @@ describe('DRAFT 표시와 파일명 (부록A §2·§6)', () => {
     expect(text(d1, 'A2')).toBe('초안 — 발행 전 문서');
     expect(d1.getCell('A2').font.color).toMatchObject({ argb: 'FFFF0000' });
     expect(text(sheet(draftWb, SHEET_DETAIL), 'A1')).toContain('[초안]');
-    expect(text(d1, 'B24')).toBe('초안');
+    expect(text(d1, 'B25')).toBe('초안');
 
     const issuedWb = await parseWorkbook(await httpExport(stmtA2A, agency));
     const i1 = sheet(issuedWb, SHEET_SUMMARY);
     expect(text(i1, 'A2')).toBe('');                                  // 행 숨김 없이 공백
-    expect(text(i1, 'B24')).toBe('발행됨');
+    expect(text(i1, 'B25')).toBe('발행됨');
     expect(text(i1, 'B3')).toBe(statementNoOf(stmtA2A));              // 청구서 번호 (A3 라벨 · B3 값)
     expect(text(i1, 'A6')).toBe('공급자 (청구하는 쪽)');
     expect(text(i1, 'D6')).toBe('공급받는자 (청구 대상)');
@@ -617,8 +649,8 @@ describe('DRAFT 표시와 파일명 (부록A §2·§6)', () => {
 
   it('CLOSED는 입금 확인 정보를 보여준다', async () => {
     const s1 = sheet(await parseWorkbook(await httpExport(stmtShip, shipper)), SHEET_SUMMARY);
-    expect(text(s1, 'B24')).toContain('입금완료');
-    expect(text(s1, 'B24')).toContain('입금 확인 2026-12-05');
+    expect(text(s1, 'B25')).toContain('입금완료');
+    expect(text(s1, 'B25')).toContain('입금 확인 2026-12-05');
   });
 
   it('파일명은 금지 문자를 치환하고 RFC 5987 헤더를 쓴다', async () => {
@@ -646,10 +678,11 @@ describe('소수 금액·중량 (PR #1411 🔴1·🔴2)', () => {
     expect(s1.getCell('B16').value).toBe(20.2);   // 유류할증료 20.20
     expect(s1.getCell('B17').value).toBe(0);      // 할증료 0.00
     expect(s1.getCell('B18').value).toBe(0);      // 기타 0.00
-    expect(s1.getCell('B20').value).toBe(30.3);   // 공급가액 합계 (float 합이면 30.299999999999997)
+    expect(s1.getCell('B19').value).toBe(0);      // 부가운임 0.00 (charge_details 없음)
+    expect(s1.getCell('B21').value).toBe(30.3);   // 공급가액 합계 (float 합이면 30.299999999999997)
 
     // 중량 문자열 — float 합이면 "0.30000000000000004 kg"
-    expect(text(s1, 'D23')).toBe('총 청구중량 0.30 kg');
+    expect(text(s1, 'D24')).toBe('총 청구중량 0.30 kg');
 
     // 상세 합계 행(마지막 행) = 헤더 총액, 개별 금액은 숫자 셀
     const lastRow = s2.rowCount; // 3행 머리글 + 항목 2행 + 합계 1행 = 6

@@ -34,13 +34,13 @@
 ## 📸 실행 증적 (Screenshots)
 
 ````carousel
-![e2e_12_01_route_options](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_12_Result/e2e_12_01_route_options.png)
+![e2e_12_01_route_options](file://~/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_12_Result/e2e_12_01_route_options.png)
 <!-- slide -->
-![e2e_12_02_balanced_selected](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_12_Result/e2e_12_02_balanced_selected.png)
+![e2e_12_02_balanced_selected](file://~/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_12_Result/e2e_12_02_balanced_selected.png)
 <!-- slide -->
-![e2e_12_03_route_confirmed](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_12_Result/e2e_12_03_route_confirmed.png)
+![e2e_12_03_route_confirmed](file://~/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_12_Result/e2e_12_03_route_confirmed.png)
 <!-- slide -->
-![e2e_12_04_milestone_timeline](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_12_Result/e2e_12_04_milestone_timeline.png)
+![e2e_12_04_milestone_timeline](file://~/WorkSpace/ZENITH_LMS_001/docs/99_Manual/E2E_12_Result/e2e_12_04_milestone_timeline.png)
 ````
 
 ## 🔔 Aiden 검토 요청

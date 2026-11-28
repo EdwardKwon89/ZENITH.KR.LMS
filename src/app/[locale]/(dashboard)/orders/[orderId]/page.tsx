@@ -18,6 +18,7 @@ import CommercialInvoicePDF from '@/components/documents/CommercialInvoicePDF';
 import PackingListPDF from '@/components/documents/PackingListPDF';
 import UpsInvoicePDF from '@/components/documents/UpsInvoicePDF';
 import { getDeclarations } from '@/app/actions/customs';
+import { getOrderAdditionalCharges } from '@/app/actions/finance/additional-charges';
 import { getOrderRateSnapshot } from '@/app/actions/operations';
 import { getOrderEditScope } from '@/lib/logistics/status-machine';import type { OrderStatus } from '@/types/orders';
 import { resolveConsigneeStreet, resolveShipperStreet, resolveRegionName, resolveCountryName } from '@/lib/ups/label-mapping'; // TASK-B-305, TASK-B-307
@@ -27,7 +28,6 @@ import { getTranslations } from 'next-intl/server';
 import { OrderClaimTrigger } from '@/components/claims/OrderClaimTrigger';
 import { getUpsLabelStatus } from '@/app/actions/operations/ups-labels';
 import UpsTradeDocumentActions from '@/components/orders/UpsTradeDocumentActions';
-import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 
 import { Package, MapPin, Truck, ShieldCheck, FileText, Pencil } from 'lucide-react';
 
@@ -101,6 +101,9 @@ export default async function OrderDetailPage({
       .maybeSingle();
     canManageFinance = !!agencyLink;
   }
+
+  // [설계 확정] 비관리자 표시 원천은 run 부가운임 단일 원천(원가 계열 미전달)
+  const additionalCharges = isAdmin ? null : await getOrderAdditionalCharges(orderId);
 
   const rawLogsData = isAdmin ? await getTrackingRawLogs(orderId) : { logs: [] };
   const rawLogs = rawLogsData?.logs || [];
@@ -563,23 +566,34 @@ export default async function OrderDetailPage({
             <OrderClaimTrigger orderId={orderId} orderNo={order.order_no} />
           </div>
 
-          {/* TASK-B-372: UPS 실비는 SUPER_ADMIN·ADMIN·MANAGER 전용 — 비관리자에게 폼을 렌더하지 않는다. */}
+          {/* TASK-B-381 PR-4a: UPS 실비·정산마감은 새 정산 화면으로 단일화한다. */}
           {isUpsOrder && (isAdmin || profile?.role === 'MANAGER') && (
-            <UpsActualAdjustmentForm
-              orderId={orderId}
-              orderStatus={order.status || ''}
-              isPlatformAdmin={isAdmin || profile?.role === 'MANAGER'}
-            />
+            <div className="rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-6 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-semibold text-slate-800 dark:text-white">UPS 정산마감</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  실비 입력·미리보기·정산마감은 새 정산 화면에서 처리합니다.
+                </p>
+              </div>
+              <Link
+                href={`/${locale}/finance/order-settlement/${orderId}`}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                정산마감 화면으로 이동
+              </Link>
+            </div>
           )}
 
           {/* 4. Finance Summary */}
           <OrderFinanceSummary 
             orderId={orderId}
-            initialCosts={costs || []}
+            initialCosts={isAdmin ? (costs || []) : []}
+            additionalCharges={additionalCharges}
             initialInvoice={invoice || null}
             incidentFees={incidentFees || []}
             isAdmin={isAdmin}
             canManageFinance={canManageFinance}
+            transportMode={order.transport_mode}
           />
 
           {/* 5. Trade Documents Section (Sprint 8) */}

@@ -105,6 +105,28 @@ function seedOrder(id: string, opts: {
           (gen_random_uuid(), '${id}', 'SURGE_FEE', 5000, 1, '${opts.usd ? 'USD' : 'KRW'}', true, now()),
           (gen_random_uuid(), '${id}', 'OTHER_CHARGE', 1000, 1, '${opts.usd ? 'USD' : 'KRW'}', true, now())
     ON CONFLICT DO NOTHING;
+    ${opts.settled ? `
+    ALTER TABLE public.zen_ups_settlement_runs DISABLE TRIGGER USER;
+    DELETE FROM public.zen_ups_settlement_runs WHERE order_id = '${id}';
+    ALTER TABLE public.zen_ups_settlement_runs ENABLE TRIGGER USER;
+    WITH r AS (
+      INSERT INTO public.zen_ups_settlement_runs (order_id, version, charge_weight_kg, settled_at, settled_by)
+      VALUES ('${id}', 1, ${opts.platformOnly ? '7' : '5'}, now(), '${admin.userId}')
+      RETURNING id
+    )
+    INSERT INTO public.zen_ups_settlement_run_amounts
+      (run_id, tier, base_freight, fuel_surcharge, surge_fee, other_charges,
+       freight_adjustment, settlement_charges_total, line_total)
+    SELECT r.id, v.tier, v.b, v.f, v.s, v.o, 0, 0, v.b + v.f + v.s + v.o
+    FROM r, (VALUES
+      ('ADMIN_TO_AGENCY',
+        ${opts.platformOnly ? '100000' : '80000'}::numeric,
+        ${opts.platformOnly ? '20000' : '16000'}::numeric,
+        ${opts.platformOnly ? '5000' : '4000'}::numeric,
+        ${opts.platformOnly ? '1000' : '800'}::numeric),
+      ('SHIPPER', 100000::numeric, 20000::numeric, 5000::numeric, 1000::numeric)
+    ) AS v(tier, b, f, s, o);
+    ` : ''}
   `);
 }
 
@@ -115,6 +137,13 @@ function cleanup() {
   psql(`DELETE FROM public.zen_billing_statements WHERE issuer_org_id IN ('${agency.orgId}','${otherAgency.orgId}');`);
   psql(`ALTER TABLE public.zen_billing_statements ENABLE TRIGGER trg_billing_statement_before_delete;`);
   const ids = ALL_ORDERS.map((o) => `'${o}'`).join(',');
+  psql(`ALTER TABLE public.zen_ups_settlement_runs DISABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_amounts DISABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_charges DISABLE TRIGGER USER;`);
+  psql(`DELETE FROM public.zen_ups_settlement_runs WHERE order_id IN (${ids});`);
+  psql(`ALTER TABLE public.zen_ups_settlement_runs ENABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_amounts ENABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_charges ENABLE TRIGGER USER;`);
   psql(`DELETE FROM public.zen_order_costs WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.zen_order_rate_snapshots WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.order_status_history WHERE order_id IN (${ids});`);
@@ -132,6 +161,13 @@ function purgeLeftover() {
         WHERE id IN (SELECT statement_id FROM public.zen_billing_statement_items WHERE order_id IN (${ids}))
            OR issuer_org_id IN (SELECT id FROM public.zen_organizations WHERE name LIKE 'b360%');`);
   psql(`ALTER TABLE public.zen_billing_statements ENABLE TRIGGER trg_billing_statement_before_delete;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_runs DISABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_amounts DISABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_charges DISABLE TRIGGER USER;`);
+  psql(`DELETE FROM public.zen_ups_settlement_runs WHERE order_id IN (${ids});`);
+  psql(`ALTER TABLE public.zen_ups_settlement_runs ENABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_amounts ENABLE TRIGGER USER;`);
+  psql(`ALTER TABLE public.zen_ups_settlement_run_charges ENABLE TRIGGER USER;`);
   psql(`DELETE FROM public.zen_order_costs WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.zen_order_rate_snapshots WHERE order_id IN (${ids});`);
   psql(`DELETE FROM public.order_status_history WHERE order_id IN (${ids});`);
@@ -612,19 +648,15 @@ describe('티어별 금액 원천·ADHOC·통화 가드 (실제 RPC 호출)', ()
     expect(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE period_year = 2025 AND period_month = 11`)).toBe('0');
   });
 
-  it('통화 가드: 비 KRW 매출 행이 있으면 거부되고 헤더가 남지 않는다', async () => {
+  it('통화 가드 제거: 비 KRW 원장 행이 있어도 run(KRW) 기준으로 생성된다', async () => {
     asUser(agency);
-    const before = Number(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE issuer_org_id='${agency.orgId}'`));
-
     const res = await createBillingStatement({
       billedTarget: ORG_TARGET(shipper.orgId), year: 2025, month: 12, orderIds: [ORDER_USD],
     });
-    expect(res.success).toBe(false);
-    expect(res.error).toBe('통화가 KRW가 아닌 매출 항목이 있어 청구서를 만들 수 없습니다. (원가 관리에서 통화를 확인해 주세요)');
-
-    // 헤더 잔존 0 (한 트랜잭션 롤백 — orphan 없음)
-    expect(Number(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE issuer_org_id='${agency.orgId}'`))).toBe(before);
-    expect(psql(`SELECT count(*) FROM public.zen_billing_statements WHERE period_year = 2025 AND period_month = 12`)).toBe('0');
+    expect(res.success).toBe(true);
+    expect(psql(`SELECT line_total FROM public.zen_billing_statement_items i
+                 JOIN public.zen_billing_statements s ON s.id=i.statement_id
+                 WHERE s.statement_no='${res.statementNo}'`)).toBe('126000.00');
   });
 });
 

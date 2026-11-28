@@ -122,7 +122,7 @@ zen_ups_settlement_run_charges
 - `operations/orders.ts`의 `nextStatus === RELEASED` 분기에서 **UPS 오더는 `generateInvoicesForOrder`를 호출하지 않는다**(비UPS만 호출).
 - **서버 액션 직접 호출 방어**: `generateInvoicesForOrder` 함수 내부에서도 UPS 오더를 `logger.warn`과 함께 거부한다(AGENCY 등 직접 호출 경로 차단). 비UPS 동작은 불변.
 - 비UPS 오더의 인보이스 생성·마감은 **변경하지 않는다**(JSJung 확인 대기 — 이 범위 밖).
-- `generateInvoicesForOrder`를 직접 호출하는 관리자 액션(`generateInvoiceAction`)도 UPS 오더에는 사용하지 않도록 UI/가드를 정리한다.
+- **정정(2026-11-26, PR-3 재검토)**: 관리자 액션 `generateInvoiceAction`과 화주 거부 재발행 `rejectInvoice`는 `generateInvoicesForOrder`가 아니라 `InvoiceGenerator.generateInvoice`를 직접 호출한다. 따라서 UPS 거부는 **공통 진입점 `InvoiceGenerator.generateInvoice`**에 두어 세 호출처를 모두 덮는다. UI 정리는 PR-4a.
 
 ### 2-5. 이미 생긴 UPS 인보이스 처리 — 비교
 
@@ -222,6 +222,19 @@ zen_ups_settlement_run_charges
 | M4-b | **출처 오더 없는 비취소 인보이스 2건 삭제**. 참조 행·삭제 제약·트리거·연결 파일 없음 확인 → **단순 삭제**. 대상 행 전체 백업·롤백 SQL. 인보이스 id를 컬럼으로 갖지 않는 참조(알림 등)는 **미확인** — 실행 전 확인 | M4 후, **R-14·Edward 별도 승인**, 로컬 리허설 후. 실행 직전 동일 읽기 전용 조회 재수행 | 백업에서 복원 |
 | M5 | 기존 SETTLED·run 없음 UPS 오더 `NOT_SETTLED` 초기화(백업·롤백). **청구서 항목 포함 오더 제외** | M4·M4-b 후, 별도 승인·로컬 리허설 후 | 백업에서 복원 |
 
+**마이그레이션 시각 채번 (2026-11-25 예약)**
+
+| # | 예약 파일명 | 내용 |
+|:-:|:--|:--|
+| M1 | `20261126090000_task_b381_ups_settlement_run.sql` | run 3테이블 · RLS(tier) · 불변 트리거 |
+| M2 | `20261126091000_task_b381_billing_items_amounts.sql` | `billing_items_amounts` run 전용 · statement items 컬럼 · 통화 가드 제거 |
+| M3 | `20261126092000_task_b381_finalize_ups_settlement_run.sql` | RPC `finalize_ups_settlement_run`(보안 GRANT 포함) |
+
+- **기준 실측(2026-11-25)**: `origin/develop` 최신 `20261122100200`, `origin/TeamB_Dev` 최신 `20261124100000` → 둘보다 늦은 **2026-11-26 09:00 KST**부터 10분 간격으로 채번했습니다.
+- `next-task-number.sh`는 TASK 번호용이므로 마이그레이션 시각 채번에 사용하지 않았습니다.
+- 실제 파일 작성 직전 `git fetch origin` 후 양쪽 최신 시각을 재확인하고, 더 늦은 시각이 있으면 **3개 예약 시각을 함께 뒤로** 옮깁니다(타임스탬프가 늦은 쪽이 양보).
+- M4·M4-b·M5는 데이터 조치 SQL로 마이그레이션 파일이 아니며, 운영 적용 시점·순서는 #1364에서 Aiden·Edward가 확정합니다. Team B는 로컬 리허설만 합니다.
+
 **배포 순서**
 1. Ds-11 확정. **M4·M5 전 R-14 승인 아래 읽기 전용 조회**(UPS 인보이스 건수·상태별·PAID 건수·청구서 포함 오더 수)를 수행하고 결과를 task file에 기록한다.
 2. M1·M2·M3 배포(추가형).
@@ -283,5 +296,422 @@ zen_ups_settlement_run_charges
 - Jaison 6차 보완 3건: M5 청구서 포함 제외, `recomputeRevenue` 목적 명시, §3 확정/근거 정리.
 - 7차 지시: PAID는 방어 가드로만, M5 제외 조건·테스트, 상태 표기·§5 갱신.
 - 코드·마이그레이션 변경 없음. PR은 draft 유지(`status:draft`).
-- **커밋 해시**: `9a8f77e58` (M4-b 추가 커밋). 해시 갱신 커밋은 별도.
+- **커밋 해시**: 코드 `7981bdc5b165774177e0d53e973cd34387f57b9a` / 문서 `7981bdc5b165774177e0d53e973cd34387f57b9a` (M4-b 추가 커밋). 해시 갱신 커밋은 별도.
 - PR: #1462 (draft, `Refs #1459`, `Refs #1451`, `Refs #1453`, `Refs #1463`, `Refs #1369`).
+
+
+## 7. 마이그레이션 시각 예약 (2026-11-25)
+
+- M1 `20261126090000` · M2 `20261126091000` · M3 `20261126092000` (10분 간격)
+- 기준: `origin/develop` `20261122100200` / `origin/TeamB_Dev` `20261124100000` 실측, 둘보다 늦은 시각으로 채번
+- 작성 직전 재확인·충돌 시 3개 일괄 조정. M4·M4-b·M5는 데이터 조치(운영 절차, #1364)
+- **커밋 해시**: 코드 `7981bdc5b165774177e0d53e973cd34387f57b9a` / 문서 `7981bdc5b165774177e0d53e973cd34387f57b9a`
+
+## 8. [구현 작업 결과] PR-1 — DB M1~M3 (2026-11-26)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr1-db` |
+| **PR** | #1536 (`TeamB_Dev`, `Refs #1459`) |
+| **마이그레이션 시각** | M1 `20261126090000` · M2 `20261126091000` · M3 `20261126092000` (작성 직전 재확인: develop `20261122100200`·TeamB_Dev `20261124100000`보다 늦음) |
+| **범위** | DB만. 앱 액션·화면·자동 인보이스 중단은 PR-2~4 |
+
+### 8-1. 산출물
+- M1: `zen_ups_settlement_runs`·`_run_amounts`·`_run_charges` + tier RLS + append-only 트리거 + ROLLBACK 블록
+- M2: `billing_items_amounts` run 전용(레거시 폴백 제거) + `zen_billing_statement_items.freight_adjustment`·`charge_details` + 통화 가드 제거 + ROLLBACK 블록
+- M3: `finalize_ups_settlement_run`(DEFINER·search_path·GRANT, admin 3역할, 멱등, 인보이스 방어, 원자 처리) + ROLLBACK 블록
+- 테스트: `tests/integration/task-b381-settlement-run-db.test.ts` (**12건, 자기완결형 — CI 실행**)
+- 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-381_Issue1459_pr1_db.md`
+
+### 8-2. 테스트 결과
+
+- **자기완결형**: `beforeAll`에서 조직·GoTrue 계정(런타임 난수)·오더를 만들고 `afterAll`에서 정리한다. `skipIf`/전용 환경변수 없이 **CI에서 실행**된다(12/12).
+- 신규 DB 통합 **9/9 PASS** — RPC 성공·멱등·불변 트리거·RLS tier·MANAGER 양성·비관리자 거부·인보이스 방어·run 전용 금액·원자성
+- 되돌리기: 불변 트리거 비활성 → 1 failed(복구 PASS), M1~M3 롤백 블록 실행 → 객체 0 확인 후 재적용 PASS
+- 기존 회귀 갱신: b360 청구서 28/28, b360 Excel 19/19, b359 스키마 36/36
+- 전체: **306 passed · 2 skipped / 2,345 passed · 25 skipped**, build SUCCESS
+
+### 8-3. M2 영향 확인 (레거시 폴백 제거)
+- run 없는 UPS 오더 청구는 `settlement_run_missing`으로 차단된다.
+- 폴백 의존 fixture 3파일을 run 기반으로 갱신했다: `task-b360-billing-statements.test.ts`, `task-b360-excel-export.test.ts`, `taskb359-billing-statement-db.test.ts`.
+- 그 외 폴백 의존 테스트는 전체 회귀에서 발견되지 않았다.
+
+### 8-4. 배포·로컬 영향
+- 이 PR 병합 후 Mike·Baker 로컬 DB는 `./scripts/check-db-freshness.sh --fix`가 필요하다.
+- M5 로컬 리허설(#1532)은 M1 이후 재실측 대상이다.
+- 운영 적용은 Aiden(Edward 승인, R-14). M4·M4-b·M5는 이 PR 범위 밖.
+
+### 8-5. 설계 §2-11 14항목 매핑
+| # | 항목 | PR/테스트 |
+|:-:|:--|:--|
+| 1 | run 양 tier·charge weight·billing_items_amounts 일치 | **PR-1** TC-381-01·08 |
+| 2 | ADJ 분리·항목명·반올림 합=총액 | PR-2(액션) + PR-1 TC-381-08 |
+| 3 | 같은 입력 2회 → 새 version 없음 | PR-1 TC-381-02 + PR-2 |
+| 4 | run RLS 매트릭스 | **PR-1** TC-381-04 |
+| 5 | RPC 보안·원자성·MANAGER 양성 | **PR-1** TC-381-03·05·06·09 |
+| 6 | UPS 출고확정 인보이스 미생성 (비UPS 회귀) | PR-3 |
+| 7 | 기존 UPS 인보이스 일괄 취소 | 범위 밖(#1532·운영) |
+| 8 | SETTLED·run 없음 초기화 | 범위 밖(#1532·운영) |
+| 9 | 비취소 인보이스 → `ups_invoice_exists` | **PR-1** TC-381-07(파일 확인: admin으로 실행, MANAGER 양성은 TC-381-05) |
+| 10 | `generateInvoicesForOrder` 직접 호출 UPS 거부 | PR-3 |
+| 11 | M4-b 삭제·참조 무결성 | 범위 밖(#1532·운영) |
+| 12 | 옛 UPS 화면·액션 제거 후 비UPS 무회귀 | PR-4 |
+| 13 | R-10 화면·ERROR 0 | PR-4 |
+| 14 | 전체 회귀·build | **PR-1** + 각 PR |
+
+### 8-6. 실패 관측성·금전 영향
+- RPC 실패는 오류 코드로 반환되어 앱에서 `logger.error`로 기록한다(PR-2). 금액·정산 영향이 있어 PR-2에서 핵심 지점 4기준 판정 후 필요 시 CRITICAL 알림을 구성한다.
+- **커밋 해시**: 코드 `7981bdc5b165774177e0d53e973cd34387f57b9a` / 문서 `7981bdc5b165774177e0d53e973cd34387f57b9a`
+
+### 8-7. 재검토 보완 반영 (Jaison 필수 4·권고 3)
+
+**2차 비차단 보완 (2026-11-26)**
+- M3 멱등 비교 정규화: 입력 금액 `round(...,2)`·항목명 `btrim`을 비교 양쪽에 적용. 공백 이름·소수 3자리 입력으로 재마감해도 새 version이 생기지 않는 테스트 추가(CI 실행).
+- M1 문구: "쓰기는 DEFINER RPC만" → **authenticated 기준**으로 정정. `service_role` INSERT 권한 카탈로그 확인 결과 **true**(Supabase 기본 권한), SELECT true.
+- M2 헤더: "추가형" → **함수 교체(동작 변경)** — run 없는 오더는 `settlement_run_missing`으로 차단.
+- 후속 설계 항목: `settled_by`의 화면/응답 노출 여부는 이 PR 범위 밖(후속 검토 1건).
+
+| # | 변경 | 파일·확인 |
+|:-:|:--|:--|
+| 1 | **멱등 재마감**: 같은 입력 분기에서 오더가 `NOT_SETTLED`면 인보이스 방어 후 **run 생성 없이 `SETTLED` 복구**. 다른 입력은 새 version | M3 §4~5. 테스트 `task-b381-settlement-run-db.test.ts` — unmark 후 재마감 시 run 1건·같은 run_id·`SETTLED`, 다른 입력은 version 2 |
+| 2 | **M2 ROLLBACK 실행 가능**: `billing_items_amounts` DROP → b360 두 함수 원문 재적용 → 컬럼 DROP → GRANT/reload. 주석 해제만으로 실행 | M2 하단 블록. 실행 검증: 롤백 후 `billing_items_amounts` OUT **7**·items 컬럼 **11**·두 함수 존재, 재적용 후 **10**·**13** |
+| 3 | **Ds-11 갱신**: run 3테이블·RPC·변경 RPC·컬럼 추가 기재, 인덱스 갱신 | `Ds_11_11B_UPS_Agency_Actuals.md §11.19`, `Ds_11_04_Finance_Settlement.md`, `Ds_11_API_상세_명세서.md` |
+| 4 | **보안 테스트 추가**: anon RPC 거부, `has_function_privilege`(**anon** f·authenticated t — PUBLIC 직접 검사 아님), `prosecdef=true`·`search_path=public`, GRANT 회수 시 호출 실패(되돌리기) | 동일 테스트 파일 |
+| 5 | `settled_by` FK를 **ON DELETE RESTRICT**로 변경 + 오더 CASCADE·불변 트리거 주석 | M1 |
+| 6 | 인보이스 `source_order_id` 비교를 **text 비교**로 변경(비uuid 값 형변환 오류 방지) | M3 |
+| 7 | **RLS 음성 대조**(비소속 대리점·타 조직 화주 0건) + 오류 `not_ups_order`·`already_settled`(다른 입력)·`paid_invoice_exists` 테스트 | 동일 테스트 파일 |
+
+- 신규 DB 통합 **12/12 PASS**(자기완결형, CI 실행), 전체 **307 passed · 1 skipped / 2,357 passed · 16 skipped**, build SUCCESS. (PR-1 재검토에서 멱등 정규화 1건 추가되어 최종 **13/13**)
+- 되돌리기: 불변 트리거 비활성 1 failed, GRANT 회수 시 호출 실패, M1~M3 롤백 블록 검증.
+
+## 9. [구현 작업 결과] PR-2 — 서버 액션·정산마감 경로 (2026-11-26)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr2-actions` |
+| **PR** | #1544 (`TeamB_Dev`, `Refs #1459`) |
+| **범위** | `ups-settlement.ts`(preview/draft/finalize) · `src/lib/ups/settlement/*` · finance index export · Ds-11 액션 항목 · 회귀 항목 PR2 |
+| **범위 밖** | `zen_ups_actual_charges` DROP, `unmarkOrderCostSettled` 변경, M4/M4-b/M5 실행, 운영 DB 접근, 옛 액션·UI 제거(PR-4) |
+
+### 9-1. 산출물
+- `src/app/actions/finance/ups-settlement.ts` — `previewUpsSettlement`·`saveUpsSettlementDraft`·`finalizeUpsSettlement` (관리자 3역할)
+- `src/lib/ups/settlement/types.ts` — `UpsSettlementInput`·`UpsSettlementPreview`·`SettlementCurrencyError`
+- `src/lib/ups/settlement/build.ts` — `computeSettlementCost`(출고확정일 환율·원가), `buildSettlementPreview`(2 tier run payload)
+- `src/app/actions/finance/index.ts` — 3개 액션 export
+- `messages/{ko,en,zh,ja}.json` — 신규 오류 키 6개(`ups_invoice_exists`·`paid_invoice_exists`·`settlement_run_missing`·`currency_conversion_failed`·`ups_estimate_unavailable`·`rpc_failed`)
+- 테스트: `tests/integration/task-b381-ups-settlement-actions.test.ts` (**10건, 자기완결형 — CI 실행**), `tests/unit/ups/settlement-build.test.ts` (**8건, 고정 fixture**)
+- 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-381_Issue1459_pr2_actions.md`
+- Ds-11: `Ds_11_11B_UPS_Agency_Actuals.md §11.20`, `Ds_11_04_Finance_Settlement.md §4.4`, 인덱스 갱신
+
+### 9-2. 테스트 결과
+
+- 자기완결형: `beforeAll`에서 조직·GoTrue 계정(런타임 난수, 비밀번호는 대/소문자·숫자 포함)·오더·스냅샷을 만들고 `afterAll`에서 `session_replication_role=replica`로 정리한다. 게이트/전용 환경변수 없이 CI에서 실행된다.
+- 신규 통합 **11/11 PASS** — 미리보기 무쓰기·임시저장 원가만·정산마감 run/charges/SETTLED·멱등 재호출·SETTLED 다른 입력 거부+원가 불변·인보이스 방어·SHIPPER 거부·환율 실패·비UPS 가드·도착국 미확인·인보이스 조회 오류 fail-closed. 거부 사유는 `trError`를 키 반환으로 mock해 **오류 키로 단언**(`already_settled`·`ups_invoice_exists`·`permission_denied`·`not_ups_order`·`currency_conversion_failed`·`ups_estimate_unavailable`).
+- 신규 단위 **8/8 PASS** (`settlement-build.test.ts`) — 고정 estimate·환율(3자리 소수)·스냅샷으로 두 tier의 7개 금액(구성요소·음수 조정·부가항목 2자리 합·`line_total`)과 부가항목 payload를 **값으로** 단언하고, 대리점 `agencyCostPrice <= 0` 폴백·`agency/shipper 없음` 조정 0·상품/도착국 실패를 고정했다.
+- 통합 finalize는 **미리보기 금액 = run 저장 금액 = `billing_items_amounts` 반환 금액**을 값으로 비교하고, `charge_details` 항목 값·`charge_weight_kg`도 함께 확인한다.
+- `npm run build` SUCCESS.
+- **회귀 1차**: 오류 키 5개 추가로 `tests/unit/i18n/errors-key-sync.test.ts`의 기준 키 수(111→116)·목록을 갱신했다. 같은 실행에서 DB 테스트 3파일이 로컬 DB 재생성 중 스키마 소실(`relation does not exist`·프로필 org_id 공백)로 실패했으나, 재실행에서 **3파일 83/83 PASS**로 코드와 무관함을 확인했다.
+- **최종 회귀**: `npm run test:regression` — **311 files passed · 1 skipped / 2,377 passed · 16 skipped**(skip은 B-373 세션 테스트 16건), `npm run build` SUCCESS.
+
+### 9-3. 환율·통화 실패 처리 (§B)
+
+- 기준일은 `getOrderReleasedDate`(최신 `RELEASED`의 UTC 날짜, 이력 없으면 오더 생성일/오늘)를 그대로 사용한다.
+- 정산마감 금액은 청구서로 직결되므로 `getExchangeRate`의 최후 fallback(**1350**)을 쓰지 않는다. `zen_exchange_rates`에서 해당 통화쌍의 유효 환율(`rate_date <= 출고확정일`, `is_active`)이 없으면 `SettlementCurrencyError` → `currency_conversion_failed`로 **실패**한다(조용히 다른 금액으로 확정 금지).
+- 테스트: 유효 환율이 없는 통화(`ZZZ`)로 미리보기 → `success:false`, run 0·원가 0(TC-381A-08).
+
+### 9-4. 멱등·잠금 경계
+
+| 오더 상태 / 입력 | 동작 |
+|:--|:--|
+| `NOT_SETTLED` + 신규 입력 | 원가 저장 → RPC가 새 version 생성 + `SETTLED` |
+| `SETTLED` + 같은 payload | 액션은 원가를 **덮어쓰지 않고** RPC에 위임 → RPC가 기존 run을 **멱등 반환**(성공, version 유지) |
+| `SETTLED` + 다른 payload | RPC가 `already_settled` 거부. 액션이 SETTLED에서 원가 저장을 생략하므로 **원가·run 불변** |
+| 미리보기·임시저장 + `SETTLED` | `already_settled` 거부(쓰기 금지) |
+
+- 같은 `baseFreight`만 바꾼 재호출은 run payload(매출 tier 금액)가 동일하므로 멱등 반환된다. run payload를 바꾸는 입력(부가항목 금액·중량)으로 잠금을 검증했다(TC-381A-05).
+- **멱등 재호출의 재계산 한계**: SETTLED 이후 요율·할인·환율 데이터가 바뀌면 같은 입력도 다른 payload로 계산되어 멱등 반환 대신 `already_settled`로 거부될 수 있다. 안전한 방향(중복 run 미생성·원가 불변)의 실패이며, 같은 데이터 구간에서는 멱등이 성립한다.
+
+### 9-5. 핵심 지점 4기준 판정 (§B)
+
+| 기준 | 판정 | 근거 |
+|:--|:--|:--|
+| ① 금전적 영향 | **해당** | 정산마감 금액이 청구서·run의 단일 원천 |
+| ② 외부 SLA/고객 접점 | 비해당 | 관리자 내부 정산 업무 |
+| ③ 침묵성 | 비해당 | 실패를 동기 응답으로 반환하고 `logger.error`로 기록 |
+| ④ 과거 사고 이력 | **해당** | UPS 원가·정산 경로는 이미 핵심 지점으로 지정(TASK-B-321/#1183 로그 커버리지, ①③) |
+
+- **2개 해당 → 핵심 지점**. 조치: RPC 실패·통화 실패·예외 3경로 모두 `logger.error`를 **반환 이전에** 호출한다. 서버 `logger.error`는 `zen_error_logs`에 ERROR로 자동 적재되어 `/admin/error-logs`에서 즉시 확인할 수 있다(DEF-145/IMP-183 계열 기존 경로).
+- CRITICAL 승격(이메일·인앱)은 **IMP-192**(`scratch/post_launch_improvements.md` — `ups-actual-cost`/`ups-actual-charges` 실패 지점의 `logClientError(CRITICAL)` 미구성)의 후속 범위다. 이 PR의 `ups-settlement.ts`도 **같은 사안**(핵심 지점 ①·④, CRITICAL 미승격)이며, IMP-192 범위에 이 파일을 포함할지는 Aiden이 판단한다(IMP 번호 소관). 이 PR에서는 새 인프라를 추가하지 않았다.
+
+### 9-6. `logger.error` 반환 이전 위치 (증거)
+
+| 경로 | 위치 | 순서 |
+|:--|:--|:--|
+| `finalize_ups_settlement_run` 실패 | `src/app/actions/finance/ups-settlement.ts:183-187` | `logger.error` → `return` |
+| 통화 변환 실패 | 동일 `:196-197` | `logger.error` → `return` |
+| estimate 불가 | 동일 `:200-201` | `logger.error` → `return` |
+| 그 외 예외 | 동일 `:203-204` | `logger.error` → `return` |
+| 인보이스 조회 실패(보조) | 동일 `:63`, **fail-closed**(`rpc_failed`) | `logger.error` → 반환(원가 선저장 안 함) |
+| 오더 조회 실패 | 동일 `:40` | `logger.error` 후 `order_not_found` 반환 |
+
+- RPC 실패 로그에는 오더 id·오류 코드·원가 KRW 합계·부가항목 건수만 남기고 인보이스 번호·계좌·거래처 값은 남기지 않는다(R-21).
+
+### 9-7. 설계 §2-11 14항목 매핑 (PR-2 반영)
+
+| # | 항목 | PR/테스트 |
+|:-:|:--|:--|
+| 1 | run 양 tier·charge weight·billing_items_amounts 일치 | PR-1 TC-381-01·08 + **PR-2 TC-381A-03**(미리보기·run·`billing_items_amounts` 값 비교)·TC-381A-11 |
+| 2 | ADJ 분리·항목명·반올림 합=총액 | **PR-2 TC-381A-11**(7개 금액 값 단언)·TC-381A-01·03·05 + PR-1 TC-381-08 |
+| 3 | 같은 입력 2회 → 새 version 없음 | PR-1 TC-381-02·12 + **PR-2 TC-381A-04** |
+| 4 | run RLS 매트릭스 | PR-1 TC-381-04·13 |
+| 5 | RPC 보안·원자성·MANAGER 양성 | PR-1 TC-381-03·05·06·09·15·16 |
+| 6 | UPS 출고확정 인보이스 미생성 (비UPS 회귀) | PR-3 |
+| 7 | 기존 UPS 인보이스 일괄 취소 | 범위 밖(#1532·운영) |
+| 8 | SETTLED·run 없음 초기화 | 범위 밖(#1532·운영) |
+| 9 | MANAGER 비취소 인보이스 → `ups_invoice_exists` | PR-1 TC-381-07 + **PR-2 TC-381A-06**(액션 선확인) |
+| 10 | `generateInvoicesForOrder` 직접 호출 UPS 거부 | PR-3 |
+| 11 | M4-b 삭제·참조 무결성 | 범위 밖(#1532·운영) |
+| 12 | 옛 UPS 화면·액션 제거 후 비UPS 무회귀 | PR-4 |
+| 13 | R-10 화면·ERROR 0 | PR-4 |
+| 14 | 전체 회귀·build | 각 PR CI |
+
+### 9-8. 확인 요청 답변 (Jaison a~d)
+
+| # | 질문 | 답변 |
+|:-:|:--|:--|
+| a | 설계 §2-1 7단계 "알림(best-effort)" 미구현 | **의도적 보류**. PR-2에는 새 정산마감 화면이 없어(PR-4a) 알림 수신자·문구·동선이 확정되지 않았다. `revalidatePath`는 3곳 구현했다. 알림은 새 화면과 함께 **PR-4a**에서 붙인다. |
+| b | draft·preview도 `DELIVERED`만 허용 | **의도**. 설계 §2-1 1단계 가드가 `DELIVERED`이고, `getOrdersForCostSettlement`도 `DELIVERED`만 노출한다. 옛 `recordUpsActualCost`의 `IN_TRANSIT` 임시저장 경로는 PR-4a에서 옛 액션과 함께 제거된다. |
+| c | 제품 미해결 시 기존 스냅샷 폴백 → 신규 실패 | **실패가 안전하다고 판단**해 유지하되 전용 키 `ups_estimate_unavailable`를 추가했다(기존 `rpc_failed` 오해 소지 제거). 사유는 `SettlementEstimateError`(PRODUCT_NOT_FOUND/DEST_COUNTRY_MISSING)로 구분해 로그에 남기고, 스냅샷으로 조용히 폴백하지 않는다. TC-381A-10으로 고정. |
+| d | 실중량 폴백 순서 차이 | **기존과 동일하게 수정**했다. `actualWeightKg ?? snapshot.platform.chargeableWeightKg`(기존 `recomputeRevenue`와 동일). 이전의 `billingWeightKg` 우선은 제거. |
+
+### 9-9. 재검토 보완 반영 (Jaison 필수 3건·Aiden 비차단)
+
+| # | 지적 | 반영 |
+|:-:|:--|:--|
+| J1 | 대리점 target `> 0` 폴백 누락 | `agencyCostPrice <= 0`이면 플랫폼 합계 target. `settlement-build.test.ts`에서 조정 24(플랫폼 120 − 구성 96)로 고정 |
+| J2 | 금액 값 단언 없음·§9-7 매핑 과대 | 단위 8건(고정 fixture, 7개 금액·음수 조정·3자리 환율 반올림) + 통합에서 미리보기=run=`billing_items_amounts` 값 비교. §9-7을 실제 단언 범위로 수정 |
+| J3 | 거부 사유 미단언 | `trError`를 키 반환으로 mock하고 6개 오류 키를 정확히 단언 |
+| A1 | 인보이스 조회 오류 시 원가 선저장 | 조회 오류를 **fail-closed**(`rpc_failed`)로 변경 — 원가 저장 전에 반환. 조회 오류 stub 클라이언트로 TC-381A-12 고정 |
+| A2 | 핵심 지점 후속 Issue | **IMP-192**(CRITICAL 미구성)로 정정, `ups-settlement.ts`도 동일 사안임을 명시 |
+| A3 | 멱등 재계산 한계 | §9-4에 명시(안전한 방향의 실패) |
+
+- 참고(비차단, 후속 검토): `saveCostDraft`의 부가항목 delete→insert는 트랜잭션이 아니다(기존 `recordUpsActualCost` 패턴과 동일). 중간 실패 시 부가항목이 빈 상태로 남을 수 있어 `logger.error`만 남긴다. PR-4a에서 옛 경로 제거 시 RPC/단일 트랜잭션 편입을 검토한다.
+
+### 9-10. 후속 인계
+
+- **PR-3**: PR-2 병합 후 착수(착수 전 이슈에 한 줄 보고). 범위는 서버 방어만(RELEASED UPS 미호출·`generateInvoicesForOrder` UPS 거부·`finalizeDailyShipperInvoices` UPS 제외, 비UPS 양성 대조). **PR-3과 PR-4a는 같은 날 연달아 병합**, 그 사이 `TeamB_Dev` 수동 테스트·UAT·배포 제외(시작·종료 시각 `date` 기록).
+- **PR-4**: 새 정산마감 화면 + 옛 액션·UI 제거를 같은 PR(4a), Ds-11 마무리·R-10 증적(4b).
+- **`settled_by` 노출**: Aiden 판단 대기. PR-2는 노출하지 않는다(범위 밖).
+- **커밋 해시**: 코드·문서 커밋 해시는 PR 본문 참조.
+
+## 10. [구현 작업 결과] PR-3 — 자동 인보이스 중단·서버 가드 (2026-11-26)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr3-guards` |
+| **PR** | #1549 (`TeamB_Dev`, `Refs #1459`) |
+| **범위** | 서버 방어만 — ① RELEASED 분기 UPS 미호출 ② `generateInvoicesForOrder` 내부 UPS 거부 ③ `finalizeDailyShipperInvoices` UPS 제외 |
+| **범위 밖** | 옛 액션·UI 제거(PR-4a), `zen_ups_actual_charges` DROP, `unmarkOrderCostSettled` 변경, M4/M4-b/M5, 운영 DB |
+
+### 10-1. 산출물
+- `src/app/actions/operations/orders.ts` — `nextStatus === RELEASED && transport_mode !== 'UPS'`일 때만 자동 인보이스
+- `src/lib/finance/settlement/invoice-generator.ts` — **공통 진입점** `generateInvoice`가 UPS 오더를 `logger.warn` + `ups_invoice_blocked`로 거부(조회 실패는 `logger.error` + `generic{ORDER_LOOKUP}` fail-closed). `generateInvoicesForOrder`·`generateInvoiceAction`·`rejectInvoice(재발행)` 세 경로를 모두 덮는다.
+- `src/app/actions/finance/settlement.ts` — `generateInvoicesForOrder`가 사용자 메시지를 위해 UPS를 조기 거부(동일 키). `rejectInvoice`는 UPS 인보이스를 **취소까지만** 수행하고 재발행하지 않는다(`newInvoiceId` 없음) — 공통 진입점이 재발행을 거부하기 때문이다.
+- `src/app/actions/finance/daily-billing.ts` — `finalizeDailyShipperInvoices`가 UPS 인보이스를 `skippedCount`로 제외, 인보이스/오더 조회 실패는 fail-closed
+- `messages/{ko,en,zh,ja}.json` — `ups_invoice_blocked` 신규(4개 로케일)
+- 테스트: `tests/unit/finance/task-b381-pr3-ups-invoice-guards.test.ts`(6건), `tests/unit/finance/task-b381-pr3-generate-invoices-guard.test.ts`(8건), `tests/unit/finance/task-b381-pr3-invoice-generator-guard.test.ts`(3건), 기존 i18n 키 동기화(118키)
+- 회귀 항목: `docs/08_Self_Audit/Checklists/regression-items/TASK-B-381_Issue1459_pr3_guards.md`
+- Ds-11: `Ds_11_04_Finance_Settlement.md` §`generateInvoicesForOrder`·§4.5
+
+### 10-2. 테스트 결과
+- 신규 **17/17 PASS**
+  - 출고확정: UPS 미호출·비UPS 호출·비RELEASED 미호출
+  - 일괄 마감: UPS/비UPS 혼재(`skippedCount`)·인보이스 조회 실패(`INVOICE_LOOKUP`)·오더 조회 실패(`ORDER_LOOKUP`) fail-closed
+  - 직접 경로: `generateInvoicesForOrder` UPS 거부(ADMIN/AGENCY)·가드 조회 실패·비UPS 양성 / `generateInvoiceAction` UPS 거부·비UPS 양성 / `rejectInvoice` UPS 취소만·비UPS 재발행 / `InvoiceGenerator` 공통 진입점 UPS 거부·조회 실패·비UPS 통과
+  - 로그 레벨: UPS 거부 `warn`, 가드/조회 실패 `error`, 일괄 제외 `warn`, fail-closed `error`를 모두 단언
+- 기존 영향 테스트: `invoice-generator-agency-invoice`·`tests/integration/finance.test.ts`·`agency-settlement-permission`·`ups-product-guard`·`daily-billing-aggregation`·`order-actions` **74/74 PASS**
+- 기존 영향 테스트: `tests/integration/finance.test.ts`·`tests/unit/finance/agency-settlement-permission.test.ts`·`tests/unit/orders/ups-product-guard.test.ts`·`tests/unit/finance/daily-billing-aggregation.test.ts`·`tests/unit/logistics/order-actions.test.ts` **전부 PASS**(가드 추가 후에도 기존 fixture의 기본 `maybeSingle` 반환으로 비UPS 경로 유지)
+- 전체 회귀: `npm run test:regression` — **311 files passed · 1 skipped / 2,386 passed · 16 skipped**(PR-2 대비 +9, skip은 B-373 16건). `npm run build` SUCCESS.
+
+### 10-3. 설계 §2-11 14항목 매핑 (PR-3 반영)
+
+| # | 항목 | PR/테스트 |
+|:-:|:--|:--|
+| 6 | UPS 출고확정 인보이스 미생성 (비UPS 회귀) | **PR-3 TC-381B-01~03** |
+| 10 | 인보이스 생성 UPS 거부 — 모든 호출 경로(`generateInvoicesForOrder`·`generateInvoiceAction`·`rejectInvoice` 재발행·`InvoiceGenerator` 공통 진입점), 비UPS 성공 | **PR-3 TC-381B-04~07·11~14** |
+| 14 | 전체 회귀·build | 각 PR CI |
+
+- 나머지 항목은 PR-1·PR-2·PR-4/범위 밖 매핑(§9-7) 유지.
+
+### 10-4. 연속 병합·배포 제외
+- PR-3과 PR-4a는 **같은 날 연달아 병합**하며, 그 사이 `TeamB_Dev`는 수동 테스트·UAT·배포 대상에서 제외한다. 시작·종료 시각은 각 병합 때 `date`로 기재한다. 이 조건을 PR-3 본문에도 적는다.
+- PR-3은 새 화면 없이 서버 가드만 추가하므로 병합 시점에도 빌드가 유지된다.
+
+### 10-5. 후속
+- **목표 상태(JSJung 2026-11-27 확정)**: UPS 인보이스 정산마감은 신규 정산마감 경로로만 수행하며 단건 마감을 포함한 다른 경로는 없다(예외 없음). 기존 UPS 인보이스는 M4에서 정리한다.
+- **PR-4a**: 새 정산마감 화면 + 옛 액션·UI 제거. `/finance/daily-billing` UPS 항목 숨김을 함께 처리한다. `skippedCount`의 화면 표시는 UPS 항목 제거로 불필요해질 수 있어 PR-4a에서 확인한다.
+- **PR-4b**: Ds-11 마무리·R-10 증적.
+- **`settled_by` 노출**: Aiden 판단 대기(PR-2 미노출 유지).
+- 커밋 해시는 PR 본문 참조.
+
+### 10-6. 재검토 반영 (2026-11-26, Jaison 필수 3건·Aiden 보완 2건)
+
+| # | 지적 | 반영 |
+|:-:|:--|:--|
+| J1 | `generateInvoiceAction`·`rejectInvoice`가 `generateInvoicesForOrder`를 거치지 않아 UPS 거부 우회 | 공통 진입점 `InvoiceGenerator.generateInvoice`에 가드 추가(3호출처 모두 커버). `generateInvoicesForOrder` 조기 가드는 사용자 메시지용으로 유지. `rejectInvoice`는 **취소만·재발행 없음**으로 동작 고정(테스트 2건) |
+| J2 | 거부·제외 경로 로그 레벨 미단언 (Aiden 보완 1 동의) | `logger` mock으로 UPS 거부 `warn`, 가드/조회 실패 `error`, 일괄 제외 `warn`, fail-closed `error` 단언 |
+| J3 | fail-closed가 인보이스 조회 실패 1경로뿐 (Aiden 보완 2 동의) | `INVOICE_LOOKUP`·`ORDER_LOOKUP` 두 경로와 `errors[0]` 사유 코드를 각각 단언 |
+| A1 | `ShipperDailyBillingClient`가 `skippedCount`를 무시 | PR-4a 본문에 표시 처리 결과를 기재(비차단, 인계) |
+| A2 | RLS 하 AGENCY 조회 미검증 | PR-4a R-10과 함께 통합 검증(비차단) |
+| A3 | `.in()` 요청 길이 한계 | 50~100건 분할을 후속 검토(비차단) |
+| S1 | `rejectInvoice` UPS 테스트가 "취소"를 단언하지 않음 | update spy로 `zen_invoices` `status:'CANCELED'` 호출을 UPS·비UPS 양쪽에서 단언. 생성기 "비UPS 통과" 테스트 제목을 "가드 통과만 검증"으로 명확화 |
+
+- `generateInvoicesForOrder` 가드와 `InvoiceGenerator` 가드가 중복되지만, 전자는 역할·AGENCY 문맥에서 빠른 사용자 메시지를, 후자는 모든 호출처의 최종 방어를 담당한다.
+- **회귀**: `npm run test:regression` — **312 files passed · 1 skipped / 2,394 passed · 16 skipped**(1차 PR-3 대비 +8, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+
+## 11. [구현 작업 결과] PR-4a — 화면 전환·옛 액션/UI 제거 (2026-11-26)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr4a-ui` (`TeamB_Dev` 분기) |
+| **PR** | #1553 (`TeamB_Dev`, `Refs #1459`) |
+| **범위** | 새 정산마감 화면 전환 + 옛 액션·UI 제거를 같은 PR에서 수행. 4b(Ds-11 마무리·R-10)는 분리 |
+
+### 11-1. 산출물
+- `OrderSettlementDetail.tsx` — `previewUpsSettlement`·`saveUpsSettlementDraft`·`finalizeUpsSettlement` 사용, tier별 금액·조정·부가항목 표시, 기본운임·유류·급증·부가항목별 통화 선택, 항목 행 추가/삭제
+- `ups-actual-cost.ts` — `recordUpsActualCost`·`previewUpsActualCost`·`recordActualCostAndFinalize`·`markOrderCostSettled` 제거(잔존: `getUpsActualCost`·`getOrdersForCostSettlement`·`unmarkOrderCostSettled`)
+- `ups-actual-charges.ts` — `recordUpsActualCharges` 제거(잔존: 조회·검색·대사)
+- `BillingConfirmModal.tsx`·`UpsActualAdjustmentForm.tsx` 삭제, `orders/[orderId]`·`admin/ups-actual-charges`는 새 정산 화면 링크로 대체
+- `createPostFinalizationAdjustment`·`createAdjustmentInvoice` 제거 — 옛 후청구 경로(직접 `zen_invoices` insert) 폐쇄. `rejectInvoice`의 비UPS 재발행만 생성기 경유로 유지
+- `OrderFinanceSummary` — UPS에서 인보이스 생성 버튼 미노출
+- `finalizeUpsSettlement` — 성공 후 관리자 3역할 전원에게 인앱 알림(best-effort, 수신자별 실패는 `logger.warn` 후 정산 유지) — §2-1 7단계
+- `daily-billing.ts` — UPS 인보이스 집계·상세 제외, `ShipperDailyBillingClient` 개별 청구확정 버튼 제거
+- 오류 키 `legacy_invoiced_order` 제거(4개 로케일), i18n 기준 116키
+- **초안 저장값**: `zen_ups_actual_cost`의 금액 컬럼에 **원금액·입력 통화**를 저장하고, 환산·+7% 가산 결과는 `total_cost_krw`·`cost_surcharge_*`·`applied_exchange_rates`에만 기록(`calc_version=3`). 재오픈 시 원금액을 복원해 이중 가산을 방지. `calc_version<3` 초안은 금액 미복원·재입력 안내
+- Ds-11 11B §11.14 잔존 액션 정리, 회귀 항목 `TASK-B-381_Issue1459_pr4a_ui.md`
+
+### 11-2. 제거·유지 결정
+- **`rejectInvoice`**: 유지(비UPS 재발행). UPS는 PR-3 공통 진입점이 재발행을 거부하며 취소만 수행.
+- **`getOrdersForCostSettlement`의 `legacyInvoiced` 표시**: 목록 정보로 유지(가드 아님). 최종 차단은 새 RPC의 `ups_invoice_exists`.
+- **`unmarkOrderCostSettled`**: 유지(청구서 포함 차단).
+- **`zen_ups_actual_charges` 테이블**: DROP하지 않음(별도 결정).
+
+### 11-3. 테스트
+- 신규 `task-b381-pr4a-daily-billing-exclusion.test.ts` 2건 — UPS 제외·비UPS 양성
+- 신규 `task-b381-pr4a-notification-db.test.ts` 1건 — 알림 **실DB**(모킹 없음), 실행자 3역할 × 수신자 3명 행 생성·SHIPPER 0건
+- 신규 `order-settlement-detail.test.tsx` 7건 — 초안 복원(calc 3/2), 디바운스 미리보기·항목별 부가운임 전달, 행 추가/삭제, 임시저장 인자, 정산마감, 되돌리기 실패
+- 복원 `task-b381-pr4a-get-orders-list.test.ts` 6건 · `task-b381-pr4a-ups-charge-readers.test.ts` 6건 — 보존 함수 회귀
+- PR-2 통합에 초안 라운드트립·알림 best-effort 2건 추가(총 13건)
+- 기존 `daily-billing-aggregation` fixture를 비UPS(AIR)로 전환해 집계·상세 로직 회귀 유지
+- 옛 액션·모달·폼 전용 테스트 제거: `ups-actual-cost`·`ups-actual-charges`(2)·`task-b364`·`task-b366`(unit/integration)·`BillingConfirmModal`·`UpsActualAdjustmentForm`·`order-settlement-detail`·E2E `r11`
+- 전체 회귀: `npm run test:regression` — **311 files passed · 1 skipped / 2,354 passed · 16 skipped**(옛 액션·UI 전용 테스트 제거로 PR-3 대비 −95, skip은 B-373 16건). `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+
+### 11-4. 후속 인계 (PR-4a 본문 기재 항목)
+- `createPostFinalizationAdjustment`→`createAdjustmentInvoice` 직접 insert 경로: 옛 후청구 액션 제거 여부·PR-3~4a 사이 UPS 도달 가능성
+- `rejectInvoice` UPS 취소 후 재발행 없음의 사용자 메시지 표시 → PR-4a에서 안내 문구 없이 `success:true`(후속 표시 검토)
+- `ShipperDailyBillingClient` `skippedCount` 표시: UPS 항목 자체를 숨겨 그룹 표시는 비UPS 기준으로 유지
+- RLS 하 AGENCY 조회 통합 검증 → 4b R-10
+- `settled_by` 노출 → Aiden 판단 전 미노출
+- IMP-192(CRITICAL 승격) 범위
+
+### 11-5. PR-4a 재검토 반영 (2026-11-26)
+
+| # | 지적 | 반영 |
+|:-:|:--|:--|
+| J1 | 초안 재오픈 시 원가 이중 가산·부가운임 소실 | 금액 컬럼에 원금액·통화 저장(`calc_version=3`), 페이지가 자식 부가항목까지 복원, `calc_version<3`은 금액 미복원·재입력 안내. 통합 라운드트립 테스트(저장→복원 preview 동일→재저장 total 불변→부가항목 유지) |
+| J2 | 보존 코드 테스트 소실 | `getOrdersForCostSettlement` 6건, `getUpsChargeReconciliation`/`searchDeliveredUpsOrders` 6건 복원. 새 화면 7건. 알림 best-effort 통합 1건. 삭제 파일은 "대상 함수 삭제"로 한정 |
+| J3 | 부가운임 항목별 입력 불가 | 항목명·금액·통화 행 추가/삭제 UI, `otherCharges[]`로 전달. 유류·급증도 통화 선택 |
+| a | 알림 수신자·문구 | **확정 사양 반영**: ADMIN·MANAGER·ZENITH_SUPER_ADMIN 전원, 제목·본문 4개 로케일 키(`UpsSettlementNotify`, 본문은 오더번호만), 수신자별 best-effort(조회/발송 실패에도 SETTLED 유지·`logger.warn`) |
+| b | `legacyInvoiced` 표시 | M4(옛 UPS 인보이스 취소) 전까지 목록·상세에 정보로 유지. 최종 차단은 새 RPC `ups_invoice_exists` |
+| N1 | head 해시 오기 | `gh pr view` 기준 head로 보고 |
+| N2 | i18n 제목 117 vs 실제 116 | 제목을 116으로 정정 |
+| N3 | 동일 삼항 | `previewing` 상태 제거, 단일 문구 |
+| M1 | PR-3 선반영 | `origin/TeamB_Dev`·PR-3 가드 브랜치를 병합 커밋으로 반영, task file·i18n 충돌 해소(Errors 117키). 병합 후 전체 회귀 PASS |
+
+### 11-6. `calc_version=3`·`other_charges_hkd` 정의 (PR-4a 재확인 답변)
+
+**① `calc_version=3`으로 구분한 이유·대안**
+- 2는 PR-2가 이미 사용했고 **금액 컬럼에 환산·+7% 가산 후 값**을 저장했다. 3은 **원금액·입력 통화**를 저장한다. `>= 2`로 게이트하면 기존 v2 초안을 원금액으로 오인해 이중 가산하므로 **`>= 3`**이 필요하다.
+- 대안: v2 초안을 마이그레이션으로 원금액 복원하는 방법은 원금액이 저장되어 있지 않아 불가능(가산 전 값 미보존). v3부터 원금액을 보존한다.
+
+**② 정의·주석**
+- 값 정의: `1=레거시(가산 없음)`, `2=PR-2 계산값 저장(환산·+7% 포함)`, `3=PR-4a 원금액·입력 통화 저장(환산·가산은 total_cost_krw/스냅샷)`.
+- 컬럼 주석 갱신: `supabase/migrations/20261126120000_task_b381_pr4a_cost_amount_comments.sql`(스키마 변경 없음, COMMENT만).
+
+**③ 읽는 코드·롤백 영향**
+- `src`에서 금액 컬럼을 읽는 곳은 `finance/order-settlement/[orderId]/page.tsx`뿐이며 `calc_version>=3`에서만 금액을 복원한다. 그 외 `src` 참조 0건.
+- 운영 쿼리(BI/수동 SQL)는 미확인. 롤백 시 v3 행을 v2처럼 읽으면 이중 가산 위험이 있으므로, 롤백 게이트는 `calc_version >= 2`가 아니라 **`>= 3`을 유지**해야 한다(Aiden·Jaison 최종 정리).
+
+**other_charges_hkd**
+- 읽는 곳: `src`에서는 위 `page.tsx` 1곳. 의도는 **참고용 합계**이며, 항목별 원금액·통화는 `zen_ups_actual_other_charges` 자식 행이 단일 원천이다.
+- 통화가 다른 항목이 섞이면 서로 다른 통화의 원금액을 단순 합산한 값이므로 **금액 계산에는 사용하지 않는다**(화면 표시·복원도 자식 행 사용). 컬럼 주석도 이 정의로 갱신.
+
+### 11-7. 알림 실발송 경로 검증 (2026-11-26, Aiden 요청)
+
+- **실DB 검증**: `tests/integration/task-b381-pr4a-notification-db.test.ts` — `sendInAppNotification`을 모킹하지 않고, ADMIN·MANAGER·ZENITH_SUPER_ADMIN이 각각 정산마감한 뒤 service 클라이언트로 `zen_notifications`의 `(order_id,user_id)` 행을 건수 단언. 3역할 전원 1건, SHIPPER 0건. 자기완결 fixture(런타임 계정·정리), skip 게이트 없음.
+- **발견 1 — CHECK 위반**: `zen_notifications_type_check` 허용값에 `UPS_SETTLEMENT`가 없어 insert 실패. 타입을 **`SYSTEM`**으로 수정.
+- **발견 2 — MANAGER 수신자 조회**: `zen_profiles` SELECT 정책이 본인/ADMIN·SUPER만이라 MANAGER 실행 시 수신자가 자기 자신으로 좁혀짐. 수신자 ID 조회만 **관리자 클라이언트**로 수행(권한은 이미 3역할로 제한).
+- **발견 3 — 타 사용자 알림 insert**: 공개 서버 액션 `sendInAppNotification`의 세션 insert는 타 사용자/비요청 컨텍스트에서 RLS에 막힘. **공개 액션 시그니처는 그대로 두고**, 서버 내부 전용 `src/lib/ups/settlement/notify-admins.server.ts`가 관리자 클라이언트로 `zen_notifications`에 직접 insert(수신자 조회도 동일 클라이언트). `sendInAppNotification` 호출처 3곳은 변경 없음.
+- **best-effort**: 수신자 조회/문구/발송을 outer try로 감싸 실패 시 `logger.warn` 후 `SETTLED` 유지. insert가 오류를 반환하는 경우도 `logger.warn`.
+- **테스트**: 헬퍼 단위 5건(정상·조회 실패·설정 실패·insert 오류 반환·insert 예외), 액션 통합에서 헬퍼 예외에도 `SETTLED` 유지, 실DB에서 `type='SYSTEM'`·title/message 값·AGENCY 0건까지 단언.
+- 알림 insert 실패는 best-effort라 `logger.warn`으로 처리하며, 심각도(CRITICAL 승격) 재정리는 IMP-192(`ups-settlement.ts` 핵심 지점 알림 범위)에서 다룬다.
+- **컬럼 주석 마이그레이션**: `20261126120000_task_b381_pr4a_cost_amount_comments.sql` — 적용 순서는 M3 `20261126092000` 뒤(전체 마이그레이션 순서대로 적용). 롤백은 이전 COMMENT 문구 복원(스키마 변경 없음).
+
+
+**PR-4a 3차 보완 (Aiden 필수 1·2, Jaison 범위 정정)**
+- **필수 1**: `sendInAppNotification`의 `asAdmin` 옵션을 제거해 **공개 액션 시그니처 원복**. 관리자 클라이언트 쓰기는 `notify-admins.server.ts`(`server-only`, 서버 액션 아님)로 분리.
+- **필수 2**: ① 수신자 조회 실패 ② setup(`createAdminClient`) 실패 ③ insert 오류 반환/예외 — 각각 `logger.warn` + `SETTLED` 유지 검증. 액션은 헬퍼 예외도 try/catch로 방어.
+- **권고 3**: 실DB에서 `type='SYSTEM'`·title/message 저장 값, 비수신 역할(AGENCY) 0건 단언. `type`은 알림 UI에서 아이콘/필터 분기에 사용되지 않음(`NotificationBell`에 type 참조 없음)을 확인.
+
+## 12. [구현 작업 결과] PR-4b — Ds-11 마무리·R-10 증적 (2026-11-27)
+
+| 항목 | 내용 |
+|:--|:--|
+| **브랜치** | `feature/teamb-task-b381-iss1459-pr4b-ds11-r10` (`origin/TeamB_Dev` 분기) |
+| **PR** | #1568 (`TeamB_Dev`, `Refs #1459`) |
+| **범위** | 문서(Ds-11)·R-10 증적·RLS 실세션 검증. 코드·마이그레이션 변경 없음 |
+| **범위 밖(별도)** | `rejectInvoice` 안내 문구(UI 후속), `skippedCount` 표시(현재 UPS 숨김으로 불필요), `settled_by` 노출(Aiden), IMP-192, `zen_ups_actual_charges` DROP |
+
+### 12-1. Ds-11 마무리 (R-12)
+- `Ds_11_11B_UPS_Agency_Actuals.md` §11.20 내부 헬퍼에 **`notifyUpsSettlementAdmins`**(경로·권한·입출력·best-effort 오류) 추가.
+- `Ds_11_04_Finance_Settlement.md`에서 **제거된** `createPostFinalizationAdjustment`·`createAdjustmentInvoice` 항목을 “PR-4a에서 제거(옛 후청구 경로 폐쇄, `src` 참조 0건)”로 대체.
+- 인덱스 줄 수 갱신(11B 227줄, 04 264줄).
+- **`npm run check:ds11` 결과는 함수명 언급 여부만 보는 도구**입니다: `액션 함수 305개 | Ds-11 언급 182개 | 미반영 123개(허용 목록 123개)` — 갱신 증거가 아니며, 위 수동 항목 추가가 증거입니다.
+
+### 12-2. R-10 증적 (저장소 밖 보관)
+- 실제 로그인(ADMIN) → `/ko/finance/order-settlement/[orderId]` → 값 입력 → **미리보기(2 tier)** → **정산 완료 모달 → 성공**까지 UI 구동 확인.
+- 결과: **PASS** — 화면 제목·미리보기·`SETTLED` 전환 확인, 브라우저 콘솔 오류 0, 오류 화면 0, `zen_error_logs` 신규 0건(“에러 로그 확인 — 無”).
+- 증적 스크린샷은 **저장소 밖**에 보관했습니다(R-21·GOV 증적 정책). 보고에는 결과만 기재합니다.
+- 참고: 시드된 기존 UPS 오더는 옛 인보이스가 남아 있어 `ups_invoice_exists`로 정산이 차단됩니다(설계대로). R-10은 옛 인보이스가 없는 신규 fixture로 정산 성공 경로를 확인한 뒤 fixture를 정리했습니다.
+
+### 12-3. RLS 실세션 검증
+- `tests/integration/task-b381-settlement-run-db.test.ts` **13/13 PASS** — **run·amounts 테이블 조회 범위**의 ADMIN/AGENCY/SHIPPER/비소속/anon 실세션 결과를 확인했습니다. 이 테스트는 PR-1 소관이며 이 PR은 추가하지 않았습니다. **PR-3 경로(`settlement.ts` transport_mode 조회·`findUpsInvoiceIds`·`InvoiceGenerator` 가드)의 AGENCY 실세션 검증은 미검증**이며 **#1569(TASK-B-400)**로 이월합니다. 역할별 정책 결과는 공개 문서에 쓰지 않고 통과 여부만 기록합니다.
+
+### 12-4. 후속 인계 구분
+| 항목 | 이 PR | 비고 |
+|:--|:--|:--|
+| `createPostFinalizationAdjustment` 직접 insert | **처리** | PR-4a에서 제거, Ds-11에 제거 기록 |
+| RLS 하 AGENCY 조회 | **미검증 이월** | run·amounts 조회 13/13은 PR-1 범위. PR-3 경로 실세션은 **#1569(TASK-B-400)**로 분리 인계 |
+| `rejectInvoice` UPS 안내 문구 | **별도** | UI 후속(코드 변경 필요) |
+| `skippedCount` 표시 | **별도(불필요)** | UPS 항목 자체를 숨겨 표시 대상 없음 |
+| `settled_by` 노출 | **보류** | Aiden 판단 전 미노출 |
+| IMP-192(CRITICAL 승격) | **별도** | Aiden 범위 판단 |
+| `zen_ups_actual_charges` DROP | **별도** | JSJung 결정 |
+
+### 12-5. 검증
+- run·amounts RLS 통합 13/13(PR-1 범위), UI R-10 PASS, 오류 로그 0. PR-3 경로 AGENCY 실세션은 #1569로 이월(미검증).
+- `npm run test:regression` — **312 files passed · 1 skipped / 2,364 passed · 16 skipped**(skip은 B-373 16건), `npm run build` SUCCESS, `tsc --noEmit` src 오류 0.
+
+### 12-6. PR-4b 재검토 반영 (2026-11-27, Aiden 필수 4·권고 6)
+
+| # | 지적 | 반영 |
+|:-:|:--|:--|
+| A1 | §11.13 `recordUpsActualCharges`가 활성 API로 잔존 | 제거 기록으로 대체, 제거된 `createPostFinalizationAdjustment` 호출 서술 삭제 |
+| A2 | `finalizeUpsSettlement` 알림·권한·로케일 불일치 | 부수효과에 알림(멱등 재호출 포함, revalidate 앞), 공통 권한에 알림 헬퍼 관리자 클라이언트 예외, 문구는 요청 로케일 1개·수신자 동일 문구·실패 시 영문 폴백 명시 |
+| A3 | §11.19 REVOKE/GRANT 대상 불일치 | SQL 기준 `REVOKE`(PUBLIC·anon·authenticated) / `GRANT SELECT`(authenticated·service_role)로 정정, 역할별 결과 표 제거 |
+| A4 | RLS 하 AGENCY “처리” 근거 부족 | run·amounts 13/13은 PR-1 범위로 정정. **PR-3 경로 AGENCY 실세션은 미검증 → #1569(TASK-B-400) 이월** (Jaison ⓑ 결정) |
+| R6 | Ds_11_04 보강 | 생성기 3호출처·UPS 거부는 생성기 내부 가드임을 명시, `getShipperDailyBillingSummary`·`getShipperDailyOrdersDetails` UPS 제외 항목 추가 |
+| R7 | 인덱스 stale | 03=66·07=72·11A=416·04=274·11B=222로 `wc -l` 확인 갱신 |
+| R8 | 소스 줄·server-only 표기 | `ups-actual-charges` 인용 줄(17-40·42-108·110-189) 정정, `server-only`는 `build.ts`만임을 명시 |
+| R9 | `tests/` 죽은 참조 2곳 | 문서 “`src` 0건” 유지, 테스트 정리는 IMP 건의 대상으로 보고(번호는 Aiden) |
+| R10 | task 정합 | §8 12→13 사유(멱등 정규화 1건 추가), §8-5 #9 실제 실행 역할(admin) 정정, 회귀 증가는 base 병합분과 상쇄 — 정확한 분해는 미확인 |

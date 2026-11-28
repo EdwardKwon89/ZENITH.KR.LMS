@@ -15,7 +15,7 @@
 | TC-369-02 | S1 조회 필터 전달 | `{status, from, to, q}` 정확 전달, 응답으로 목록 교체 | 동일 |
 | TC-369-03 | S1 기간 역전 | 서버 미호출 + 로컬 오류 표시 | 동일 |
 | TC-369-04 | S1 조회 실패 | 오류 표시 + 기존 행 유지(빈 목록 성공 위장 금지) | 동일 |
-| TC-369-05 | S2 기존 저장값/시스템 값 프리필 | 청구서번호·HKD 원가·실측 중량, 시스템 청구/부피중량 표시 | `tests/unit/components/order-settlement/order-settlement-detail.test.tsx` |
+| TC-369-05 | S2 기존 저장값/시스템 값 프리필 | 청구서번호·HKD 원가·실측 중량, 시스템 청구/부피중량 표시 | PR-4a에서 제거(옛 경로) |
 | TC-369-06 | S2 미리보기 디바운스 | 변경 후 300ms 뒤 `previewUpsActualCost` 호출, 서버 `totalCostKrw` 표시 | 동일 |
 | TC-369-07 | S2 임시저장 토스트 합계 | 서버 응답 `totalCostKrw` 사용(클라이언트 합계 금지), `router.refresh` | 동일 |
 | TC-369-08 | S2 정산 완료 확인 모달 | 확인 전 액션 미호출, 확인 후 `markOrderCostSettled`·상태 갱신 | 동일 |
@@ -27,9 +27,9 @@
 | TC-369-14 | 대리점 메뉴 | 오더정산 링크 없음 | 동일 |
 | TC-369-15 | #1367 문구 교체 | Admin 안내에서 S1 링크 렌더(href `/ko/finance/order-settlement`), 대리점 링크 없음 | `tests/unit/components/statements/statement-create.test.tsx` (TC-361-09 갱신) |
 | TC-369-16 | R-10 실구동 (수동, **CI 미실행**) | Admin 실제 로그인 → S1 `page.goto` → S2 저장 → 정산 완료 → 되돌리기 | `tests/e2e/e2e-27-order-settlement-ui.spec.ts` |
-| TC-369-17 | S2 저장 후 입력 변경 | [정산 완료] 비활성 + "먼저 저장" 안내 렌더 | `tests/unit/components/order-settlement/order-settlement-detail.test.tsx` |
-| TC-369-18 | S2 변경 사항 임시저장 | 성공 후 [정산 완료] 재활성 | 동일 |
-| TC-369-19 | S2 미저장 변경 상태 클릭 | `markOrderCostSettled` 미호출·모달 미표시 | 동일 |
+| TC-369-17 | S2 저장 후 입력 변경 | [정산 완료] 비활성 + "먼저 저장" 안내 렌더 | PR-4a에서 옛 테스트 제거 — 새 화면 수동 확인(TC-381C-01·02) |
+| TC-369-18 | S2 변경 사항 임시저장 | 성공 후 [정산 완료] 재활성 | PR-4a 수동 확인(TC-381C-02) |
+| TC-369-19 | S2 미저장 변경 상태 클릭 | `finalizeUpsSettlement` 미호출·모달 미표시 | PR-4a 수동 확인(TC-381C-02) |
 
 **되돌리기 검증 (구현 유효성 — 테스트가 실제로 실패함을 증명)**:
 

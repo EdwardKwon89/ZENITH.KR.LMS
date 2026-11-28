@@ -11,7 +11,7 @@ author: Antigravity
 
 고객 요구사항 정의 및 기초 스키마 설계 단계에서 조직(Organizations) 간의 계층적 관계(본사-지사)를 고려하지 않은 단순 플랫(flat) 구조로 설계를 진행함. 이후 사용자 피드백을 통해 계층 구조 필요성이 인지됨.
 
-**발생 위치:** [init_schema.sql](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/docs/04_Database/init_schema.sql) 초기 버전 설계
+**발생 위치:** [init_schema.sql](file://~/WorkSpace/ZENITH_LMS_001/docs/04_Database/init_schema.sql) 초기 버전 설계
 
 ## 원인 (Why)
 

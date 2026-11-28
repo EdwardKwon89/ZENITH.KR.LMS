@@ -78,13 +78,6 @@ vi.mock('@/utils/supabase/server', () => ({
   }),
 }));
 
-vi.mock('@/app/actions/ups/freight', () => ({
-  estimateUpsFreight: vi.fn().mockResolvedValue({
-    platform: { totalSellingPrice: 100, currency: 'USD' },
-    agency: null,
-    shipper: null,
-  }),
-}));
 vi.mock('@/app/actions/operations/inventory', () => ({ syncInventoryFromOrder: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@/app/actions/finance', () => ({ generateInvoicesForOrder: vi.fn() }));
 

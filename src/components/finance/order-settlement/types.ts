@@ -41,9 +41,14 @@ export interface SavedActualCost {
   actualWidthCm: number | null;
   actualHeightCm: number | null;
   baseFreightHkd: number | null;
+  baseFreightCurrency: string | null;
   fuelSurchargeHkd: number | null;
+  fuelSurchargeCurrency: string | null;
   surgeFeeHkd: number | null;
+  surgeFeeCurrency: string | null;
   otherChargesHkd: number | null;
+  otherCharges: Array<{ name: string; amount: number; currency: string }>;
+  calcVersion: number;
   notes: string | null;
   totalCostKrw: number;
   /** KRW 기준으로 저장된 기존 행이면 HKD 입력으로 프리필하지 않는다. */

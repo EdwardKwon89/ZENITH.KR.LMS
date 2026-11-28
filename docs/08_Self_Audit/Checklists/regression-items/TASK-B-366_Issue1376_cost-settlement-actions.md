@@ -11,9 +11,9 @@
 
 | ID | 검증 내용 | 기대 결과 | 테스트 위치 |
 | :-- | :-- | :-- | :-- |
-| TC-366-01 | `markOrderCostSettled` 거부 사유 5종 | UPS 아님·DELIVERED 아님·이미 정산·원가 미입력·레거시 인보이스 → 각 오류 키 | `tests/unit/finance/task-b366-cost-settlement.test.ts` |
+| TC-366-01 | `markOrderCostSettled` 거부 사유 5종 | UPS 아님·DELIVERED 아님·이미 정산·원가 미입력·레거시 인보이스 → 각 오류 키 | PR-4a에서 제거(옛 경로) |
 | TC-366-02 | 정상 정산 | `cost_settlement_status=SETTLED` + `cost_settled_at/by` 기록 | 동일 |
-| TC-366-03 | 동시 요청 2건 (실DB) | **1건만 성공**, 패자는 `already_settled` — 조건부 UPDATE | `tests/integration/task-b366-cost-settlement.test.ts` |
+| TC-366-03 | 동시 요청 2건 (실DB) | **1건만 성공**, 패자는 `already_settled` — 조건부 UPDATE | PR-4a에서 제거(옛 경로) |
 | TC-366-04 | 목록 기간 역전 | `generic{DATE_RANGE_INVALID}` | unit |
 | TC-366-05 | 레거시 인보이스 오더 | 목록 표시 + `legacyInvoiced=true`·`excludedReason=LEGACY_INVOICED` | unit |
 | TC-366-06 | 배송완료일 기간 밖 | 목록 제외(`total=0`) | unit |

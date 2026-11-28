@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { searchDeliveredUpsOrders } from '@/app/actions/finance';
-import { UpsActualAdjustmentForm } from '@/components/orders/UpsActualAdjustmentForm';
 import { Search, ChevronDown, ChevronUp, Package, Calendar, MapPin, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { ZenCard, ZenButton, ZenInput, ZenBadge } from '@/components/ui/ZenUI';
@@ -19,6 +20,7 @@ interface OrderSearchResult {
 }
 
 export default function UpsActualChargesClient() {
+  const locale = useLocale();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<OrderSearchResult[]>([]);
@@ -120,11 +122,15 @@ export default function UpsActualChargesClient() {
               {/* Collapsible Editor Form */}
               {isExpanded && (
                 <div className="border-t border-slate-100 dark:border-zinc-800 bg-slate-50/30 dark:bg-zinc-900/10 p-5">
-                  <UpsActualAdjustmentForm
-                    orderId={order.id}
-                    orderStatus={order.status}
-                    isPlatformAdmin={true}
-                  />
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 mb-3">
+                    TASK-B-381 PR-4a: UPS 실비·정산마감은 새 정산 화면에서 처리합니다.
+                  </p>
+                  <Link
+                    href={`/${locale}/finance/order-settlement/${order.id}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                  >
+                    정산마감 화면으로 이동
+                  </Link>
                 </div>
               )}
               </ZenCard>

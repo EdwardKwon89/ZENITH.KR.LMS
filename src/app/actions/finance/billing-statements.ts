@@ -87,6 +87,10 @@ export interface StatementItemRow {
   fuelSurcharge: number;
   surgeFee: number;
   otherCharges: number;
+  /** [설계 확정] 조정 행 — target − 구성합(음수 가능), 0원이면 비표시 */
+  freightAdjustment: number;
+  /** [설계 확정] 부가운임 항목(run 스냅샷) — 항목명·금액 표시 */
+  chargeDetails: { line_no?: number; name?: string; amount?: number; currency?: string }[];
   lineTotal: number;
 }
 
@@ -844,7 +848,7 @@ async function fetchStatementItems(
 ): Promise<{ items: any[] } | { error: string }> {
   const { data, error } = await supabase
     .from('zen_billing_statement_items')
-    .select('order_id, charge_weight_kg, base_freight, fuel_surcharge, surge_fee, other_charges, line_total, order:zen_orders(order_no)')
+    .select('order_id, charge_weight_kg, base_freight, fuel_surcharge, surge_fee, other_charges, freight_adjustment, charge_details, line_total, order:zen_orders(order_no)')
     .eq('statement_id', statementId);
   if (error) {
     logger.error('[fetchStatementItems] lookup failed', error);
@@ -863,6 +867,8 @@ function mapDetailRows(items: any[]): StatementItemRow[] {
     fuelSurcharge: Number(i.fuel_surcharge ?? 0),
     surgeFee: Number(i.surge_fee ?? 0),
     otherCharges: Number(i.other_charges ?? 0),
+    freightAdjustment: Number(i.freight_adjustment ?? 0),
+    chargeDetails: Array.isArray(i.charge_details) ? i.charge_details : [],
     lineTotal: Number(i.line_total ?? 0),
   }));
 }

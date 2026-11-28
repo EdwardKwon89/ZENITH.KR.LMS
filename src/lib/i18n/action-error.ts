@@ -32,3 +32,16 @@ export async function trError(
   const t = await getTranslations({ locale, namespace: 'Errors' });
   return params ? t(key, params) : t(key);
 }
+
+
+/** 정산마감 알림 제목·본문 (UpsSettlementNotify 네임스페이스) */
+export type NotificationKey = keyof (typeof koMessages)['UpsSettlementNotify'];
+
+export async function trNotification(
+  key: NotificationKey,
+  params?: Record<string, string | number>,
+): Promise<string> {
+  const locale = await actionLocale();
+  const t = await getTranslations({ locale, namespace: 'UpsSettlementNotify' });
+  return params ? t(key, params) : t(key);
+}

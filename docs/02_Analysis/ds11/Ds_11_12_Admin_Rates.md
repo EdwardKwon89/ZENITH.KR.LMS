@@ -150,7 +150,7 @@
 #### getRateCards() — `admin/rate-cards.ts`
 - **Path**: `src/app/actions/admin/rate-cards.ts:146-160`
 - **설명**: 전체 요율 카드 목록(`zen_rate_cards` + `carrier:zen_carriers!carrier_id(code, name, transport_mode)`, `carrier_cost`·`margin_rate`·`platform_fee_rate` 포함)을 생성일 내림차순으로 조회합니다.
-- **권한**: `validateUserAction()` (`rate-cards.ts:147`, 로그인 세션만 검증하며 역할 가드 및 `CARRIER` 본인 필터링·`platform_fee_rate` 마스킹 없음 — `DEF-152` 참조)
+- **권한**: `validateUserAction()` (`rate-cards.ts:147`, 목표: 역할 가드·마스킹 정렬 대상 — `DEF-152` 참조)
 - **Input**: 없음 (`()`)
 - **Output**: `Promise<Array<Record<string, unknown>>>` (`data || []`)
 - **오류**: DB 조회 실패 시 `Error("Failed to fetch rate cards: ${error.message}")` throw(`L158`)
@@ -226,7 +226,7 @@
 #### getTransportPolicies()
 - **Path**: `src/app/actions/admin/transport-policies.ts:27-41` (`withAction` 미래핑)
 - **설명**: 운송 모드별(`AIR | SEA | LAND | EXP`) 요금 산정 방식(`WEIGHT_ONLY | VOLUMETRIC | WM`) 및 부피중량 제수(`volumetric_divisor`) 정책 목록(`zen_transport_pricing_policies`)을 `transport_mode` 오름차순으로 조회합니다.
-- **권한**: `validateUserAction()` (`transport-policies.ts:28`, 로그인 세션만 검증하며 별도 역할 가드 없음)
+- **권한**: `validateUserAction()` (`transport-policies.ts:28`, 인증 세션 검증 — 역할 가드 정렬 대상 `DEF-152` 참조)
 - **Input**: 없음 (`()`)
 - **Output**: `Promise<TransportPolicy[]>` (`transport-policies.ts:9-21, 40`, `data || []`)
 - **오류**: 미인증 시 `validateUserAction()` 예외 throw; DB 실패 시 `logger.error` 후 `Error("운송 정책 조회 실패: ${error.message}")` throw(`L36-37`)

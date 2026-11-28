@@ -33,12 +33,16 @@ export {
 
 export {
   getOrdersForCostSettlement,
-  markOrderCostSettled,
   unmarkOrderCostSettled,
 } from './ups-actual-cost';
 
 export {
-  recordUpsActualCharges,
+  previewUpsSettlement,
+  saveUpsSettlementDraft,
+  finalizeUpsSettlement,
+} from './ups-settlement';
+
+export {
   getUpsActualCharges,
   getUpsChargeReconciliation,
   searchDeliveredUpsOrders,

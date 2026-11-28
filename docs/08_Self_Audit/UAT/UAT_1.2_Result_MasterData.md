@@ -1,7 +1,7 @@
 # UAT-1.2-RESULT: 마스터 데이터 원격 배포 결과 보고서
 
 **수행일**: 2026-04-18
-**검증 대상**: 원격 Supabase 프로젝트 (`ayowrwmufagzstqiqrnj`)
+**검증 대상**: 원격 Supabase 프로젝트 (식별자 비공개)
 **최종 상태**: ✅ **COMPLETE / PASSED**
 
 ---

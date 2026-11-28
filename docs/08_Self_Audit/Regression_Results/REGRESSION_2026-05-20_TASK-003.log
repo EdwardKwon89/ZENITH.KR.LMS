@@ -1,5 +1,5 @@
 > vitest run
-[1m[30m[46m RUN [49m[39m[22m [36mv4.1.4 [39m[90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001[39m
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.4 [39m[90m~/WorkSpace/ZENITH_LMS_001[39m
 [90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration
 [22m[39m[QA-02] Starting beforeAll setup...
 [90mstdout[2m | tests/integration/tracking-business-qa.test.ts[2m > [22m[2mQA-02 Tracking Business Integration
@@ -192,28 +192,28 @@
 (Use `node --trace-warnings ...` to show where the warning was created)
 [90mstderr[2m | tests/integration/finance.test.ts[2m > [22m[2mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22m[2mScenario 1: Auto-Invoicing on Order Release[2m > [22m[2mTC-F.1: [Success] 오더가 RELEASED 상태가 될 때 정산서가 자동 생성되어야 함
 [22m[39m[ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
-    at cookies [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
-    at createClient [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:6:29[90m)[39m
-    at triggerStatusChangeNotification [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/notifications.ts:46:46[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:365:13
+    at throwForMissingRequestStore [90m(~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
+    at cookies [90m(~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
+    at createClient [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:6:29[90m)[39m
+    at triggerStatusChangeNotification [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/notifications.ts:46:46[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:365:13
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
     at async Promise.all (index 2)
-    at Module.updateOrderStatus [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:355:3[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:71:22
-    at [90mfile:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
+    at Module.updateOrderStatus [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:355:3[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:71:22
+    at [90mfile://~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
 [90mstderr[2m | tests/integration/finance.test.ts[2m > [22m[2mZENITH Finance Integration: WBS 3.2 Integrity Test[2m > [22m[2mScenario 4: Multi-Currency & Security Expansion (TC-F.4~6)[2m > [22m[2mTC-F.6: [Policy] 인보이스가 생성된 오더는 상태 변경이 제한되어야 함 (Data Integrity)
 [22m[39m[ERROR] Notification trigger failed: Error: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
-    at throwForMissingRequestStore [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
-    at cookies [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
-    at createClient [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:6:29[90m)[39m
-    at triggerStatusChangeNotification [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/notifications.ts:46:46[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:365:13
+    at throwForMissingRequestStore [90m(~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/app-render/work-unit-async-storage.external.js:75:33[90m)[39m
+    at cookies [90m(~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4mnext[24m/dist/server/request/cookies.js:126:67[90m)[39m
+    at createClient [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/utils/supabase/server.ts:6:29[90m)[39m
+    at triggerStatusChangeNotification [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/notifications.ts:46:46[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:365:13
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
     at async Promise.all (index 2)
-    at Module.updateOrderStatus [90m(/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:355:3[90m)[39m
-    at [90m/Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:133:22
-    at [90mfile:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
+    at Module.updateOrderStatus [90m(~/WorkSpace/ZENITH_LMS_001/[39msrc/app/actions/orders.ts:355:3[90m)[39m
+    at [90m~/WorkSpace/ZENITH_LMS_001/[39mtests/integration/finance.test.ts:133:22
+    at [90mfile://~/WorkSpace/ZENITH_LMS_001/[39mnode_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:20
 [90mstderr[2m | tests/unit/auth/guards.test.ts[2m > [22m[2mZENITH Security Guard: Server Action Authorization[2m > [22m[2mTC-G.2: [Failure] 권한이 없는 사용자가 관리자 액션 호출 시 예외를 발생시켜야 함
 [22m[39m[AUTH_DENIED] Access blocked for admin@zenith.kr (Role: CUSTOMER)
 (node:31120) Warning: `--localstorage-file` was provided without a valid path

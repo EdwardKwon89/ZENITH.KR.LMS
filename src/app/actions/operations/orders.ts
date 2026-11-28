@@ -16,7 +16,8 @@ import { OrderRegistrationInput, orderRegistrationSchema } from "@/lib/validatio
 import { generateTrackingHistory } from "@/lib/logistics/tracking";
 import { createAdminClient } from '@/utils/supabase/server';
 import { syncInventoryFromOrder } from "./inventory";
-import { estimateUpsFreight as estimateUpsFreightFn } from "@/app/actions/ups/freight";
+import { estimateUpsFreightCore } from "@/lib/ups/estimate-core";
+import type { EstimateUpsFreightInput, UpsFreightEstimate } from "@/lib/ups/estimate-core";
 import { ORDER_EDIT_LOG_CORE_FIELDS, extractOrderEditLogSnapshot, extractCargoSummarySnapshot, cargoSummaryEquals } from "@/lib/orders/edit-log-fields";
 import { assertActiveUpsProduct } from "@/lib/orders/ups-product-guard";
 import { hasActiveUpsLabel } from "@/lib/orders/ups-registration";
@@ -30,7 +31,7 @@ interface SaveOrderRateSnapshotParams {
   validated: OrderRegistrationInput;
   profile: { org_id: string | null; role: string };
   agencyOrgId?: string | null;
-  estimateFn: typeof estimateUpsFreightFn;
+  estimateFn: (input: EstimateUpsFreightInput) => Promise<UpsFreightEstimate>;
 }
 
 export async function saveOrderRateSnapshot({
@@ -199,7 +200,7 @@ export async function createOrder(payload: OrderRegistrationInput) {
   }
 
   if (validated.transport_mode === 'UPS' && validated.ups_product_code) {
-    await saveOrderRateSnapshot({ supabase, orderId, validated, profile, agencyOrgId: resolvedAgencyOrgId, estimateFn: estimateUpsFreightFn });
+    await saveOrderRateSnapshot({ supabase, orderId, validated, profile, agencyOrgId: resolvedAgencyOrgId, estimateFn: (args: EstimateUpsFreightInput) => estimateUpsFreightCore(args, supabase) });
   }
 
   revalidatePath("/(dashboard)/orders", "page");
@@ -545,7 +546,7 @@ export async function updateOrder(orderId: string, payload: OrderRegistrationInp
   //   비UPS→UPS는 갱신을 놓쳐 스냅샷이 없는 채 남는다.
   if (effectiveTransportMode === 'UPS') {
     try {
-      await refreshUpsRateSnapshot({ supabase, orderId, profile, estimateFn: estimateUpsFreightFn });
+      await refreshUpsRateSnapshot({ supabase, orderId, profile, estimateFn: (args: EstimateUpsFreightInput) => estimateUpsFreightCore(args, supabase) });
     } catch (err) {
       logger.error('[ORDER_UPDATE] UPS 운임 스냅샷 갱신 실패(수정 저장은 유지):', err);
     }
@@ -730,7 +731,8 @@ export async function updateOrderStatus(
   }
 
   await Promise.all([
-    nextStatus === OrderStatus.RELEASED
+    // TASK-B-381 PR-3 (§2-4): RELEASED 분기에서 UPS는 자동 인보이스 생성 대신 신규 정산마감 경로를 사용한다.
+    nextStatus === OrderStatus.RELEASED && currentOrder?.transport_mode !== 'UPS'
       ? generateInvoicesForOrder(orderId).catch(financeError => {
           logger.error("[CRITICAL] Finance automation failed during release:", financeError);
         })
@@ -1152,7 +1154,7 @@ export async function applyPackageMeasurements(
         }
 
         if (product && destCountryCode && totalWeight > 0) {
-          const newEstimate = await estimateUpsFreightFn({
+          const newEstimate = await estimateUpsFreightCore({
             productId: product.id,
             destCountryCode,
             actualWeightKg: totalWeight,
@@ -1162,7 +1164,7 @@ export async function applyPackageMeasurements(
             incoterms: orderMeta.incoterms,
             agencyOrgId: orderMeta.agency_org_id,
             shipperOrgId: orderMeta.shipper_id,
-          });
+          }, supabase);
 
           if (canWriteOrderRateSnapshot(profile, orderMeta)) {
             const adminClient = await createAdminClient();

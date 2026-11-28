@@ -154,13 +154,13 @@ graph TD
 ## 작업 결과
 
 - **구현 파일**:
-  - [composite-pricing.ts](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/composite-pricing.ts): 기본 슬랩 운임과 다중 할증 요율 계산 로직을 담당하는 핵심 요율 엔진 신규 구현
-  - [freight-calculator.ts](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/utils/logistics/freight-calculator.ts): DUMMY_RATES 제거 및 DB 기반 composite pricing 계산 위임 리팩토링 (클라이언트 UI와 단위 테스트용 동기 fallback 정책 포함 설계)
-  - [routing.ts](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/routing.ts): getRouteOptions 서버 액션에 composite pricing 연계 및 총액 업데이트 처리
-  - [DatabaseRouteAdapter.ts](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/adapters/DatabaseRouteAdapter.ts): 세그먼트에 `carrier_id` 정보를 포함시켜 반환하도록 확장
-  - [routing.ts (lib)](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/src/lib/logistics/routing.ts): RouteOption 및 RouteSegment 타입에 pricing_breakdown 및 carrier_id 선택 필드 추가
+  - [composite-pricing.ts](file://~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/composite-pricing.ts): 기본 슬랩 운임과 다중 할증 요율 계산 로직을 담당하는 핵심 요율 엔진 신규 구현
+  - [freight-calculator.ts](file://~/WorkSpace/ZENITH_LMS_001/src/utils/logistics/freight-calculator.ts): DUMMY_RATES 제거 및 DB 기반 composite pricing 계산 위임 리팩토링 (클라이언트 UI와 단위 테스트용 동기 fallback 정책 포함 설계)
+  - [routing.ts](file://~/WorkSpace/ZENITH_LMS_001/src/app/actions/operations/routing.ts): getRouteOptions 서버 액션에 composite pricing 연계 및 총액 업데이트 처리
+  - [DatabaseRouteAdapter.ts](file://~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/adapters/DatabaseRouteAdapter.ts): 세그먼트에 `carrier_id` 정보를 포함시켜 반환하도록 확장
+  - [routing.ts (lib)](file://~/WorkSpace/ZENITH_LMS_001/src/lib/logistics/routing.ts): RouteOption 및 RouteSegment 타입에 pricing_breakdown 및 carrier_id 선택 필드 추가
 - **테스트 케이스**:
-  - [freight-calculator.test.ts](file:///Users/edward.kwon/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/freight-calculator.test.ts): `calculateCompositePricing`에 대한 Supabase Mock Client 기반 단위 테스트(TC-C.6) 추가
+  - [freight-calculator.test.ts](file://~/WorkSpace/ZENITH_LMS_001/tests/unit/logistics/freight-calculator.test.ts): `calculateCompositePricing`에 대한 Supabase Mock Client 기반 단위 테스트(TC-C.6) 추가
 - **회귀 테스트 결과**: 220/220 PASS (`rtk npm run test:regression` 성공 확인)
 - **코드 커밋 해시**: 3d9e915
 - **문서 커밋 해시**: 83a5b4c

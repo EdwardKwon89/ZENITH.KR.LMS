@@ -13,7 +13,7 @@
 - **회귀 복구 (QA-02)**: `zen_orders` 삽입 시 `rc.rate_price` 누락으로 인한 실패 현상을 migration 보강을 통해 해결하였습니다.
 - **Admin 권한 무결성**: Admin 계정의 `role`이 `INDIVIDUAL`로 강등되었던 문제를 식별하고, JWT 메타데이터 및 `zen_profiles` 테이블 동기화 트리거를 보정하여 해결하였습니다.
 - **Spec 파일 고도화**:
-    - Admin 비밀번호를 표준 규격(`password1234`)으로 정정하였습니다.
+    - Admin 비밀번호를 표준 규격(`<로컬 시드 비밀번호>`)으로 정정하였습니다.
     - Strict Mode 위반 방지를 위해 선택자를 보강하였습니다.
 - **거버넌스 준수**: 기존 migration 파일 수정을 롤백하고, 신규 migration 파일(`20260506115337_fix_grade_promotion_fk_and_sync_profiles.sql`)을 통해 DB 스키마를 정석적으로 보완하였습니다.
 
