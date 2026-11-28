@@ -65,7 +65,7 @@ const actors: Actor[] = [];
 
 async function createActor(role: string, orgId: string): Promise<Actor> {
   const suffix = randomUUID().slice(0, 8);
-  const email = `402-${suffix}@test.kr`;
+  const email = `402-${suffix}@example.test`;
   const password = `Aa1-${randomUUID()}`; // CI 비밀번호 정책 충족 — 런타임 생성, 저장소 미기재
   const { data, error } = await service.auth.admin.createUser({
     email,
@@ -164,8 +164,8 @@ describe('TASK-B-402 — run_charges tier×역할 RLS 매트릭스 + 가더 함�
         DELETE FROM public.zen_ups_settlement_runs WHERE order_id = '${ORDER_ID}';
         DELETE FROM public.zen_ups_actual_cost WHERE order_id = '${ORDER_ID}';
         DELETE FROM public.zen_orders WHERE id = '${ORDER_ID}';
-        DELETE FROM public.zen_profiles WHERE email LIKE '402-%@test.kr';
-        DELETE FROM auth.users WHERE email LIKE '402-%@test.kr';
+        DELETE FROM public.zen_profiles WHERE email LIKE '402-%@example.test';
+        DELETE FROM auth.users WHERE email LIKE '402-%@example.test';
         DELETE FROM public.zen_organizations WHERE id IN ('${ORG_IDS.join("','")}');
         RESET session_replication_role;
       `);
@@ -263,6 +263,16 @@ describe('TASK-B-402 — run_charges tier×역할 RLS 매트릭스 + 가더 함�
     expect(data).not.toBeNull();
     expect((data as { order_id?: string }).order_id).toBe(ORDER_ID);
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('getUpsActualCost 실세션 거부: 비허용 역할(SHIPPER)은 permission_denied throw + logger.warn (Aiden R-01 권고 2)', async () => {
+    vi.clearAllMocks();
+    asActor(shipper, 'SHIPPER', SHIPPER_ORG);
+
+    await expect(getUpsActualCost(ORDER_ID)).rejects.toThrow('권한이 없습니다');
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Denied for role'));
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('SUB_ADMIN 비파괴 회귀: 수익금 집계(getSubAgencyProfitSummary) 통과, SHIPPER는 거부', async () => {

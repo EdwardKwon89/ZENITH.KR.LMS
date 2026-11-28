@@ -31,7 +31,8 @@
 | TC-402-18 | 실DB getter — admin 최신 version·DTO | version 2·키 제한(원가 미반환) | 동일 | CI (vitest + 실DB) |
 | TC-402-19 | `SUB_ADMIN` 비파괴 — 원가 관리(`getUpsActualCost`) | 실DB 행 반환 통과·warn 없음 | 동일 | CI (vitest + 실DB) |
 | TC-402-20 | `SUB_ADMIN` 비파괴 — 수익금 집계(`getSubAgencyProfitSummary`) | 통과 / `SHIPPER`는 거부(기존 가드 유지) | 동일 | CI (vitest + 실DB) |
+| TC-402-21 | `getUpsActualCost` 실세션 거부 — 비허용 역할(SHIPPER, Aiden R-01 권고 2) | `permission_denied` throw(ko 문구) + `logger.warn`(Denied for role), `logger.error` 없음 | 동일 | CI (vitest + 실DB) |
 
 **수정 전 코드에서의 실패 확인(2026-11-27)**: `src/`·`messages/`만 stash + 신규 소스 격리 상태에서 실행 → `task-b402-cost-display.test.ts` **import 실패(실행 불가)** · `statement-detail` TC-402-01/02 **2 failed** · 통합 테스트 **import 실패** — 전부 기대대로 실패 후 복원.
 
-**회귀**: 신규 22건(단위 9 + 렌더 2 + Excel 1 + 실DB 10) 전부 PASS · `npm run build` / `npm run test:regression` 결과는 PR CI `gh pr checks` 인용.
+**회귀**: 신규 23건(단위 9 + 렌더 2 + Excel 1 + 실DB 11) 전부 PASS · `npm run build` / `npm run test:regression` 결과는 PR CI `gh pr checks` 인용.

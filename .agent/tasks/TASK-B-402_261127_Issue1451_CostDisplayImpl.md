@@ -60,7 +60,7 @@ date                              # Thu Nov 27 14:23:17 KST 2026
   - ⑦ 테스트 22건: 단위 9(`task-b402-cost-display`) + 렌더 2(`statement-detail`) + Excel 1(`task-b360-excel-data`) + 실DB 10(`task-b402-additional-charges-rls`)
 - **수정 전 실패 확인**: src·messages stash + 신규 소스 격리 → unit import fail / 렌더 2 failed / integration import fail (전부 기대대로, 복원 OK)
 - **전체 회귀**: `npm run test:regression` **314 passed / 2,386 tests PASS**, `npm run build` exit 0, `check:ds11`·`check:lrtm` OK, tsc src·내 테스트 0건
-- **공유 DB 인시던트(외부 원인)**: 검증 중 Dave TASK-B-403(#1579) 미커밋 마이그레이션이 로컬 DB에 선적용되어 `get_next_order_sequence` NULL 통과 로직이 거부로 바뀌며 `task-b349/346`·`task-b360-excel-export` 등 기존 실DB 테스트가 본 변경과 무관하게 실패. A/B 쿼리로 원인 규명 → R-08-2 공식 해소(`supabase db reset`)로 복구 → 전체 회귀 GREEN → **Dave 마이그레이션 재적용으로 그의 작업 복원**(CI fresh DB 무관).
+- **공유 DB 인시던트(외부 원인)**: 공유 로컬 DB에 타 Task의 미커밋 마이그레이션이 선적용되어 일부 실DB 테스트가 영향받음 → R-08-2 `supabase db reset`으로 복구 후 전체 회귀 통과, 타 Task 작업 복원. CI는 fresh DB라 영향 없음. 상세는 Aiden에게 비공개 전달.
 - **`gh pr checks`(2026-11-28 15:51 KST, Regression Tests만 진행 중)**:
 ```
 Task File Check (advisory, non-blocking)	pass	8s
