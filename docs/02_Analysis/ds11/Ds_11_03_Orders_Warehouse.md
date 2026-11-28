@@ -6,7 +6,7 @@
 - **설명**: 신규 하우스 오더 등록 (Header + Packages + Items 동시 처리)
 - **Input**: `OrderRegistrationInput` (Zod Schema 검증)
 - **Output**: `Promise<Order>`
-- **저장 경로**: `create_order_atomic` RPC (v7, `20261113090100_task_b346_create_order_atomic_v7.sql`)
+- **저장 경로**: `create_order_atomic` RPC (v7, `20261113090100_task_b346_create_order_atomic_v7.sql`) — 실행 권한은 TASK-B-403(#1579)에서 `authenticated`·`service_role`로 정렬
 - **주요 Input 필드 — 수하인(Consignee)**: `buildCreateOrderPayload()`가 SHXK createorder `consignee.*`로 매핑하는 필드. 제약은 SHXK 명세(`docs/80_RawData/Phase8_UPS_API_리서치_결과.md` 130~147행) 기준이며, 앱이 명세보다 엄격한 필드는 별도 표기한다.
 
   | 필드 | 타입 | 필수 | 제약 | SHXK 매핑 | 비고 |
